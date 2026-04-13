@@ -1,4 +1,4 @@
-// Build script: concatenates src/ into build/ECSC.html
+// Build script: concatenates src/ into build/ECEPT.html
 // Run with: node scripts/build.js
 const fs = require('fs');
 const path = require('path');
@@ -45,5 +45,5 @@ const final = shell
   .replace('/* APP_PLACEHOLDER */', app);
 
 fs.mkdirSync('build', { recursive: true });
-fs.writeFileSync('build/ECSC.html', final);
-console.log('Built build/ECSC.html: ' + (final.length / 1024).toFixed(0) + 'KB, ' + final.split('\n').length + ' lines');
+fs.writeFileSync('build/ECEPT.html', final);
+console.log('Built build/ECEPT.html: ' + (final.length / 1024).toFixed(0) + 'KB, ' + final.split('\n').length + ' lines');
