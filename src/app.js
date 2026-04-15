@@ -569,7 +569,7 @@ function App(){
       // PARES CRANEALES
       e("div",{style:{marginTop:"24px",marginBottom:"24px"}},
         e("div",{onClick:function(){setAbdOpen(abdOpen==="craneales"?null:"craneales")},style:{background:C.cd,border:"1px solid "+(abdOpen==="craneales"?"#a78bfa44":C.bd),borderRadius:"14px",padding:"18px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between"}},
-          e("div",{style:{display:"flex",alignItems:"center",gap:"12px"}},e("span",{style:{fontSize:"24px"}},"🧠"),e("div",null,e("h3",{style:{fontSize:"16px",fontWeight:700,color:"#a78bfa"}},"Pares Craneales"),e("p",{style:{fontSize:"11px",color:C.dm}},"12 pares con origen, función, clínica y mnemotecnias"))),
+          e("div",{style:{display:"flex",alignItems:"center",gap:"12px"}},e("span",{style:{fontSize:"24px"}},"🧠"),e("div",null,e("h3",{style:{fontSize:"16px",fontWeight:700,color:"#a78bfa"}},"Pares Craneales"),e("p",{style:{fontSize:"11px",color:C.dm}},"12 pares con origen, función y clínica"))),
           e("span",{style:{color:C.dm,transform:abdOpen==="craneales"?"rotate(180deg)":"none",transition:"transform .2s"}},"▼")
         ),
         abdOpen==="craneales"&&e("div",{style:{marginTop:"10px"}},
@@ -583,22 +583,18 @@ function App(){
                   e("div",{style:{fontSize:"11px",color:C.dm,fontStyle:"italic"}},n.latin)
                 ),
                 e("div",{style:{display:"flex",gap:"4px",flexWrap:"wrap"}},n.tipos.map(function(t,ti){
-                  var tc2={"Sensitivo especial":"#60a5fa","Motor somático":"#34d399","Motor":"#34d399","Sensitivo":"#60a5fa","Parasimpático":"#a78bfa"};
+                  var tc2={"Sensitivo especial":"#60a5fa","Motor somático":"#34d399","Motor":"#34d399","Sensitivo":"#60a5fa","Parasimpático":"#a78bfa","Mixto":"#f97316"};
                   return e("span",{key:ti,style:{fontSize:"9px",padding:"2px 8px",borderRadius:"100px",background:(tc2[t]||"#94a3b8")+"15",color:tc2[t]||"#94a3b8",border:"1px solid "+(tc2[t]||"#94a3b8")+"30"}},t)
                 })),
                 e("span",{style:{color:C.dm,fontSize:"12px",transform:isExp2?"rotate(180deg)":"none",transition:"transform .2s"}},"▾")
               ),
               isExp2&&e("div",{style:{padding:"0 16px 16px",borderTop:"1px solid "+C.bd}},
                 e("div",{style:{padding:"12px 14px",background:n.color+"08",borderRadius:"8px",borderLeft:"3px solid "+n.color,margin:"12px 0",fontSize:"13px",color:C.tx,lineHeight:1.7}},n.funcion),
-                e("div",{style:{padding:"12px 14px",background:"rgba(251,191,36,.06)",borderRadius:"8px",borderLeft:"3px solid #fbbf24",marginBottom:"10px"}},
-                  e("div",{style:{fontSize:"10px",fontWeight:700,color:"#fbbf24",marginBottom:"4px"}},"📌 PERLA CLÍNICA"),
-                  e("span",{style:{fontSize:"12px",color:C.mt,lineHeight:1.6}},n.pearl)
-                ),
                 e("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}},
                   e("div",{style:{padding:"10px",background:"rgba(255,255,255,.03)",borderRadius:"8px"}},e("div",{style:{fontSize:"10px",fontWeight:700,color:C.dm,marginBottom:"3px"}},"ORIGEN REAL"),e("div",{style:{fontSize:"11px",color:C.mt,lineHeight:1.5}},n.real)),
-                  e("div",{style:{padding:"10px",background:"rgba(255,255,255,.03)",borderRadius:"8px"}},e("div",{style:{fontSize:"10px",fontWeight:700,color:C.dm,marginBottom:"3px"}},"LESIÓN"),e("div",{style:{fontSize:"11px",color:"#ef4444",lineHeight:1.5}},n.lesion))
-                ),
-                e("div",{style:{marginTop:"8px",padding:"10px",background:"rgba(255,255,255,.02)",borderRadius:"8px"}},e("div",{style:{fontSize:"10px",fontWeight:700,color:C.dm,marginBottom:"3px"}},"MNEMOTECNIA"),e("div",{style:{fontSize:"11px",color:C.mt,fontStyle:"italic"}},n.mnemo))
+                  e("div",{style:{padding:"10px",background:"rgba(255,255,255,.03)",borderRadius:"8px"}},e("div",{style:{fontSize:"10px",fontWeight:700,color:C.dm,marginBottom:"3px"}},"ORIGEN APARENTE"),e("div",{style:{fontSize:"11px",color:C.mt,lineHeight:1.5}},n.origen_aparente)),
+                  e("div",{style:{padding:"10px",background:"rgba(255,255,255,.03)",borderRadius:"8px",gridColumn:"1 / -1"}},e("div",{style:{fontSize:"10px",fontWeight:700,color:C.dm,marginBottom:"3px"}},"LESIÓN"),e("div",{style:{fontSize:"11px",color:"#ef4444",lineHeight:1.5}},n.lesion))
+                )
               )
             )
           })
