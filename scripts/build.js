@@ -16,6 +16,7 @@ var parts = [
   'src/styles/theme.js',
   // data (order matters: triadas before links)
   'src/data/reuma.js',
+  'src/data/inmuno.js',
   'src/data/triadas.js',
   'src/data/cirugia.js',
   'src/data/emergencias.js',

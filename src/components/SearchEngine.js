@@ -35,7 +35,7 @@ function globalSearch(q){
   });
   NERVES.forEach(function(n){
     var txt=[n.name,n.latin,n.funcion,n.pearl,n.lesion].join(" ").toLowerCase();
-    if(txt.indexOf(l)>-1) res.push({type:"nc",name:"🧠 Par "+n.id+" — "+n.name,sub:"Generalidades — Pares Craneales",go:"general"});
+    if(txt.indexOf(l)>-1) res.push({type:"nc",name:"🧠 Par "+n.id+" — "+n.name,sub:"Anatomía — Pares Craneales",go:"cir_ing"});
   });
   COAG_FACTORES.forEach(function(cf){
     var txt=[cf.num,cf.nombre,cf.alt||""].join(" ").toLowerCase();
