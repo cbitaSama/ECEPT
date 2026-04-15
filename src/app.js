@@ -592,7 +592,8 @@ function App(){
                 e("div",{style:{padding:"12px 14px",background:n.color+"08",borderRadius:"8px",borderLeft:"3px solid "+n.color,margin:"12px 0",fontSize:"13px",color:C.tx,lineHeight:1.7}},n.funcion),
                 e("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}},
                   e("div",{style:{padding:"10px",background:"rgba(255,255,255,.03)",borderRadius:"8px"}},e("div",{style:{fontSize:"10px",fontWeight:700,color:C.dm,marginBottom:"3px"}},"ORIGEN REAL"),e("div",{style:{fontSize:"11px",color:C.mt,lineHeight:1.5}},n.real)),
-                  e("div",{style:{padding:"10px",background:"rgba(255,255,255,.03)",borderRadius:"8px"}},e("div",{style:{fontSize:"10px",fontWeight:700,color:C.dm,marginBottom:"3px"}},"LESIÓN"),e("div",{style:{fontSize:"11px",color:"#ef4444",lineHeight:1.5}},n.lesion))
+                  e("div",{style:{padding:"10px",background:"rgba(255,255,255,.03)",borderRadius:"8px"}},e("div",{style:{fontSize:"10px",fontWeight:700,color:C.dm,marginBottom:"3px"}},"ORIGEN APARENTE"),e("div",{style:{fontSize:"11px",color:C.mt,lineHeight:1.5}},n.origen_aparente)),
+                  e("div",{style:{padding:"10px",background:"rgba(255,255,255,.03)",borderRadius:"8px",gridColumn:"1 / -1"}},e("div",{style:{fontSize:"10px",fontWeight:700,color:C.dm,marginBottom:"3px"}},"LESIÓN"),e("div",{style:{fontSize:"11px",color:"#ef4444",lineHeight:1.5}},n.lesion))
                 )
               )
             )
