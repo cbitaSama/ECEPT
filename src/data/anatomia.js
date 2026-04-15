@@ -56,51 +56,58 @@ var NERVES=[
     lesion:"Diplopía vertical, cabeza inclinada"
   },
   {
-    id:"V", name:"Trigémino", latin:"N. trigeminus", color:"#fb923c",
-    tipos:["Motor","Sensitivo"],
+    id:"V", name:"Nervio Trigémino (V)", latin:"N. trigeminus", color:"#fb923c",
+    tipos:["Mixto"],
     real:"Sensitivo: ganglio de Gasser → núcleos pontino, espinal y mesencefálico. Motor: núcleo motor del trigémino (puente)",
-    aparente:"Cara anterolateral del puente (el más voluminoso)",
+    origen_aparente:"Cara anterolateral del puente (emerge como dos raíces: una sensitiva gruesa y una motora delgada)",
     nivel:"Puente — el par más voluminoso",
     nivelShort:"Puente (cara ant-lat)",
-    funcion:"V1 Oftálmica: frente, párpado sup., ojo, dorso nasal. V2 Maxilar: mejilla, labio sup., dientes sup., paladar. V3 Mandibular: mandíbula, dientes inf., labio inf., lengua (general). Motor (solo V3): masticadores (masetero, temporal, pterigoideos).",
-    pearl:"Neuralgia del trigémino: dolor lancinante en zona gatillo V2-V3. Causa principal: compresión vascular. Reflejos: corneal (V1 aferente + VII eferente), maseterino (monosináptico pontino). Herpes zóster oftálmico = V1 → signo de Hutchinson.",
-    mnemo:"\"V = cinCo dedos de la cara\" — V1 (arriba), V2 (medio), V3 (abajo). Solo V3 tiene motor.",
+    funcion:"El nervio trigémino es el par craneal más voluminoso y se encarga tanto de la sensibilidad de la cara como de la masticación. Su componente sensitivo recoge información táctil, dolorosa y térmica de toda la cara, la cavidad oral, las meninges y parte de la duramadre, distribuyéndose en tres ramas: oftálmica (V1), maxilar (V2) y mandibular (V3). El componente motor viaja exclusivamente con la rama mandibular (V3) e inerva los músculos masticadores (masetero, temporal, pterigoideos medial y lateral), así como el milohioideo y el vientre anterior del digástrico. El ganglio de Gasser (semilunar), ubicado en la fosa craneal media sobre la impresión trigeminal del peñasco, alberga los cuerpos celulares de las neuronas sensitivas.",
+    ramas:[
+      {n:"Rama oftálmica (V1)",d:"Puramente sensitiva. Recoge sensibilidad de la frente, párpado superior, dorso de la nariz, córnea y parte de la mucosa nasal. Es la aferente del reflejo corneal."},
+      {n:"Rama maxilar (V2)",d:"Puramente sensitiva. Recoge sensibilidad de la mejilla, labio superior, dientes superiores, paladar, seno maxilar y parte de la mucosa nasal."},
+      {n:"Rama mandibular (V3)",d:"Rama mixta (sensitiva + motora). Sensibilidad de mandíbula, dientes inferiores, labio inferior, mentón y dos tercios anteriores de la lengua (sensibilidad general, no gusto). Es la ÚNICA rama que lleva fibras motoras para los músculos masticadores."}
+    ],
     lesion:"Neuralgia del trigémino, anestesia facial"
   },
   {
-    id:"VI", name:"Abducens", latin:"N. abducens", color:"#f472b6",
-    tipos:["Motor somático"],
+    id:"VI", name:"Nervio Abducens (VI)", latin:"N. abducens", color:"#f472b6",
+    tipos:["Motor"],
     real:"Núcleo del abducens — puente, bajo el colículo facial",
-    aparente:"Surco bulbopontino (entre puente y médula)",
+    origen_aparente:"Surco bulbopontino (entre el borde inferior del puente y la pirámide bulbar)",
     nivel:"Puente inferior",
     nivelShort:"Puente inf. / Surco bulbopontino",
-    funcion:"Inerva exclusivamente el recto lateral → abducción del ojo (mirada lateral). Fundamental para la mirada conjugada horizontal con el III contralateral.",
-    pearl:"Parálisis VI: estrabismo convergente + diplopía horizontal al mirar al lado afectado. Trayecto largo por base del cráneo → \"falso signo localizador\" en HIC. Núcleo del VI contiene neuronas del FLM que coordinan mirada horizontal conjugada.",
-    mnemo:"\"VI ABDuce = ABDuce el ojo hacia AFUERA\" (ABD = alejarse del cuerpo).",
+    funcion:"El nervio abducens inerva exclusivamente el músculo recto lateral del ojo, responsable de la abducción ocular (mover el ojo hacia afuera, alejándolo de la línea media). Es fundamental para la mirada conjugada horizontal, coordinándose con el nervio oculomotor (III) contralateral a través del fascículo longitudinal medial. Emerge del surco bulbopontino y recorre un largo trayecto por la base del cráneo, ascendiendo por el clivus y pasando sobre el ápex del peñasco antes de entrar al seno cavernoso y alcanzar la órbita. Este trayecto extenso lo hace especialmente vulnerable a la hipertensión intracraneal, por lo que su parálisis puede ser un falso signo localizador.",
     lesion:"Estrabismo convergente, diplopía horizontal"
   },
   {
-    id:"VII", name:"Facial", latin:"N. facialis", color:"#e879f9",
-    tipos:["Motor","Sensitivo","Parasimpático"],
+    id:"VII", name:"Nervio Facial (VII)", latin:"N. facialis", color:"#e879f9",
+    tipos:["Mixto"],
     real:"Motor: núcleo motor del facial (puente). Sensitivo: ganglio geniculado → núcleo del tracto solitario. Parasimpático: núcleos salival superior y lacrimal",
-    aparente:"Surco bulbopontino (lateral al VI, medial al VIII)",
+    origen_aparente:"Surco bulbopontino (lateral al VI, medial al VIII)",
     nivel:"Puente",
     nivelShort:"Puente — surco bulbopontino",
-    funcion:"Motor: músculos de expresión facial + estapedio + digástrico posterior + estilohioideo. Sensitivo especial: gusto 2/3 anteriores de la lengua (cuerda del tímpano). Parasimpático: glándula lacrimal, sublingual, submandibular.",
-    pearl:"CLAVE: Central RESPETA frente (inervación bilateral). Periférica (Bell, Ramsay-Hunt) afecta TODA la hemiface. Fenómeno de Bell: al cerrar el ojo, globo se desvía arriba y afuera. Ramsay-Hunt: parálisis facial + vesículas en pabellón auricular (VZV ganglio geniculado).",
-    mnemo:"\"VII = siete = cara = muchas expresiones.\" Central respeta frente, periférica no.",
+    funcion:"El nervio facial es uno de los pares craneales más complejos, con funciones motoras, sensitivas y parasimpáticas. Su componente motor inerva todos los músculos de la expresión facial (frontal, orbicular de los ojos, buccinador, orbicular de los labios, platisma, entre otros), así como el músculo del estribo, el estilohioideo y el vientre posterior del digástrico. A través de la cuerda del tímpano conduce el gusto de los dos tercios anteriores de la lengua y fibras parasimpáticas para las glándulas submandibular y sublingual. El nervio petroso mayor lleva fibras parasimpáticas a la glándula lacrimal y a las glándulas de la mucosa nasal y palatina, haciendo relevo en el ganglio pterigopalatino.",
+    ramas:[
+      {n:"Ramas motoras terminales (temporofaciales y cervicofaciales)",d:"Se dividen en cinco ramos clásicos: temporal, cigomático, bucal, marginal mandibular y cervical. Inervan todos los músculos de la expresión facial y el platisma."},
+      {n:"Nervio cuerda del tímpano",d:"Rama mixta que lleva el gusto de los dos tercios anteriores de la lengua y fibras parasimpáticas para las glándulas submandibular y sublingual (relevo en ganglio submandibular)."},
+      {n:"Nervio petroso mayor",d:"Rama parasimpática que inerva la glándula lacrimal y las glándulas de la mucosa nasal y palatina, haciendo relevo en el ganglio pterigopalatino."},
+      {n:"Nervio del estribo (estapedio)",d:"Rama motora que inerva el músculo del estribo en el oído medio, modulando la transmisión del sonido (reflejo estapedial)."}
+    ],
     lesion:"Parálisis facial (Bell)"
   },
   {
-    id:"VIII", name:"Vestibulococlear", latin:"N. vestibulocochlearis", color:"#38bdf8",
-    tipos:["Sensitivo especial"],
+    id:"VIII", name:"Nervio Vestibulococlear (VIII)", latin:"N. vestibulocochlearis", color:"#38bdf8",
+    tipos:["Sensitivo"],
     real:"Rama vestibular: ganglio de Scarpa. Rama coclear: ganglio espiral de Corti",
-    aparente:"Surco bulbopontino (lateral al VII) — ángulo pontocerebeloso",
+    origen_aparente:"Surco bulbopontino (lateral al VII) — ángulo pontocerebeloso",
     nivel:"Puente — ángulo pontocerebeloso",
     nivelShort:"Puente — ángulo pontocerebeloso",
-    funcion:"Coclear: audición — células ciliadas del órgano de Corti → núcleos cocleares → colículo inferior → cuerpo geniculado medial → corteza auditiva (Heschl, T1). Vestibular: equilibrio — utrículo, sáculo, canales semicirculares → núcleos vestibulares → cerebelo.",
-    pearl:"Schwannoma del VIII: hipoacusia neurosensorial unilateral + acúfenos + vértigo → comprime VII. Ménière: tríada hipoacusia fluctuante + acúfenos + vértigo episódico. Weber y Rinne: conductiva (Weber al afectado) vs neurosensorial (Weber al sano).",
-    mnemo:"\"VIII = VESTIBULOcoclear = VESTÍBULO = equilibrio. COCLEAR = caracol = audición.\"",
+    funcion:"El nervio vestibulococlear transmite la información auditiva y del equilibrio desde el oído interno hasta el tronco encefálico. Su rama coclear recoge los estímulos sonoros captados por las células ciliadas del órgano de Corti en la cóclea, llevándolos a los núcleos cocleares del puente y de allí a la corteza auditiva primaria (circunvolución de Heschl) en el lóbulo temporal. La rama vestibular transmite información sobre la posición y el movimiento de la cabeza desde el utrículo, sáculo y los tres canales semicirculares, proyectando a los núcleos vestibulares y al cerebelo. Ambas ramas viajan juntas por el conducto auditivo interno, acompañadas del nervio facial (VII).",
+    ramas:[
+      {n:"Rama coclear (audición)",d:"Transmite estímulos sonoros desde las células ciliadas del órgano de Corti en la cóclea. Cuerpos neuronales en el ganglio espiral de Corti. Proyecta a los núcleos cocleares del puente."},
+      {n:"Rama vestibular (equilibrio)",d:"Transmite información de posición y movimiento de la cabeza desde el utrículo, sáculo y los tres canales semicirculares. Cuerpos neuronales en el ganglio de Scarpa. Proyecta a los núcleos vestibulares y al cerebelo."}
+    ],
     lesion:"Hipoacusia, vértigo (schwannoma)"
   },
   {
