@@ -111,51 +111,55 @@ var NERVES=[
     lesion:"Hipoacusia, vértigo (schwannoma)"
   },
   {
-    id:"IX", name:"Glosofaríngeo", latin:"N. glossopharyngeus", color:"#4ade80",
-    tipos:["Motor","Sensitivo","Parasimpático"],
+    id:"IX", name:"Nervio Glosofaríngeo (IX)", latin:"N. glossopharyngeus", color:"#4ade80",
+    tipos:["Mixto"],
     real:"Motor: núcleo ambiguo. Sensitivo: ganglios superior/inferior → núcleo del tracto solitario. Parasimpático: núcleo salival inferior",
-    aparente:"Surco retroolivar superior (médula oblongada)",
+    origen_aparente:"Surco retroolivar (posterolateral) de la médula oblongada, por encima del vago",
     nivel:"Médula oblongada",
     nivelShort:"Médula oblongada — retroolivar sup",
-    funcion:"Motor: estilofaríngeo (eleva faringe). Sensitivo: orofaringe, amígdala, 1/3 posterior lengua (gusto y sensibilidad general), oído medio, seno carotídeo (barorreceptores), cuerpo carotídeo (quimiorreceptores). Parasimpático: parótida (vía ganglio ótico).",
-    pearl:"Reflejo nauseoso: IX aferente + X eferente. Reflejo del seno carotídeo: barorreceptores IX → X → bradicardia. Neuralgia del IX: dolor en orofaringe y oído al tragar. Sale por foramen yugular con X y XI → síndrome de Vernet (IX+X+XI).",
-    mnemo:"\"IX GLOSOfaríngeo = GLOSa = lengua + FARINge.\" Gusto del 1/3 posterior.",
+    funcion:"El nervio glosofaríngeo cumple funciones motoras, sensitivas y parasimpáticas que conectan la lengua y la faringe con el tronco encefálico. Su componente motor inerva el músculo estilofaríngeo, que eleva la faringe durante la deglución y la fonación. La porción sensitiva recoge el gusto y la sensibilidad general del tercio posterior de la lengua, la orofaringe, la amígdala palatina, la trompa de Eustaquio, y los barorreceptores del seno carotídeo y quimiorreceptores del cuerpo carotídeo (regulación de la presión arterial y niveles de oxígeno). Su componente parasimpático, a través del núcleo salival inferior, inerva la glándula parótida haciendo relevo en el ganglio ótico.",
     lesion:"Disfagia, pérdida gusto 1/3 post."
   },
   {
-    id:"X", name:"Vago", latin:"N. vagus · Neumogástrico", color:"#86efac",
-    tipos:["Motor","Sensitivo","Parasimpático"],
+    id:"X", name:"Nervio Vago (X)", latin:"N. vagus · Neumogástrico", color:"#86efac",
+    tipos:["Mixto"],
     real:"Motor: núcleo ambiguo. Sensitivo: ganglios superior (yugular) e inferior (nodoso) → núcleo del tracto solitario. Parasimpático: núcleo motor dorsal del vago",
-    aparente:"Surco retroolivar medio (por debajo del IX)",
+    origen_aparente:"Surco retroolivar (posterolateral) de la médula oblongada, por debajo del IX",
     nivel:"Médula oblongada — mayor distribución",
     nivelShort:"Médula oblongada — retroolivar medio",
-    funcion:"Parasimpático: corazón (↓FC), bronquios (broncoconstricción), TGI hasta ángulo esplénico. Motor: faringe (deglución), laringe (fonación — cuerdas vocales). Sensitivo: vísceras toracoabdominales, mucosa laringe/faringe, pabellón auricular (rama de Arnold).",
-    pearl:"Lesión X unilateral: disfonía + disfagia + úvula al lado SANO. N. laríngeo recurrente izquierdo rodea arco aórtico → compresión por aneurisma/tumor mediastínico = disfonía. El X = 75% de toda la actividad parasimpática del cuerpo.",
-    mnemo:"\"X = Vago = VAGA por todo el cuerpo\" — desde cuello hasta abdomen.",
+    funcion:"El nervio vago es el par craneal con mayor distribución, extendiéndose desde la base del cráneo hasta el abdomen y regulando funciones vitales de los sistemas respiratorio, cardiovascular y digestivo. Su componente parasimpático representa aproximadamente el 75% de toda la actividad parasimpática del cuerpo, controlando la frecuencia cardíaca (bradicardia), el tono bronquial (broncoconstricción) y la motilidad y secreción del tracto gastrointestinal desde el esófago hasta el ángulo esplénico del colon. El componente motor somático, desde el núcleo ambiguo, inerva los músculos de la faringe (deglución) y la laringe (fonación mediante las cuerdas vocales). Su porción sensitiva recoge información de las vísceras torácicas y abdominales, la mucosa de la laringe y faringe, y una pequeña zona del pabellón auricular (rama auricular o de Arnold).",
+    ramas:[
+      {n:"Nervio laríngeo superior",d:"Se divide en rama interna (sensitiva de mucosa laríngea supraglótica) y rama externa (motora del músculo cricotiroideo, tensor de las cuerdas vocales)."},
+      {n:"Nervio laríngeo recurrente (inferior)",d:"Inerva todos los músculos intrínsecos de la laringe excepto el cricotiroideo. El izquierdo rodea el arco aórtico, el derecho la arteria subclavia. Su lesión causa disfonía."},
+      {n:"Ramas cardíacas",d:"Fibras parasimpáticas que disminuyen la frecuencia cardíaca y la conducción en los nodos sinoauricular y auriculoventricular."},
+      {n:"Ramas pulmonares y bronquiales",d:"Fibras parasimpáticas que producen broncoconstricción y aumento de las secreciones bronquiales."},
+      {n:"Troncos vagales anterior y posterior (ramas abdominales)",d:"Fibras parasimpáticas que regulan la motilidad y secreción del tracto gastrointestinal desde el esófago hasta el ángulo esplénico del colon."},
+      {n:"Rama auricular (de Arnold)",d:"Rama sensitiva que inerva una pequeña zona del pabellón auricular y del conducto auditivo externo. Responsable del reflejo tusígeno al estimular el oído."}
+    ],
     lesion:"Disfonía, úvula al lado sano"
   },
   {
-    id:"XI", name:"Accesorio", latin:"N. accessorius · Espinal", color:"#fde68a",
-    tipos:["Motor somático"],
+    id:"XI", name:"Nervio Accesorio (XI)", latin:"N. accessorius · Espinal", color:"#fde68a",
+    tipos:["Motor"],
     real:"Raíz bulbar: núcleo ambiguo. Raíz espinal: asta anterior C1-C5 (asciende por foramen magno)",
-    aparente:"Surco retroolivar inferior + raíces espinales C1-C5",
+    origen_aparente:"Raíz bulbar: surco retroolivar inferior de la médula oblongada. Raíz espinal: cara lateral de la médula espinal entre C1-C5",
     nivel:"Médula oblongada + médula espinal C1-C5",
     nivelShort:"M. oblongada + C1-C5 (ÚNICO espinal)",
-    funcion:"Raíz espinal: ECM (gira cabeza al lado CONTRARIO) + trapecio (eleva hombro ipsilateral). Raíz bulbar: se une al X para inervar laringe y faringe.",
-    pearl:"Lesión XI: dificultad girar cabeza al lado contrario (ECM) + hombro caído ipsilateral (trapecio). VULNERABLE en disección radical de cuello → hombro caído iatrogénico. ÚNICO par craneal con origen medular verdadero.",
-    mnemo:"\"XI Accesorio del X\" — raíz bulbar se añade al vago. XI Espinal = ECM + Trapecio.",
+    funcion:"El nervio accesorio es el único par craneal con un verdadero origen medular, ya que su raíz espinal se origina en las astas anteriores de los segmentos cervicales C1-C5 y asciende a través del foramen magno para unirse brevemente con la raíz bulbar. La raíz espinal inerva dos músculos importantes: el esternocleidomastoideo (que gira la cabeza hacia el lado contrario) y el trapecio (que eleva el hombro y estabiliza la escápula). La raíz bulbar, originada en el núcleo ambiguo, se separa rápidamente para unirse al nervio vago (X) y contribuye a la inervación motora de la faringe y la laringe. Sale del cráneo por el foramen yugular junto con los nervios IX y X.",
+    ramas:[
+      {n:"Raíz espinal (nervio accesorio espinal)",d:"Se origina en las astas anteriores de C1-C5, asciende por el canal raquídeo y entra al cráneo por el foramen magno. Inerva el esternocleidomastoideo (gira cabeza al lado contrario) y el trapecio (eleva el hombro)."},
+      {n:"Raíz bulbar (accesorio del vago)",d:"Se origina en el núcleo ambiguo de la médula oblongada. Se une al nervio vago (X) y contribuye a la inervación motora de faringe y laringe. No tiene territorio independiente."}
+    ],
     lesion:"Hombro caído, dif. girar cabeza"
   },
   {
-    id:"XII", name:"Hipogloso", latin:"N. hypoglossus", color:"#fca5a5",
-    tipos:["Motor somático"],
+    id:"XII", name:"Nervio Hipogloso (XII)", latin:"N. hypoglossus", color:"#fca5a5",
+    tipos:["Motor"],
     real:"Núcleo del hipogloso — médula oblongada, piso del IV ventrículo (triángulo del hipogloso)",
-    aparente:"Surco preolivar (entre oliva bulbar y pirámide)",
+    origen_aparente:"Surco preolivar (anterolateral) de la médula oblongada, entre la oliva bulbar y la pirámide",
     nivel:"Médula oblongada",
     nivelShort:"Médula oblongada — surco preolivar",
-    funcion:"Todos los músculos intrínsecos de la lengua (longitudinal, transverso, vertical) y extrínsecos (geniogloso, hiogloso, estilogloso). Excepción: palatogloso (inervado por X). Fundamental para articulación, masticación y deglución.",
-    pearl:"NMI: lengua desvía al lado AFECTADO + atrofia + fasciculaciones. NMS: lengua al lado CONTRARIO a la lesión. ELA afecta ambas → fasciculaciones + espasticidad. Sale entre oliva y pirámide.",
-    mnemo:"\"XII HIPOgloso = debajo de la lengua.\" Sale entre oliva y pirámide.",
+    funcion:"El nervio hipogloso es puramente motor y controla todos los movimientos de la lengua, tanto los intrínsecos (que cambian la forma: longitudinal, transverso y vertical) como la mayoría de los extrínsecos (geniogloso, hiogloso y estilogloso, que mueven la lengua en el espacio). La excepción es el músculo palatogloso, que está inervado por el nervio vago (X). Emerge de la médula oblongada por el surco preolivar, entre la oliva bulbar y la pirámide, y sale del cráneo a través del canal del hipogloso en el hueso occipital. Es fundamental para la articulación del lenguaje, la masticación y la primera fase de la deglución.",
     lesion:"Desviación lengua al lado afectado (NMI)"
   }
 ];
