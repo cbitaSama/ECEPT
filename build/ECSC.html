@@ -1015,7 +1015,7 @@ comun:[{paso:"Xa + Va + Ca²⁺ = Complejo Protrombinasa",nota:""},{paso:"Protro
 // Se usa con la función goLink() que navega al destino
 var LINKS={
   "anat_inguinal":{vista:"cir_ing",label:"Anatomía Inguinal",materia:"Anatomía"},
-  "gen_craneales":{vista:"cir_ing",label:"Pares Craneales",materia:"Anatomía"},
+  "gen_craneales":{vista:"anatomia",label:"Pares Craneales",materia:"Anatomía"},
   "gen_coag":{vista:"general",label:"Factores de Coagulación",materia:"Generalidades"},
   "gen_inmuno":{vista:"general",label:"Bases Inmunológicas",materia:"Generalidades"},
   "lab_coag":{vista:"labs",label:"Valores de Coagulación",materia:"Laboratorios"},
@@ -1028,7 +1028,7 @@ var LINKS={
 
 var MODS=[
 {id:"reuma",n:"Reumatología",ic:"🦴",col:"#60a5fa",d:"AR, AIJ, Sjögren, EA, Esclerodermia, SAF, Fibromialgia",st:"lleno"},
-{id:"cirugia",n:"Cirugía",ic:"🔪",col:"#ef4444",d:"Abdomen agudo, Hernias inguinales",st:"lleno"},
+{id:"cirugia",n:"Cirugía",ic:"🔪",col:"#ef4444",d:"Abdomen agudo infeccioso, Peritonitis, Apendicitis",st:"lleno"},
 {id:"anatomia",n:"Anatomía",ic:"🩻",col:"#f59e0b",d:"Conducto inguinal, Anillos, Cordón espermático, 12 Pares Craneales",st:"lleno"},
 {id:"general",n:"Generalidades",ic:"📚",col:"#8b5cf6",d:"Inmunología, Cascada de Coagulación, y más",st:"lleno"},
 {id:"epid",n:"Epidemiología (Salud Pública)",ic:"📊",col:"#00b4d8",d:"Tipos de estudio, Pirámide de evidencia, Sesgos, Medidas, Lectura crítica",st:"lleno"},
@@ -1089,6 +1089,8 @@ function globalSearch(q){
     var txt=[n.name,n.latin,n.funcion,n.lesion].join(" ").toLowerCase();
     if(txt.indexOf(l)>-1) res.push({type:"nc",name:"🧠 Par "+n.id+" — "+n.name,sub:"Anatomía — Pares Craneales",go:"anatomia"});
   });
+  var ingTxt=[].concat(ING_PAREDES.map(function(w){return w.nombre+" "+w.estructura+" "+w.detalle})).concat([ING_SUPERFICIAL.formacion,ING_SUPERFICIAL.clinica]).concat(ING_SUPERFICIAL.pilares.map(function(p){return p.n+" "+p.d})).concat([ING_PROFUNDO.formacion,ING_PROFUNDO.ubicacion,ING_PROFUNDO.clinica]).concat(ING_PROFUNDO.componentes.map(function(c){return c.n+" "+c.d})).concat(ING_CORDON.elementos.map(function(el){return el.n+" "+el.d})).concat([ING_CORDON.nota_mujer,"conducto inguinal anillo inguinal cordón espermático hernia inguinal"]).join(" ").toLowerCase();
+  if(ingTxt.indexOf(l)>-1) res.push({type:"ing",name:"🧱 Conducto Inguinal",sub:"Anatomía — Conducto Inguinal",go:"cir_ing"});
   COAG_FACTORES.forEach(function(cf){
     var txt=[cf.num,cf.nombre,cf.alt||""].join(" ").toLowerCase();
     if(txt.indexOf(l)>-1) res.push({type:"coag",name:"🩸 Factor "+cf.num+" — "+cf.nombre,sub:"Generalidades — Coagulación",go:"general"});
@@ -1267,7 +1269,7 @@ function App(){
   s=_(null);var abdOpen=s[0],setAbdOpen=s[1]; s=_({});var abdExp=s[0],setAbdExp=s[1];
   s=_(0);var ingTab=s[0],setIngTab=s[1];
   s=_(0);var calcPeso=s[0],setCalcPeso=s[1]; s=_(0);var calcSCQ=s[0],setCalcSCQ=s[1];
-  s=_(0);var calcGotas=s[0],setCalcGotas=s[1]; s=_(null);var sbExp=s[0],setSbExp=s[1];
+  s=_(0);var calcGotas=s[0],setCalcGotas=s[1]; s=_(null);var sbExp=s[0],setSbExp=s[1]; s=_(null);var sbSub=s[0],setSbSub=s[1];
   s=_(0);var fisioTab=s[0],setFisioTab=s[1]; s=_(0);var fisioRec=s[0],setFisioRec=s[1]; s=_({});var fisioQa=s[0],setFisioQa=s[1];
   s=_([]);var favs=s[0],setFavs=s[1];
   s=_(0);var streak=s[0],setStreak=s[1]; s=_(0);var bestStreak=s[0],setBestStreak=s[1]; s=_(0);var calcHoras=s[0],setCalcHoras=s[1];
@@ -1334,7 +1336,7 @@ function App(){
           vista==="reuma_sec"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Reuma")),
           vista==="reuma_dis"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("reuma")},style:{color:C.dm,cursor:"pointer"}},"Reuma"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt,maxWidth:"100px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},dis?dis.n:"")),
           vista==="cir_abd"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Cirugía")),
-          vista==="cir_ing"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("cir_menu")},style:{color:C.dm,cursor:"pointer"}},"Cirugía"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Conducto Inguinal")),
+          vista==="cir_ing"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("anatomia")},style:{color:C.dm,cursor:"pointer"}},"Anatomía"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Conducto Inguinal")),
           vista==="anatomia"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Anatomía")),
           vista==="cir_quem"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Quemaduras")),
           vista==="epid"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Epidemiología")),
@@ -1392,10 +1394,10 @@ function App(){
         // ── MATERIAS ──
         e("div",{style:{fontSize:"9px",fontWeight:700,color:C.dm,textTransform:"uppercase",letterSpacing:"2px",padding:"0 4px",marginTop:"16px",marginBottom:"8px",paddingTop:"12px",borderTop:"1px solid "+C.bd}},"📋 MATERIAS"),
         [{ic:"🦴",n:"Reumatología",v:"reuma",col:"#60a5fa",act:true,sub:REUMA_SECS.map(function(s){return{n:s.i+" "+s.n,v:"reuma_sec",sec:s.id}})},
-         {ic:"🔪",n:"Cirugía",v:"cir_menu",col:"#ef4444",act:true,sub:[{n:"🔴 Abdomen Agudo",v:"cir_abd"},{n:"🧱 Conducto Inguinal",v:"cir_ing"}]},
+         {ic:"🔪",n:"Cirugía",v:"cir_menu",col:"#ef4444",act:true,sub:[{n:"🔴 Abdomen Agudo",v:"cir_abd"}]},
          {ic:"🔬",n:"Fisiología",v:"fisio",col:"#ec4899",act:true,sub:[{n:"🧬 Receptores Adrenérgicos",v:"fisio"}]},
          {ic:"🚑",n:"Emergenciología",v:"emergen_menu",col:"#ef4444",act:true,sub:[{n:"🔥 Quemaduras + Calculadoras",v:"cir_quem"}]},
-         {ic:"🩻",n:"Anatomía",v:"anatomia",col:"#f59e0b",act:true,sub:[{n:"🧠 Pares Craneales",v:"anatomia"}]},
+         {ic:"🩻",n:"Anatomía",v:"anatomia",col:"#f59e0b",act:true,sub:[{n:"🧠 Pares Craneales",grp:true,items:[{n:"🗺️ Mapa Interactivo",v:"anatomia",openMap:true},{n:"📋 Lista de Pares",v:"anatomia"}]},{n:"🧱 Conducto Inguinal",v:"cir_ing"}]},
          {ic:"📊",n:"Epidemiología (Salud Pública)",v:"epid",col:"#00b4d8",act:true,sub:[{n:"🔺 Pirámide de Evidencia",v:"epid"},{n:"📋 Tipos de Estudio",v:"epid"},{n:"⚠️ Sesgos",v:"epid"},{n:"📐 Medidas",v:"epid"},{n:"✅ Lectura Crítica",v:"epid"}]},
          {ic:"🫀",n:"Cardiología",col:"#ef4444",act:false,sub:[]},
          {ic:"🫁",n:"Neumología",col:"#06b6d4",act:false,sub:[]},
@@ -1422,6 +1424,7 @@ function App(){
             ),
             isExp2&&hasSub2&&e("div",{style:{paddingLeft:"20px",marginTop:"2px",marginBottom:"4px"}},
               mat.sub.map(function(ss2,si2){
+                if(ss2.grp){var subKey="sub_"+mat.n+"_"+si2;var subOn=sbSub===subKey;return e(F,{key:si2},e("div",{onClick:function(){setSbSub(subOn?null:subKey)},style:{padding:"6px 12px",fontSize:"12px",color:C.dm,cursor:"pointer",borderLeft:"2px solid "+mat.col+"40",marginBottom:"1px",display:"flex",justifyContent:"space-between",alignItems:"center"}},e("span",null,ss2.n),e("span",{style:{fontSize:"9px",color:C.dm,transform:subOn?"rotate(180deg)":"none",transition:"transform .2s"}},"▾")),subOn&&e("div",{style:{paddingLeft:"14px"}},ss2.items.map(function(it,ii){return e("div",{key:ii,onClick:function(){go(it.v);if(it.openMap)setTimeout(function(){setAbdOpen("mapa_nc")},150);setSb(false)},style:{padding:"5px 12px",fontSize:"11px",color:C.dm,cursor:"pointer",borderLeft:"2px solid "+mat.col+"20",marginBottom:"1px"}},it.n)})))}
                 return e("div",{key:si2,onClick:function(){
                   if(ss2.sec){go(ss2.v,ss2.sec)}else{go(ss2.v)}
                   setSb(false);
@@ -1529,7 +1532,7 @@ function App(){
     // ════════════ CIRUGÍA MENÚ ════════════
     vista==="cir_menu"&&e(F,null,
       e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🔪"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"24px",fontWeight:800,color:"#ef4444"}},"Cirugía")),
-      [{v:"cir_abd",ic:"🔴",n:"Abdomen Agudo Infeccioso",d:"Peritonitis, Apendicitis, Colecistitis, Pancreatitis, Colangitis"},{v:"cir_ing",ic:"🧱",n:"Conducto Inguinal",d:"Conducto · Anillos · Cordón Espermático"}].map(function(it){
+      [{v:"cir_abd",ic:"🔴",n:"Abdomen Agudo Infeccioso",d:"Peritonitis, Apendicitis, Colecistitis, Pancreatitis, Colangitis"}].map(function(it){
         return e("div",{key:it.v,onClick:function(){go(it.v)},style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"18px",cursor:"pointer",marginBottom:"12px",display:"flex",alignItems:"center",gap:"14px"}},
           e("span",{style:{fontSize:"28px"}},it.ic),e("div",null,e("h3",{style:{fontSize:"15px",fontWeight:700}},it.n),e("p",{style:{fontSize:"12px",color:C.dm}},it.d)),e("span",{style:{color:C.dm,marginLeft:"auto"}},"›"))
       })
