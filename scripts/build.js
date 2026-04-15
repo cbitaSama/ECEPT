@@ -29,6 +29,7 @@ var parts = [
   // components
   'src/components/SearchEngine.js',
   'src/components/LinkBadge.js',
+  'src/components/NervesMap.js',
   // app
   'src/app.js'
 ];
