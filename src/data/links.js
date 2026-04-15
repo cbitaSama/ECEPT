@@ -5,7 +5,7 @@
 // Se usa con la función goLink() que navega al destino
 var LINKS={
   "anat_inguinal":{vista:"cir_ing",label:"Anatomía Inguinal",materia:"Anatomía"},
-  "gen_craneales":{vista:"general",label:"Pares Craneales",materia:"Generalidades"},
+  "gen_craneales":{vista:"cir_ing",label:"Pares Craneales",materia:"Anatomía"},
   "gen_coag":{vista:"general",label:"Factores de Coagulación",materia:"Generalidades"},
   "gen_inmuno":{vista:"general",label:"Bases Inmunológicas",materia:"Generalidades"},
   "lab_coag":{vista:"labs",label:"Valores de Coagulación",materia:"Laboratorios"},
@@ -19,8 +19,8 @@ var LINKS={
 var MODS=[
 {id:"reuma",n:"Reumatología",ic:"🦴",col:"#60a5fa",d:"AR, AIJ, Sjögren, EA, Esclerodermia, SAF, Fibromialgia",st:"lleno"},
 {id:"cirugia",n:"Cirugía",ic:"🔪",col:"#ef4444",d:"Abdomen agudo, Hernias inguinales",st:"lleno"},
-{id:"anatomia",n:"Anatomía",ic:"🩻",col:"#f59e0b",d:"Conducto inguinal, Anillos, Cordón espermático",st:"lleno"},
-{id:"general",n:"Generalidades",ic:"📚",col:"#8b5cf6",d:"Inmunología, 12 Pares Craneales, Cascada de Coagulación, y más",st:"lleno"},
+{id:"anatomia",n:"Anatomía",ic:"🩻",col:"#f59e0b",d:"Conducto inguinal, Anillos, Cordón espermático, 12 Pares Craneales",st:"lleno"},
+{id:"general",n:"Generalidades",ic:"📚",col:"#8b5cf6",d:"Inmunología, Cascada de Coagulación, y más",st:"lleno"},
 {id:"epid",n:"Epidemiología (Salud Pública)",ic:"📊",col:"#00b4d8",d:"Tipos de estudio, Pirámide de evidencia, Sesgos, Medidas, Lectura crítica",st:"lleno"},
 {id:"triadas",n:"Tríadas y Síndromes",ic:"🔺",col:"#e879f9",d:TR.length+" asociaciones clásicas multidisciplinarias",st:"lleno"},
 {id:"labs",n:"Valores de Laboratorio",ic:"📊",col:"#4caf82",d:"Hemograma, Coagulación, Hepáticas, Renal, Ionograma, Tiroides",st:"lleno"},
