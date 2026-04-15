@@ -1,4 +1,6 @@
-// Global search across all modules
+// ══════════════════════════════════════════════════════════════
+// BÚSQUEDA GLOBAL
+// ══════════════════════════════════════════════════════════════
 function globalSearch(q){
   if(!q||q.length<2) return [];
   var l=q.toLowerCase();var res=[];

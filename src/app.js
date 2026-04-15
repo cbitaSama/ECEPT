@@ -1,4 +1,6 @@
-// Main App component with routing and navigation
+// ══════════════════════════════════════════════════════════════
+// APP PRINCIPAL
+// ══════════════════════════════════════════════════════════════
 function App(){
   var _=useState;
   var s=_("home");var vista=s[0],setVista=s[1];

@@ -1,49 +1,46 @@
-// Build script: concatenates src/ into build/ECEPT.html
+// Build script: concatenates src/ modules into build/ECSC.html
 // Run with: node scripts/build.js
-const fs = require('fs');
-const path = require('path');
+var fs = require('fs');
+var path = require('path');
 
-const shell = fs.readFileSync('src/index.html', 'utf8');
-const theme = fs.readFileSync('src/styles/theme.js', 'utf8');
+var shell = fs.readFileSync('src/index.html', 'utf8');
 
-// Load data files in dependency order
-// (links.js references TR.length, so triadas must come first)
-const dataOrder = [
-  'reuma.js',
-  'triadas.js',
-  'inmuno.js',
-  'cirugia.js',
-  'emergencias.js',
-  'anatomia.js',
-  'epidemiologia.js',
-  'labs.js',
-  'fisiologia.js',
-  'generalidades.js',
-  'links.js'
+// Concatenation order:
+// 1. styles (theme + React shortcuts)
+// 2. data files (dependency order: triadas before links because MODS references TR.length)
+// 3. components (SearchEngine needs data vars, LinkBadge is standalone)
+// 4. app.js (main App + ReactDOM.render)
+
+var parts = [
+  // styles
+  'src/styles/theme.js',
+  // data (order matters: triadas before links)
+  'src/data/reuma.js',
+  'src/data/triadas.js',
+  'src/data/cirugia.js',
+  'src/data/emergencias.js',
+  'src/data/anatomia.js',
+  'src/data/epidemiologia.js',
+  'src/data/labs.js',
+  'src/data/fisiologia.js',
+  'src/data/generalidades.js',
+  'src/data/links.js',
+  // components
+  'src/components/SearchEngine.js',
+  'src/components/LinkBadge.js',
+  // app
+  'src/app.js'
 ];
-const dataContent = dataOrder
-  .map(function(f) { return fs.readFileSync(path.join('src/data', f), 'utf8'); })
-  .join('\n');
 
-// Load components in order (SearchEngine needs data vars, LinkBadge is standalone)
-const compOrder = [
-  'SearchEngine.js',
-  'LinkBadge.js'
-];
-const compContent = compOrder
-  .map(function(f) { return fs.readFileSync(path.join('src/components', f), 'utf8'); })
-  .join('\n');
+var bundle = parts.map(function(f) {
+  return fs.readFileSync(f, 'utf8');
+}).join('\n');
 
-// Load main app
-const app = fs.readFileSync('src/app.js', 'utf8');
-
-// Assemble
-const final = shell
-  .replace('/* THEME_PLACEHOLDER */', theme)
-  .replace('/* DATA_PLACEHOLDER */', dataContent)
-  .replace('/* COMPONENTS_PLACEHOLDER */', compContent)
-  .replace('/* APP_PLACEHOLDER */', app);
+var output = shell.replace('/* BUNDLE */', bundle);
 
 fs.mkdirSync('build', { recursive: true });
-fs.writeFileSync('build/ECEPT.html', final);
-console.log('Built build/ECEPT.html: ' + (final.length / 1024).toFixed(0) + 'KB, ' + final.split('\n').length + ' lines');
+fs.writeFileSync('build/ECSC.html', output);
+
+var sizeKB = (Buffer.byteLength(output, 'utf8') / 1024).toFixed(0);
+var lineCount = output.split('\n').length;
+console.log('Built build/ECSC.html: ' + sizeKB + 'KB, ' + lineCount + ' lines');
