@@ -12,7 +12,7 @@ function App(){
   s=_(null);var abdOpen=s[0],setAbdOpen=s[1]; s=_({});var abdExp=s[0],setAbdExp=s[1];
   s=_(0);var ingTab=s[0],setIngTab=s[1];
   s=_(0);var calcPeso=s[0],setCalcPeso=s[1]; s=_(0);var calcSCQ=s[0],setCalcSCQ=s[1];
-  s=_(0);var calcGotas=s[0],setCalcGotas=s[1]; s=_(null);var sbExp=s[0],setSbExp=s[1];
+  s=_(0);var calcGotas=s[0],setCalcGotas=s[1]; s=_(null);var sbExp=s[0],setSbExp=s[1]; s=_(null);var sbSub=s[0],setSbSub=s[1];
   s=_(0);var fisioTab=s[0],setFisioTab=s[1]; s=_(0);var fisioRec=s[0],setFisioRec=s[1]; s=_({});var fisioQa=s[0],setFisioQa=s[1];
   s=_([]);var favs=s[0],setFavs=s[1];
   s=_(0);var streak=s[0],setStreak=s[1]; s=_(0);var bestStreak=s[0],setBestStreak=s[1]; s=_(0);var calcHoras=s[0],setCalcHoras=s[1];
@@ -140,7 +140,7 @@ function App(){
          {ic:"🔪",n:"Cirugía",v:"cir_menu",col:"#ef4444",act:true,sub:[{n:"🔴 Abdomen Agudo",v:"cir_abd"}]},
          {ic:"🔬",n:"Fisiología",v:"fisio",col:"#ec4899",act:true,sub:[{n:"🧬 Receptores Adrenérgicos",v:"fisio"}]},
          {ic:"🚑",n:"Emergenciología",v:"emergen_menu",col:"#ef4444",act:true,sub:[{n:"🔥 Quemaduras + Calculadoras",v:"cir_quem"}]},
-         {ic:"🩻",n:"Anatomía",v:"anatomia",col:"#f59e0b",act:true,sub:[{n:"🧠 Pares Craneales",v:"anatomia"},{n:"🧱 Conducto Inguinal",v:"cir_ing"}]},
+         {ic:"🩻",n:"Anatomía",v:"anatomia",col:"#f59e0b",act:true,sub:[{n:"🧠 Pares Craneales",grp:true,items:[{n:"🗺️ Mapa Interactivo",v:"anatomia",openMap:true},{n:"📋 Lista de Pares",v:"anatomia"}]},{n:"🧱 Conducto Inguinal",v:"cir_ing"}]},
          {ic:"📊",n:"Epidemiología (Salud Pública)",v:"epid",col:"#00b4d8",act:true,sub:[{n:"🔺 Pirámide de Evidencia",v:"epid"},{n:"📋 Tipos de Estudio",v:"epid"},{n:"⚠️ Sesgos",v:"epid"},{n:"📐 Medidas",v:"epid"},{n:"✅ Lectura Crítica",v:"epid"}]},
          {ic:"🫀",n:"Cardiología",col:"#ef4444",act:false,sub:[]},
          {ic:"🫁",n:"Neumología",col:"#06b6d4",act:false,sub:[]},
@@ -167,6 +167,7 @@ function App(){
             ),
             isExp2&&hasSub2&&e("div",{style:{paddingLeft:"20px",marginTop:"2px",marginBottom:"4px"}},
               mat.sub.map(function(ss2,si2){
+                if(ss2.grp){var subKey="sub_"+mat.n+"_"+si2;var subOn=sbSub===subKey;return e(F,{key:si2},e("div",{onClick:function(){setSbSub(subOn?null:subKey)},style:{padding:"6px 12px",fontSize:"12px",color:C.dm,cursor:"pointer",borderLeft:"2px solid "+mat.col+"40",marginBottom:"1px",display:"flex",justifyContent:"space-between",alignItems:"center"}},e("span",null,ss2.n),e("span",{style:{fontSize:"9px",color:C.dm,transform:subOn?"rotate(180deg)":"none",transition:"transform .2s"}},"▾")),subOn&&e("div",{style:{paddingLeft:"14px"}},ss2.items.map(function(it,ii){return e("div",{key:ii,onClick:function(){go(it.v);if(it.openMap)setTimeout(function(){setAbdOpen("mapa_nc")},150);setSb(false)},style:{padding:"5px 12px",fontSize:"11px",color:C.dm,cursor:"pointer",borderLeft:"2px solid "+mat.col+"20",marginBottom:"1px"}},it.n)})))}
                 return e("div",{key:si2,onClick:function(){
                   if(ss2.sec){go(ss2.v,ss2.sec)}else{go(ss2.v)}
                   setSb(false);

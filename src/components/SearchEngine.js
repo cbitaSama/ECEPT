@@ -37,6 +37,8 @@ function globalSearch(q){
     var txt=[n.name,n.latin,n.funcion,n.lesion].join(" ").toLowerCase();
     if(txt.indexOf(l)>-1) res.push({type:"nc",name:"🧠 Par "+n.id+" — "+n.name,sub:"Anatomía — Pares Craneales",go:"anatomia"});
   });
+  var ingTxt=[].concat(ING_PAREDES.map(function(w){return w.nombre+" "+w.estructura+" "+w.detalle})).concat([ING_SUPERFICIAL.formacion,ING_SUPERFICIAL.clinica]).concat(ING_SUPERFICIAL.pilares.map(function(p){return p.n+" "+p.d})).concat([ING_PROFUNDO.formacion,ING_PROFUNDO.ubicacion,ING_PROFUNDO.clinica]).concat(ING_PROFUNDO.componentes.map(function(c){return c.n+" "+c.d})).concat(ING_CORDON.elementos.map(function(el){return el.n+" "+el.d})).concat([ING_CORDON.nota_mujer,"conducto inguinal anillo inguinal cordón espermático hernia inguinal"]).join(" ").toLowerCase();
+  if(ingTxt.indexOf(l)>-1) res.push({type:"ing",name:"🧱 Conducto Inguinal",sub:"Anatomía — Conducto Inguinal",go:"cir_ing"});
   COAG_FACTORES.forEach(function(cf){
     var txt=[cf.num,cf.nombre,cf.alt||""].join(" ").toLowerCase();
     if(txt.indexOf(l)>-1) res.push({type:"coag",name:"🩸 Factor "+cf.num+" — "+cf.nombre,sub:"Generalidades — Coagulación",go:"general"});
