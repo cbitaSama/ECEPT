@@ -79,8 +79,9 @@ function App(){
           vista==="reuma_sec"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Reuma")),
           vista==="reuma_dis"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("reuma")},style:{color:C.dm,cursor:"pointer"}},"Reuma"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt,maxWidth:"100px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},dis?dis.n:"")),
           vista==="cir_abd"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Cirugía")),
-          vista==="cir_ing"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("anatomia")},style:{color:C.dm,cursor:"pointer"}},"Anatomía"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Conducto Inguinal")),
-          vista==="anatomia"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Anatomía")),
+          vista==="cir_ing"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("anat_menu")},style:{color:C.dm,cursor:"pointer"}},"Anatomía"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Conducto Inguinal")),
+          vista==="anat_menu"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Anatomía")),
+          vista==="anatomia"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("anat_menu")},style:{color:C.dm,cursor:"pointer"}},"Anatomía"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Pares Craneales")),
           vista==="cir_quem"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Quemaduras")),
           vista==="epid"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Epidemiología")),
           vista==="labs"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Laboratorios")),
@@ -256,7 +257,7 @@ function App(){
       e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:"14px"}},
         MODS.filter(function(m){return["triadas","labs","imagenes","general"].indexOf(m.id)===-1}).map(function(m,i){
           var lleno=m.st==="lleno";
-          return e("div",{key:m.id,onClick:function(){if(lleno)go(m.id==="cirugia"?"cir_menu":m.id==="anatomia"?"anatomia":m.id==="labs"?"labs":m.id==="epid"?"epid":m.id==="emergen"?"emergen_menu":m.id==="fisio"?"fisio":m.id)},style:{
+          return e("div",{key:m.id,onClick:function(){if(lleno)go(m.id==="cirugia"?"cir_menu":m.id==="anatomia"?"anat_menu":m.id==="labs"?"labs":m.id==="epid"?"epid":m.id==="emergen"?"emergen_menu":m.id==="fisio"?"fisio":m.id)},style:{
             background:C.cd,border:"1px solid "+(lleno?m.col+"30":C.bd),borderRadius:"16px",padding:"20px",
             cursor:lleno?"pointer":"default",opacity:lleno?1:.4,transition:"all .2s",
             animation:"slideUp .4s ease-out "+(i*0.04)+"s both"
@@ -276,6 +277,15 @@ function App(){
     vista==="cir_menu"&&e(F,null,
       e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🔪"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"24px",fontWeight:800,color:"#ef4444"}},"Cirugía")),
       [{v:"cir_abd",ic:"🔴",n:"Abdomen Agudo Infeccioso",d:"Peritonitis, Apendicitis, Colecistitis, Pancreatitis, Colangitis"}].map(function(it){
+        return e("div",{key:it.v,onClick:function(){go(it.v)},style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"18px",cursor:"pointer",marginBottom:"12px",display:"flex",alignItems:"center",gap:"14px"}},
+          e("span",{style:{fontSize:"28px"}},it.ic),e("div",null,e("h3",{style:{fontSize:"15px",fontWeight:700}},it.n),e("p",{style:{fontSize:"12px",color:C.dm}},it.d)),e("span",{style:{color:C.dm,marginLeft:"auto"}},"›"))
+      })
+    ),
+
+    // ════════════ ANATOMÍA MENÚ ════════════
+    vista==="anat_menu"&&e(F,null,
+      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🩻"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"24px",fontWeight:800,color:"#f59e0b"}},"Anatomía")),
+      [{v:"anatomia",ic:"🧠",n:"Pares Craneales",d:"Mapa interactivo · 12 pares · Origen, función y clínica"},{v:"cir_ing",ic:"🧱",n:"Conducto Inguinal",d:"Conducto · Anillos · Cordón Espermático"}].map(function(it){
         return e("div",{key:it.v,onClick:function(){go(it.v)},style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"18px",cursor:"pointer",marginBottom:"12px",display:"flex",alignItems:"center",gap:"14px"}},
           e("span",{style:{fontSize:"28px"}},it.ic),e("div",null,e("h3",{style:{fontSize:"15px",fontWeight:700}},it.n),e("p",{style:{fontSize:"12px",color:C.dm}},it.d)),e("span",{style:{color:C.dm,marginLeft:"auto"}},"›"))
       })
