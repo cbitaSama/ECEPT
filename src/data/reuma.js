@@ -1,6 +1,26 @@
-// Rheumatology: sections and disease data
+// ══════════════════════════════════════════════════════════════
+// DATOS REUMATOLOGÍA — SECCIONES
+// ══════════════════════════════════════════════════════════════
 var REUMA_SECS=[{id:"ai",n:"Artritis Inflamatoria",i:"🦴",d:"AR, AIJ, Still, Reactiva, EA"},{id:"tc",n:"Tejido Conectivo",i:"🧬",d:"Sjögren, Esclerodermia, SAF"},{id:"if",n:"Artritis Infecciosas",i:"🦠",d:"Séptica, Gonocócica, TBC"},{id:"fr",n:"Fiebre Reumática",i:"❤️‍🔥",d:"FRA y Cardiopatía Reumática"},{id:"ni",n:"No Inflamatorias",i:"🦿",d:"Artrosis"},{id:"dl",n:"Fibromialgia",i:"⚡",d:"Dolor Regional"}];
 
+
+// ══════════════════════════════════════════════════════════════
+// DATOS REUMATOLOGÍA — INMUNOLOGÍA
+// ══════════════════════════════════════════════════════════════
+var INT={t:"Sistema Inmunitario",s:[
+{t:"Concepto",i:"🧠",c:"#60a5fa",x:"Distingue propio/ajeno, peligroso/inocuo.",p:["RI combate patógenos","Sistema global integrado"]},
+{t:"Inmunidad Innata",i:"🛡️",c:"#f472b6",x:"MINUTOS-HORAS. Inespecífica.",p:["PAMP+PRR+DAMP","Barreras, complemento, fagocitos, NK"]},
+{t:"Inmunidad Adaptativa",i:"🎯",c:"#a78bfa",x:"DÍAS-SEMANAS. Específica.",p:["LB→plasmática→Ac","LTh: citocinas. LTc: citólisis","MHC presenta Ag","Especificidad+memoria+clonalidad"]},
+{t:"RI 1ª vs 2ª",i:"🔄",c:"#34d399",x:"",p:["1ª: preinmunes, lenta","2ª: MEMORIA, rápida y potente"]},
+{t:"Tolerancia",i:"⚖️",c:"#fbbf24",x:"Pérdida tolerancia→autoinmunidad.",p:["AR, LES, Sjögren, esclerodermia..."]},
+{t:"Órganos",i:"🏛️",c:"#fb923c",x:"",p:["1°: Médula ósea(LB)+Timo(LT)","2°: Ganglios, Bazo, MALT"]},
+{t:"Inmunoglobulinas",i:"🔑",c:"#e879f9",x:"",p:["IgG: abundante, placenta","IgM: 1ª, pentamérica","IgA: mucosas","IgE: alergia"]},
+{t:"Citocinas Reuma",i:"💉",c:"#ef4444",x:"Blancos terapéuticos.",p:["TNF-α→Infliximab","IL-1→Anakinra","IL-6→Tocilizumab","IL-17→Secukinumab","CD20→Rituximab"]}
+]};
+
+// ══════════════════════════════════════════════════════════════
+// DATOS REUMATOLOGÍA — ENFERMEDADES (TODAS)
+// ══════════════════════════════════════════════════════════════
 var RD=[
 {id:"ar",n:"Artritis Reumatoidea",s:"ai",cc:{t:"Inflamatoria crónica. M:H=2-3:1. Pico 25-55a. Simétrica.",p:["Inicio peq articulaciones, SIMÉTRICA","Rigidez matutina >1 HORA","PANNUS destruye cartílago","Deformidades: cubital, cisne, ojal, Z","Nódulos reumatoides 20-30%","Pulmón: pleuritis. Corazón: pericarditis","Felty: AR+neutropenia+esplenomegalia","Columna cervical ÚNICO segmento"]},dx:{cr:[{c:"Articulaciones 0-5",d:"1gde=0|2-10gde=1|1-3peq=2|4-10peq=3|>10=5"},{c:"Serología 0-3",d:"(-)=0|(+)bajo=2|(+)alto=3"},{c:"Reactantes 0-1",d:"Normal=0|Elevados=1"},{c:"Duración 0-1",d:"<6sem=0|≥6sem=1"},{c:"TOTAL",d:"≥6pts = AR (ACR/EULAR 2010)"}],df:["LES","Psoriásica","Gota","Still","Infecciosa"],nt:"DAS-28 seguimiento."},ex:{l:["FR: +2/3. >40UI/mL","Anti-CCP: >95% especificidad","VSG,PCR,fibrinógeno↑","Anemia normocítica (no Fe)"],im:"Rx: erosiones, osteopenia, pinzamiento."},tx:{p:"MTX=PILAR 7.5-30mg/sem + ác.fólico.",q:"Leflunomida, Sulfasalazina, HCQ.",b:"Infliximab, Rituximab.",m:"GC puente. Vasculitis: 1mg/kg+ciclofosfamida."},px:{e:"Fluctuante. ↓Esperanza 7-10a.",f:["FR/CCP altos","Erosiva temprana","Nódulos"],co:["Destrucción","Amiloidosis","Felty"]},pe:["Anti-CCP>95% especificidad","Rigidez>1h=AR vs <30min=artrosis","PANNUS=sello histopatológico","MTX=PILAR + ác.fólico","Felty=AR+neutropenia+esplenomegalia"],qz:[{p:"¿Ac más específico?",o:["FR","Anti-CCP","ANA","Anti-DNA"],r:1,x:"Anti-CCP>95%."},{p:"¿Pilar del tx?",o:["Ibuprofeno","Prednisona","Metotrexato","Infliximab"],r:2,x:"Metotrexato."}]},
 {id:"aij",n:"Artritis Idiopática Juvenil",s:"ai",cc:{t:"Artritis ≥6sem, <16a (ILAR).",p:["OLIGOARTICULAR 27-56%: uveítis 20%, ANA+65-85%","POLIARTICULAR FR-: ≥5art","POLIARTICULAR FR+: =AR adulto","ENTESITIS: HLA-B27+","SISTÉMICA: fiebre 39°, exantema, hepatoespleno, ACTIVACIÓN MACROFÁGICA 40%"]},dx:{cr:[{c:"Esencial",d:"Artritis ≥6sem <16a sin otra causa"}],df:["Infecciosas","LES","Neoplasias"],nt:"Uveítis SILENTE→screening."},ex:{l:["ANA+ oligoarticular","Ferritina↑↑ sistémica"],im:"RM temprana."},tx:{p:"Oligoarticular: GC IA+MTX.",q:"Poliarticular: MTX+AINEs.",b:"Anti-IL1/IL6 sistémica.",m:"Vigilar activación macrofágica."},px:{e:"Variable según forma.",f:["Activación macrofágica","FR+"],co:["Ceguera","Retraso crecimiento"]},pe:["Sistémica=fiebre+exantema asalmonado","Activación macrofágica=MÁS GRAVE","ANA+→riesgo uveítis","Still adulto=MISMA entidad"],qz:[{p:"Complicación más grave AIJ sistémica",o:["Uveítis","Amiloidosis","Activación macrofágica","Anquilosis"],r:2,x:"Hasta 40%."}]},

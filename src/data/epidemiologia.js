@@ -1,4 +1,9 @@
-// Epidemiology: evidence pyramid, studies, biases, measures, checklist
+// ══════════════════════════════════════════════════════════════
+// DATOS GENERALIDADES — LECTURA CRÍTICA (resumen clave)
+// ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// DATOS EPIDEMIOLOGÍA — PIRÁMIDE DE EVIDENCIA
+// ══════════════════════════════════════════════════════════════
 var PIRAMIDE=[
 {nivel:1,nombre:"Meta-análisis / Revisión Sistemática",color:"#22d3ee",ancho:"30%",desc:"Síntesis estadística de MÚLTIPLES ECAs. Máxima evidencia.",para:"Confirmar eficacia de tratamientos con alta potencia estadística",medida:"Tamaño del efecto combinado (pooled), IC 95%, heterogeneidad (I²)",ejemplo:"Cochrane: ¿Los corticoides reducen mortalidad en sepsis?",icono:"👑"},
 {nivel:2,nombre:"Ensayo Clínico Aleatorizado (ECA)",color:"#3b82f6",ancho:"42%",desc:"Gold Standard experimental. Aleatorización + cegamiento.",para:"Demostrar CAUSALIDAD entre intervención y resultado",medida:"RR, RRA, NNT, p-value, IC 95%",ejemplo:"RECOVERY: dexametasona en COVID → ↓mortalidad 35%",icono:"🏆"},

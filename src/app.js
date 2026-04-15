@@ -1,4 +1,6 @@
-// Main App component with routing and navigation
+// ══════════════════════════════════════════════════════════════
+// APP PRINCIPAL
+// ══════════════════════════════════════════════════════════════
 function App(){
   var _=useState;
   var s=_("home");var vista=s[0],setVista=s[1];
@@ -14,9 +16,9 @@ function App(){
   s=_(0);var fisioTab=s[0],setFisioTab=s[1]; s=_(0);var fisioRec=s[0],setFisioRec=s[1]; s=_({});var fisioQa=s[0],setFisioQa=s[1];
   s=_([]);var favs=s[0],setFavs=s[1];
   s=_(0);var streak=s[0],setStreak=s[1]; s=_(0);var bestStreak=s[0],setBestStreak=s[1]; s=_(0);var calcHoras=s[0],setCalcHoras=s[1];
-  s=_(function(){try{return JSON.parse(localStorage.getItem("ecsc_v1")||"[]")}catch(e2){return[]}});
+  s=_(function(){try{return JSON.parse(localStorage.getItem("ecept_v1")||"[]")}catch(e2){return[]}});
   var vi=s[0],setVi=s[1];
-  useEffect(function(){try{localStorage.setItem("ecsc_v1",JSON.stringify(vi))}catch(e2){}},[vi]);
+  useEffect(function(){try{localStorage.setItem("ecept_v1",JSON.stringify(vi))}catch(e2){}},[vi]);
 
   // Nav history for back button
   s=_([]); var hist=s[0],setHist=s[1];
@@ -71,7 +73,7 @@ function App(){
     e("div",{style:{background:"linear-gradient(180deg,rgba(13,18,36,.98),rgba(6,10,20,.95))",borderBottom:"1px solid "+C.bd,padding:"12px 16px",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)"}},
       e("div",{style:{maxWidth:"900px",margin:"0 auto",display:"flex",alignItems:"center",gap:"10px"}},
         e("button",{onClick:function(){setSb(!sb)},style:{background:"none",border:"none",color:C.mt,fontSize:"20px",cursor:"pointer"}},"☰"),
-        e("div",{onClick:function(){go("home")},style:{fontFamily:"'Playfair Display',serif",fontSize:"18px",fontWeight:900,background:"linear-gradient(135deg,#3b82f6,#8b5cf6,#f472b6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",cursor:"pointer",flexShrink:0,letterSpacing:"2px"}},"ECSC"),
+        e("div",{onClick:function(){go("home")},style:{fontFamily:"'Playfair Display',serif",fontSize:"18px",fontWeight:900,background:"linear-gradient(135deg,#3b82f6,#8b5cf6,#f472b6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",cursor:"pointer",flexShrink:0,letterSpacing:"2px"}},"ECEPT"),
         vista!=="home"&&e("div",{style:{display:"flex",alignItems:"center",gap:"4px",fontSize:"11px",flexShrink:0}},
           e("span",{onClick:function(){go("home")},style:{color:C.dm,cursor:"pointer"}},"Inicio"),
           vista==="reuma_sec"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Reuma")),
@@ -98,7 +100,7 @@ function App(){
         e("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"20px"}},
           e("div",{style:{display:"flex",alignItems:"center",gap:"8px"}},
             e("span",{style:{fontSize:"18px"}},"🧬"),
-            e("span",{style:{fontFamily:"'Playfair Display',serif",fontSize:"18px",fontWeight:900,background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",letterSpacing:"2px"}},"ECSC")
+            e("span",{style:{fontFamily:"'Playfair Display',serif",fontSize:"18px",fontWeight:900,background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",letterSpacing:"2px"}},"ECEPT")
           ),
           e("button",{onClick:function(){setSb(false)},style:{background:"none",border:"none",color:C.mt,fontSize:"20px",cursor:"pointer"}},"✕")
         ),
@@ -174,7 +176,7 @@ function App(){
 
         // Footer
         e("div",{style:{marginTop:"20px",paddingTop:"12px",borderTop:"1px solid "+C.bd,textAlign:"center"}},
-          e("p",{style:{fontSize:"10px",color:"rgba(255,255,255,.15)"}},"ECSC · El Conocimiento Se Comparte")
+          e("p",{style:{fontSize:"10px",color:"rgba(255,255,255,.15)"}},"ECEPT · El Conocimiento Es Para Todos")
         )
       ),
       e("div",{onClick:function(){setSb(false)},style:{flex:1,background:"rgba(0,0,0,.6)"}})
@@ -186,8 +188,8 @@ function App(){
     vista==="home"&&e(F,null,
       e("div",{style:{textAlign:"center",padding:"40px 20px 32px",marginBottom:"32px",background:"radial-gradient(ellipse at center top,rgba(59,130,246,.06) 0%,transparent 70%)",borderRadius:"20px"}},
         e("div",{style:{fontSize:"48px",marginBottom:"12px",animation:"float 3s ease-in-out infinite"}},"🧬"),
-        e("h1",{style:{fontFamily:"'Playfair Display',serif",fontSize:"clamp(28px,6vw,42px)",fontWeight:900,background:"linear-gradient(135deg,#3b82f6,#8b5cf6,#f472b6,#fbbf24)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginBottom:"8px",letterSpacing:"3px"}},"ECSC"),
-        e("p",{style:{fontFamily:"'Playfair Display',serif",fontSize:"14px",color:C.mt,fontWeight:700,letterSpacing:"1px"}},"El Conocimiento Se Comparte"),
+        e("h1",{style:{fontFamily:"'Playfair Display',serif",fontSize:"clamp(28px,6vw,42px)",fontWeight:900,background:"linear-gradient(135deg,#3b82f6,#8b5cf6,#f472b6,#fbbf24)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginBottom:"8px",letterSpacing:"3px"}},"ECEPT"),
+        e("p",{style:{fontFamily:"'Playfair Display',serif",fontSize:"14px",color:C.mt,fontWeight:700,letterSpacing:"1px"}},"El Conocimiento Es Para Todos"),
         // Stats row
         e("div",{style:{display:"flex",justifyContent:"center",gap:"16px",marginTop:"20px",flexWrap:"wrap"}},
           e("div",{style:{textAlign:"center",padding:"10px 18px",background:"rgba(59,130,246,.08)",borderRadius:"12px",border:"1px solid rgba(59,130,246,.15)"}},

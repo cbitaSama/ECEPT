@@ -1,4 +1,6 @@
-// Helper list component, link badge, and card box style
+// ══════════════════════════════════════════════════════════════
+// COMPONENTES HELPER
+// ══════════════════════════════════════════════════════════════
 function Ls(props){return e("div",{style:{display:"flex",flexDirection:"column",gap:"8px",marginTop:"6px"}},(props.items||[]).filter(Boolean).map(function(it,i){return e("div",{key:i,style:{display:"flex",gap:"10px",alignItems:"flex-start",lineHeight:1.6}},e("span",{style:{color:props.color||C.mt,flexShrink:0,marginTop:"8px",width:"5px",height:"5px",borderRadius:"50%",background:props.color||C.mt}}),e("span",{style:{color:C.tx,fontSize:"13px"}},it))}))}
 // Link badge component for cross-navigation
 function LinkBadge(props){

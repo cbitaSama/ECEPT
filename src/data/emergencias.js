@@ -1,4 +1,6 @@
-// Emergency: burns algorithm
+// ══════════════════════════════════════════════════════════════
+// DATOS CIRUGÍA — QUEMADURAS (ALGORITMO)
+// ══════════════════════════════════════════════════════════════
 var QUEM_PASOS=[
 {n:"01",t:"Seguridad + Detener la quemadura",col:"#ef4444",items:["Seguridad de la escena (riesgo eléctrico, químico, fuego)","Retirar al paciente de la fuente","Retirar ropa, joyas, anillos (edema progresivo)","Irrigar con agua a temperatura ambiente × 20 min"],alerta:"⚠ NUNCA: hielo, agua helada, pasta dental, mantequilla. Profundizan la lesión."},
 {n:"02",t:"ABCDE del Trauma",col:"#f97316",items:["A: Vía aérea — ¿esputo carbonáceo? ¿vibrisas quemadas? → Intubación precoz","B: Ventilación — O₂ al 100% humidificado. Descartar lesión inhalatoria","C: Circulación — 2 vías IV gruesas (14-16G), incluso en piel quemada","D: Neurológico — Descartar intoxicación por CO/cianuro","E: Exposición — Evaluar extensión (Wallace / Lund-Browder)"],alerta:"⚠ Intubar ANTES de que edematice. Después puede ser imposible."},
@@ -8,4 +10,3 @@ var QUEM_PASOS=[
 {n:"06",t:"Antibióticos + Analgesia + Profilaxis",col:"#3b82f6",items:["ATB sistémicos profilácticos: ❌ NO","ATB tópicos: Sí (sulfadiazina, bacitracina)","ATB sistémicos solo si infección confirmada","Leve-Moderado: AINE (ibuprofeno, ketorolaco) ± Tramadol","Severo: Morfina/Fentanilo IV titulado. Ketamina subdisociativa (0.1-0.3 mg/kg)","Profilaxis antitetánica según esquema. Td/Tdap si >5 años sin refuerzo"],alerta:""},
 {n:"07",t:"Soporte Integral",col:"#8b5cf6",items:["Elevación de extremidades quemadas","SNG si SCQ >20% (íleo paralítico frecuente)","Nutrición precoz hipercalórica/hiperproteica","Protección gástrica: omeprazol (prevenir úlcera de Curling)","Control estricto de temperatura (hipotermia = mortalidad)","Manejo en ambiente estéril, cálido"],alerta:"⚠ Criterios referencia centro quemados: 2° >20% SCQ · 3° >10% · cara/manos/pies/genitales · circunferencial · eléctrica · inhalatoria"}
 ];
-

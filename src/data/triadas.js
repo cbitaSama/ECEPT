@@ -1,4 +1,6 @@
-// Triads and specialty categories
+// ══════════════════════════════════════════════════════════════
+// DATOS REUMATOLOGÍA — TRÍADAS (TODAS)
+// ══════════════════════════════════════════════════════════════
 var TC=[{id:"reuma",n:"Reuma",c:"#60a5fa"},{id:"cardio",n:"Cardio",c:"#ef4444"},{id:"nefro",n:"Nefro",c:"#f59e0b"},{id:"neuro",n:"Neuro",c:"#a78bfa"},{id:"hema",n:"Hemato",c:"#ec4899"},{id:"infecto",n:"Infecto",c:"#34d399"},{id:"gastro",n:"Gastro",c:"#fb923c"},{id:"endoc",n:"Endoc",c:"#06b6d4"},{id:"gral",n:"General",c:"#8b5cf6"}];
 var TR=[
 {ct:"reuma",nm:"Tríada de Reiter",en:"Artritis Reactiva",cp:["Artritis oligoarticular asimétrica MMII","Uretritis no gonocócica","Conjuntivitis"],cl:"#60a5fa",ic:"🔺",dt:"HLA-B27+. Entesitis=patognomónica. Post-infección GI/GU."},

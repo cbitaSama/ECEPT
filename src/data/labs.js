@@ -1,4 +1,6 @@
-// Lab values: normal ranges and clinical significance
+// ══════════════════════════════════════════════════════════════
+// DATOS LABORATORIOS — VALORES NORMALES (COMPLETO)
+// ══════════════════════════════════════════════════════════════
 var LAB_SECTIONS=[
   {
     id: "coag", label: "Coagulación", icon: "🩸", accent: "#e05252",
@@ -310,4 +312,3 @@ var LAB_SECTIONS=[
     ]
   }
 ];
-

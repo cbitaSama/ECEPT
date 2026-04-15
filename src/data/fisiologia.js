@@ -1,4 +1,6 @@
-// Physiology: adrenergic receptors
+// ══════════════════════════════════════════════════════════════
+// DATOS FISIOLOGÍA — RECEPTORES ADRENÉRGICOS
+// ══════════════════════════════════════════════════════════════
 var FISIO_RECEPTORS=[
   {
     id: 'a1',
@@ -221,5 +223,3 @@ var FISIO_PROTEINAS_G=[
 {name:"Gi",color:"#fb923c",desc:"Inhibe adenilato ciclasa",result:"↓ AMPc",receptors:"α₂, M₂, D₂, μ-opioide"},
 {name:"Gs",color:"#60a5fa",desc:"Activa adenilato ciclasa",result:"↑ AMPc → PKA",receptors:"β₁, β₂, β₃, D₁, H₂"}
 ];
-
-

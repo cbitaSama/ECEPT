@@ -1,4 +1,8 @@
-// Cross-reference links and module definitions
+// ══════════════════════════════════════════════════════════════
+// SISTEMA DE NAVEGACIÓN CRUZADA (CONECTORES)
+// ══════════════════════════════════════════════════════════════
+// Cada conector tiene: de (vista origen), a (vista destino), label, y un icono
+// Se usa con la función goLink() que navega al destino
 var LINKS={
   "anat_inguinal":{vista:"cir_ing",label:"Anatomía Inguinal",materia:"Anatomía"},
   "gen_craneales":{vista:"general",label:"Pares Craneales",materia:"Generalidades"},
