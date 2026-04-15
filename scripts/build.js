@@ -40,7 +40,8 @@ var output = shell.replace('/* BUNDLE */', bundle);
 
 fs.mkdirSync('build', { recursive: true });
 fs.writeFileSync('build/ECSC.html', output);
+fs.writeFileSync('index.html', output);
 
 var sizeKB = (Buffer.byteLength(output, 'utf8') / 1024).toFixed(0);
 var lineCount = output.split('\n').length;
-console.log('Built build/ECSC.html: ' + sizeKB + 'KB, ' + lineCount + ' lines');
+console.log('Built build/ECSC.html + index.html: ' + sizeKB + 'KB, ' + lineCount + ' lines');
