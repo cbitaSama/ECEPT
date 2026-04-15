@@ -79,6 +79,8 @@ function App(){
           vista==="reuma_sec"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Reuma")),
           vista==="reuma_dis"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("reuma")},style:{color:C.dm,cursor:"pointer"}},"Reuma"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt,maxWidth:"100px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},dis?dis.n:"")),
           vista==="cir_abd"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Cirugía")),
+          vista==="cir_ing"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("cir_menu")},style:{color:C.dm,cursor:"pointer"}},"Cirugía"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Conducto Inguinal")),
+          vista==="anatomia"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Anatomía")),
           vista==="cir_quem"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Quemaduras")),
           vista==="epid"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Epidemiología")),
           vista==="labs"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Laboratorios")),
@@ -135,10 +137,10 @@ function App(){
         // ── MATERIAS ──
         e("div",{style:{fontSize:"9px",fontWeight:700,color:C.dm,textTransform:"uppercase",letterSpacing:"2px",padding:"0 4px",marginTop:"16px",marginBottom:"8px",paddingTop:"12px",borderTop:"1px solid "+C.bd}},"📋 MATERIAS"),
         [{ic:"🦴",n:"Reumatología",v:"reuma",col:"#60a5fa",act:true,sub:REUMA_SECS.map(function(s){return{n:s.i+" "+s.n,v:"reuma_sec",sec:s.id}})},
-         {ic:"🔪",n:"Cirugía",v:"cir_menu",col:"#ef4444",act:true,sub:[{n:"🔴 Abdomen Agudo",v:"cir_abd"},{n:"🧱 Anatomía Inguinal",v:"cir_ing"}]},
+         {ic:"🔪",n:"Cirugía",v:"cir_menu",col:"#ef4444",act:true,sub:[{n:"🔴 Abdomen Agudo",v:"cir_abd"},{n:"🧱 Conducto Inguinal",v:"cir_ing"}]},
          {ic:"🔬",n:"Fisiología",v:"fisio",col:"#ec4899",act:true,sub:[{n:"🧬 Receptores Adrenérgicos",v:"fisio"}]},
          {ic:"🚑",n:"Emergenciología",v:"emergen_menu",col:"#ef4444",act:true,sub:[{n:"🔥 Quemaduras + Calculadoras",v:"cir_quem"}]},
-         {ic:"🩻",n:"Anatomía",v:"cir_ing",col:"#f59e0b",act:true,sub:[{n:"🧱 Conducto Inguinal",v:"cir_ing"},{n:"🧠 Pares Craneales",v:"cir_ing"}]},
+         {ic:"🩻",n:"Anatomía",v:"anatomia",col:"#f59e0b",act:true,sub:[{n:"🧠 Pares Craneales",v:"anatomia"}]},
          {ic:"📊",n:"Epidemiología (Salud Pública)",v:"epid",col:"#00b4d8",act:true,sub:[{n:"🔺 Pirámide de Evidencia",v:"epid"},{n:"📋 Tipos de Estudio",v:"epid"},{n:"⚠️ Sesgos",v:"epid"},{n:"📐 Medidas",v:"epid"},{n:"✅ Lectura Crítica",v:"epid"}]},
          {ic:"🫀",n:"Cardiología",col:"#ef4444",act:false,sub:[]},
          {ic:"🫁",n:"Neumología",col:"#06b6d4",act:false,sub:[]},
@@ -253,7 +255,7 @@ function App(){
       e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:"14px"}},
         MODS.filter(function(m){return["triadas","labs","imagenes","general"].indexOf(m.id)===-1}).map(function(m,i){
           var lleno=m.st==="lleno";
-          return e("div",{key:m.id,onClick:function(){if(lleno)go(m.id==="cirugia"?"cir_menu":m.id==="anatomia"?"cir_ing":m.id==="labs"?"labs":m.id==="epid"?"epid":m.id==="emergen"?"emergen_menu":m.id==="fisio"?"fisio":m.id)},style:{
+          return e("div",{key:m.id,onClick:function(){if(lleno)go(m.id==="cirugia"?"cir_menu":m.id==="anatomia"?"anatomia":m.id==="labs"?"labs":m.id==="epid"?"epid":m.id==="emergen"?"emergen_menu":m.id==="fisio"?"fisio":m.id)},style:{
             background:C.cd,border:"1px solid "+(lleno?m.col+"30":C.bd),borderRadius:"16px",padding:"20px",
             cursor:lleno?"pointer":"default",opacity:lleno?1:.4,transition:"all .2s",
             animation:"slideUp .4s ease-out "+(i*0.04)+"s both"
@@ -272,7 +274,7 @@ function App(){
     // ════════════ CIRUGÍA MENÚ ════════════
     vista==="cir_menu"&&e(F,null,
       e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🔪"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"24px",fontWeight:800,color:"#ef4444"}},"Cirugía")),
-      [{v:"cir_abd",ic:"🔴",n:"Abdomen Agudo Infeccioso",d:"Peritonitis, Apendicitis, Colecistitis, Pancreatitis, Colangitis"},{v:"cir_ing",ic:"🧱",n:"Anatomía Inguinal",d:"📎 Conectado desde Anatomía"}].map(function(it){
+      [{v:"cir_abd",ic:"🔴",n:"Abdomen Agudo Infeccioso",d:"Peritonitis, Apendicitis, Colecistitis, Pancreatitis, Colangitis"},{v:"cir_ing",ic:"🧱",n:"Conducto Inguinal",d:"Conducto · Anillos · Cordón Espermático"}].map(function(it){
         return e("div",{key:it.v,onClick:function(){go(it.v)},style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"18px",cursor:"pointer",marginBottom:"12px",display:"flex",alignItems:"center",gap:"14px"}},
           e("span",{style:{fontSize:"28px"}},it.ic),e("div",null,e("h3",{style:{fontSize:"15px",fontWeight:700}},it.n),e("p",{style:{fontSize:"12px",color:C.dm}},it.d)),e("span",{style:{color:C.dm,marginLeft:"auto"}},"›"))
       })
@@ -565,41 +567,37 @@ function App(){
           )})
         ),
         e("div",{style:{padding:"14px",background:"rgba(16,185,129,.07)",border:"1px solid rgba(16,185,129,.2)",borderRadius:"12px"}},e("div",{style:{fontSize:"11px",fontWeight:700,color:"#10b981",marginBottom:"4px"}},"♀ EN LA MUJER"),e("p",{style:{fontSize:"12px",lineHeight:1.6}},ING_CORDON.nota_mujer))
-      ),
-      // PARES CRANEALES
-      e("div",{style:{marginTop:"24px",marginBottom:"24px"}},
-        e("div",{onClick:function(){setAbdOpen(abdOpen==="craneales"?null:"craneales")},style:{background:C.cd,border:"1px solid "+(abdOpen==="craneales"?"#a78bfa44":C.bd),borderRadius:"14px",padding:"18px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between"}},
-          e("div",{style:{display:"flex",alignItems:"center",gap:"12px"}},e("span",{style:{fontSize:"24px"}},"🧠"),e("div",null,e("h3",{style:{fontSize:"16px",fontWeight:700,color:"#a78bfa"}},"Pares Craneales"),e("p",{style:{fontSize:"11px",color:C.dm}},"12 pares con origen, función y clínica"))),
-          e("span",{style:{color:C.dm,transform:abdOpen==="craneales"?"rotate(180deg)":"none",transition:"transform .2s"}},"▼")
-        ),
-        abdOpen==="craneales"&&e("div",{style:{marginTop:"10px"}},
-          NERVES.map(function(n,i){
-            var isExp2=abdExp["nc_"+n.id];
-            return e("div",{key:n.id,style:{background:C.cd,border:"1px solid "+(isExp2?n.color+"44":C.bd),borderRadius:"12px",marginBottom:"8px",overflow:"hidden",animation:"fadeIn .3s ease"}},
-              e("div",{onClick:function(){var nw={};for(var k in abdExp)nw[k]=abdExp[k];nw["nc_"+n.id]=!isExp2;setAbdExp(nw)},style:{padding:"14px 16px",cursor:"pointer",display:"flex",alignItems:"center",gap:"12px"}},
-                e("span",{style:{fontFamily:"'Playfair Display',serif",fontSize:"20px",fontWeight:900,color:n.color,minWidth:"36px"}},n.id),
-                e("div",{style:{flex:1}},
-                  e("div",{style:{fontWeight:700,fontSize:"14px",color:C.tx}},n.name),
-                  e("div",{style:{fontSize:"11px",color:C.dm,fontStyle:"italic"}},n.latin)
-                ),
-                e("div",{style:{display:"flex",gap:"4px",flexWrap:"wrap"}},n.tipos.map(function(t,ti){
-                  var tc2={"Sensitivo especial":"#60a5fa","Motor somático":"#34d399","Motor":"#34d399","Sensitivo":"#60a5fa","Parasimpático":"#a78bfa","Mixto":"#f97316"};
-                  return e("span",{key:ti,style:{fontSize:"9px",padding:"2px 8px",borderRadius:"100px",background:(tc2[t]||"#94a3b8")+"15",color:tc2[t]||"#94a3b8",border:"1px solid "+(tc2[t]||"#94a3b8")+"30"}},t)
-                })),
-                e("span",{style:{color:C.dm,fontSize:"12px",transform:isExp2?"rotate(180deg)":"none",transition:"transform .2s"}},"▾")
-              ),
-              isExp2&&e("div",{style:{padding:"0 16px 16px",borderTop:"1px solid "+C.bd}},
-                e("div",{style:{padding:"12px 14px",background:n.color+"08",borderRadius:"8px",borderLeft:"3px solid "+n.color,margin:"12px 0",fontSize:"13px",color:C.tx,lineHeight:1.7}},n.funcion),
-                e("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}},
-                  e("div",{style:{padding:"10px",background:"rgba(255,255,255,.03)",borderRadius:"8px"}},e("div",{style:{fontSize:"10px",fontWeight:700,color:C.dm,marginBottom:"3px"}},"ORIGEN REAL"),e("div",{style:{fontSize:"11px",color:C.mt,lineHeight:1.5}},n.real)),
-                  e("div",{style:{padding:"10px",background:"rgba(255,255,255,.03)",borderRadius:"8px"}},e("div",{style:{fontSize:"10px",fontWeight:700,color:C.dm,marginBottom:"3px"}},"ORIGEN APARENTE"),e("div",{style:{fontSize:"11px",color:C.mt,lineHeight:1.5}},n.origen_aparente)),
-                  e("div",{style:{padding:"10px",background:"rgba(255,255,255,.03)",borderRadius:"8px",gridColumn:"1 / -1"}},e("div",{style:{fontSize:"10px",fontWeight:700,color:C.dm,marginBottom:"3px"}},"LESIÓN"),e("div",{style:{fontSize:"11px",color:"#ef4444",lineHeight:1.5}},n.lesion))
-                )
-              )
-            )
-          })
-        )
       )
+    ),
+
+    // ════════════ ANATOMÍA (PARES CRANEALES) ════════════
+    vista==="anatomia"&&e(F,null,
+      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🩻"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"22px",fontWeight:800,color:"#f59e0b"}},"Anatomía"),e("p",{style:{color:C.dm,fontSize:"13px"}},"Pares Craneales · Origen, función y clínica")),
+      NERVES.map(function(n,i){
+        var isExp2=abdExp["nc_"+n.id];
+        return e("div",{key:n.id,style:{background:C.cd,border:"1px solid "+(isExp2?n.color+"44":C.bd),borderRadius:"12px",marginBottom:"8px",overflow:"hidden",animation:"fadeIn .3s ease"}},
+          e("div",{onClick:function(){var nw={};for(var k in abdExp)nw[k]=abdExp[k];nw["nc_"+n.id]=!isExp2;setAbdExp(nw)},style:{padding:"14px 16px",cursor:"pointer",display:"flex",alignItems:"center",gap:"12px"}},
+            e("span",{style:{fontFamily:"'Playfair Display',serif",fontSize:"20px",fontWeight:900,color:n.color,minWidth:"36px"}},n.id),
+            e("div",{style:{flex:1}},
+              e("div",{style:{fontWeight:700,fontSize:"14px",color:C.tx}},n.name),
+              e("div",{style:{fontSize:"11px",color:C.dm,fontStyle:"italic"}},n.latin)
+            ),
+            e("div",{style:{display:"flex",gap:"4px",flexWrap:"wrap"}},n.tipos.map(function(t,ti){
+              var tc2={"Sensitivo especial":"#60a5fa","Motor somático":"#34d399","Motor":"#34d399","Sensitivo":"#60a5fa","Parasimpático":"#a78bfa","Mixto":"#f97316"};
+              return e("span",{key:ti,style:{fontSize:"9px",padding:"2px 8px",borderRadius:"100px",background:(tc2[t]||"#94a3b8")+"15",color:tc2[t]||"#94a3b8",border:"1px solid "+(tc2[t]||"#94a3b8")+"30"}},t)
+            })),
+            e("span",{style:{color:C.dm,fontSize:"12px",transform:isExp2?"rotate(180deg)":"none",transition:"transform .2s"}},"▾")
+          ),
+          isExp2&&e("div",{style:{padding:"0 16px 16px",borderTop:"1px solid "+C.bd}},
+            e("div",{style:{padding:"12px 14px",background:n.color+"08",borderRadius:"8px",borderLeft:"3px solid "+n.color,margin:"12px 0",fontSize:"13px",color:C.tx,lineHeight:1.7}},n.funcion),
+            e("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}},
+              e("div",{style:{padding:"10px",background:"rgba(255,255,255,.03)",borderRadius:"8px"}},e("div",{style:{fontSize:"10px",fontWeight:700,color:C.dm,marginBottom:"3px"}},"ORIGEN REAL"),e("div",{style:{fontSize:"11px",color:C.mt,lineHeight:1.5}},n.real)),
+              e("div",{style:{padding:"10px",background:"rgba(255,255,255,.03)",borderRadius:"8px"}},e("div",{style:{fontSize:"10px",fontWeight:700,color:C.dm,marginBottom:"3px"}},"ORIGEN APARENTE"),e("div",{style:{fontSize:"11px",color:C.mt,lineHeight:1.5}},n.origen_aparente)),
+              e("div",{style:{padding:"10px",background:"rgba(255,255,255,.03)",borderRadius:"8px",gridColumn:"1 / -1"}},e("div",{style:{fontSize:"10px",fontWeight:700,color:C.dm,marginBottom:"3px"}},"LESIÓN"),e("div",{style:{fontSize:"11px",color:"#ef4444",lineHeight:1.5}},n.lesion))
+            )
+          )
+        )
+      })
     ),
 
     // ════════════ LABORATORIOS ════════════
