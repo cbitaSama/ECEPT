@@ -573,6 +573,14 @@ function App(){
     // ════════════ ANATOMÍA (PARES CRANEALES) ════════════
     vista==="anatomia"&&e(F,null,
       e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🩻"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"22px",fontWeight:800,color:"#f59e0b"}},"Anatomía"),e("p",{style:{color:C.dm,fontSize:"13px"}},"Pares Craneales · Origen, función y clínica")),
+      // Interactive brain map (collapsible)
+      e("div",{style:{marginBottom:"16px"}},
+        e("div",{onClick:function(){setAbdOpen(abdOpen==="mapa_nc"?null:"mapa_nc")},style:{background:C.cd,border:"1px solid "+(abdOpen==="mapa_nc"?"#a78bfa44":C.bd),borderRadius:"14px",padding:"16px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between"}},
+          e("div",{style:{display:"flex",alignItems:"center",gap:"10px"}},e("span",{style:{fontSize:"20px"}},"🧠"),e("div",null,e("span",{style:{fontSize:"14px",fontWeight:700,color:"#a78bfa"}},"Mapa Interactivo de Pares Craneales"),e("p",{style:{fontSize:"11px",color:C.dm,margin:"2px 0 0"}},"Vista inferior del encéfalo — toca un nervio para explorar"))),
+          e("span",{style:{color:C.dm,transform:abdOpen==="mapa_nc"?"rotate(180deg)":"none",transition:"transform .2s"}},"▼")
+        ),
+        abdOpen==="mapa_nc"&&e("div",{style:{marginTop:"10px"}},e(NervesMap,null))
+      ),
       NERVES.map(function(n,i){
         var isExp2=abdExp["nc_"+n.id];
         return e("div",{key:n.id,style:{background:C.cd,border:"1px solid "+(isExp2?n.color+"44":C.bd),borderRadius:"12px",marginBottom:"8px",overflow:"hidden",animation:"fadeIn .3s ease"}},
