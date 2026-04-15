@@ -32,8 +32,8 @@ function globalSearch(q){
     if(txt.indexOf(l)>-1) res.push({type:"lab",name:"📊 "+ls.label,sub:"Laboratorios",go:"labs"});
   });
   NERVES.forEach(function(n){
-    var txt=[n.name,n.latin,n.funcion,n.pearl,n.lesion].join(" ").toLowerCase();
-    if(txt.indexOf(l)>-1) res.push({type:"nc",name:"🧠 Par "+n.id+" — "+n.name,sub:"Generalidades — Pares Craneales",go:"general"});
+    var txt=[n.n,n.desc,n.lesion,n.origen_real,n.origen_aparente].concat(n.ramas||[]).join(" ").toLowerCase();
+    if(txt.indexOf(l)>-1) res.push({type:"nc",name:"🧠 Par "+n.num+" — "+n.n,sub:"Anatomía — Pares Craneales",go:"anat"});
   });
   COAG_FACTORES.forEach(function(cf){
     var txt=[cf.num,cf.nombre,cf.alt||""].join(" ").toLowerCase();
