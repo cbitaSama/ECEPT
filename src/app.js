@@ -2,6 +2,12 @@
 // APP PRINCIPAL
 // ══════════════════════════════════════════════════════════════
 function App(){
+  // ─── STATE (compacted via useState alias _) ───
+  // vista: current view id. cs/cd: selected section/disease ids. tab/qm/qa: quiz state.
+  // sb/sbExp/sbSub: sidebar open + expanded item + nested submenu.
+  // abdOpen/abdExp: abdomen-agudo accordion state (reused by labs, epid estudios).
+  // et: expanded triada/pirámide index. an: fade-in animation flag.
+  // vi (localStorage "ecept_v1"): reviewed-disease ids. favs: favorited disease ids.
   var _=useState;
   var s=_("home");var vista=s[0],setVista=s[1];
   s=_("");var sq=s[0],setSq=s[1]; s=_(false);var so=s[0],setSo=s[1];
@@ -20,7 +26,7 @@ function App(){
   var vi=s[0],setVi=s[1];
   useEffect(function(){try{localStorage.setItem("ecept_v1",JSON.stringify(vi))}catch(e2){}},[vi]);
 
-  // Nav history for back button
+  // ─── NAVIGATION ─── back-button history stack
   s=_([]); var hist=s[0],setHist=s[1];
 
   var go=useCallback(function(x,sc,dc){
@@ -45,6 +51,7 @@ function App(){
     }
   },[hist]);
 
+  // ─── DERIVED (memos + derived values) ───
   var toggleFav=useCallback(function(id){setFavs(function(prev){return prev.indexOf(id)>-1?prev.filter(function(x){return x!==id}):prev.concat([id])});},[]);
   var isFav=useCallback(function(id){return favs.indexOf(id)>-1},[favs]);
   var dis=useMemo(function(){return cd?RD.find(function(x){return x.id===cd}):null},[cd]);
@@ -78,7 +85,8 @@ function App(){
           e("span",{onClick:function(){go("home")},style:{color:C.dm,cursor:"pointer"}},"Inicio"),
           vista==="reuma_sec"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Reuma")),
           vista==="reuma_dis"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("reuma")},style:{color:C.dm,cursor:"pointer"}},"Reuma"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt,maxWidth:"100px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},dis?dis.n:"")),
-          vista==="cir_abd"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Cirugía")),
+          vista==="cir_menu"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Cirugía")),
+          vista==="cir_abd"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("cir_menu")},style:{color:C.dm,cursor:"pointer"}},"Cirugía"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Abdomen Agudo")),
           vista==="cir_ing"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("anat_menu")},style:{color:C.dm,cursor:"pointer"}},"Anatomía"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Conducto Inguinal")),
           vista==="anat_menu"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Anatomía")),
           vista==="anatomia"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("anat_menu")},style:{color:C.dm,cursor:"pointer"}},"Anatomía"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Pares Craneales")),
@@ -89,7 +97,8 @@ function App(){
           vista==="labs"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Laboratorios")),
           vista==="fisio"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Fisiología")),
           vista==="general"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Generalidades")),
-          vista==="triadas"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Tríadas"))
+          vista==="triadas"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Tríadas")),
+          vista==="imagenes"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Imágenes"))
         ),
         e("div",{style:{flex:1,position:"relative"}},
           e("span",{style:{position:"absolute",left:"10px",top:"50%",transform:"translateY(-50%)",color:C.dm,fontSize:"13px",pointerEvents:"none"}},"🔍"),
@@ -187,9 +196,12 @@ function App(){
       ),
       e("div",{onClick:function(){setSb(false)},style:{flex:1,background:"rgba(0,0,0,.6)"}})
     ),
-    // TRAUMA EMBED (full bleed, outside content wrapper)
+    // ════════════ TRAUMA — UNIDAD 1 (EMBED, full-bleed iframe) ════════════
+    // Rendered outside the 900px content wrapper so the artifact takes the full viewport.
+    // The artifact (artifacts/trauma_unidad_1.html) is inlined base64 by scripts/build.js.
     vista==="trauma-u1"&&e(TraumaEmbedView),
-    // MAIN
+
+    // ════════════ MAIN (content wrapper for all non-trauma views) ════════════
     vista!=="trauma-u1"&&e("div",{style:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
 
     // ════════════ HOME ════════════
@@ -382,7 +394,6 @@ function App(){
       })
     ),
 
-    // ════════════ TRAUMA — UNIDAD 1 (EMBED) ════════════
     // ════════════ EMERGENCIOLOGÍA MENÚ ════════════
     vista==="emergen_menu"&&e(F,null,
       e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🚑"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"24px",fontWeight:800,color:"#ef4444"}},"Emergenciología")),
@@ -1055,7 +1066,7 @@ function App(){
     )
 
     )),
-    // BACK BUTTON
+    // ════════════ BACK BUTTON (floating, hidden on home + trauma which has its own nav) ════════════
     vista!=="home"&&vista!=="trauma-u1"&&e("button",{onClick:goBack,style:{position:"fixed",bottom:"20px",left:"20px",background:C.ac,color:"#fff",border:"none",borderRadius:"50%",width:"48px",height:"48px",fontSize:"20px",cursor:"pointer",boxShadow:"0 4px 20px "+C.gl,zIndex:90,display:"flex",alignItems:"center",justifyContent:"center"}},"←")
   );
 }
