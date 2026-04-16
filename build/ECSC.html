@@ -1083,6 +1083,18 @@ function globalSearch(q){
     var txt=[sg.nombre,sg.def].join(" ").toLowerCase();
     if(txt.indexOf(l)>-1) res.push({type:"epid",name:"📊 "+sg.nombre,sub:"Epidemiología — Sesgos",go:"epid"});
   });
+  PIRAMIDE.forEach(function(p){
+    var txt=[p.nombre,p.desc,p.para,p.medida,p.ejemplo].join(" ").toLowerCase();
+    if(txt.indexOf(l)>-1) res.push({type:"epid",name:"🔺 "+p.nombre,sub:"Epidemiología — Pirámide de Evidencia",go:"epid"});
+  });
+  MEDIDAS_EPI.forEach(function(m){
+    var txt=[m.nombre,m.formula,m.desc,m.regla].join(" ").toLowerCase();
+    if(txt.indexOf(l)>-1) res.push({type:"epid",name:"📐 "+m.nombre,sub:"Epidemiología — Medidas",go:"epid"});
+  });
+  CHECKLIST_LC.forEach(function(ck){
+    var txt=[ck.pregunta,ck.detalle].join(" ").toLowerCase();
+    if(txt.indexOf(l)>-1) res.push({type:"epid",name:"✅ "+ck.pregunta,sub:"Epidemiología — Lectura Crítica",go:"epid"});
+  });
   LAB_SECTIONS.forEach(function(ls){
     var txt=[ls.label,ls.subtitle].join(" ").toLowerCase();
     ls.analytes.forEach(function(an){txt+=(" "+an.name+" "+an.range+" "+(an.note||"")).toLowerCase()});
