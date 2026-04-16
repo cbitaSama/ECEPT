@@ -818,3 +818,148 @@ TRAUMA_SECCIONES.push(
     ]}
   ]}
 );
+
+/* === SHOCK Batch B (sh-5 .. sh-9) === */
+TRAUMA_SECCIONES.push(
+  {id:"sh-5", topic:"shock", title:"Trampas clínicas — los diferenciales clave", bloques:[
+    {k:"trap", ico:"⚠️", html:"<strong>Hipotensión + bradicardia (o sin taquicardia) en un paciente con trauma de columna</strong> → NO es hipovolémico. Es <strong>neurogénico</strong>. El tratamiento es diferente."},
+    {k:"h3", text:"Shock neurogénico"},
+    {k:"callout", tone:"orange", title:"Pérdida del tono simpático por lesión medular", html:"Por lesión medular <strong>cervical o torácica alta</strong>. Se distingue del hipovolémico por un cuadro hemodinámico particular:", items:[
+      "<strong>HIPOTENSIÓN SIN TAQUICARDIA</strong> (o con bradicardia)",
+      "Disminución de la <strong>resistencia vascular sistémica</strong> (vasodilatación por pérdida del tono simpático)",
+      "<strong>Extremidades calientes y secas</strong> (a diferencia del hipovolémico que tiene piel fría)"
+    ]},
+    {k:"h3", text:"Shock medular (espinal)"},
+    {k:"callout", tone:"purple", title:"Fenómeno diferente del neurogénico", html:"Es la pérdida temporal de todas las funciones medulares por debajo del nivel de la lesión. Se caracteriza por:", items:[
+      "<strong>Flacidez</strong> (parálisis flácida)",
+      "<strong>Arreflexia</strong> (ausencia de reflejos osteotendinosos)",
+      "Anestesia completa por debajo del nivel lesionado",
+      "Puede durar <strong>horas a semanas</strong> antes de resolverse"
+    ]},
+    {k:"table", headers:["Concepto","Qué es","Hemodinamia"], rows:[
+      ["<strong>Shock neurogénico</strong>","Pérdida del tono simpático vascular","Hipotensión + bradicardia / sin taquicardia"],
+      ["<strong>Shock medular (espinal)</strong>","Pérdida transitoria de función medular","Flacidez + arreflexia (no es un cuadro cardiovascular)"]
+    ]},
+    {k:"trap", ico:"🩸", html:"<strong>Hemotórax de 1000 ml:</strong> produce taquicardia, sudoración fría, palidez, taquipnea y oliguria. <strong>NO produce bradicardia</strong> — la respuesta simpática compensadora siempre acelera la FC. Si ves bradicardia en un sangrado, pensá en neurogénico o en un cuadro muy avanzado."},
+    {k:"trap", ico:"❤️", html:"<strong>Shock cardiogénico</strong> — las presiones de llenado están <strong>ALTAS, no bajas</strong> (error frecuente). GC bajo + RVS altas + PVC alta + yugulares ingurgitadas + rales pulmonares."}
+  ]},
+
+  {id:"sh-6", topic:"shock", title:"Shock hemorrágico — clasificación por grados", bloques:[
+    {k:"pearl", ico:"🎯", html:"<strong>Factor desencadenante:</strong> disminución de la precarga. <strong>Tratamiento inicial:</strong> dirigido a aumentar la precarga (restaurar volumen)."},
+    {k:"widget", name:"hemorrhage"},
+    {k:"h3", text:"Tabla de clasificación (volemia ~ 70 ml/kg)"},
+    {k:"table", compact:true, headers:["Parámetro","Grado I","Grado II","Grado III","Grado IV"], rows:[
+      ["<strong>Pérdida (ml)</strong>","Hasta 750","750 – 1500","1500 – 2000","&gt; 2000"],
+      ["<strong>Pérdida (%)</strong>","&lt; 15 %","15 – 30 %","30 – 40 %","&gt; 40 %"],
+      ["<strong>FC (lpm)</strong>","&lt; 100","&gt; 100","&gt; 120","&gt; 140"],
+      ["<strong>PA</strong>","Normal","Normal","<strong>BAJA</strong>","Baja"],
+      ["<strong>Presión de pulso</strong>","Normal/alta","Baja","Baja","Baja"],
+      ["<strong>FR</strong>","14 – 20","20 – 30","30 – 40","&gt; 35"],
+      ["<strong>Diuresis (ml/h)</strong>","&gt; 30","20 – 30","5 – 15","Indeterminada"],
+      ["<strong>Estado mental</strong>","Ansiedad","Mayor ansiedad","Confusión","Letargia"],
+      ["<strong>Reposición</strong>","Cristaloides","Cristaloides","Crist. + HD","Crist. + HD"]
+    ]},
+    {k:"pearl", ico:"🎯", html:"<strong>Primer signo del shock hipovolémico: TAQUICARDIA.</strong> La hipotensión recién aparece en <strong>Grado III (pérdida 30–40 %)</strong>. Si esperás a que baje la PA, estás tarde."},
+    {k:"h3", text:"Secuestro de sangre en fracturas"},
+    {k:"table", headers:["Fractura","Pérdida estimada","Equivalente"], rows:[
+      ["Tibia o húmero","~ 750 ml","~ 1.5 U de sangre"],
+      ["Fémur","~ 1500 ml","~ 3 U de sangre"],
+      ["Pelvis","&gt; 2 L","—"]
+    ]}
+  ]},
+
+  {id:"sh-7", topic:"shock", title:"Evaluación y diagnóstico", bloques:[
+    {k:"callout", tone:"orange", title:"Signos clínicos de hipoperfusión", items:[
+      "<strong>Taquicardia → 1° signo de hipovolemia</strong>",
+      "<strong>Hipotensión → signo TARDÍO</strong>",
+      "<strong>Oliguria &lt; 0.5 ml/kg/h</strong> en adulto",
+      "Alteración del estado de conciencia (hipoperfusión cerebral)",
+      "Piel fría, pálida, cianosis distal",
+      "Llenado capilar &gt; 2 segundos"
+    ]},
+    {k:"h3", text:"Diagnóstico diferencial clínico rápido"},
+    {k:"table", compact:true, headers:["Tipo","TA / FC","Yugulares","Pulmón","Piel","PVC"], rows:[
+      ["Hipovolémico","TA ↓ FC ↑","No ingurgitadas","Sin rales","Fría","&lt; 3"],
+      ["Distributivo séptico","TA ↓ FC ↑","No ingurgitadas","Sin rales","Caliente","Baja"],
+      ["Neurogénico","TA ↓ FC ↓ o normal","No ingurgitadas","Sin rales","Caliente, seca","Baja"],
+      ["Cardiogénico","TA ↓ FC ↑","<strong>Ingurgitadas</strong>","<strong>Con rales</strong>","Fría","&gt; 12"],
+      ["Obstructivo","TA ↓ FC ↑","<strong>Ingurgitadas</strong>","Sin rales","Fría","Alta"]
+    ]},
+    {k:"h3", text:"PVC (Presión Venosa Central)"},
+    {k:"list", items:[
+      "<strong>&lt; 2–3 cm H₂O</strong>: ↓ volumen intravascular (hipovolémico / distributivo)",
+      "<strong>&gt; 10–12 cm H₂O</strong>: obstructivo o cardiogénico (taponamiento, neumotórax, IAM)"
+    ]},
+    {k:"h3", text:"Correlación pulso palpable ↔ PAS estimada"},
+    {k:"table", compact:true, headers:["Pulso palpable","PAS estimada (mmHg)"], rows:[
+      ["<strong>Radial</strong>","≥ 80"],
+      ["<strong>Femoral</strong>","≥ 70"],
+      ["<strong>Carotídeo</strong>","≥ 60"]
+    ]},
+    {k:"pearl", ico:"💡", html:"Si no palpás pulso radial pero sí femoral → PAS entre 70–80. Si solo palpás carotídeo → PAS ~ 60. Herramienta útil cuando no tenés manguito."}
+  ]},
+
+  {id:"sh-8", topic:"shock", title:"Manejo del shock", bloques:[
+    {k:"callout", tone:"purple", title:"Objetivos terapéuticos", items:[
+      "<strong>PAM ≥ 60 mmHg</strong>",
+      "<strong>SatO₂ arterial ≥ 92 %</strong>",
+      "<strong>Diuresis &gt; 0.5 ml/kg/h</strong> (adulto)",
+      "Normalizar lactato"
+    ]},
+    {k:"h3", text:"A + B"},
+    {k:"list", items:[
+      "Valorar intubación si: <strong>Glasgow &lt; 8</strong>, <strong>PaO₂ ≤ 60 mmHg</strong>, taquipnea, cianosis, bradipnea",
+      "Monitor ECG + SpO₂ + PA"
+    ]},
+    {k:"h3", text:"C — Accesos venosos e hidratación"},
+    {k:"list", items:[
+      "<strong>2 vías periféricas</strong> cortas y gruesas (teflón 14–16: mayor diámetro + menor longitud = mayor flujo)",
+      "En niños: vía periférica primero · <strong>intraósea si falla</strong>",
+      "Vías válidas para hidratar: endovenosa, intraósea, oral (en excepciones). <strong>La vía ARTERIAL NO sirve para hidratar</strong>",
+      "Vía 1: cristaloides 20 ml/kg",
+      "Vía 2: analítica + prueba cruzada",
+      "Control de hemorragia: compresión directa / cirugía"
+    ]},
+    {k:"h3", text:"Fluidoterapia"},
+    {k:"table", headers:["Tipo","Mecanismo","Comentario"], rows:[
+      ["<strong>Cristaloides</strong>","Agua + electrolitos. <strong>1000 ml → solo 200 ml intravasculares</strong>","Solución fisiológica, Ringer Lactato. Precalentar a 39 °C"],
+      ["<strong>Coloides</strong>","Presión oncótica similar al plasma. <strong>1000 ml → ~ 800 ml intravasculares (HES)</strong>","Mayor retención de volumen. Cuidado con edema si hay alteración de la membrana vascular"]
+    ]},
+    {k:"pearl", ico:"💡", html:"<strong>Solución inicial en politraumatizado inestable: RINGER LACTATO tibio (39 °C).</strong> NO dextrosa 5 % (no es expansor), NO manitol como inicial, NO sangre total como primera línea."},
+    {k:"h3", text:"Respuesta a la fluidoterapia — 3 patrones"},
+    {k:"table", headers:["Respuesta rápida","Respuesta transitoria","Mínima / nula"], rows:[
+      ["&lt; 20 % de pérdida sanguínea","20 – 40 % de pérdida","&gt; 40 % de pérdida"],
+      ["Estabilización con cristaloides","Puede requerir hemoderivados","<strong>Cirugía inmediata + hemoderivados</strong>"]
+    ]},
+    {k:"h3", text:"Transfusión sanguínea"},
+    {k:"list", items:[
+      "<strong>Umbral:</strong> iniciar tras <strong>3 L de Ringer Lactato sin respuesta hemodinámica</strong>",
+      "Paciente estable: hemoclasificación + pruebas cruzadas",
+      "Paciente inestable: sangre tipo específico o <strong>GR empaquetados O Rh(–)</strong>",
+      "Transfundir a <strong>37 °C</strong> (cristaloides a 39 °C) para evitar hipotermia",
+      "Relación cristaloide : sangre = <strong>3 : 1</strong>"
+    ]},
+    {k:"h3", text:"Manejo específico por tipo de shock"},
+    {k:"table", headers:["Tipo","Tratamiento"], rows:[
+      ["<strong>Hipovolémico</strong>","Control de hemorragia + volumen + transfusión + cirugía"],
+      ["<strong>Séptico (distributivo)</strong>","Volumen + vasopresores + ATB + drenaje del foco + corticoides + vasopresina"],
+      ["<strong>Neurogénico</strong>","Volumen cauteloso + <strong>vasopresores</strong> (no responde solo a líquidos) + atropina si bradicardia"],
+      ["<strong>Cardiogénico</strong>","Inotrópicos + balón de contrapulsación + trombolíticos + revascularización"],
+      ["<strong>Obstructivo</strong>","Punción evacuadora (taponamiento) / drenaje (neumotórax) / trombolíticos (TEP)"]
+    ]}
+  ]},
+
+  {id:"sh-9", topic:"shock", title:"Lo que NO se debe hacer", bloques:[
+    {k:"danger", ico:"🚫", html:"<strong>Errores que cuestan vidas en el manejo del shock.</strong>"},
+    {k:"callout", tone:"red", title:"Lista de \"no hacer\"", items:[
+      "Enviar a Rx a un paciente en shock inestable",
+      "Comenzar tratamiento por la <strong>C sin pasar por A y B</strong>",
+      "Indicar <strong>inotrópicos en shock hipovolémico</strong> (el inicial es volumen)",
+      "Dar por finalizado el tratamiento si persisten marcadores de hipoperfusión",
+      "Maniobras innecesarias antes de reanimar (ej. sondas prematuras)",
+      "Retrasar la atención definitiva por exámenes",
+      "Alejarse del paciente (incluye traslados)",
+      "Olvidar informar a los familiares"
+    ]}
+  ]}
+);
