@@ -30,6 +30,7 @@ var parts = [
   'src/components/SearchEngine.js',
   'src/components/LinkBadge.js',
   'src/components/NervesMap.js',
+  'src/components/TraumaEmbedView.js',
   // app
   'src/app.js'
 ];
@@ -47,3 +48,10 @@ fs.writeFileSync('index.html', output);
 var sizeKB = (Buffer.byteLength(output, 'utf8') / 1024).toFixed(0);
 var lineCount = output.split('\n').length;
 console.log('Built build/ECSC.html + index.html: ' + sizeKB + 'KB, ' + lineCount + ' lines');
+
+// Copy standalone artifacts to build output (byte-identical)
+var artifactSrc = 'artifacts/trauma_unidad_1.html';
+if (fs.existsSync(artifactSrc)) {
+  fs.copyFileSync(artifactSrc, 'build/trauma_unidad_1.html');
+  console.log('Copied trauma_unidad_1.html to build/');
+}
