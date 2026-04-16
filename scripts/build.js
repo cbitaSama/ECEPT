@@ -1,4 +1,4 @@
-// Build script: concatenates src/ modules into build/ECSC.html
+// Build script: concatenates src/ modules into build/ECSC.html + index.html
 // Run with: node scripts/build.js
 var fs = require('fs');
 var path = require('path');
@@ -10,7 +10,6 @@ var shell = fs.readFileSync('src/index.html', 'utf8');
 // 2. data files (dependency order: triadas before links because MODS references TR.length)
 // 3. components (SearchEngine needs data vars, LinkBadge is standalone)
 // 4. app.js (main App + ReactDOM.render)
-
 var parts = [
   // styles
   'src/styles/theme.js',
@@ -35,27 +34,91 @@ var parts = [
   'src/app.js'
 ];
 
+// ─── concat bundle ───
+var manifest = [];
 var bundle = parts.map(function(f) {
-  return fs.readFileSync(f, 'utf8');
+  var src = fs.readFileSync(f, 'utf8');
+  manifest.push({ file: f, bytes: Buffer.byteLength(src, 'utf8'), lines: src.split('\n').length });
+  return src;
 }).join('\n');
 
 var output = shell.replace('/* BUNDLE */', bundle);
 
-// Inline trauma artifact as base64 (avoids </script> collision in template literals)
+// ─── inline trauma artifact as base64 ───
+// Base64 avoids </script> collision inside the artifact when inlined in a template.
+// TextDecoder(UTF-8) is used on read so Spanish chars survive the atob() round-trip.
 var artifactSrc = 'artifacts/trauma_unidad_1.html';
+var artifactBytes = 0, artifactB64Len = 0;
 if (fs.existsSync(artifactSrc)) {
   var traumaRaw = fs.readFileSync(artifactSrc, 'utf8');
+  artifactBytes = Buffer.byteLength(traumaRaw, 'utf8');
   var traumaB64 = Buffer.from(traumaRaw).toString('base64');
+  artifactB64Len = traumaB64.length;
   var injection = 'var TRAUMA_U1_B64 = "' + traumaB64 + '";\n' +
     'var TRAUMA_U1_HTML = new TextDecoder().decode(Uint8Array.from(atob(TRAUMA_U1_B64), function(c){ return c.charCodeAt(0); }));';
   output = output.replace('/* TRAUMA_ARTIFACT_PLACEHOLDER */', injection);
-  console.log('Inlined trauma_unidad_1.html as base64 (' + (traumaB64.length / 1024).toFixed(0) + 'KB encoded)');
+} else {
+  console.warn('WARN: ' + artifactSrc + ' not found — TraumaEmbedView will fail at runtime.');
+  output = output.replace('/* TRAUMA_ARTIFACT_PLACEHOLDER */', 'var TRAUMA_U1_HTML = "";');
 }
 
+// ─── integrity checks ───
+// These guards catch classes of regressions that silently produce a broken bundle.
+var errors = [];
+var expectedGlobals = [
+  'RD=', 'REUMA_SECS', 'SUB=', 'TR=', 'TC=',
+  'ABD_DATA', 'QUEM_PASOS', 'ING_',
+  'PIRAMIDE', 'ESTUDIOS', 'SESGOS', 'MEDIDAS_EPI', 'CHECKLIST_LC',
+  'LAB_SECTIONS', 'FISIO_', 'NERVES=',
+  'COAG_', 'MODS=', 'LINKS=',
+  'function globalSearch', 'function LinkBadge', 'function NervesMap', 'function TraumaEmbedView',
+  'function App',
+  'TRAUMA_U1_B64', 'TRAUMA_U1_HTML'
+];
+expectedGlobals.forEach(function(g) {
+  if (output.indexOf(g) === -1) errors.push('missing global: ' + g);
+});
+
+// The shell contains 3 legitimate </script> tags: react CDN, react-dom CDN, main bundle.
+// Anything over 3 means the artifact leaked a </script> and the base64 wrapper failed.
+var shellClosingScripts = (shell.match(/<\/script>/g) || []).length;
+var outputClosingScripts = (output.match(/<\/script>/g) || []).length;
+if (outputClosingScripts !== shellClosingScripts) {
+  errors.push('leaked </script> tags: output=' + outputClosingScripts + ' shell=' + shellClosingScripts + ' (base64 inlining should have prevented this)');
+}
+
+// Placeholders must have been replaced.
+if (output.indexOf('/* BUNDLE */') !== -1) errors.push('unreplaced /* BUNDLE */ placeholder');
+if (output.indexOf('/* TRAUMA_ARTIFACT_PLACEHOLDER */') !== -1) errors.push('unreplaced /* TRAUMA_ARTIFACT_PLACEHOLDER */');
+
+if (errors.length) {
+  console.error('BUILD FAILED — integrity check errors:');
+  errors.forEach(function(msg) { console.error('  ✗ ' + msg); });
+  process.exit(1);
+}
+
+// ─── write outputs ───
 fs.mkdirSync('build', { recursive: true });
 fs.writeFileSync('build/ECSC.html', output);
 fs.writeFileSync('index.html', output);
 
-var sizeKB = (Buffer.byteLength(output, 'utf8') / 1024).toFixed(0);
-var lineCount = output.split('\n').length;
-console.log('Built build/ECSC.html + index.html: ' + sizeKB + 'KB, ' + lineCount + ' lines');
+// ─── manifest ───
+var totalBytes = manifest.reduce(function(a, m) { return a + m.bytes; }, 0);
+var totalLines = manifest.reduce(function(a, m) { return a + m.lines; }, 0);
+var outBytes = Buffer.byteLength(output, 'utf8');
+
+console.log('');
+console.log('── BUILD MANIFEST ──');
+manifest.forEach(function(m) {
+  console.log('  ' + m.file.padEnd(38) + String(m.lines).padStart(5) + ' lines  ' + (m.bytes / 1024).toFixed(1).padStart(6) + ' KB');
+});
+console.log('  ' + '(subtotal)'.padEnd(38) + String(totalLines).padStart(5) + ' lines  ' + (totalBytes / 1024).toFixed(1).padStart(6) + ' KB');
+if (artifactBytes) {
+  console.log('  ' + artifactSrc.padEnd(38) + '  (b64)  ' + (artifactBytes / 1024).toFixed(1).padStart(6) + ' KB → ' + (artifactB64Len / 1024).toFixed(1) + ' KB encoded');
+}
+console.log('');
+console.log('── OUTPUT ──');
+console.log('  build/ECSC.html   ' + (outBytes / 1024).toFixed(1) + ' KB   ' + output.split('\n').length + ' lines');
+console.log('  index.html        ' + (outBytes / 1024).toFixed(1) + ' KB   (GitHub Pages root)');
+console.log('');
+console.log('✓ build OK (' + expectedGlobals.length + ' integrity checks passed)');
