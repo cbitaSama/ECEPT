@@ -13,7 +13,8 @@ var LINKS={
   "epid_sesgos":{vista:"epid",label:"Sesgos",materia:"Epidemiología"},
   "calc_parkland":{vista:"cir_quem",label:"Calculadora de Parkland",materia:"Emergenciología"},
   "calc_goteo":{vista:"cir_quem",label:"Calculadora de Goteo",materia:"Emergenciología"},
-  "triadas_all":{vista:"triadas",label:"Tríadas y Síndromes",materia:"Tríadas"}
+  "triadas_all":{vista:"triadas",label:"Tríadas y Síndromes",materia:"Tríadas"},
+  "trauma_u1":{vista:"trauma-u1",label:"Trauma — Unidad 1",materia:"Emergenciología"}
 };
 
 var MODS=[

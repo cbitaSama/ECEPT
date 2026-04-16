@@ -55,6 +55,9 @@ function globalSearch(q){
     var txt=[s.t,s.x||""].concat(s.p).join(" ").toLowerCase();
     if(txt.indexOf(l)>-1) res.push({type:"inm",name:"🛡️ "+s.t,sub:"Generalidades — Inmunología",go:"general"});
   });
+  // Trauma Unidad 1 (embedded artifact)
+  var traumaKw="trauma vía aérea politraumatizado shock tórax glasgow intubación ABCDE ABCDEFG neumotórax hemotórax taponamiento Beck pericardiocentesis triage START lesiones letales deontología curva trimodal Ringer hemorrágico neurogénico cricotiroidotomía volet costal contusión pulmonar asfixia traumática Mallampati Cormack SIR midazolam succinilcolina fentanilo".toLowerCase();
+  if(traumaKw.indexOf(l)>-1) res.push({type:"trauma",name:"🩸 Trauma — Unidad 1",sub:"Emergenciología",go:"trauma-u1"});
   // Remove duplicates by name
   var seen={};var unique=[];
   res.forEach(function(r){if(!seen[r.name]){seen[r.name]=true;unique.push(r)}});
