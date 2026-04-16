@@ -1,0 +1,52 @@
+/* NeckSVG — ECM (Esternocleidomastoideo) 3-insertion animation.
+   Ported from artifacts/vocabulario_medico_v4.html lines 768-787.
+   Props: {step: 1..3, p: [{c:color},{c:color},{c:color}]} */
+
+function NeckSVG(props) {
+  var step = props.step, p = props.p;
+  return e("svg", {viewBox:"0 0 300 300",
+                   style:{width:"100%", height:"100%",
+                          filter:"drop-shadow(0 0 15px rgba(96,165,250,.15))"}},
+    e("ellipse", {cx:"150", cy:"65", rx:"45", ry:"55",
+                  fill:"none", stroke:"#1a2040", strokeWidth:"1.5"}),
+    e("path", {d:"M 108 110 Q 150 140 192 110",
+               stroke:"#1a2040", strokeWidth:"1.5", fill:"none", strokeDasharray:"3,3"}),
+    e("path", {d:"M 115 115 L 105 180 L 90 230 L 210 230 L 195 180 L 185 115",
+               stroke:"#1a2040", strokeWidth:"1.5", fill:"rgba(26,32,64,.2)"}),
+    e("path", {d:"M 60 235 Q 95 225 130 232",
+               stroke:"#1a2040", strokeWidth:"3", fill:"none", strokeLinecap:"round"}),
+    e("path", {d:"M 170 232 Q 205 225 240 235",
+               stroke:"#1a2040", strokeWidth:"3", fill:"none", strokeLinecap:"round"}),
+    e("rect", {x:"140", y:"232", width:"20", height:"55", rx:"4",
+               fill:"rgba(26,32,64,.4)", stroke:"#1a2040", strokeWidth:"1.5"}),
+    e("path", {d:"M 148 240 Q 140 200 130 165 Q 125 140 118 115",
+               stroke: step>=1 ? p[0].c : "#1a2040", strokeWidth:"6", fill:"none",
+               strokeLinecap:"round", opacity: step>=1 ? .9 : .3,
+               style:{transition:"all .6s"}}),
+    e("path", {d:"M 118 235 Q 120 200 122 165 Q 123 140 122 118",
+               stroke: step>=2 ? p[1].c : "#1a2040", strokeWidth:"5", fill:"none",
+               strokeLinecap:"round", opacity: step>=2 ? .9 : .3,
+               style:{transition:"all .6s"}}),
+    e("circle", {cx:"148", cy:"243", r:"8", fill:p[0].c,
+                 opacity: step>=1 ? 1 : .2,
+                 style:{transition:"all .5s",
+                        filter: step===1 ? "drop-shadow(0 0 10px "+p[0].c+")" : "none"}}),
+    e("circle", {cx:"118", cy:"233", r:"8", fill:p[1].c,
+                 opacity: step>=2 ? 1 : .2,
+                 style:{transition:"all .5s",
+                        filter: step===2 ? "drop-shadow(0 0 10px "+p[1].c+")" : "none"}}),
+    e("circle", {cx:"120", cy:"113", r:"8", fill:p[2].c,
+                 opacity: step>=3 ? 1 : .2,
+                 style:{transition:"all .5s",
+                        filter: step===3 ? "drop-shadow(0 0 10px "+p[2].c+")" : "none"}}),
+    step>=1 && e("text", {x:"168", y:"246", fill:p[0].c,
+                          fontSize:"10", fontWeight:"700",
+                          fontFamily:"DM Sans"}, "Esternón"),
+    step>=2 && e("text", {x:"30", y:"236", fill:p[1].c,
+                          fontSize:"10", fontWeight:"700",
+                          fontFamily:"DM Sans"}, "Clavícula"),
+    step>=3 && e("text", {x:"132", y:"108", fill:p[2].c,
+                          fontSize:"10", fontWeight:"700",
+                          fontFamily:"DM Sans"}, "Mastoides")
+  );
+}
