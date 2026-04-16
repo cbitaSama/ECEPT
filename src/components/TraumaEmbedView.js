@@ -1,13 +1,15 @@
 // Embed view for Trauma Unidad 1 artifact (iframe wrapper)
 function TraumaEmbedView(props) {
-  var headerH = "48px";
+  useEffect(function() {
+    document.body.style.overflow = "hidden";
+    return function() { document.body.style.overflow = ""; };
+  }, []);
   return e("div", {style: {
-    position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
-    zIndex: 50, background: C.bg, display: "flex", flexDirection: "column"
+    position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+    zIndex: 100, background: C.bg, display: "flex", flexDirection: "column"
   }},
-    // Header strip
     e("div", {style: {
-      height: headerH, minHeight: headerH, background: C.cd,
+      height: "48px", minHeight: "48px", background: C.cd,
       borderBottom: "1px solid " + C.bd, display: "flex",
       alignItems: "center", padding: "0 16px", gap: "12px", flexShrink: 0
     }},
@@ -25,12 +27,12 @@ function TraumaEmbedView(props) {
         e("span", {style: {color: C.mt, fontWeight: 600}}, "Trauma \u2014 Unidad 1")
       )
     ),
-    // Iframe (srcdoc — artifact inlined at build time, no external file needed)
     e("iframe", {
       srcDoc: TRAUMA_U1_HTML,
       style: {
-        flex: 1, width: "100%", height: "calc(100vh - " + headerH + ")",
-        border: "none", margin: 0, padding: 0, display: "block"
+        flex: 1, width: "100%", border: "none",
+        display: "block", margin: 0, padding: 0,
+        backgroundColor: C.bg
       },
       allow: "fullscreen",
       loading: "eager",
