@@ -24,6 +24,7 @@ var parts = [
   'src/data/labs.js',
   'src/data/fisiologia.js',
   'src/data/generalidades.js',
+  'src/data/trauma.js',
   'src/data/links.js',
   // components
   'src/components/SearchEngine.js',
@@ -31,6 +32,17 @@ var parts = [
   'src/components/NervesMap.js',
   'src/components/TraumaEmbedView.js',
   'src/components/VocabularioEmbedView.js',
+  // trauma native widgets (must precede TraumaView + BloqueRenderer)
+  'src/components/trauma/GlasgowCalculator.js',
+  'src/components/trauma/HemorrhageCalculator.js',
+  'src/components/trauma/ETTSelector.js',
+  'src/components/trauma/ABCDEFGAccordion.js',
+  'src/components/trauma/LethalLesionsGrid.js',
+  'src/components/trauma/PuntosAnatomicos.js',
+  // shared bloque renderer (used by TraumaView + nested widgets)
+  'src/components/BloqueRenderer.js',
+  // trauma view (depends on BloqueRenderer + widgets + data)
+  'src/components/TraumaView.js',
   // app
   'src/app.js'
 ];
@@ -154,7 +166,12 @@ var expectedGlobals = [
   'function globalSearch', 'function LinkBadge', 'function NervesMap', 'function TraumaEmbedView', 'function VocabularioEmbedView',
   'function App',
   'TRAUMA_U1_B64', 'TRAUMA_U1_HTML',
-  'VOCAB_B64', 'VOCAB_HTML'
+  'VOCAB_B64', 'VOCAB_HTML',
+  // native trauma module
+  'TRAUMA_TOPICS', 'TRAUMA_SECCIONES', 'TRAUMA_ETT', 'TRAUMA_ABCD', 'TRAUMA_LETHAL', 'TRAUMA_REPASO', 'TRAUMA_HUB',
+  'function BloqueRenderer', 'function TraumaView',
+  'function GlasgowCalculator', 'function HemorrhageCalculator', 'function ETTSelector',
+  'function ABCDEFGAccordion', 'function LethalLesionsGrid', 'function PuntosAnatomicos'
 ];
 expectedGlobals.forEach(function(g) {
   if (output.indexOf(g) === -1) errors.push('missing global: ' + g);

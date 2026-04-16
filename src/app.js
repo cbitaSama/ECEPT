@@ -29,6 +29,10 @@ function App(){
   // ─── NAVIGATION ─── back-button history stack
   s=_([]); var hist=s[0],setHist=s[1];
 
+  // Native trauma view back-handler ref + widget registry
+  var traumaBackRef=useRef(null);
+  var traumaWidgets={glasgow:GlasgowCalculator,hemorrhage:HemorrhageCalculator,ett:ETTSelector,abcdefg:ABCDEFGAccordion,lethal:LethalLesionsGrid,anat_pts:PuntosAnatomicos};
+
   var go=useCallback(function(x,sc,dc){
     setAn(false);
     setTimeout(function(){
@@ -52,7 +56,9 @@ function App(){
   },[hist]);
 
   var handleBack=useCallback(function(){
-    if(vista==="trauma-u1"&&window._traumaGoBack&&window._traumaGoBack()) return;
+    if(vista==="trauma-u1"){
+      if(traumaBackRef.current&&traumaBackRef.current()) return;
+    }
     goBack();
   },[vista,goBack]);
 
@@ -202,16 +208,12 @@ function App(){
       ),
       e("div",{onClick:function(){setSb(false)},style:{flex:1,background:"rgba(0,0,0,.6)"}})
     ),
-    // ════════════ TRAUMA — UNIDAD 1 (EMBED, full-bleed iframe) ════════════
-    // Rendered outside the 900px content wrapper so the artifact takes the full viewport.
-    // The artifact (artifacts/trauma_unidad_1.html) is inlined base64 by scripts/build.js.
-    vista==="trauma-u1"&&e(TraumaEmbedView),
-
     // ════════════ VOCABULARIO MÉDICO (EMBED, full-bleed iframe) ════════════
+    // (Trauma now renders natively inside the content wrapper below.)
     vista==="vocabulario"&&e(VocabularioEmbedView),
 
     // ════════════ MAIN (content wrapper for all non-embed views) ════════════
-    vista!=="trauma-u1"&&vista!=="vocabulario"&&e("div",{style:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
+    vista!=="vocabulario"&&e("div",{style:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
 
     // ════════════ HOME ════════════
     vista==="home"&&e(F,null,
@@ -418,6 +420,9 @@ function App(){
         )
       })
     ),
+
+    // ════════════ TRAUMA — UNIDAD 1 (NATIVE) ════════════
+    vista==="trauma-u1"&&e(TraumaView,{widgets:traumaWidgets,onBackRef:traumaBackRef}),
 
     // ════════════ QUEMADURAS ════════════
     vista==="cir_quem"&&e(F,null,
