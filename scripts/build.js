@@ -30,6 +30,7 @@ var parts = [
   'src/components/SearchEngine.js',
   'src/components/LinkBadge.js',
   'src/components/NervesMap.js',
+  'src/components/TraumaEmbedView.js',
   // app
   'src/app.js'
 ];
@@ -39,6 +40,17 @@ var bundle = parts.map(function(f) {
 }).join('\n');
 
 var output = shell.replace('/* BUNDLE */', bundle);
+
+// Inline trauma artifact as base64 (avoids </script> collision in template literals)
+var artifactSrc = 'artifacts/trauma_unidad_1.html';
+if (fs.existsSync(artifactSrc)) {
+  var traumaRaw = fs.readFileSync(artifactSrc, 'utf8');
+  var traumaB64 = Buffer.from(traumaRaw).toString('base64');
+  var injection = 'var TRAUMA_U1_B64 = "' + traumaB64 + '";\n' +
+    'var TRAUMA_U1_HTML = new TextDecoder().decode(Uint8Array.from(atob(TRAUMA_U1_B64), function(c){ return c.charCodeAt(0); }));';
+  output = output.replace('/* TRAUMA_ARTIFACT_PLACEHOLDER */', injection);
+  console.log('Inlined trauma_unidad_1.html as base64 (' + (traumaB64.length / 1024).toFixed(0) + 'KB encoded)');
+}
 
 fs.mkdirSync('build', { recursive: true });
 fs.writeFileSync('build/ECSC.html', output);
