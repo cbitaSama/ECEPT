@@ -963,3 +963,118 @@ TRAUMA_SECCIONES.push(
     ]}
   ]}
 );
+
+/* === TORAX (tx-1 .. tx-4) === */
+TRAUMA_SECCIONES.push(
+  {id:"tx-1", topic:"torax", title:"Definición y mecanismos", bloques:[
+    {k:"p", html:"Lesiones de la pared torácica o de las estructuras intratorácicas producidas por fuerzas externas. Potencialmente letales si no se identifican y tratan a tiempo."},
+    {k:"pearl", ico:"🌬️", html:"<strong>Primera medida para mejorar la oxigenación tras un trauma torácico: administrar OXÍGENO SUPLEMENTARIO.</strong> Antes de pensar en intubar o drenar."},
+    {k:"h3", text:"Fuerzas involucradas"},
+    {k:"list", items:[
+      "Aceleración / desaceleración",
+      "Compresión torácica",
+      "Electrocución"
+    ]},
+    {k:"h3", text:"Clasificación por mecanismo"},
+    {k:"table", headers:["Tipo","Mecanismo","Ejemplos"], rows:[
+      ["<strong>Cerrado</strong>","Impacto sin penetración","Accidente de tránsito, caída desde altura"],
+      ["<strong>Penetrante</strong>","Objeto que penetra la cavidad torácica","Proyectil de arma de fuego, arma blanca"]
+    ]},
+    {k:"h3", text:"Necesidad de cirugía mayor"},
+    {k:"table", compact:true, headers:["Tipo","Cirugía mayor","Procedimientos simples"], rows:[
+      ["Cerrado","~ 10 %","~ 90 %"],
+      ["Penetrante","15 – 30 %","70 – 85 %"]
+    ]},
+    {k:"callout", tone:"red", title:"Signos de gravedad (alta energía)", items:[
+      "Caída &gt; 6 metros",
+      "Impactos a alta velocidad",
+      "Pasajeros despedidos del vehículo",
+      "Atropellamiento"
+    ]},
+    {k:"h3", text:"Método clínico — IPPA"},
+    {k:"list", items:[
+      "<strong>I</strong> — Inspección",
+      "<strong>P</strong> — Palpación",
+      "<strong>P</strong> — Percusión",
+      "<strong>A</strong> — Auscultación"
+    ]}
+  ]},
+
+  {id:"tx-2", topic:"torax", title:"Las 6 lesiones letales", bloques:[
+    {k:"p", html:"Se identifican en la <strong>revisión primaria</strong>. Tocá cada lesión para ver clínica y tratamiento en detalle."},
+    {k:"widget", name:"lethal"}
+  ]},
+
+  {id:"tx-3", topic:"torax", title:"Lesiones de la revisión secundaria", bloques:[
+    {k:"cards", layout:"card", items:[
+      {title:"Contusión pulmonar", body:[
+        {k:"list", items:[
+          "<strong>Lesión pulmonar más frecuente en trauma torácico</strong>",
+          "Trastorno de oxigenación y ventilación",
+          "<strong>Signos radiográficos tardíos</strong> — pueden aparecer recién a las 6 horas del trauma",
+          "Puede requerir intubación selectiva",
+          "Vigilar gasometría y SatO₂",
+          "<strong>Evitar sobrehidratación</strong> (empeora el edema)",
+          "Los corticoides <strong>no tienen beneficio demostrado</strong>"
+        ]}
+      ]},
+      {title:"Lesión traqueal", body:[
+        {k:"list", items:[
+          "<strong>Frecuentemente olvidada</strong> en el manejo inicial",
+          "Puede ser por trauma abierto o cerrado, parcial o total",
+          "<strong>Diagnóstico: endoscopia (broncoscopia)</strong>",
+          "Tratamiento: vía aérea + ventilación + cirugía"
+        ]}
+      ]},
+      {title:"Neumotórax simple", body:[
+        {k:"list", items:[
+          "Sin compromiso hemodinámico ni desplazamiento mediastinal",
+          "Pequeños y asintomáticos pueden manejarse sin drenaje",
+          "<strong>Atención:</strong> un neumotórax simple que pasa desapercibido puede <strong>convertirse en hipertensivo</strong> si el paciente recibe asistencia respiratoria mecánica",
+          "Tubo de tórax para resolución"
+        ]}
+      ]},
+      {title:"Hemotórax (leve a moderado)", body:[
+        {k:"p", html:"Causas: pared torácica, parénquima pulmonar, vasos intercostales, arteria torácica interna, hilio, grandes vasos, corazón. Manejo según grado (ver clasificación en \"6 letales\")."}
+      ]},
+      {title:"Ensanchamiento mediastinal / lesión aórtica", body:[
+        {k:"list", items:[
+          "Mecanismo: <strong>desaceleración brusca</strong>",
+          "Sospecha en Rx de tórax: <strong>mediastino &gt; 8 cm</strong>",
+          "Confirmar con <strong>aortografía o TC con contraste EV</strong>",
+          "Alta mortalidad — requiere manejo quirúrgico urgente"
+        ]}
+      ]},
+      {title:"Asfixia traumática", body:[
+        {k:"list", items:[
+          "Causa: <strong>compresión torácica severa</strong> (atropello con rueda sobre el tórax, aplastamiento)",
+          "Clínica: cefalea, edema y <strong>petequiado facial y conjuntival</strong> (cara roja-violácea \"máscara equimótica\")",
+          "Paciente habitualmente <strong>consciente</strong>",
+          "Manejo: O₂, soporte ventilatorio si es necesario, tratamiento de lesiones asociadas"
+        ]}
+      ]}
+    ]},
+    {k:"h3", text:"Anexos de la revisión primaria"},
+    {k:"list", items:[
+      "Hematocrito / hemoglobina",
+      "Radiografía de tórax (si es posible)",
+      "Gasometría arterial",
+      "ECG / monitoreo cardíaco",
+      "Oxímetro de pulso",
+      "Pruebas para transfusión de sangre"
+    ]}
+  ]},
+
+  {id:"tx-4", topic:"torax", title:"Tabla unificada de puntos anatómicos", bloques:[
+    {k:"p", html:"Los <strong>cuatro procedimientos de emergencia</strong> del trauma y dónde se realizan exactamente. Es la tabla más preguntada del bloque."},
+    {k:"widget", name:"anat_pts"},
+    {k:"h3", text:"Drenaje bajo sello de agua — técnica"},
+    {k:"callout", tone:"blue", items:[
+      "El tubo que viene del hemitórax del paciente debe quedar <strong>dentro del líquido</strong> del frasco",
+      "Si queda fuera → no hay sello → entrada de aire al espacio pleural y agravamiento del cuadro",
+      "El frasco debe estar por debajo del nivel del tórax del paciente (gravedad)",
+      "Burbujeo persistente = fuga aérea continua"
+    ]},
+    {k:"pearl", ico:"💡", html:"<strong>Regla mnemotécnica para recordar los espacios:</strong> 2 de adelante (toracocentesis en el 2° EIC anterior), 5 al costado (toracostomía en el 5° EIC lateral), debajo del xifoides (pericardio), entre tiroides y cricoides (vía aérea)."}
+  ]}
+);
