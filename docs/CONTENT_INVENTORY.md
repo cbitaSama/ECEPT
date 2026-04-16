@@ -1,29 +1,45 @@
-# ECEPT — Content Inventory
+# ECEPT — Inventario de Contenido
 
-## Reumatología
-- 52 enfermedades reumáticas (datos nativos)
+## Reumatología (`src/data/reuma.js`)
+- 52 enfermedades reumáticas con cuadro clínico, diagnóstico, criterios, tratamiento y perlas.
 
-## Cirugía
-- Abdomen Agudo (datos nativos)
+## Cirugía (`src/data/cirugia.js`)
+- Abdomen Agudo (algoritmo completo con estudios y manejo).
 
-## Emergenciología
-- Algoritmo de Quemaduras + Calculadoras (datos nativos)
-- Trauma — Unidad 1 ✅ (embedded artifact: 5 temas, 29 secciones, 7 widgets interactivos)
+## Emergenciología (`src/data/emergencias.js` + artefacto)
+- Algoritmo de Quemaduras + Calculadoras (SCQ, Parkland, criterios de internación).
+- Trauma — Unidad 1 ✅ (artefacto embebido: 5 temas, 29 secciones, 7 widgets interactivos).
 
-## Anatomía
-- Conducto Inguinal (datos nativos)
+## Anatomía (`src/data/anatomia.js` + `src/components/NervesMap.js`)
+- Conducto Inguinal (paredes, contenido, clínica).
+- Pares Craneales (mapa SVG interactivo sobre la base del cráneo).
 
-## Epidemiología
-- Tipos de Estudio, Sesgos, Medidas, Lectura Crítica (datos nativos)
+## Epidemiología (`src/data/epidemiologia.js`)
+- Pirámide de evidencia.
+- Tipos de Estudio (cohorte, caso-control, ensayo clínico, etc.).
+- Sesgos.
+- Medidas de asociación e impacto.
+- Lectura Crítica.
 
-## Fisiología
-- Receptores Adrenérgicos, SNA (datos nativos)
+## Fisiología (`src/data/fisiologia.js`)
+- Receptores Adrenérgicos.
+- Sistema Nervioso Autónomo.
 
-## Generalidades
-- Pares Craneales, Factores de Coagulación, Inmunología (datos nativos)
+## Generalidades (`src/data/generalidades.js` + `src/data/inmuno.js`)
+- Pares Craneales (tabla sinóptica).
+- Factores de Coagulación.
+- Inmunología (poblaciones celulares, citoquinas, HLA).
 
-## Laboratorios
-- Hemograma, Coagulación, Hepáticas, Renal, Ionograma, Tiroides (datos nativos)
+## Laboratorios (`src/data/labs.js`)
+- Hemograma.
+- Coagulación.
+- Hepáticas.
+- Renal.
+- Ionograma.
+- Tiroides.
 
-## Tríadas y Síndromes
-- Asociaciones clásicas multidisciplinarias (datos nativos)
+## Tríadas y Síndromes (`src/data/triadas.js`)
+- Asociaciones clásicas multidisciplinarias.
+
+## Links cruzados (`src/data/links.js`)
+- Referencias internas entre módulos (ej. trauma → quemaduras, inmuno → reuma).
