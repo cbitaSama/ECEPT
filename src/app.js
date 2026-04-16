@@ -187,8 +187,10 @@ function App(){
       ),
       e("div",{onClick:function(){setSb(false)},style:{flex:1,background:"rgba(0,0,0,.6)"}})
     ),
+    // TRAUMA EMBED (full bleed, outside content wrapper)
+    vista==="trauma-u1"&&e(TraumaEmbedView),
     // MAIN
-    e("div",{style:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
+    vista!=="trauma-u1"&&e("div",{style:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
 
     // ════════════ HOME ════════════
     vista==="home"&&e(F,null,
@@ -381,8 +383,6 @@ function App(){
     ),
 
     // ════════════ TRAUMA — UNIDAD 1 (EMBED) ════════════
-    vista==="trauma-u1"&&e(TraumaEmbedView,{goBack:goBack}),
-
     // ════════════ EMERGENCIOLOGÍA MENÚ ════════════
     vista==="emergen_menu"&&e(F,null,
       e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🚑"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"24px",fontWeight:800,color:"#ef4444"}},"Emergenciología")),
@@ -1056,7 +1056,7 @@ function App(){
 
     )),
     // BACK BUTTON
-    vista!=="home"&&e("button",{onClick:goBack,style:{position:"fixed",bottom:"20px",left:"20px",background:C.ac,color:"#fff",border:"none",borderRadius:"50%",width:"48px",height:"48px",fontSize:"20px",cursor:"pointer",boxShadow:"0 4px 20px "+C.gl,zIndex:90,display:"flex",alignItems:"center",justifyContent:"center"}},"←")
+    vista!=="home"&&vista!=="trauma-u1"&&e("button",{onClick:goBack,style:{position:"fixed",bottom:"20px",left:"20px",background:C.ac,color:"#fff",border:"none",borderRadius:"50%",width:"48px",height:"48px",fontSize:"20px",cursor:"pointer",boxShadow:"0 4px 20px "+C.gl,zIndex:90,display:"flex",alignItems:"center",justifyContent:"center"}},"←")
   );
 }
 
