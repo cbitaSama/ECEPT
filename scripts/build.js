@@ -54,8 +54,13 @@ if (fs.existsSync(artifactSrc)) {
 
   // Inject CSS to hide the artifact's own topbar when embedded in ECEPT.
   // ECEPT provides header/breadcrumbs, so the artifact's internal nav bar is redundant.
+  // Strategy: collapse .topbar to zero height, hide crumb + back individually,
+  // but keep #btnRepaso visible as a floating button (it's the only Repaso trigger).
   var embedCSS = '<style id="ecept-embed-overrides">' +
-    '.topbar { display: none !important; }' +
+    '.topbar { height: 0 !important; overflow: visible !important; margin: 0 !important; padding: 0 !important; border: none !important; }' +
+    '.topbar > .crumb { display: none !important; }' +
+    '.topbar > .btn-back { display: none !important; }' +
+    '#btnRepaso { position: fixed !important; bottom: 20px !important; right: 20px !important; z-index: 40 !important; box-shadow: 0 4px 20px rgba(59,130,246,.3) !important; }' +
     '.shell { padding-top: 12px !important; }' +
     'body { padding-top: 0 !important; margin-top: 0 !important; }' +
     '</style>';
