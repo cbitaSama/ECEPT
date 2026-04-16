@@ -51,6 +51,11 @@ function App(){
     }
   },[hist]);
 
+  var handleBack=useCallback(function(){
+    if(vista==="trauma-u1"&&window._traumaGoBack&&window._traumaGoBack()) return;
+    goBack();
+  },[vista,goBack]);
+
   // ─── DERIVED (memos + derived values) ───
   var toggleFav=useCallback(function(id){setFavs(function(prev){return prev.indexOf(id)>-1?prev.filter(function(x){return x!==id}):prev.concat([id])});},[]);
   var isFav=useCallback(function(id){return favs.indexOf(id)>-1},[favs]);
@@ -1067,7 +1072,7 @@ function App(){
 
     )),
     // ════════════ BACK BUTTON (floating, hidden on home only) ════════════
-    vista!=="home"&&e("button",{onClick:goBack,style:{position:"fixed",bottom:"20px",left:"20px",background:C.ac,color:"#fff",border:"none",borderRadius:"50%",width:"48px",height:"48px",fontSize:"20px",cursor:"pointer",boxShadow:"0 4px 20px "+C.gl,zIndex:90,display:"flex",alignItems:"center",justifyContent:"center"}},"←")
+    vista!=="home"&&e("button",{onClick:handleBack,style:{position:"fixed",bottom:"20px",left:"20px",background:C.ac,color:"#fff",border:"none",borderRadius:"50%",width:"48px",height:"48px",fontSize:"20px",cursor:"pointer",boxShadow:"0 4px 20px "+C.gl,zIndex:90,display:"flex",alignItems:"center",justifyContent:"center"}},"←")
   );
 }
 
