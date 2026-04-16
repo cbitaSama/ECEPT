@@ -725,3 +725,96 @@ TRAUMA_SECCIONES.push(
     ]}
   ]}
 );
+
+/* === SHOCK Batch A (sh-1 .. sh-4) === */
+TRAUMA_SECCIONES.push(
+  {id:"sh-1", topic:"shock", title:"Definición", bloques:[
+    {k:"callout", tone:"blue", title:"Síndrome de hipoperfusión tisular", html:"Déficit de O₂ en los tejidos por <strong>inadecuada perfusión y oxigenación celular</strong>, que produce:", items:[
+      "Metabolismo celular anaerobio",
+      "↑ producción de lactato y acidosis metabólica",
+      "Agotamiento de depósitos energéticos celulares",
+      "Falla multiorgánica si no se trata"
+    ]},
+    {k:"pearl", ico:"🎯", html:"<strong>Lo que tienen en común todos los tipos de shock:</strong> mala oxigenación celular de los tejidos vitales. La causa varía, el resultado final es el mismo."},
+    {k:"h3", text:"Disfunción celular en el shock"},
+    {k:"list", items:[
+      "Disfunción de la bomba iónica de membrana",
+      "Edema intracelular",
+      "Salida del contenido intracelular al extracelular",
+      "Inadecuada regulación del pH intracelular"
+    ]}
+  ]},
+
+  {id:"sh-2", topic:"shock", title:"Fases evolutivas del shock", bloques:[
+    {k:"table", compact:true, headers:["Noxa","Inicial","Preshock","Shock","FOM","Muerte"], rows:[
+      ["Agente causal","Compensación hemodinámica","Signos incipientes","Hipoperfusión manifiesta","Falla multiorgánica","Sin reversión"]
+    ]},
+    {k:"callout", tone:"green", title:"Fase compensada (Inicial / Preshock)", items:[
+      "Vasoconstricción → mantiene GC con ↑ FC y contractilidad",
+      "Volumen intravascular conservado por cierre arteriolar precapilar",
+      "Hipoperfusión periférica + oliguria",
+      "<strong>PA aún NORMAL</strong> (por eso la hipotensión es signo TARDÍO)"
+    ]},
+    {k:"callout", tone:"yellow", title:"Fase descompensada (Shock establecido)", items:[
+      "↓ GC y flujo a órganos vitales",
+      "Hipotensión + deterioro neurológico",
+      "Pulsos periféricos débiles o ausentes",
+      "Oliguria severa + acidosis metabólica progresiva",
+      "Arritmias e isquemia en ECG"
+    ]},
+    {k:"callout", tone:"red", title:"Fase irreversible", items:[
+      "Fallo multisistémico → muerte",
+      "Daño celular <strong>IRREVERSIBLE</strong>"
+    ]}
+  ]},
+
+  {id:"sh-3", topic:"shock", title:"Tríada letal del shock", bloques:[
+    {k:"danger", ico:"⚠️", html:"<strong>Hipotermia + Acidosis + Coagulopatía.</strong> Los tres se retroalimentan y son predictores independientes de mortalidad."},
+    {k:"table", headers:["Hipotermia","Acidosis","Coagulopatía"], rows:[[
+      "Exposición, pérdida de sangre, líquidos IV fríos. <strong>&lt; 35 °C al ingreso = predictor independiente de mortalidad</strong>",
+      "<strong>pH &lt; 7.30</strong>. Producida por hipoperfusión tisular → lactato. Interfiere con la cascada de coagulación.",
+      "Causada por hipotermia + acidosis + transfusiones masivas. Cierra el círculo vicioso."
+    ]]},
+    {k:"h3", text:"Manejo de la hipotermia"},
+    {k:"list", items:[
+      "Cristaloides IV calentados a <strong>39 °C</strong>",
+      "Hemoderivados a <strong>37 °C</strong>",
+      "Sábanas térmicas o dispositivos de calentamiento externo",
+      "Ambiente cálido en sala de shock"
+    ]}
+  ]},
+
+  {id:"sh-4", topic:"shock", title:"Clasificación del shock", bloques:[
+    {k:"table", headers:["Tipo","Mecanismo","Causas principales"], rows:[
+      ["<strong>Hipovolémico</strong>","↓ volumen intravascular → ↓ precarga → ↓ GC","Hemorragia, trauma, diarrea, vómitos, quemados, 3er espacio"],
+      ["<strong>Distributivo</strong>","↓ RVS → distribución anormal del flujo. GC normal o ↑","<strong>Séptico (más común)</strong>, anafiláctico, <strong>neurogénico</strong>"],
+      ["<strong>Cardiogénico</strong>","Falla de bomba → ↓ GC. GC ↓↓, RVS ↑","<strong>IAM (&gt; 40 %)</strong>, arritmias, miocardiopatía dilatada, contusión miocárdica"],
+      ["<strong>Obstructivo</strong>","Obstrucción mecánica al flujo cardíaco","TEP masivo, neumotórax a tensión, taponamiento pericárdico <span class=\"linkbadge\" data-jump=\"torax\">Ver tórax</span>"]
+    ]},
+    {k:"h3", text:"Asociación causa → tipo de shock"},
+    {k:"p", html:"Las asociaciones más preguntadas en examen:"},
+    {k:"table", headers:["Causa","Tipo de shock"], rows:[
+      ["Hematoma retroperitoneal pélvico","Hipovolémico"],
+      ["IAM masivo","Cardiogénico"],
+      ["Quemadura del 60 %","Hipovolémico"],
+      ["Sepsis","Distributivo"],
+      ["Neumotórax hipertensivo","Obstructivo"],
+      ["Lesión medular cervical alta","Distributivo (neurogénico)"],
+      ["Reacción anafiláctica severa","Distributivo"],
+      ["Taponamiento cardíaco","Obstructivo"]
+    ]},
+    {k:"h3", text:"Hiperdinámico vs hipodinámico"},
+    {k:"table", headers:["—","Hiperdinámico (GC ↑)","Hipodinámico (GC ↓)"], rows:[
+      ["Características","Pulso amplio, diastólica baja, <strong>extremidades CALIENTES</strong>, llenado capilar rápido, hipertermia","Pulso débil/filiforme, palidez, <strong>frialdad cutánea</strong>, cianosis distal, llenado capilar lento, hipotermia"],
+      ["Ejemplo","Séptico (fase inicial)","Hemorrágico, cardiogénico, obstructivo, séptico tardío"]
+    ]},
+    {k:"h3", text:"Parámetros hemodinámicos por tipo"},
+    {k:"table", compact:true, headers:["Tipo","Precarga","GC","RVP","RVS","Piel"], rows:[
+      ["Hemorrágico","↓","↓","↑","↑","Fría"],
+      ["Anafiláctico","↓/↑","↓","↑↑","↓","Caliente"],
+      ["Cardiogénico","↑","↓↓","↑","↑","Fría"],
+      ["Séptico hiperdinámico","↓","↑","↑","↓↓","Caliente"],
+      ["Séptico hipodinámico","↓","↓","↑","↑","Fría"]
+    ]}
+  ]}
+);
