@@ -51,6 +51,16 @@ var artifactSrc = 'artifacts/trauma_unidad_1.html';
 var artifactBytes = 0, artifactB64Len = 0;
 if (fs.existsSync(artifactSrc)) {
   var traumaRaw = fs.readFileSync(artifactSrc, 'utf8');
+
+  // Inject CSS to hide the artifact's own topbar when embedded in ECEPT.
+  // ECEPT provides header/breadcrumbs, so the artifact's internal nav bar is redundant.
+  var embedCSS = '<style id="ecept-embed-overrides">' +
+    '.topbar { display: none !important; }' +
+    '.shell { padding-top: 12px !important; }' +
+    'body { padding-top: 0 !important; margin-top: 0 !important; }' +
+    '</style>';
+  traumaRaw = traumaRaw.replace('</head>', embedCSS + '</head>');
+
   artifactBytes = Buffer.byteLength(traumaRaw, 'utf8');
   var traumaB64 = Buffer.from(traumaRaw).toString('base64');
   artifactB64Len = traumaB64.length;
