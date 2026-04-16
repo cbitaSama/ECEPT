@@ -98,6 +98,7 @@ function App(){
           vista==="emergen_menu"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Emergenciología")),
           vista==="cir_quem"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("emergen_menu")},style:{color:C.dm,cursor:"pointer"}},"Emergenciología"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Quemaduras")),
           vista==="trauma-u1"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("emergen_menu")},style:{color:C.dm,cursor:"pointer"}},"Emergenciología"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Trauma — Unidad 1")),
+          vista==="vocabulario"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("general")},style:{color:C.dm,cursor:"pointer"}},"Generalidades"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Vocabulario Médico")),
           vista==="epid"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Epidemiología")),
           vista==="labs"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Laboratorios")),
           vista==="fisio"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Fisiología")),
@@ -130,7 +131,7 @@ function App(){
         e("div",{style:{fontSize:"9px",fontWeight:700,color:C.dm,textTransform:"uppercase",letterSpacing:"2px",padding:"0 4px",marginBottom:"8px"}},"⚡ SECCIONES ESPECIALES"),
         [{ic:"🔺",n:"Tríadas y Síndromes",v:"triadas",col:"#e879f9",sub:[]},
          {ic:"📊",n:"Laboratorios",v:"labs",col:"#4caf82",sub:[]},
-         {ic:"📚",n:"Generalidades",v:"general",col:"#8b5cf6",sub:[{n:"🛡️ Bases Inmunológicas",v:"general"},{n:"🩸 Factores de Coagulación",v:"general"},{n:"📖 Vocabulario Médico",v:null}]},
+         {ic:"📚",n:"Generalidades",v:"general",col:"#8b5cf6",sub:[{n:"🛡️ Bases Inmunológicas",v:"general"},{n:"🩸 Factores de Coagulación",v:"general"},{n:"📖 Vocabulario Médico",v:"vocabulario"}]},
          {ic:"📷",n:"Imágenes Diagnósticas",v:"imagenes",col:"#06b6d4",sub:[]}
         ].map(function(sec){
           var isExp=sbExp===sec.v;
@@ -206,8 +207,11 @@ function App(){
     // The artifact (artifacts/trauma_unidad_1.html) is inlined base64 by scripts/build.js.
     vista==="trauma-u1"&&e(TraumaEmbedView),
 
-    // ════════════ MAIN (content wrapper for all non-trauma views) ════════════
-    vista!=="trauma-u1"&&e("div",{style:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
+    // ════════════ VOCABULARIO MÉDICO (EMBED, full-bleed iframe) ════════════
+    vista==="vocabulario"&&e(VocabularioEmbedView),
+
+    // ════════════ MAIN (content wrapper for all non-embed views) ════════════
+    vista!=="trauma-u1"&&vista!=="vocabulario"&&e("div",{style:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
 
     // ════════════ HOME ════════════
     vista==="home"&&e(F,null,
@@ -943,8 +947,15 @@ function App(){
         )
       ),
 
+      // Vocabulario Médico — active card
+      e("div",{onClick:function(){go("vocabulario")},style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"16px",marginBottom:"10px",cursor:"pointer",display:"flex",alignItems:"center",gap:"14px"}},
+        e("span",{style:{fontSize:"22px"}},"📖"),
+        e("div",null,e("h3",{style:{fontSize:"14px",fontWeight:700}},"Vocabulario Médico"),e("p",{style:{fontSize:"11px",color:C.dm}},"270+ raíces · 13 categorías · Decodificador · Quiz · SVG")),
+        e("span",{style:{color:C.dm,marginLeft:"auto"}},"›")
+      ),
+
       // Remaining placeholders
-      [{ic:"📖",n:"Vocabulario Médico",d:"Prefijos, sufijos, terminología clínica — Próximamente"},{ic:"🧬",n:"Citocinas e Interleucinas",d:"TNF, IL-1 a IL-38, Interferones — Próximamente"},{ic:"💎",n:"Complemento",d:"Vías clásica, alternativa y de lectinas — Próximamente"}].map(function(ph,i){
+      [{ic:"🧬",n:"Citocinas e Interleucinas",d:"TNF, IL-1 a IL-38, Interferones — Próximamente"},{ic:"💎",n:"Complemento",d:"Vías clásica, alternativa y de lectinas — Próximamente"}].map(function(ph,i){
         return e("div",{key:i,style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"16px",marginBottom:"10px",opacity:.45,display:"flex",alignItems:"center",gap:"14px"}},
           e("span",{style:{fontSize:"22px"}},ph.ic),
           e("div",null,e("h3",{style:{fontSize:"14px",fontWeight:700}},ph.n),e("p",{style:{fontSize:"11px",color:C.dm}},ph.d)),

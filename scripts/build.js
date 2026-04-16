@@ -30,6 +30,7 @@ var parts = [
   'src/components/LinkBadge.js',
   'src/components/NervesMap.js',
   'src/components/TraumaEmbedView.js',
+  'src/components/VocabularioEmbedView.js',
   // app
   'src/app.js'
 ];
@@ -124,6 +125,23 @@ if (fs.existsSync(artifactSrc)) {
   output = output.replace('/* TRAUMA_ARTIFACT_PLACEHOLDER */', 'var TRAUMA_U1_HTML = "";');
 }
 
+// ─── inline vocabulario artifact as base64 ───
+var vocabSrc = 'artifacts/vocabulario_medico_v4.html';
+var vocabBytes = 0, vocabB64Len = 0;
+if (fs.existsSync(vocabSrc)) {
+  var vocabRaw = fs.readFileSync(vocabSrc, 'utf8');
+  vocabBytes = Buffer.byteLength(vocabRaw, 'utf8');
+  var vocabB64 = Buffer.from(vocabRaw).toString('base64');
+  vocabB64Len = vocabB64.length;
+  var vocabInjection = 'var VOCAB_B64 = "' + vocabB64 + '";\n' +
+    'var VOCAB_HTML = new TextDecoder().decode(Uint8Array.from(atob(VOCAB_B64), function(c){ return c.charCodeAt(0); }));';
+  output = output.replace('/* VOCAB_ARTIFACT_PLACEHOLDER */', vocabInjection);
+  console.log('Inlined vocabulario_medico_v4.html as base64 (' + (vocabB64.length / 1024).toFixed(0) + 'KB encoded)');
+} else {
+  console.warn('WARN: ' + vocabSrc + ' not found — VocabularioEmbedView will fail at runtime.');
+  output = output.replace('/* VOCAB_ARTIFACT_PLACEHOLDER */', 'var VOCAB_HTML = "";');
+}
+
 // ─── integrity checks ───
 // These guards catch classes of regressions that silently produce a broken bundle.
 var errors = [];
@@ -133,9 +151,10 @@ var expectedGlobals = [
   'PIRAMIDE', 'ESTUDIOS', 'SESGOS', 'MEDIDAS_EPI', 'CHECKLIST_LC',
   'LAB_SECTIONS', 'FISIO_', 'NERVES=',
   'COAG_', 'MODS=', 'LINKS=',
-  'function globalSearch', 'function LinkBadge', 'function NervesMap', 'function TraumaEmbedView',
+  'function globalSearch', 'function LinkBadge', 'function NervesMap', 'function TraumaEmbedView', 'function VocabularioEmbedView',
   'function App',
-  'TRAUMA_U1_B64', 'TRAUMA_U1_HTML'
+  'TRAUMA_U1_B64', 'TRAUMA_U1_HTML',
+  'VOCAB_B64', 'VOCAB_HTML'
 ];
 expectedGlobals.forEach(function(g) {
   if (output.indexOf(g) === -1) errors.push('missing global: ' + g);
@@ -152,6 +171,7 @@ if (outputClosingScripts !== shellClosingScripts) {
 // Placeholders must have been replaced.
 if (output.indexOf('/* BUNDLE */') !== -1) errors.push('unreplaced /* BUNDLE */ placeholder');
 if (output.indexOf('/* TRAUMA_ARTIFACT_PLACEHOLDER */') !== -1) errors.push('unreplaced /* TRAUMA_ARTIFACT_PLACEHOLDER */');
+if (output.indexOf('/* VOCAB_ARTIFACT_PLACEHOLDER */') !== -1) errors.push('unreplaced /* VOCAB_ARTIFACT_PLACEHOLDER */');
 
 if (errors.length) {
   console.error('BUILD FAILED — integrity check errors:');
@@ -177,6 +197,9 @@ manifest.forEach(function(m) {
 console.log('  ' + '(subtotal)'.padEnd(38) + String(totalLines).padStart(5) + ' lines  ' + (totalBytes / 1024).toFixed(1).padStart(6) + ' KB');
 if (artifactBytes) {
   console.log('  ' + artifactSrc.padEnd(38) + '  (b64)  ' + (artifactBytes / 1024).toFixed(1).padStart(6) + ' KB → ' + (artifactB64Len / 1024).toFixed(1) + ' KB encoded');
+}
+if (vocabBytes) {
+  console.log('  ' + vocabSrc.padEnd(38) + '  (b64)  ' + (vocabBytes / 1024).toFixed(1).padStart(6) + ' KB → ' + (vocabB64Len / 1024).toFixed(1) + ' KB encoded');
 }
 console.log('');
 console.log('── OUTPUT ──');

@@ -29,6 +29,7 @@
 - Pares Craneales (tabla sinóptica).
 - Factores de Coagulación.
 - Inmunología (poblaciones celulares, citoquinas, HLA).
+- Vocabulario Médico ✅ (embedded artifact: 270+ roots, 13 categories, decoder, quiz, SVG demos, word of the day).
 
 ## Laboratorios (`src/data/labs.js`)
 - Hemograma.
