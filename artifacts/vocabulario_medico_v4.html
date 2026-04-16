@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ECEPT · Vocabulario Médico</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#060a14">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#060a14;font-family:'DM Sans',sans-serif;color:#e2e8f0;-webkit-tap-highlight-color:transparent;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#1a2040;border-radius:3px}
+input,button{font-family:inherit;-webkit-appearance:none;border:none;outline:none}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideInLeft{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(.97)}}
+@keyframes glowPulse{0%,100%{box-shadow:0 0 20px rgba(59,130,246,.3)}50%{box-shadow:0 0 40px rgba(59,130,246,.6)}}
+@keyframes pingDot{0%{transform:scale(1);opacity:1}75%,100%{transform:scale(2.5);opacity:0}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes flash{0%,100%{filter:brightness(1)}50%{filter:brightness(1.6)}}
+@keyframes drawLine{to{stroke-dashoffset:0}}
+.glow{animation:glowPulse 3s ease-in-out infinite}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script>
+var e=React.createElement,F=React.Fragment;
+var useState=React.useState,useEffect=React.useEffect,useMemo=React.useMemo,useRef=React.useRef,useCallback=React.useCallback;
+
+// ══════════════════════════════════════════════════════════════
+// PALETA ECEPT
+// ══════════════════════════════════════════════════════════════
+var C={bg:"#060a14",cd:"#0d1224",bd:"#1a2040",ac:"#3b82f6",ac2:"#60a5fa",gl:"rgba(59,130,246,.15)",tx:"#e2e8f0",mt:"#94a3b8",dm:"#64748b"};
+
+// ══════════════════════════════════════════════════════════════
+// CATEGORÍAS (13)
+// ══════════════════════════════════════════════════════════════
+var CATS=[
+{id:"quir",n:"Acción Quirúrgica",i:"🔪",c:"#f472b6",d:"Qué se le hace al tejido"},
+{id:"diag",n:"Diagnóstico & Observación",i:"🔬",c:"#60a5fa",d:"Ver, medir, evaluar"},
+{id:"pato",n:"Patología & Lesión",i:"🧬",c:"#a78bfa",d:"Tipos de enfermedad"},
+{id:"col",n:"Colores Celulares",i:"🎨",c:"#06b6d4",d:"Leuco, eritro, melano..."},
+{id:"sang",n:"Sangre & Vasos",i:"🩸",c:"#ef4444",d:"Hematología y vascular"},
+{id:"org",n:"Raíces de Órganos",i:"🫀",c:"#fb7185",d:"Prefijos anatómicos"},
+{id:"gu",n:"Genitourinario",i:"💧",c:"#0891b2",d:"Riñón, vejiga, genitales"},
+{id:"endo",n:"Endocrino & Glándulas",i:"⚗️",c:"#d946ef",d:"Adeno, tiro, insulino..."},
+{id:"func",n:"Función & Estado",i:"⚖️",c:"#fbbf24",d:"Cómo funciona algo"},
+{id:"loc",n:"Localización & Dirección",i:"🧭",c:"#34d399",d:"Dónde y hacia dónde"},
+{id:"med",n:"Medición & Cantidad",i:"📊",c:"#fb923c",d:"Mucho, poco, grande, chico"},
+{id:"cel",n:"Células & Tejidos",i:"🦠",c:"#84cc16",d:"-cito, -blasto, -fito"},
+{id:"quim",n:"Moléculas & Química",i:"💠",c:"#8b5cf6",d:"Lip, glic, sacar, proteo..."},
+{id:"term",n:"Términos Clínicos",i:"📖",c:"#e879f9",d:"Palabras médicas completas"}
+];
+
+// ══════════════════════════════════════════════════════════════
+// VOCABULARIO — MEGA EXPANDIDO (270+)
+// Estructura: {cat, t:'p'|'s'|'w' (prefijo/sufijo/término), tx, or, sig, ej[], tip, piece:"match parts for decoder"}
+// ══════════════════════════════════════════════════════════════
+var VOC=[
+
+// ═══════════════════════════════════════════════════════════
+// ACCIÓN QUIRÚRGICA
+// ═══════════════════════════════════════════════════════════
+{cat:"quir",t:"s",tx:"-tomía",or:"Griego: tomḗ (corte)",sig:"Corte o incisión. Abrir para acceder sin extirpar.",ej:["Laparotomía → apertura del abdomen","Craneotomía → apertura del cráneo","Toracotomía → tórax","Traqueotomía → incisión traqueal","Flebotomía → incisión venosa","Queratotomía → córnea","Esternotomía → esternón"],tip:"⚡ Solo CORTA. No saca."},
+{cat:"quir",t:"s",tx:"-ectomía",or:"Griego: ektomḗ (extirpación)",sig:"Extirpación quirúrgica de un órgano o estructura completa.",ej:["Apendicectomía → apéndice","Colecistectomía → vesícula biliar","Histerectomía → útero","Mastectomía → mama","Nefrectomía → riñón","Esplenectomía → bazo","Tiroidectomía → tiroides","Lobectomía → lóbulo (pulmón/hígado)"],tip:"💡 -ec- = fuera. Lo QUITA."},
+{cat:"quir",t:"s",tx:"-stomía",or:"Griego: stóma (boca)",sig:"Crear una boca/abertura artificial permanente o temporal.",ej:["Colostomía → colon a la piel","Gastrostomía → acceso al estómago","Traqueostomía → tráquea","Ureterostomía → derivación urinaria","Ileostomía → abocar íleon","Yeyunostomía → yeyuno"],tip:"⚠️ NO confundir con -tomía. Aquí queda una BOCA."},
+{cat:"quir",t:"s",tx:"-rrafia",or:"Griego: rhaphḗ (costura)",sig:"Sutura o costura quirúrgica para unir tejidos.",ej:["Herniorrafia → sutura de hernia","Gastrorrafia → sutura gástrica","Perineorrafia → periné","Tenorrafia → tendón","Neurorrafia → nervio","Enterorrafia → intestino"],tip:"🪡 Aguja + hilo."},
+{cat:"quir",t:"s",tx:"-plastia",or:"Griego: plastikós (modelar)",sig:"Reparación o reconstrucción quirúrgica.",ej:["Rinoplastia → nariz","Angioplastia → vaso","Artroplastia → articulación","Mamoplastia → mama","Otoplastia → oreja","Blefaroplastia → párpado","Vaginoplastia → vagina"],tip:"🛠️ Repara la FORMA."},
+{cat:"quir",t:"s",tx:"-pexia",or:"Griego: pêxis (fijación)",sig:"Fijación quirúrgica en su posición correcta.",ej:["Orquidopexia → testículo","Nefropexia → riñón descendido","Histeropexia → útero","Colpopexia → vagina (prolapso)","Retinopexia → retina","Sacrocolpopexia"],tip:"📌 Lo ANCLA."},
+{cat:"quir",t:"s",tx:"-desis",or:"Griego: désis (atadura)",sig:"Fusión permanente de dos superficies.",ej:["Artrodesis → fusión articular","Espondilodesis → fusión vertebral","Pleurodesis → adherir pleuras","Tenodesis → fijación tendinosa"],tip:"🔒 Inmoviliza fusionando."},
+{cat:"quir",t:"s",tx:"-centesis",or:"Griego: kéntēsis (punción)",sig:"Punción para extraer líquido.",ej:["Paracentesis → ascitis","Toracocentesis → derrame pleural","Pericardiocentesis → taponamiento","Amniocentesis → líquido amniótico","Artrocentesis → articular","Culdocentesis → fondo de saco"],tip:"💉 Punción + aspiración."},
+{cat:"quir",t:"s",tx:"-tripsia",or:"Griego: tríbein (triturar)",sig:"Trituración o fragmentación de cálculos.",ej:["Litotripsia → fragmentar cálculos","LEOC → extracorpórea con ondas de choque","Neurotripsia → aplastar nervio (histórico)"],tip:"💥 Rompe en pedazos."},
+{cat:"quir",t:"s",tx:"-clasia",or:"Griego: klásis (fractura)",sig:"Fractura intencional para corrección.",ej:["Osteoclasia → fractura ósea quirúrgica","Onicoclasia → fractura ungueal"],tip:"🔨 Rompe para realinear."},
+{cat:"quir",t:"s",tx:"-lisis",or:"Griego: lýsis (disolución)",sig:"Liberación, destrucción o disolución.",ej:["Adherenciólisis → liberar bridas","Hemólisis → destrucción eritrocitaria","Fibrinólisis → lisar coágulo","Electrólisis → con corriente","Trombólisis → disolver trombo","Osteólisis → destrucción ósea"],tip:"🧊→💧 Disolver / liberar."},
+{cat:"quir",t:"s",tx:"-ectasia",or:"Griego: éktasis (dilatación)",sig:"Dilatación anormal o terapéutica.",ej:["Bronquiectasia → dilatación bronquial","Linfangiectasia → vasos linfáticos","Telangiectasia → capilares finos","Atelectasia → 'a-'+-ectasia = sin dilatación (colapso)"],tip:"🎈 Se ensancha (atel- = incompleto)."},
+
+// ═══════════════════════════════════════════════════════════
+// DIAGNÓSTICO
+// ═══════════════════════════════════════════════════════════
+{cat:"diag",t:"s",tx:"-scopia",or:"Griego: skopéō (observar)",sig:"Exploración visual con instrumento óptico.",ej:["Endoscopia → ver por dentro","Laparoscopia → abdomen","Colonoscopia → colon","Broncoscopia → bronquios","Artroscopia → articulación","Otoscopia → oído","Cistoscopia → vejiga","Histeroscopia → útero"],tip:"👁️ Cámara + luz."},
+{cat:"diag",t:"s",tx:"-grafía",or:"Griego: graphḗ (escritura)",sig:"Técnica de imagen: 'escribe' una imagen.",ej:["Radiografía → rayos X","Ecografía → ultrasonido","Mamografía → Rx mama","Angiografía → vasos","Tomografía → cortes","Urografía → vía urinaria","Resonancia magnética","Venografía","Linfografía"],tip:"📸 La TÉCNICA."},
+{cat:"diag",t:"s",tx:"-grama",or:"Griego: grámma (dibujo/registro)",sig:"El resultado o registro gráfico.",ej:["Electrocardiograma (ECG)","Electroencefalograma (EEG)","Electromiograma (EMG)","Mielograma → médula ósea","Hemograma → recuento","Leucograma → leucocitos","Coagulograma","Ionograma → electrolitos"],tip:"📄 El PAPEL / resultado."},
+{cat:"diag",t:"s",tx:"-metría",or:"Griego: métron (medida)",sig:"Medición cuantitativa.",ej:["Espirometría → pulmón","Audiometría → audición","Pelvimetría → pelvis","Optometría → visión","Densitometría → densidad ósea","Oximetría → SatO₂","Capnometría → CO₂","Calorimetría"],tip:"📏 Cuantifica."},
+{cat:"diag",t:"s",tx:"-logía",or:"Griego: lógos (estudio)",sig:"Ciencia o estudio.",ej:["Cardiología","Neurología","Patología","Histología","Citología","Hematología","Reumatología","Semiología","Epidemiología"],tip:"📚 La especialidad."},
+{cat:"diag",t:"s",tx:"-gnosis",or:"Griego: gnōsis (conocimiento)",sig:"Conocer / identificar.",ej:["Diagnóstico → a través del conocimiento","Pronóstico → conocimiento anticipado","Agnosia → incapacidad de reconocer"],tip:"🧠 Saber qué es."},
+{cat:"diag",t:"s",tx:"-opsia",or:"Griego: ópsis (visión/vista)",sig:"Visión o examen visual.",ej:["Biopsia → examen de tejido vivo","Necropsia → examen de cadáver","Autopsia → 'verse a sí mismo'","Hemianopsia → pérdida de medio campo visual","Diplopía → doble visión"],tip:"👁️ Ver."},
+
+// ═══════════════════════════════════════════════════════════
+// PATOLOGÍA
+// ═══════════════════════════════════════════════════════════
+{cat:"pato",t:"s",tx:"-itis",or:"Griego: -îtis (inflamación)",sig:"Inflamación de una estructura.",ej:["Apendicitis","Meningitis","Gastritis","Artritis","Pancreatitis","Tiroiditis","Flebitis","Tendinitis","Otitis","Conjuntivitis"],tip:"🔥 Dolor+rubor+calor+tumor."},
+{cat:"pato",t:"s",tx:"-osis",or:"Griego: -ōsis (condición/proceso)",sig:"Proceso patológico NO inflamatorio, crónico o degenerativo.",ej:["Artrosis → degeneración","Cirrosis → fibrosis hepática","Necrosis → muerte celular","Fibrosis","Estenosis → estrechamiento","Trombosis","Acidosis → pH bajo","Alcalosis → pH alto","Psicosis"],tip:"⚙️ Proceso, NO inflamación."},
+{cat:"pato",t:"s",tx:"-oma",or:"Griego: -ōma (tumor/masa)",sig:"Tumor, masa o tumefacción (no siempre cáncer).",ej:["Hematoma → sangre","Lipoma → graso benigno","Linfoma → maligno linfoide","Melanoma","Fibroma","Mioma","Adenoma → glandular","Glaucoma → presión ocular","Hepatoma"],tip:"⚠️ NO todo -oma es cáncer."},
+{cat:"pato",t:"s",tx:"-blastoma",or:"Griego: blastós (germen) + -oma",sig:"Tumor de células embrionarias/primitivas. Típicamente pediátrico y agresivo.",ej:["Neuroblastoma → neural infantil","Retinoblastoma","Nefroblastoma (Wilms)","Meduloblastoma","Glioblastoma","Hepatoblastoma"],tip:"🧒 Pediátrico / agresivo."},
+{cat:"pato",t:"s",tx:"-carcinoma",or:"Griego: karkínos (cangrejo)",sig:"Tumor maligno de origen epitelial.",ej:["Adenocarcinoma → glandular","Ca escamoso → epitelio plano","Hepatocarcinoma","Colangiocarcinoma → vía biliar","Ca basocelular → piel"],tip:"🦀 Cáncer epitelial."},
+{cat:"pato",t:"s",tx:"-sarcoma",or:"Griego: sárx (carne)",sig:"Tumor maligno mesenquimal (hueso, músculo, grasa).",ej:["Osteosarcoma","Liposarcoma","Leiomiosarcoma → músculo liso","Condrosarcoma → cartilaginoso","Rabdomiosarcoma → músculo estriado","Angiosarcoma → vascular"],tip:"💪 Cáncer de tejido conectivo."},
+{cat:"pato",t:"s",tx:"-patía",or:"Griego: páthos (sufrimiento)",sig:"Enfermedad en general.",ej:["Cardiopatía","Neuropatía","Miopatía","Nefropatía","Retinopatía","Encefalopatía","Adenopatía → ganglio","Coagulopatía"],tip:"❓ Término genérico."},
+{cat:"pato",t:"s",tx:"-algia",or:"Griego: álgos (dolor)",sig:"Dolor en una región específica.",ej:["Cefalalgia / Cefalea","Mialgia","Neuralgia","Lumbalgia","Artralgia","Otalgia","Odontalgia","Coxalgia → cadera","Gonalgia → rodilla","Torácica"],tip:"😣 = -dinia."},
+{cat:"pato",t:"s",tx:"-dinia",or:"Griego: odýnē (dolor)",sig:"Dolor (sinónimo de -algia, menos común).",ej:["Pleurodinia","Vulvodinia","Glosodinia → lingual","Odinofagia → dolor al tragar"],tip:"= -algia pero más raro."},
+{cat:"pato",t:"s",tx:"-cele",or:"Griego: kḗlē (hernia/tumor)",sig:"Hernia, protrusión o dilatación anormal con contenido.",ej:["Hidrocele → líquido en túnica vaginal","Varicocele → pampiniforme","Meningocele → meninges","Rectocele → prolapso rectal","Cistocele → vejiga","Mielocele → médula","Galactocele → leche","Espermatocele"],tip:"🎈 Bolsa o protrusión."},
+{cat:"pato",t:"s",tx:"-malacia",or:"Griego: malakía (reblandecimiento)",sig:"Reblandecimiento patológico.",ej:["Osteomalacia","Condromalacia","Encefalomalacia","Traqueomalacia","Laringomalacia"],tip:"🥴 Se vuelve blando."},
+{cat:"pato",t:"s",tx:"-esclerosis",or:"Griego: sklērós (duro)",sig:"Endurecimiento patológico.",ej:["Arterioesclerosis","Otoesclerosis → estribo","Esclerosis múltiple","Aterosclerosis → placas","Esclerosis lateral amiotrófica (ELA)"],tip:"🪨 Opuesto a -malacia."},
+{cat:"pato",t:"s",tx:"-necrosis",or:"Griego: nekrós (muerto)",sig:"Muerte tisular.",ej:["Osteonecrosis","Necrosis avascular","Necrosis caseosa → TBC","Pancreatitis necrotizante","Necrosis coagulativa → infarto"],tip:"💀 Tejido muerto."},
+{cat:"pato",t:"s",tx:"-ptosis",or:"Griego: ptôsis (caída)",sig:"Caída o descenso de un órgano/estructura.",ej:["Blefaroptosis → párpado caído","Nefroptosis → riñón","Gastroptosis → estómago","Mastoptosis → mama","Visceroptosis"],tip:"⬇️ Se cae."},
+{cat:"pato",t:"s",tx:"-spasmo",or:"Griego: spasmós (contracción)",sig:"Contracción muscular involuntaria.",ej:["Broncoespasmo","Laringoespasmo","Blefaroespasmo → párpado","Pilorospasmo","Esofagoespasmo","Vasoespasmo"],tip:"⚡ Se contrae solo."},
+{cat:"pato",t:"s",tx:"-plejia",or:"Griego: plḗssein (golpear)",sig:"Parálisis motora completa.",ej:["Hemiplejia → mitad del cuerpo","Paraplejia → MMII","Cuadriplejia → 4 extremidades","Oftalmoplejia → músculos oculares","Apoplejía → ACV (histórico)"],tip:"🚫 No se mueve."},
+{cat:"pato",t:"s",tx:"-paresia",or:"Griego: páresis (aflojamiento)",sig:"Parálisis PARCIAL / debilidad.",ej:["Hemiparesia","Paraparesia","Monoparesia → un miembro","Tetraparesia → 4 extremidades"],tip:"⚠️ Parcial, no total (vs plejia)."},
+{cat:"pato",t:"s",tx:"-edema",or:"Griego: oídēma (hinchazón)",sig:"Hinchazón por acumulación de líquido.",ej:["Edema agudo de pulmón","Linfedema","Papiledema → disco óptico","Angioedema → alérgico","Mixedema → hipotiroidismo"],tip:"💧 Hinchado por agua."},
+{cat:"pato",t:"s",tx:"-fagia (pato)",or:"Griego: phageîn (comer)",sig:"Trastorno de deglución.",ej:["Disfagia → dificultad","Odinofagia → dolor","Afagia → imposible","Aerofagia → tragar aire"],tip:"🍽️ Tragar."},
+
+// ═══════════════════════════════════════════════════════════
+// COLORES CELULARES
+// ═══════════════════════════════════════════════════════════
+{cat:"col",t:"p",tx:"leuco-",or:"Griego: leukós (blanco)",sig:"Blanco. Típicamente células blancas de la sangre.",ej:["Leucocito → glóbulo BLANCO","Leucograma → recuento de leucocitos","Leucemia → leucocitos malignos","Leucopenia → ↓leucocitos","Leucocitosis → ↑leucocitos","Leucorrea → flujo vaginal blanco","Leucoplasia → placa blanca en mucosa","Leucomalacia"],tip:"⚪ Blanco = defensa."},
+{cat:"col",t:"p",tx:"eritro-",or:"Griego: erythrós (rojo)",sig:"Rojo. Típicamente glóbulos rojos.",ej:["Eritrocito → glóbulo ROJO","Eritropoyesis → producir hematíes","Eritropoyetina (EPO) → hormona renal","Eritrocitosis → ↑eritrocitos","Eritrocitopenia → ↓","Eritema → enrojecimiento","Eritrodermia → piel roja","Eritrasma → infección"],tip:"🔴 Rojo = oxígeno."},
+{cat:"col",t:"p",tx:"melano-",or:"Griego: mélas (negro)",sig:"Negro u oscuro.",ej:["Melanoma → tumor pigmentado","Melanocito → productora de melanina","Melanosis → pigmentación anormal","Melena → heces negras (sangre digerida)","Hipermelanosis"],tip:"⚫ Negro."},
+{cat:"col",t:"p",tx:"cian-",or:"Griego: kýanos (azul)",sig:"Azul / azulado.",ej:["Cianosis → coloración azulada (hipoxia)","Cianótico → labios/dedos azules","Acianótico → sin cianosis","Acrocianosis → extremidades azules"],tip:"🔵 Azul por falta de O₂."},
+{cat:"col",t:"p",tx:"xanto-",or:"Griego: xanthós (amarillo)",sig:"Amarillo.",ej:["Xantoma → depósito lipídico amarillo","Xantelasma → xantoma palpebral","Xantocromía → LCR amarillo (sangre vieja)","Xantopsia → ver amarillo (digital)"],tip:"🟡 Amarillo."},
+{cat:"col",t:"p",tx:"cloro-",or:"Griego: chlōrós (verde)",sig:"Verde pálido / amarillo verdoso.",ej:["Clorosis → anemia ferropénica (histórico)","Cloroma → leucemia con pigmento verde","Cloruro → ion verde-amarillo"],tip:"🟢 Verdoso."},
+{cat:"col",t:"p",tx:"rubro- / rubi-",or:"Latín: ruber (rojo)",sig:"Rojo (eq. latino de eritro-).",ej:["Rubor → enrojecimiento (signo inflamación)","Bilirrubina → pigmento biliar rojizo","Rubéola → 'rojito'"],tip:"🔴 Rojo (latín)."},
+{cat:"col",t:"p",tx:"cromo-",or:"Griego: chrôma (color)",sig:"Color en general.",ej:["Cromosoma → cuerpo coloreado","Policromasia → varios colores","Acromía → sin color","Hipocromía → color ↓ (anemia)","Hipercromía → color ↑","Cromoforo"],tip:"🎨 Color."},
+{cat:"col",t:"p",tx:"albo-",or:"Latín: albus (blanco)",sig:"Blanco (eq. latino de leuco-).",ej:["Albúmina → proteína blanca","Albinismo → sin pigmentación"],tip:"⚪ Blanco (latín)."},
+{cat:"col",t:"p",tx:"ictero-",or:"Griego: íkteros (amarillo)",sig:"Amarillento por bilirrubina.",ej:["Ictericia → piel y mucosas amarillas","Ictérico → paciente amarillento","Subictericia → ictericia leve"],tip:"🟡 Amarillo por bilirrubina."}
+
+// ═══════════════════════════════════════════════════════════
+// SANGRE & VASOS
+// ═══════════════════════════════════════════════════════════
+,{cat:"sang",t:"s",tx:"-emia",or:"Griego: haîma (sangre)",sig:"Condición o presencia de algo en sangre.",ej:["Anemia → ↓hematíes/Hb","Leucemia","Hiperglicemia","Uremia","Septicemia","Hipocalcemia","Natremia → sodio","Bacteriemia","Azoemia → urea","Acidemia → pH bajo"],tip:"🩸 Lo más usado en hemato."},
+{cat:"sang",t:"s",tx:"-rragia",or:"Griego: rhḗgnymi (romper)",sig:"Sangrado abundante o hemorragia.",ej:["Hemorragia → sangrado","Menorragia → menstruación abundante","Metrorragia → uterino no menstrual","Epistaxis → nasal","Otorragia → oído","Hematemesis → vómito con sangre","Enterorragia → intestinal bajo","Hemoptisis → esputo con sangre","Hematuria → urinario"],tip:"🚨 Flujo INTENSO de sangre."},
+{cat:"sang",t:"s",tx:"-rrea",or:"Griego: rhéō (fluir)",sig:"Flujo o secreción (no sanguínea).",ej:["Diarrea → intestinal","Rinorrea → nasal","Otorrea → oído","Leucorrea → vaginal blanca","Galactorrea → lácteo","Esteatorrea → grasa en heces","Seborrea → sebo","Broncorrea → bronquial","Pirorrea → dental con pus"],tip:"💧 Flujo."},
+{cat:"sang",t:"p",tx:"hemo- / hemat-",or:"Griego: haîma (sangre)",sig:"Relativo a la sangre.",ej:["Hemorragia","Hematoma","Hematuria","Hemoptisis","Hemólisis","Hemostasia","Hemofilia","Hematocrito","Hemoglobina","Hemorroides","Hemosiderina"],tip:"🩸 Sangre."},
+{cat:"sang",t:"p",tx:"angio-",or:"Griego: angeîon (vaso)",sig:"Vaso (sanguíneo o linfático).",ej:["Angiografía","Angiopatía","Angioplastia","Hemangioma","Linfangitis","Angioedema","Angiogénesis"],tip:"🩸 Conducto."},
+{cat:"sang",t:"p",tx:"flebo- / veno-",or:"Griego: phléps / Latín: vena",sig:"Vena.",ej:["Flebitis","Flebotomía","Tromboflebitis","Venopunción","Flebolito → cálculo venoso","Varices → vena dilatada","Venoclisis"],tip:"🟦 Vena."},
+{cat:"sang",t:"p",tx:"arterio-",or:"Griego: artēría (arteria)",sig:"Arteria.",ej:["Arteriografía","Arteriopatía","Arteriosclerosis","Arteritis","Aneurisma","Endarterectomía"],tip:"🟥 Arteria."},
+{cat:"sang",t:"p",tx:"trombo-",or:"Griego: thrómbos (coágulo)",sig:"Coágulo sanguíneo.",ej:["Trombosis","Tromboflebitis","Tromboembolia","Trombocitopenia → ↓plaquetas","Trombolisis","Trombina → enzima"],tip:"🧊 Coágulo."},
+{cat:"sang",t:"p",tx:"linfo-",or:"Latín: lympha (agua clara)",sig:"Linfa o tejido linfático.",ej:["Linfoma","Linfadenopatía","Linfocito","Linfedema","Linfangitis","Linfadenitis"],tip:"💧 Linfa."},
+{cat:"sang",t:"p",tx:"vaso-",or:"Latín: vas (vaso)",sig:"Vaso (eq. latino).",ej:["Vasoconstrictor → cierra vaso","Vasodilatador → abre vaso","Vasovagal","Vasopresina → ADH","Vasculitis"],tip:"🩸 Vaso (latino)."},
+{cat:"sang",t:"p",tx:"embolo-",or:"Griego: émbolos (tapón)",sig:"Émbolo (coágulo móvil, aire, grasa, etc).",ej:["Embolia pulmonar (TEP)","Embolia grasa","Embolia gaseosa","Embolización"],tip:"🧩 Se mueve y tapa."},
+
+// ═══════════════════════════════════════════════════════════
+// RAÍCES DE ÓRGANOS
+// ═══════════════════════════════════════════════════════════
+{cat:"org",t:"p",tx:"cardio-",or:"Griego: kardía (corazón)",sig:"Corazón.",ej:["Cardiología","Cardiomegalia → corazón agrandado","Cardiomiopatía","Pericardio → alrededor","Endocardio → dentro","Miocardio → músculo","Taquicardia / Bradicardia","Cardioversión"],tip:"❤️ Corazón."},
+{cat:"org",t:"p",tx:"pneumo- / neumo-",or:"Griego: pneúmōn (pulmón) / pneûma (aire)",sig:"Pulmón o aire.",ej:["Neumonía → infección pulmonar","Neumotórax → aire en pleura","Neumología","Pneumoconiosis → polvo pulmonar","Neumoperitoneo → aire en abdomen","Neumovax"],tip:"🫁 Pulmón / aire."},
+{cat:"org",t:"p",tx:"hepato-",or:"Griego: hêpar (hígado)",sig:"Hígado.",ej:["Hepatitis","Hepatomegalia","Hepatocito → célula hepática","Hepatocarcinoma","Hepatopatía","Hepatograma"],tip:"🫀 Hígado."},
+{cat:"org",t:"p",tx:"gastro-",or:"Griego: gastḗr (estómago)",sig:"Estómago.",ej:["Gastritis","Gastrectomía","Gastroenterología","Gastrostomía","Gastroparesia","Gastroesofágico"],tip:"🍽️ Estómago."},
+{cat:"org",t:"p",tx:"entero-",or:"Griego: énteron (intestino)",sig:"Intestino (especialmente delgado).",ej:["Enteritis","Enterocolitis","Gastroenteritis","Parenteral → 'fuera del intestino'","Enterorragia","Disentería"],tip:"🧬 Intestino."},
+{cat:"org",t:"p",tx:"colo- / colono-",or:"Griego: kólon",sig:"Colon / intestino grueso.",ej:["Colonoscopia","Colitis","Colectomía","Megacolon","Coloproctología","Dolicocolon → colon alargado"],tip:"Intestino grueso."},
+{cat:"org",t:"p",tx:"procto-",or:"Griego: prōktós (ano)",sig:"Ano y recto.",ej:["Proctología","Proctitis","Proctoscopia","Coloproctología","Proctalgia"],tip:"Ano/recto."},
+{cat:"org",t:"p",tx:"cole- / colecisto-",or:"Griego: cholḗ (bilis) / kýstis (saco)",sig:"Cole- = bilis · Colecisto- = vesícula biliar.",ej:["Colecistitis → inflamación vesicular","Colecistectomía → retirar vesícula","Colelitiasis → cálculos biliares","Colangitis → vía biliar","Coledocolitiasis → cálculo en colédoco","Colecistocinina (CCK)"],tip:"🟡 Bilis / vesícula."},
+{cat:"org",t:"p",tx:"colangi-",or:"Griego: cholḗ + angeîon",sig:"Vía biliar (conductos).",ej:["Colangitis → inflamación","Colangiografía","Colangiopancreatografía retrógrada (CPRE)","Colangiocarcinoma"],tip:"Tuberías de la bilis."},
+{cat:"org",t:"p",tx:"cisto-",or:"Griego: kýstis (saco/vejiga)",sig:"Vejiga o saco/quiste.",ej:["Cistitis → vejiga","Cistoscopia","Colecistitis → vesícula biliar","Cistectomía","Cistocele"],tip:"🎈 Saco lleno."},
+{cat:"org",t:"p",tx:"oftalmo- / oculo-",or:"Griego: ophthalmós / Latín: oculus (ojo)",sig:"Ojo.",ej:["Oftalmología","Oftalmoplejia","Xeroftalmia → ojo seco","Exoftalmos → protrusión","Ocular"],tip:"👁️ Ojo."},
+{cat:"org",t:"p",tx:"oto-",or:"Griego: oûs/ōtós (oído)",sig:"Oído.",ej:["Otitis","Otorragia","Otoscopia","Otorrinolaringología (ORL)","Otorrea","Otoplastia"],tip:"👂 Oído."},
+{cat:"org",t:"p",tx:"rino- / naso-",or:"Griego: rhís / Latín: nasus (nariz)",sig:"Nariz.",ej:["Rinitis","Rinoplastia","Nasogástrica → sonda","Rinorrea → moco","Rinorragia → sangrado","Nasofaringe"],tip:"👃 Nariz."},
+{cat:"org",t:"p",tx:"neuro-",or:"Griego: neûron (nervio)",sig:"Nervio o sistema nervioso.",ej:["Neurología","Neuralgia","Neurona","Neuropatía","Neuritis","Neurorrafia","Neurocirugía"],tip:"🧠 Nervio."},
+{cat:"org",t:"p",tx:"mielo-",or:"Griego: myelós (médula)",sig:"Médula (ósea o espinal).",ej:["Mielograma → médula ósea","Mieloma múltiple","Mielitis → inflamación medular","Osteomielitis → médula ósea infectada","Mielopatía","Mielinización"],tip:"⚠️ Contexto define cuál."},
+{cat:"org",t:"p",tx:"osteo-",or:"Griego: ostéon (hueso)",sig:"Hueso.",ej:["Osteología","Osteítis","Osteoporosis","Osteomielitis","Osteosarcoma","Osteopenia","Osteomalacia","Osteófito"],tip:"🦴 Hueso."},
+{cat:"org",t:"p",tx:"artro-",or:"Griego: árthron (articulación)",sig:"Articulación.",ej:["Artritis","Artrosis","Artroscopia","Artroplastia","Artralgia","Artrodesis","Artrocentesis"],tip:"🦿 Articulación."},
+{cat:"org",t:"p",tx:"condro-",or:"Griego: chóndros (cartílago)",sig:"Cartílago.",ej:["Condritis","Condromalacia","Condrosarcoma","Condrocito","Perióndrio","Hipocondrio → bajo el cartílago (costal)"],tip:"Cartílago."},
+{cat:"org",t:"p",tx:"dermato- / derm-",or:"Griego: dérma (piel)",sig:"Piel.",ej:["Dermatología","Dermatitis","Epidermis → sobre dermis","Hipodermis → debajo","Piodermia → con pus","Dermatoma","Escleroderma"],tip:"🩹 Piel."},
+{cat:"org",t:"p",tx:"tricho-",or:"Griego: thríx (pelo)",sig:"Pelo.",ej:["Tricotilomanía → arrancarse pelo","Tricosis → exceso de pelo","Hipertricosis"],tip:"💇 Pelo."},
+{cat:"org",t:"p",tx:"onico-",or:"Griego: ónyx (uña)",sig:"Uña.",ej:["Onicomicosis → hongos en uñas","Paroniquia → infección periungueal","Onicofagia → comerse uñas","Onicólisis"],tip:"💅 Uña."},
+{cat:"org",t:"p",tx:"mio-",or:"Griego: mŷs (músculo)",sig:"Músculo.",ej:["Miocardio","Miopatía","Mialgia","Miositis","Mioma","Miastenia → debilidad","Miocito","Miofibrilla"],tip:"💪 Músculo."},
+{cat:"org",t:"p",tx:"teno-",or:"Griego: ténōn (tendón)",sig:"Tendón.",ej:["Tendinitis","Tenosinovitis","Tenorrafia","Tenodesis"],tip:"Tendón."},
+{cat:"org",t:"p",tx:"cefalo- / encefalo-",or:"Griego: kephalḗ / enképhalos",sig:"Cefalo- = cabeza · Encefalo- = cerebro.",ej:["Cefalea → dolor de cabeza","Cefalalgia","Encefalitis → cerebro","Encefalopatía","Hidrocefalia → ↑LCR","Anencefalia → sin cerebro","Cefalohematoma"],tip:"🧠 Cabeza / cerebro."},
+{cat:"org",t:"p",tx:"odonto-",or:"Griego: odoús (diente)",sig:"Diente.",ej:["Odontología","Odontalgia → dolor","Endodoncia → interior del diente","Ortodoncia","Odontoma","Exodoncia → extracción dental"],tip:"🦷 Diente."},
+{cat:"org",t:"p",tx:"glosso- / lingu-",or:"Griego: glôssa / Latín: lingua",sig:"Lengua.",ej:["Glositis","Glosodinia","Macroglosia","Hipogloso → nervio XII","Sublingual"],tip:"👅 Lengua."},
+{cat:"org",t:"p",tx:"faringo-",or:"Griego: phárynx",sig:"Faringe.",ej:["Faringitis","Faringoamigdalitis","Rinofaringe","Disfagia","Orofaringe"],tip:"Garganta."},
+{cat:"org",t:"p",tx:"laringo-",or:"Griego: lárynx",sig:"Laringe.",ej:["Laringitis","Laringoscopia","Laringoespasmo","Laringomalacia","Laringotomía"],tip:"Caja de voz."},
+{cat:"org",t:"p",tx:"traqueo-",or:"Griego: tracheîa (áspera)",sig:"Tráquea.",ej:["Traqueítis","Traqueotomía","Traqueostomía","Traqueomalacia"],tip:"Vía aérea principal."},
+{cat:"org",t:"p",tx:"broncho- / bronquio-",or:"Griego: brónchos",sig:"Bronquios.",ej:["Bronquitis","Broncoscopia","Broncoespasmo","Bronquiectasia","Broncopulmonar","Broncoaspiración"],tip:"Vía aérea inferior."},
+{cat:"org",t:"p",tx:"pleuro-",or:"Griego: pleurá (costilla/lado)",sig:"Pleura.",ej:["Pleuritis","Pleurodesis","Pleurodinia → dolor","Derrame pleural","Neumotórax"],tip:"Membrana pulmón."},
+{cat:"org",t:"p",tx:"esplen-",or:"Griego: splḗn (bazo)",sig:"Bazo.",ej:["Esplenomegalia → bazo grande","Esplenectomía","Hipoesplenismo","Hiperesplenismo","Esplenorragia"],tip:"Bazo."},
+{cat:"org",t:"p",tx:"péanc-/ pancreas-",or:"Griego: pân (todo) + kréas (carne)",sig:"Páncreas.",ej:["Pancreatitis","Pancreatectomía","Hemopancreático","CPRE → colangiopancreatografía"],tip:"Páncreas (pan = todo carne)."},
+{cat:"org",t:"p",tx:"colpo- / vagino-",or:"Griego: kólpos / Latín: vagina",sig:"Vagina.",ej:["Colposcopia","Colpocele → prolapso","Colpopexia","Vaginitis","Vaginoplastia"],tip:"Vagina."},
+{cat:"org",t:"p",tx:"peri-tone",or:"Griego: perí + teínō",sig:"Peritoneo.",ej:["Peritonitis","Peritoneo parietal/visceral","Retroperitoneo","Peritoneal"],tip:"Membrana que recubre."},
+
+// ═══════════════════════════════════════════════════════════
+// GENITOURINARIO
+// ═══════════════════════════════════════════════════════════
+{cat:"gu",t:"p",tx:"nefro- / ren-",or:"Griego: nephrós / Latín: ren (riñón)",sig:"Riñón.",ej:["Nefrología / Nefritis","Nefrectomía","Nefropatía","Hidronefrosis → dilatación","Renal","Suprarrenal → encima","Pielonefritis"],tip:"🫘 Riñón (gr.+lat.)."},
+{cat:"gu",t:"p",tx:"pielo-",or:"Griego: pýelos (pelvis)",sig:"Pelvis renal.",ej:["Pielonefritis → pelvis + riñón","Pielografía","Pielolitotomía","Pielograma"],tip:"Pelvis renal."},
+{cat:"gu",t:"p",tx:"uretero-",or:"Griego: ourētḗr",sig:"Uréter (riñón→vejiga).",ej:["Ureterolitiasis → cálculo","Ureterostomía","Hidrouréter","Ureteroscopia"],tip:"Conducto al riñón."},
+{cat:"gu",t:"p",tx:"uretro-",or:"Griego: ourḗthra",sig:"Uretra (vejiga→exterior).",ej:["Uretritis","Uretroscopia","Uretroplastia","Hipospadias → uretra mal ubicada"],tip:"Uretra (no confundir con uréter)."},
+{cat:"gu",t:"p",tx:"cisto- (vej)",or:"Griego: kýstis (vejiga)",sig:"Vejiga urinaria.",ej:["Cistitis → infección urinaria baja","Cistoscopia","Cistectomía","Cistocele → prolapso"],tip:"Vejiga."},
+{cat:"gu",t:"p",tx:"uro-",or:"Griego: oûron (orina)",sig:"Orina / tracto urinario.",ej:["Urología","Urografía","Uropatía obstructiva","Urea","Urolitiasis","Ureasa"],tip:"💦 Orina."},
+{cat:"gu",t:"p",tx:"hister- / metro-",or:"Griego: hystéra / mētrá (útero)",sig:"Útero.",ej:["Histerectomía","Histeroscopia","Endometrio → interno","Miometrio → muscular","Perimetrio","Metrorragia → sangrado uterino"],tip:"Útero."},
+{cat:"gu",t:"p",tx:"oofor- / ovario-",or:"Griego: ōón (huevo) / Latín: ovarium",sig:"Ovario.",ej:["Ooforitis","Ooforectomía","Salpingooforectomía","Ovarios poliquísticos (SOP)"],tip:"🥚 Ovario."},
+{cat:"gu",t:"p",tx:"salpingo-",or:"Griego: sálpinx (trompeta)",sig:"Trompa (uterina o auditiva).",ej:["Salpingitis → trompa de Falopio","Salpingectomía","Salpingooforectomía","Salpingoscopia"],tip:"🎺 Trompa."},
+{cat:"gu",t:"p",tx:"orquido- / testiculo-",or:"Griego: órchis (testículo)",sig:"Testículo.",ej:["Orquitis → inflamación","Orquiectomía","Orquidopexia → criptorquidia","Orquialgia"],tip:"Testículo."},
+{cat:"gu",t:"p",tx:"espermato-",or:"Griego: spérma (semilla)",sig:"Esperma / espermatozoide.",ej:["Espermatogénesis","Oligospermia → poco esperma","Azoospermia → sin esperma","Espermatocele"],tip:"Esperma."},
+{cat:"gu",t:"p",tx:"balano-",or:"Griego: bálanos (glande)",sig:"Glande del pene.",ej:["Balanitis","Balanopostitis → glande + prepucio"],tip:"Glande."},
+{cat:"gu",t:"p",tx:"prostato-",or:"Griego: prostátēs (protector)",sig:"Próstata.",ej:["Prostatitis","Prostatectomía","Hiperplasia prostática benigna (HPB)","Adenocarcinoma prostático"],tip:"Próstata."},
+{cat:"gu",t:"p",tx:"meno-",or:"Griego: mḗn (mes)",sig:"Menstruación.",ej:["Menorragia → abundante","Amenorrea → sin menstruación","Dismenorrea → dolorosa","Menopausia → cese","Oligomenorrea → escasa"],tip:"🌙 Ciclo menstrual."},
+
+// ═══════════════════════════════════════════════════════════
+// ENDOCRINO & GLÁNDULAS
+// ═══════════════════════════════════════════════════════════
+{cat:"endo",t:"p",tx:"adeno-",or:"Griego: adḗn (glándula)",sig:"Glándula o ganglio.",ej:["Adenoma → tumor glandular benigno","Adenocarcinoma → maligno","Adenopatía → ganglio","Adenitis","Adenoides","Linfadenitis"],tip:"⚗️ Glándula."},
+{cat:"endo",t:"p",tx:"tiro- / tiroido-",or:"Griego: thyreoeidḗs (escudo)",sig:"Tiroides.",ej:["Tiroiditis","Tiroidectomía","Hipotiroidismo","Hipertiroidismo","Tirotoxicosis","Tiromegalia / Bocio"],tip:"Tiroides."},
+{cat:"endo",t:"p",tx:"parato-",or:"Griego: pará + thyreoeidḗs",sig:"Paratiroides (al lado de tiroides).",ej:["Hiperparatiroidismo","Hipoparatiroidismo","Paratiroidectomía"],tip:"Glándulas calcio."},
+{cat:"endo",t:"p",tx:"adreno- / suprarrenal",or:"Latín: ad- + ren",sig:"Glándula suprarrenal.",ej:["Adrenalina → epinefrina","Adrenérgico → receptores","Insuficiencia suprarrenal","Adrenalectomía"],tip:"Encima del riñón."},
+{cat:"endo",t:"p",tx:"insulino-",or:"Latín: insula (isla) (de Langerhans)",sig:"Insulina / células β.",ej:["Insulinoma → tumor","Insulinorresistencia","Hiperinsulinismo","Insulinopenia"],tip:"Hormona del azúcar."},
+{cat:"endo",t:"p",tx:"tim-",or:"Griego: thýmos (timo)",sig:"Timo.",ej:["Timoma → tumor del timo","Timectomía","Timitis"],tip:"Órgano linfoide."},
+{cat:"endo",t:"p",tx:"hipofiso- / pituitar-",or:"Griego: hypó + phýō",sig:"Hipófisis / pituitaria.",ej:["Hipopituitarismo","Hiperpituitarismo","Adenoma hipofisario","Panhipopituitarismo"],tip:"Glándula maestra."},
+{cat:"endo",t:"p",tx:"gluco- / glic-",or:"Griego: glykýs (dulce)",sig:"Glucosa / azúcar.",ej:["Glucemia → glucosa en sangre","Glucosuria → glucosa en orina","Glucogénesis → producir glucosa","Glucagón → hormona pancreática","Hipoglucemia","Hiperglicemia"],tip:"🍬 Azúcar."},
+{cat:"endo",t:"p",tx:"cortico-",or:"Latín: cortex (corteza)",sig:"Corteza (suprarrenal o cerebral).",ej:["Corticoesteroides","Corticotropina (ACTH)","Hipercorticismo → Cushing","Corticoadrenal"],tip:"Corteza."}
+// ═══════════════════════════════════════════════════════════
+// FUNCIÓN & ESTADO
+// ═══════════════════════════════════════════════════════════
+,{cat:"func",t:"s",tx:"-stasis",or:"Griego: stásis (detención)",sig:"Detención, estancamiento o equilibrio.",ej:["Hemostasia → detener sangrado","Homeostasis → equilibrio interno","Colestasis → estancamiento biliar","Metástasis → cambio de lugar (tumor)","Bacteriostático → detiene bacterias","Urostasis"],tip:"⏸️ Se detiene / equilibra."},
+{cat:"func",t:"s",tx:"-plasia",or:"Griego: plásis (formación)",sig:"Formación celular.",ej:["Hiperplasia → ↑nº de células","Displasia → anormal","Aplasia → ausencia","Metaplasia → cambio de tipo","Hipoplasia → pobre","Neoplasia → tumor","Anaplasia → indiferenciado"],tip:"🌱 Crecimiento."},
+{cat:"func",t:"s",tx:"-trofia",or:"Griego: trophḗ (nutrición)",sig:"Nutrición / tamaño tisular.",ej:["Hipertrofia → ↑tamaño","Atrofia → ↓tamaño","Distrofia → anormal","Hipotrofia","Eutrofia → normal"],tip:"🌿 Tamaño por nutrición."},
+{cat:"func",t:"s",tx:"-cinesia / -cinesis",or:"Griego: kínēsis (movimiento)",sig:"Movimiento.",ej:["Discinesia → anormal","Acinesia → ausente","Bradicinesia → lenta (Parkinson)","Hipercinesia → excesiva","Cinesiología"],tip:"🏃 Movimiento."},
+{cat:"func",t:"s",tx:"-fagia",or:"Griego: phageîn (comer)",sig:"Deglutir o comer.",ej:["Disfagia → dificultad","Odinofagia → dolor al tragar","Polifagia → hambre excesiva","Afagia","Aerofagia → tragar aire","Coprofagia"],tip:"🍽️ Tragar."},
+{cat:"func",t:"s",tx:"-pnea",or:"Griego: pnéō (respirar)",sig:"Respiración.",ej:["Disnea → dificultad","Apnea → cese","Taquipnea → rápida","Bradipnea → lenta","Ortopnea → en decúbito","Polipnea → profunda rápida","Hiperpnea / Hipopnea"],tip:"🫁 Respirar."},
+{cat:"func",t:"s",tx:"-uria",or:"Griego: oûron (orina)",sig:"Relativo a orina.",ej:["Hematuria → sangre","Proteinuria → proteínas","Poliuria → ↑","Oliguria → ↓","Anuria → ausencia","Disuria → dolor","Glucosuria → glucosa","Piuria → pus","Nicturia → nocturna","Polaquiuria → frecuente"],tip:"💦 Orina."},
+{cat:"func",t:"s",tx:"-penia",or:"Griego: penía (pobreza)",sig:"Disminución.",ej:["Leucopenia","Trombocitopenia","Neutropenia","Osteopenia","Linfopenia","Sarcopenia → músculo"],tip:"📉 Escasez."},
+{cat:"func",t:"s",tx:"-citosis",or:"Griego: kýtos + -osis",sig:"Aumento de células específicas.",ej:["Leucocitosis","Linfocitosis","Eosinofilia","Eritrocitosis","Trombocitosis","Monocitosis"],tip:"📈 Opuesto a -penia."},
+{cat:"func",t:"s",tx:"-filia",or:"Griego: philía (afinidad)",sig:"Afinidad o aumento específico.",ej:["Hemofilia → tendencia al sangrado","Eosinofilia → ↑eosinófilos","Basofilia → tinción","Neutrofilia","Termofilia"],tip:"❤️ Atracción / más de."},
+{cat:"func",t:"s",tx:"-fobia",or:"Griego: phóbos (miedo)",sig:"Miedo o rechazo.",ej:["Fotofobia → luz","Hidrofobia → rabia","Acrofobia → alturas","Claustrofobia → encierro","Xenofobia","Aracnofobia"],tip:"😱 Rechazo."},
+{cat:"func",t:"s",tx:"-génesis",or:"Griego: génesis (origen)",sig:"Origen / producción.",ej:["Patogénesis","Oncogénesis → tumor","Osteogénesis","Espermatogénesis","Gametogénesis","Angiogénesis"],tip:"🌱 Cómo nace."},
+{cat:"func",t:"s",tx:"-poyesis",or:"Griego: poíēsis (producir)",sig:"Producción / formación.",ej:["Hematopoyesis → sangre","Eritropoyesis → rojos","Leucopoyesis → blancos","Trombopoyesis → plaquetas","Uropoyesis → orina"],tip:"🏭 Fabricar."},
+{cat:"func",t:"s",tx:"-tropo / -trópico",or:"Griego: trépō (dirigir)",sig:"Que dirige la acción hacia.",ej:["Cardiotrópico","Hepatotrópico","Psicotrópico","Gonadotropina","Corticotropina (ACTH)","Tirotrópina (TSH)","Somatotrópica (GH)"],tip:"🎯 Dirigido a."},
+{cat:"func",t:"s",tx:"-lepsia",or:"Griego: lēpsis (crisis/tomar)",sig:"Crisis, ataque o convulsión.",ej:["Epilepsia → sobre-crisis","Narcolepsia → sueño súbito","Catalepsia → rigidez"],tip:"Crisis súbita."},
+{cat:"func",t:"s",tx:"-mnesia",or:"Griego: mnḗmē (memoria)",sig:"Memoria.",ej:["Amnesia → pérdida","Hipermnesia → ↑memoria","Paramnesia → falsificación","Dismnesia"],tip:"🧠 Memoria."},
+{cat:"func",t:"s",tx:"-praxia",or:"Griego: prâxis (acción)",sig:"Ejecución de movimiento voluntario.",ej:["Apraxia → incapacidad","Dispraxia → trastorno"],tip:"Planear movimiento."},
+{cat:"func",t:"s",tx:"-tonia",or:"Griego: tónos (tensión)",sig:"Tensión o tono muscular.",ej:["Hipertonía → ↑tono","Hipotonía → ↓tono","Distonía → anormal","Atonía → sin tono","Miotonía","Tonicoclónica"],tip:"Tono muscular."},
+
+// ═══════════════════════════════════════════════════════════
+// LOCALIZACIÓN & DIRECCIÓN
+// ═══════════════════════════════════════════════════════════
+{cat:"loc",t:"p",tx:"dextro-",or:"Latín: dexter (derecho)",sig:"Derecha.",ej:["Dextrocardia","Dextrógiro","Situs inversus"],tip:"➡️ Derecha."},
+{cat:"loc",t:"p",tx:"levo- / sinistro-",or:"Latín: laevus / sinister",sig:"Izquierda.",ej:["Levocardia","Levógiro","Sinistrocardia"],tip:"⬅️ Izquierda."},
+{cat:"loc",t:"p",tx:"ecto-",or:"Griego: ektós (fuera)",sig:"Fuera / externo.",ej:["Ectópico → fuera de lugar (embarazo)","Ectodermo","Ectoparásito"],tip:"🚪 Fuera."},
+{cat:"loc",t:"p",tx:"endo-",or:"Griego: éndon (dentro)",sig:"Dentro / interno.",ej:["Endocardio","Endoscopia","Endógeno","Endometrio","Endocrino","Endotelio"],tip:"🏠 Dentro."},
+{cat:"loc",t:"p",tx:"epi-",or:"Griego: epí (sobre)",sig:"Sobre, encima.",ej:["Epidermis → sobre dermis","Epicardio","Epigastrio","Epiglotis","Epilepsia → 'ataque sobre'"],tip:"⬆️ Encima."},
+{cat:"loc",t:"p",tx:"hipo-",or:"Griego: hypó (debajo)",sig:"Debajo O disminuido.",ej:["Hipoglucemia","Hipogastrio","Hipotensión","Hipodermis","Hipotiroidismo","Hipoxia"],tip:"⬇️ Abajo / poco."},
+{cat:"loc",t:"p",tx:"hiper-",or:"Griego: hypér (sobre)",sig:"Exceso / aumentado.",ej:["Hipertensión","Hiperglucemia","Hipertrofia","Hipertiroidismo","Hiperemesis","Hiperoxia"],tip:"⬆️ Mucho."},
+{cat:"loc",t:"p",tx:"peri-",or:"Griego: perí (alrededor)",sig:"Alrededor.",ej:["Pericardio","Periorbitario","Peritoneo","Periostio → alrededor del hueso","Perianal","Perinatal"],tip:"🔄 Alrededor."},
+{cat:"loc",t:"p",tx:"meso-",or:"Griego: mésos (medio)",sig:"En el medio.",ej:["Mesogastrio","Mesodermo","Mesenterio","Mesocolon"],tip:"⏺️ Medio."},
+{cat:"loc",t:"p",tx:"para-",or:"Griego: pará (al lado)",sig:"Al lado de.",ej:["Paratiroides","Paraumbilical","Paravertebral","Paranasal","Parenteral → al lado del intestino"],tip:"↔️ Junto a."},
+{cat:"loc",t:"p",tx:"retro-",or:"Latín: retro (atrás)",sig:"Detrás.",ej:["Retroperitoneal","Retroesternal","Retrógrado","Retrofaríngeo"],tip:"⏪ Detrás."},
+{cat:"loc",t:"p",tx:"ante- / pre-",or:"Latín: ante / prae",sig:"Delante / antes.",ej:["Anteversión","Prenatal","Premenstrual","Preoperatorio"],tip:"➡️ Adelante/antes."},
+{cat:"loc",t:"p",tx:"post-",or:"Latín: post (después)",sig:"Después / detrás.",ej:["Postparto","Postoperatorio","Postprandial → tras comer"],tip:"Después."},
+{cat:"loc",t:"p",tx:"sub-",or:"Latín: sub (debajo)",sig:"Debajo (eq. latino de hipo-).",ej:["Subcutáneo","Sublingual","Subdural","Subescapular","Subcostal"],tip:"🔽 Debajo."},
+{cat:"loc",t:"p",tx:"supra-",or:"Latín: supra (encima)",sig:"Encima (eq. latino de epi-).",ej:["Suprarrenal","Supraclavicular","Supraescapular","Supraventricular"],tip:"🔼 Encima."},
+{cat:"loc",t:"p",tx:"inter-",or:"Latín: inter (entre)",sig:"Entre.",ej:["Intercostal","Interfalángico","Intervertebral","Interoseo"],tip:"↔️ Entre."},
+{cat:"loc",t:"p",tx:"intra-",or:"Latín: intra (dentro)",sig:"Dentro de.",ej:["Intravenoso (IV)","Intraarticular","Intramuscular (IM)","Intratecal → saco dural","Intracraneal"],tip:"🎯 Adentro."},
+{cat:"loc",t:"p",tx:"extra-",or:"Latín: extra (fuera)",sig:"Fuera de.",ej:["Extracelular","Extrahepático","Extrapiramidal","Extrauterino"],tip:"🚪 Fuera (latino)."},
+{cat:"loc",t:"p",tx:"trans-",or:"Latín: trans (a través)",sig:"A través / al otro lado.",ej:["Transvaginal","Transuretral","Transabdominal","Transfusión","Transplante"],tip:"🌉 A través."},
+{cat:"loc",t:"p",tx:"dia-",or:"Griego: diá (a través)",sig:"A través / entre (gr.).",ej:["Diarrea → fluir a través","Diaforesis → sudar","Diagnóstico → conocer a través","Diálisis"],tip:"🌉 A través (gr.)."},
+{cat:"loc",t:"p",tx:"circum-",or:"Latín: circum (alrededor)",sig:"Alrededor (lat.).",ej:["Circumcisión → cortar alrededor","Circunvalación","Circunferencia"],tip:"🔄 Latino de peri."},
+{cat:"loc",t:"p",tx:"ipsi- / contra-",or:"Latín: ipse (mismo) / contra (opuesto)",sig:"Mismo lado / lado opuesto.",ej:["Ipsilateral → mismo lado","Contralateral → opuesto","Bilateral → ambos","Unilateral → uno solo"],tip:"Lados."},
+{cat:"loc",t:"p",tx:"ana-",or:"Griego: aná (arriba/hacia arriba)",sig:"Hacia arriba / de nuevo.",ej:["Anabolismo → construir","Anabólico","Anamnesis → recuerdo","Anatomía → cortar arriba (por capas)"],tip:"⬆️ Hacia arriba."},
+{cat:"loc",t:"p",tx:"cata-",or:"Griego: katá (hacia abajo)",sig:"Hacia abajo / destruir.",ej:["Catabolismo → destruir","Catatonia → 'abajo'","Catarata → 'caída'"],tip:"⬇️ Hacia abajo."},
+
+// ═══════════════════════════════════════════════════════════
+// MEDICIÓN & CANTIDAD
+// ═══════════════════════════════════════════════════════════
+{cat:"med",t:"p",tx:"poli-",or:"Griego: polýs (mucho)",sig:"Mucho.",ej:["Poliuria","Polidipsia → mucha sed","Polifagia","Policitemia","Polimiositis","Poliquístico","Polineuropatía"],tip:"➕ Muchos."},
+{cat:"med",t:"p",tx:"oligo-",or:"Griego: olígos (poco)",sig:"Poco, escaso.",ej:["Oliguria","Oligomenorrea","Oligodendrocito","Oligofrenia (histórico)","Oligoespermia"],tip:"➖ Poco."},
+{cat:"med",t:"p",tx:"a- / an-",or:"Griego: a- (sin)",sig:"Ausencia, sin.",ej:["Anuria / Apnea / Afebril","Asintomático","Atrofia","Ageusia → sin gusto","Anosmia → sin olfato","Acianótico","Anencefalia","Aplasia"],tip:"🚫 Negación."},
+{cat:"med",t:"p",tx:"macro-",or:"Griego: makrós (grande)",sig:"Grande.",ej:["Macrocefalia","Macroglosia","Macrocítico","Macrosomía → bebé grande","Macrófago"],tip:"🔍 Grande."},
+{cat:"med",t:"p",tx:"micro-",or:"Griego: mikrós (pequeño)",sig:"Pequeño.",ej:["Microcefalia","Microcítico","Microcirugía","Microscopio","Microbiología"],tip:"🔬 Pequeño."},
+{cat:"med",t:"p",tx:"mega- / megalo-",or:"Griego: mégas (grande)",sig:"Muy grande.",ej:["Megacolon","Hepatomegalia","Esplenomegalia","Cardiomegalia","Acromegalia → extremidades","Megaloblasto"],tip:"📏 MUY grande."},
+{cat:"med",t:"p",tx:"brady-",or:"Griego: bradýs (lento)",sig:"Lento.",ej:["Bradicardia → FC<60","Bradipnea","Bradicinesia","Bradipsiquia","Bradilalia"],tip:"🐢 Lento."},
+{cat:"med",t:"p",tx:"taqui-",or:"Griego: tachýs (rápido)",sig:"Rápido.",ej:["Taquicardia → FC>100","Taquipnea","Taquiarritmia","Taquipsiquia","Taquilalia"],tip:"⚡ Rápido."},
+{cat:"med",t:"p",tx:"iso-",or:"Griego: ísos (igual)",sig:"Igual.",ej:["Isocoria → pupilas iguales","Isotónico","Isométrico","Isovolumétrico"],tip:"= Iguales."},
+{cat:"med",t:"p",tx:"aniso-",or:"Griego: an- + ísos",sig:"Desigual.",ej:["Anisocoria → pupilas desiguales","Anisocitosis → hematíes distintos tamaños","Anisotrópico"],tip:"≠ Desiguales."},
+{cat:"med",t:"p",tx:"di- / bi-",or:"Griego: dís / Latín: bis (dos)",sig:"Dos, doble.",ej:["Diplopía → visión doble","Bilateral","Bifurcación","Bicúspide","Diplacusia"],tip:"2️⃣ Dos."},
+{cat:"med",t:"p",tx:"tri-",or:"Griego: treîs / Latín: tres (tres)",sig:"Tres.",ej:["Tricúspide → 3 valvas","Triglicérido","Trimestre","Trigémino → nervio V (3 ramas)"],tip:"3️⃣ Tres."},
+{cat:"med",t:"p",tx:"tetra- / cuadri-",or:"Griego: téttares / Latín: quattuor",sig:"Cuatro.",ej:["Tetraplejia → 4 extremidades","Cuadriplejia","Tétrada → 4 elementos","Cuadrante"],tip:"4️⃣ Cuatro."},
+{cat:"med",t:"p",tx:"hemi-",or:"Griego: hēmi- (mitad)",sig:"Mitad.",ej:["Hemiplejia","Hemicránea","Hemisferio","Hemitórax","Hemianopsia"],tip:"½ Mitad."},
+{cat:"med",t:"p",tx:"semi-",or:"Latín: semi (mitad)",sig:"Mitad (eq. latino de hemi-).",ej:["Semiología","Semicomatoso","Semilunar"],tip:"½ Mitad (lat.)."},
+{cat:"med",t:"p",tx:"auto-",or:"Griego: autós (propio)",sig:"Propio / sí mismo.",ej:["Autoinmune","Autotransplante","Autolisis","Autosómico"],tip:"🪞 Uno mismo."},
+{cat:"med",t:"p",tx:"hetero-",or:"Griego: héteros (otro)",sig:"Distinto.",ej:["Heterogéneo","Heterotrasplante → de otra especie","Heterotopia → tejido fuera de lugar","Heterocigoto"],tip:"🔀 Distinto."},
+{cat:"med",t:"p",tx:"homo-",or:"Griego: homós (igual)",sig:"Igual / mismo.",ej:["Homogéneo","Homocigoto","Homotermia","Homosexual"],tip:"= Igual."},
+{cat:"med",t:"p",tx:"normo-",or:"Latín: norma (regla)",sig:"Normal.",ej:["Normoglucemia","Normotensión","Normocítico","Normocrómico"],tip:"✓ Dentro del rango."},
+{cat:"med",t:"p",tx:"eu-",or:"Griego: eû (bien/bueno)",sig:"Normal / bien.",ej:["Eupnea → respiración normal","Eutrofia → bien nutrido","Eucórico → pupilas normales","Eutanasia → buena muerte"],tip:"😊 Bien."},
+{cat:"med",t:"p",tx:"dis-",or:"Griego: dys- (mal)",sig:"Mal, difícil, anormal.",ej:["Disnea → respirar mal","Disfagia","Disuria","Displasia","Disritmia","Disartria"],tip:"❌ Mal / difícil."},
+
+// ═══════════════════════════════════════════════════════════
+// CÉLULAS & TEJIDOS
+// ═══════════════════════════════════════════════════════════
+{cat:"cel",t:"s",tx:"-cito",or:"Griego: kýtos (célula)",sig:"Célula (madura).",ej:["Hepatocito → hepática","Linfocito → linfoide","Leucocito → blanco","Eritrocito → rojo","Trombocito → plaqueta","Osteocito → óseo","Condrocito → cartilaginoso","Miocito → muscular","Monocito","Neurocito"],tip:"🦠 Célula madura."},
+{cat:"cel",t:"s",tx:"-blasto",or:"Griego: blastós (germen)",sig:"Célula precursora / inmadura.",ej:["Osteoblasto → forma hueso","Fibroblasto → colágeno","Eritroblasto → precursor eritrocito","Neuroblasto","Hepatoblasto","Linfoblasto","Mieloblasto","Meduloblasto"],tip:"🌱 Aún NO maduro."},
+{cat:"cel",t:"s",tx:"-clasto",or:"Griego: klastós (roto)",sig:"Célula que destruye.",ej:["Osteoclasto → destruye hueso","Hemoclasto → destruye eritrocitos"],tip:"💥 Destruye (opuesto a -blasto)."},
+{cat:"cel",t:"s",tx:"-fito",or:"Griego: phytón (planta)",sig:"Crecimiento similar a planta.",ej:["Osteofito → excrecencia ósea","Dermatofito → hongo de piel","Epifito"],tip:"🌿 Crece hacia afuera."},
+{cat:"cel",t:"s",tx:"-poyético",or:"Griego: poíēsis (producir)",sig:"Productor de.",ej:["Hematopoyético","Eritropoyético","Trombopoyético"],tip:"🏭 Productor."},
+{cat:"cel",t:"p",tx:"fibro-",or:"Latín: fibra",sig:"Tejido fibroso.",ej:["Fibroma → tumor benigno","Fibrosis → cicatriz","Fibroblasto","Fibromialgia","Fibrilar"],tip:"Tejido conectivo."},
+{cat:"cel",t:"p",tx:"lipo-",or:"Griego: lípos (grasa)",sig:"Grasa / tejido adiposo.",ej:["Lipoma → tumor graso","Liposucción","Lipólisis → quemar grasa","Dislipidemia","Lipoproteína"],tip:"💧 Grasa."},
+{cat:"cel",t:"p",tx:"histo-",or:"Griego: histós (tejido)",sig:"Tejido.",ej:["Histología","Histiocito → macrófago tisular","Histopatología","Histoquímica"],tip:"Tejido."},
+
+// ═══════════════════════════════════════════════════════════
+// MOLÉCULAS & QUÍMICA
+// ═══════════════════════════════════════════════════════════
+{cat:"quim",t:"p",tx:"proteo- / proteino-",or:"Griego: prôtos (primero)",sig:"Proteína.",ej:["Proteinuria → proteínas en orina","Proteólisis → romper proteínas","Proteasa → enzima","Hipoproteinemia","Proteoma"],tip:"Bloques de vida."},
+{cat:"quim",t:"p",tx:"sacaro- / sacarido-",or:"Griego: sákcharon (azúcar)",sig:"Azúcar / carbohidrato.",ej:["Monosacárido","Disacárido","Polisacárido","Sacarosa","Glucosacárido"],tip:"🍬 Carbohidrato."},
+{cat:"quim",t:"p",tx:"lacto-",or:"Latín: lac (leche)",sig:"Leche / lactosa.",ej:["Lactasa → enzima","Lactosa","Lactancia","Galactosa (gr.)","Lactocito"],tip:"🥛 Leche."},
+{cat:"quim",t:"p",tx:"galacto-",or:"Griego: gála (leche)",sig:"Leche (gr.).",ej:["Galactosa → azúcar de leche","Galactorrea → secreción láctea","Galactocele","Galactosemia"],tip:"🥛 Leche (gr.)."},
+{cat:"quim",t:"p",tx:"oligo- / poli- (sacar)",or:"Griego: polýs",sig:"Prefijos de cadenas químicas.",ej:["Oligopéptido → pocas aminoácidos","Polipéptido → muchas","Monosacárido → 1 azúcar"],tip:"Nº de unidades."},
+{cat:"quim",t:"p",tx:"amino-",or:"Árabe/gr. ammonia",sig:"Amino / nitrogenado.",ej:["Aminoácido → bloques de proteína","Amina","Aminotransferasa","ALT (alanina-aminotransferasa)"],tip:"Contiene N."},
+{cat:"quim",t:"p",tx:"amilo-",or:"Griego: ámylon (almidón)",sig:"Almidón.",ej:["Amilasa → enzima digestiva","Amilasa pancreática/salival","Amiloidosis → depósito anormal de proteína"],tip:"Almidón."},
+{cat:"quim",t:"p",tx:"hidro-",or:"Griego: hýdōr (agua)",sig:"Agua.",ej:["Hidrocele → líquido","Hidrocefalia → agua en cerebro (LCR)","Hidronefrosis → agua en riñón","Deshidratación","Hidroterapia"],tip:"💧 Agua."},
+{cat:"quim",t:"p",tx:"oxi- / oxí-",or:"Griego: oxýs (agudo/ácido)",sig:"Oxígeno / ácido.",ej:["Oximetría → SatO₂","Oxigenación","Hipoxia → ↓O₂","Hiperoxia","Anoxia → sin O₂"],tip:"💨 Oxígeno."},
+{cat:"quim",t:"p",tx:"pir- / piret-",or:"Griego: pŷr (fuego)",sig:"Fuego / fiebre.",ej:["Pirosis → ardor gástrico","Pirógeno → da fiebre","Antipirético → baja fiebre","Pirexia → fiebre"],tip:"🔥 Fuego / calor."},
+{cat:"quim",t:"p",tx:"cal- / calci-",or:"Latín: calx (cal)",sig:"Calcio.",ej:["Calcemia → Ca en sangre","Hipocalcemia","Calcitonina → hormona","Calcificación"],tip:"Calcio."},
+{cat:"quim",t:"p",tx:"fos-/ fosfo-",or:"Griego: phôs (luz)",sig:"Fósforo.",ej:["Hipofosfatemia","Fosfatasa alcalina (FA)","Fosfolípido","Fosforilación"],tip:"Fósforo."},
+{cat:"quim",t:"p",tx:"natr- / kal-",or:"Latín: natrium / kalium",sig:"Natr- = sodio · Kal- = potasio.",ej:["Natremia → Na en sangre","Hiponatremia","Kalemia → K","Hipokalemia","Hiperkalemia"],tip:"Electrolitos."},
+{cat:"quim",t:"p",tx:"ferr-",or:"Latín: ferrum (hierro)",sig:"Hierro.",ej:["Ferropenia → déficit de hierro","Ferritina → proteína","Ferroterapia"],tip:"Fe = hierro."},
+{cat:"quim",t:"p",tx:"uro- / azoo-",or:"Griego: oûron / a-zōé (sin vida)",sig:"Urea / nitrógeno.",ej:["Uremia","Azoemia → N en sangre","Azoospermia → sin esperma"],tip:"Residuo N."},
+{cat:"quim",t:"p",tx:"keto- / ceto-",or:"Griego: ketos",sig:"Cuerpos cetónicos.",ej:["Cetoacidosis diabética (CAD)","Cetosis","Cetonuria","Cetogénico"],tip:"Cuerpos cetónicos."},
+
+// ═══════════════════════════════════════════════════════════
+// TÉRMINOS CLÍNICOS COMPLETOS
+// ═══════════════════════════════════════════════════════════
+{cat:"term",t:"w",tx:"Anastomosis",or:"Griego: ana- + stóma (boca)",sig:"Comunicación entre dos estructuras tubulares. Natural o quirúrgica.",ej:["Término-terminal → extremo con extremo","Latero-lateral → por los lados","Término-lateral → mixta","Círculo de Willis → anastomosis natural cerebral"],tip:"🔗 Unir dos conductos."},
+{cat:"term",t:"w",tx:"Exéresis",or:"Griego: exaíresis (extracción)",sig:"Extirpación quirúrgica completa. Sinónimo culto de -ectomía.",ej:["Tumoral → masa completa","Amplia → con márgenes","En bloque"],tip:"✂️ Sacar TODO."},
+{cat:"term",t:"w",tx:"Curetaje / Legrado",or:"Francés: curette (cucharilla)",sig:"Raspado con cureta. Dental, uterino o cutáneo.",ej:["Dental → sarro subgingival","Legrado uterino → endometrio","Curetaje cutáneo"],tip:"🥄 Raspar con cuchara."},
+{cat:"term",t:"w",tx:"Desbridamiento",or:"Francés: débridement (desatar)",sig:"Remoción de tejido necrótico/infectado para permitir cicatrización.",ej:["Quirúrgico → bisturí","Enzimático → enzimas tópicas","Autolítico → apósitos húmedos","Mecánico"],tip:"🧹 Limpiar tejido muerto."},
+{cat:"term",t:"w",tx:"Obliteración",or:"Latín: obliterare (borrar)",sig:"Cierre/oclusión de cavidad o conducto, por fibrosis o intervención.",ej:["Venosa → escleroterapia","Espacio pleural → pleurodesis","Luminal"],tip:"❌ Borrar cavidad."},
+{cat:"term",t:"w",tx:"Ligadura",or:"Latín: ligare (atar)",sig:"Anudar hilo alrededor de una estructura para ocluirla.",ej:["De trompas → anticoncepción","Vascular → hemostasia","Variceal endoscópica"],tip:"🎀 Atar."},
+{cat:"term",t:"w",tx:"Fístula",or:"Latín: fistula (tubo)",sig:"Comunicación anormal entre dos superficies epitelizadas.",ej:["Anal → recto↔piel","Arteriovenosa → para diálisis","Enterocutánea","Vesicovaginal","Broncopleural"],tip:"🕳️ Túnel anormal."},
+{cat:"term",t:"w",tx:"Drenaje",or:"Francés: drainer (escurrir)",sig:"Evacuación de líquidos por incisión o dispositivo.",ej:["Penrose → pasivo","Jackson-Pratt → bulbo","Torácico → pleura","Kehr → vía biliar"],tip:"🚿 Evacuar."},
+{cat:"term",t:"w",tx:"Biopsia",or:"Griego: bíos (vida) + ópsis",sig:"Muestra de tejido vivo para estudio histopatológico.",ej:["Excisional → lesión completa","Incisional → porción","Core → aguja gruesa","PAAF → aguja fina","Por congelación → intraoperatoria"],tip:"🔬 Muestra + histología."},
+{cat:"term",t:"w",tx:"Ablación",or:"Latín: ablatio (quitar)",sig:"Destrucción dirigida de tejido sin extirparlo físicamente.",ej:["Radiofrecuencia → arritmias","Crioablación → frío","Tumoral con microondas","Láser"],tip:"🔥 Destruir sin sacar."},
+{cat:"term",t:"w",tx:"Injerto vs Colgajo",or:"Cirugía plástica",sig:"Injerto: sin pedículo vascular propio. Colgajo: con vascularización propia.",ej:["Injerto de piel","Colgajo miocutáneo","Colgajo libre → microcirugía"],tip:"🌿 Injerto=sin sangre · Colgajo=con ella."},
+{cat:"term",t:"w",tx:"Resección",or:"Latín: resecare (cortar)",sig:"Extirpación parcial o total. Término más amplio que -ectomía.",ej:["Intestinal → segmento","En cuña → triangular","En bloque → órgano + ganglios"],tip:"📏 Quitar parte."},
+{cat:"term",t:"w",tx:"Escarotomía",or:"Griego: eschára (costra)",sig:"Incisión de escara en quemaduras profundas circunferenciales.",ej:["Quemaduras 3er grado circunferenciales","Evita síndrome compartimental"],tip:"🔥 Abrir costra."},
+{cat:"term",t:"w",tx:"Fasciotomía",or:"Latín: fascia + -tomía",sig:"Incisión de la fascia para liberar síndrome compartimental.",ej:["Sd compartimental agudo","Aplastamiento","Quemaduras profundas"],tip:"✂️ Descomprimir."},
+{cat:"term",t:"w",tx:"Decorticación",or:"Latín: de- + cortex",sig:"Remoción de capa fibrosa que encapsula un órgano.",ej:["Pleural → empiema crónico","Pericárdica → pericarditis constrictiva"],tip:"🧅 Pelar la cáscara."},
+{cat:"term",t:"w",tx:"Reducción",or:"Latín: reducere (traer de vuelta)",sig:"Devolver una estructura desplazada a su posición.",ej:["De fractura","De hernia","De luxación"],tip:"↩️ Volver a su sitio."},
+{cat:"term",t:"w",tx:"Embolización",or:"Griego: émbolos (tapón)",sig:"Oclusión intencional de un vaso por vía endovascular.",ej:["Aneurismas cerebrales","Miomas uterinos","Sangrado digestivo"],tip:"🧩 Tapar un vaso."},
+{cat:"term",t:"w",tx:"Canalización",or:"Latín: canalis",sig:"Introducción de catéter en vaso o cavidad.",ej:["Venosa central","Arterial (línea)","Biliar"],tip:"🔌 Catéter."},
+{cat:"term",t:"w",tx:"Profilaxis",or:"Griego: prophýlaxis (vigilancia previa)",sig:"Medidas preventivas antes de la enfermedad.",ej:["Antibiótica preoperatoria","Antitrombótica con HBPM","Post-exposición VIH (PEP)","Pre-exposición (PrEP)"],tip:"🛡️ Prevenir."},
+{cat:"term",t:"w",tx:"Idiopático",or:"Griego: idios (propio) + páthos",sig:"Sin causa identificable.",ej:["Fibrosis pulmonar idiopática","HT idiopática","Epilepsia idiopática"],tip:"🤷 'No sabemos por qué'."},
+{cat:"term",t:"w",tx:"Iatrogénico",or:"Griego: iatrós (médico) + gennáō",sig:"Causado por el acto médico.",ej:["Cushing iatrogénico → corticoides","Infección iatrogénica","Lesión quirúrgica"],tip:"👨‍⚕️ Lo causó el médico."},
+{cat:"term",t:"w",tx:"Nosocomial",or:"Griego: nósos + komeîn",sig:"Adquirido durante hospitalización (>48h).",ej:["NAV → neumonía asociada a ventilador","Infección de sitio quirúrgico","Bacteriemia por catéter"],tip:"🏥 Del hospital."},
+{cat:"term",t:"w",tx:"Metaplasia vs Displasia vs Neoplasia",or:"Griego: plásis",sig:"Meta=cambio reversible · Dis=pre-maligno · Neo=tumor.",ej:["Metaplasia de Barrett → escamoso→cilíndrico","Displasia cervical → NIC I-III","Neoplasia maligna → cáncer"],tip:"📊 Escalera al cáncer."},
+{cat:"term",t:"w",tx:"Disección",or:"Latín: dissecare",sig:"1) Separar tejidos por planos. 2) Desgarro de capa vascular.",ej:["Quirúrgica ganglionar","Aórtica → Stanford A/B","Carotídea → ACV joven"],tip:"🔪 Separar / desgarrar."},
+{cat:"term",t:"w",tx:"Anamnesis",or:"Griego: anámnēsis (recuerdo)",sig:"Interrogatorio clínico al paciente.",ej:["Próxima → enfermedad actual","Remota → antecedentes","Por sistemas"],tip:"📝 Preguntar."},
+{cat:"term",t:"w",tx:"Semiología",or:"Griego: sēmeîon (signo) + lógos",sig:"Estudio de signos y síntomas.",ej:["Inspección","Palpación","Percusión","Auscultación"],tip:"🔎 Leer el cuerpo."},
+{cat:"term",t:"w",tx:"Signo vs Síntoma",or:"Semiología",sig:"Signo=objetivo (el médico lo ve). Síntoma=subjetivo (el paciente lo siente).",ej:["Signo → ictericia, fiebre, soplo","Síntoma → dolor, náusea, mareo"],tip:"👁️ Ver vs 😣 Sentir."},
+{cat:"term",t:"w",tx:"Síndrome",or:"Griego: syn- (con) + drómos (carrera)",sig:"Conjunto de signos y síntomas que van juntos, sin causa única definida.",ej:["Sd nefrótico","Sd metabólico","Sd de Cushing","Sd febril"],tip:"🎭 Corren juntos."},
+{cat:"term",t:"w",tx:"Patognomónico",or:"Griego: páthos + gnōmonikós",sig:"Signo específico de UNA sola enfermedad: si está, es esa.",ej:["Manchas de Koplik → sarampión","Nódulos de Osler → endocarditis","Perlas de Elschnig → catarata"],tip:"🎯 100% específico."},
+{cat:"term",t:"w",tx:"Aguda vs Crónica",or:"Latín: acutus / chronos (tiempo)",sig:"Aguda: instauración rápida, corta duración. Crónica: evolución lenta, prolongada.",ej:["Apendicitis aguda → horas","Gastritis crónica → meses-años","Subaguda → intermedia"],tip:"⏱️ Tiempo de evolución."},
+{cat:"term",t:"w",tx:"Benigno vs Maligno",or:"Latín: benignus / malignus",sig:"Benigno: sin capacidad de invadir ni metastatizar. Maligno: invade, metastatiza.",ej:["Lipoma → benigno","Liposarcoma → maligno","Adenoma → benigno","Adenocarcinoma → maligno"],tip:"Crece vs invade."},
+{cat:"term",t:"w",tx:"Primaria vs Secundaria",or:"Latín: primus / secundus",sig:"Primaria: enfermedad de origen. Secundaria: consecuencia de otra.",ej:["HTA primaria (esencial)","HTA secundaria → renal, endocrina","Infertilidad 1ª vs 2ª"],tip:"Causa principal vs consecuencia."},
+{cat:"term",t:"w",tx:"Exacerbación / Reagudización",or:"Latín: exacerbare",sig:"Empeoramiento súbito de enfermedad crónica.",ej:["EPOC reagudizado","Asma exacerbada","Esclerosis múltiple en brote"],tip:"Crónica que se agrava."},
+{cat:"term",t:"w",tx:"Recidiva / Recurrencia",or:"Latín: recidere",sig:"Reaparición de enfermedad tras período libre.",ej:["Recidiva tumoral","Recurrencia de cáncer","Recidiva herpética"],tip:"🔄 Volvió."},
+{cat:"term",t:"w",tx:"Remisión",or:"Latín: remittere",sig:"Desaparición parcial o total de manifestaciones sin necesariamente curar.",ej:["Remisión completa → sin rastro","Remisión parcial → ↓50%","Remisión molecular"],tip:"Tregua."},
+{cat:"term",t:"w",tx:"Incidencia vs Prevalencia",or:"Epidemiología",sig:"Incidencia: casos NUEVOS en período. Prevalencia: TOTAL en momento.",ej:["Incidencia → dinámico","Prevalencia → fotografía","Letalidad → % que mueren"],tip:"Nuevos vs total."},
+{cat:"term",t:"w",tx:"Sensibilidad vs Especificidad",or:"Estadística",sig:"Sens: capacidad de detectar ENFERMOS. Espec: capacidad de excluir SANOS.",ej:["Test sensible → pocos falsos negativos (SnNOUT)","Test específico → pocos falsos positivos (SpPIN)"],tip:"Detectar vs descartar."},
+{cat:"term",t:"w",tx:"Triaje",or:"Francés: trier (elegir)",sig:"Clasificación por prioridad en urgencias.",ej:["Rojo → emergencia","Naranja → muy urgente","Amarillo → urgente","Verde → menos urgente","Azul → no urgente"],tip:"Priorizar."},
+{cat:"term",t:"w",tx:"Cribado / Tamizaje",or:"Screening",sig:"Prueba en población aparentemente sana para detectar enfermedad.",ej:["Mamografía → cáncer de mama","Colonoscopia → CCR","PAP → cáncer de cérvix","TSH neonatal"],tip:"Buscar en sanos."},
+{cat:"term",t:"w",tx:"Placebo vs Nocebo",or:"Latín: placēre / nocēre",sig:"Placebo: efecto positivo sin principio activo. Nocebo: efecto adverso esperado aunque no lo haya.",ej:["Ensayo doble ciego","Efecto placebo","Efecto nocebo → expectativa negativa"],tip:"Placebo=bien, Nocebo=mal."},
+{cat:"term",t:"w",tx:"In vivo vs In vitro",or:"Latín",sig:"In vivo: en el organismo vivo. In vitro: en laboratorio (tubo).",ej:["Ensayo in vivo → animales o humanos","Cultivo in vitro → placa","Fertilización in vitro (FIV)"],tip:"Vivo vs laboratorio."},
+{cat:"term",t:"w",tx:"De novo",or:"Latín: 'de nuevo'",sig:"Que aparece por primera vez, sin antecedentes.",ej:["Mutación de novo → no heredada","Trombosis de novo","Insuficiencia cardíaca de novo"],tip:"Por primera vez."},
+{cat:"term",t:"w",tx:"Eponimo",or:"Griego: ep- + ónoma (nombre)",sig:"Enfermedad nombrada por la persona que la describió.",ej:["Enfermedad de Parkinson","Síndrome de Down","Enfermedad de Alzheimer","Síndrome de Cushing"],tip:"Nombre propio."},
+{cat:"term",t:"w",tx:"Pródromo",or:"Griego: pró- + drómos",sig:"Síntomas tempranos antes de manifestación plena.",ej:["Pródromo viral → malestar antes del exantema","Aura epiléptica → antes de crisis","Pródromo migrañoso"],tip:"Aviso previo."},
+{cat:"term",t:"w",tx:"Secuela",or:"Latín: sequela (seguir)",sig:"Consecuencia permanente que queda tras una enfermedad.",ej:["Secuela motora post-ACV","Secuela cicatricial","Secuela auditiva post-meningitis"],tip:"Lo que queda."},
+{cat:"term",t:"w",tx:"Comórbido / Comorbilidad",or:"Latín: con + morbus",sig:"Presencia simultánea de varias enfermedades en el mismo paciente.",ej:["DM + HTA + dislipidemia","Comorbilidades oncológicas","Índice de Charlson"],tip:"Juntas."},
+{cat:"term",t:"w",tx:"Hiperplasia vs Hipertrofia",or:"Griego: plásis / trophḗ",sig:"Hiperplasia: ↑NÚMERO de células. Hipertrofia: ↑TAMAÑO de células.",ej:["Hiperplasia prostática → más células","Hipertrofia ventricular → células más grandes","Músculo del fisicoculturista → hipertrofia"],tip:"Más vs más grandes."},
+{cat:"term",t:"w",tx:"Apoptosis vs Necrosis",or:"Griego: apo- + ptôsis / nekrós",sig:"Apoptosis: muerte celular programada y ordenada. Necrosis: muerte por daño, desordenada.",ej:["Apoptosis → caspasas, sin inflamación","Necrosis → isquemia, inflamación","Apoptosis = 'caída de hojas'"],tip:"Suicidio vs asesinato."},
+{cat:"term",t:"w",tx:"Aferente vs Eferente",or:"Latín: ad + ferre / ex + ferre",sig:"Aferente: lleva HACIA. Eferente: lleva LEJOS DE.",ej:["Nervio aferente → sensitivo (al SNC)","Nervio eferente → motor (del SNC)","Arteriola aferente → al glomérulo","Eferente → sale"],tip:"A-dentro vs Ex-fuera."},
+{cat:"term",t:"w",tx:"Autólogo vs Alogénico vs Xenogénico",or:"Griego: autós / állos / xénos",sig:"Autólogo: del mismo paciente. Alogénico: de otro humano. Xenogénico: de otra especie.",ej:["Autotransplante óseo","Trasplante alogénico de MO","Válvula xenogénica (porcina)"],tip:"Uno mismo / otro humano / animal."},
+{cat:"term",t:"w",tx:"Anasarca",or:"Griego: aná + sárx (carne)",sig:"Edema generalizado masivo (piel, TCS, cavidades).",ej:["IC avanzada","Sd nefrótico grave","Cirrosis descompensada"],tip:"Edema TOTAL."},
+{cat:"term",t:"w",tx:"Isquemia vs Infarto",or:"Griego: ísch- (detener) + haîma",sig:"Isquemia: ↓riego sanguíneo (reversible). Infarto: muerte tisular por isquemia (irreversible).",ej:["Angina → isquemia miocárdica","IAM → infarto","AIT → ataque isquémico transitorio","ACV → infarto cerebral"],tip:"Hambre vs muerte."},
+{cat:"term",t:"w",tx:"Hipoxia vs Hipoxemia vs Anoxia",or:"Griego: hypó + oxýs",sig:"Hipoxia: ↓O₂ tisular. Hipoxemia: ↓O₂ en sangre. Anoxia: ausencia total de O₂.",ej:["Hipoxemia → pO₂ <60","Hipoxia tisular → mitocondrial","Anoxia cerebral → paro cardíaco"],tip:"Tejido vs sangre vs cero."},
+{cat:"term",t:"w",tx:"Esteatosis",or:"Griego: stéar (grasa)",sig:"Acumulación anormal de grasa en un órgano.",ej:["Esteatosis hepática → hígado graso","Esteatohepatitis (EHNA)","Esteatorrea → grasa en heces"],tip:"🥩 Grasa en tejido."}
+// ═══ AGREGADOS v-final: raíces frecuentes en la práctica clínica ═══
+
+// ─── MÁS RAÍCES DE ÓRGANOS ───
+,{cat:"org",t:"p",tx:"espondilo- / vertebr-",or:"Griego: spóndylos / Latín: vertebra",sig:"Vértebra / columna vertebral.",ej:["Espondilitis anquilosante","Espondilodiscitis","Espondilólisis → defecto en pars interarticularis","Espondilolistesis → desplazamiento vertebral","Vertebroplastia"],tip:"🦴 Columna."}
+,{cat:"org",t:"p",tx:"costo-",or:"Latín: costa (costilla)",sig:"Costilla.",ej:["Costocondritis → inflamación cartilaginosa","Intercostal → entre costillas","Subcostal → debajo de costillas","Costoesternal"],tip:"Costilla."}
+,{cat:"org",t:"p",tx:"mast- / mamo-",or:"Griego: mastós / Latín: mamma",sig:"Mama.",ej:["Mastitis → inflamación mamaria","Mastectomía","Mamografía","Mastalgia","Ginecomastia → mama en varón"],tip:"🤱 Mama."}
+,{cat:"org",t:"p",tx:"mandíbulo- / maxilo-",or:"Latín: mandibula / maxilla",sig:"Mandíbula inferior / maxilar superior.",ej:["Mandibulectomía","Maxilar superior vs inferior","Craneomandibular","Maxilofacial"],tip:"Huesos de la cara."}
+,{cat:"org",t:"p",tx:"bursa-",or:"Latín: bursa (bolsa)",sig:"Bursa (bolsa serosa articular).",ej:["Bursitis → inflamación","Bursectomía","Bursa olecraniana","Bursa trocantérica"],tip:"💧 Cojín articular."}
+,{cat:"org",t:"p",tx:"sinov-",or:"Griego: sýn + Latín: ovum",sig:"Membrana sinovial / líquido articular.",ej:["Sinovitis → inflamación","Sinoviectomía","Tenosinovitis → tendón + sinovial","Líquido sinovial"],tip:"Membrana articular."}
+,{cat:"org",t:"p",tx:"ligament-",or:"Latín: ligamentum",sig:"Ligamento.",ej:["Ligamentosis → degeneración","Esguince ligamentario","Plastia ligamentaria","Ligamento cruzado anterior (LCA)"],tip:"Une hueso con hueso."}
+,{cat:"org",t:"p",tx:"fascia-",or:"Latín: fascia (banda)",sig:"Fascia (tejido conectivo envolvente).",ej:["Fascitis plantar","Fasciotomía → descompresión","Fascitis necrotizante","Fasciectomía"],tip:"Envoltura muscular."}
+,{cat:"org",t:"p",tx:"conjuntiv- / cornea-",or:"Latín: conjunctivus / cornea",sig:"Conjuntiva / córnea.",ej:["Conjuntivitis","Queratoconjuntivitis → córnea + conjuntiva","Conjuntivoplastia","Queratitis"],tip:"Estructuras del ojo."}
+,{cat:"org",t:"p",tx:"queratO- / querato-",or:"Griego: kéras (cuerno)",sig:"Córnea o queratina (tejido córneo).",ej:["Queratitis → inflamación corneal","Queratocono","Queratosis → engrosamiento córneo","Queratoplastia → trasplante corneal","Hiperqueratosis"],tip:"Córnea / queratina."}
+,{cat:"org",t:"p",tx:"iris- / irid-",or:"Griego: îris",sig:"Iris del ojo.",ej:["Iritis / Iridociclitis","Iridectomía","Heterocromía del iris"],tip:"El diafragma del ojo."}
+,{cat:"org",t:"p",tx:"retin-",or:"Latín: rete (red)",sig:"Retina.",ej:["Retinopatía diabética","Retinoblastoma","Desprendimiento de retina","Retinitis pigmentaria"],tip:"Tejido neurosensorial del ojo."}
+,{cat:"org",t:"p",tx:"timpan-",or:"Griego: týmpanon (tambor)",sig:"Tímpano / membrana timpánica.",ej:["Timpanitis","Miringotomía → incisión timpánica","Timpanoplastia","Timpanometría"],tip:"🥁 Tambor del oído."}
+,{cat:"org",t:"p",tx:"coclea-",or:"Latín: cochlea (caracol)",sig:"Cóclea (órgano auditivo interno).",ej:["Coclear","Implante coclear","Cocleitis","Neuritis coclear"],tip:"🐌 Oído interno."}
+,{cat:"org",t:"p",tx:"vestibul-",or:"Latín: vestibulum",sig:"Aparato vestibular / del equilibrio.",ej:["Vestibulitis","Vértigo vestibular","Neuronitis vestibular"],tip:"⚖️ Equilibrio."}
+
+// ─── CARDIOLOGÍA ESPECÍFICA ───
+,{cat:"org",t:"p",tx:"aurícul-",or:"Latín: auricula (orejita)",sig:"Aurícula cardíaca.",ej:["Fibrilación auricular (FA)","Flutter auricular","Aurícula derecha/izquierda","Apéndice auricular"],tip:"Cavidades superiores del corazón."}
+,{cat:"org",t:"p",tx:"ventricul-",or:"Latín: ventriculus",sig:"Ventrículo (cardíaco o cerebral).",ej:["Hipertrofia ventricular izquierda (HVI)","Fibrilación ventricular (FV)","Ventriculografía","Ventriculomegalia cerebral"],tip:"Cavidad bombea."}
+,{cat:"org",t:"p",tx:"valv-",or:"Latín: valva (hoja)",sig:"Válvula cardíaca.",ej:["Valvulopatía","Valvuloplastia","Insuficiencia valvular","Estenosis valvular"],tip:"Puerta del flujo sanguíneo."}
+,{cat:"org",t:"p",tx:"coron-",or:"Latín: corona",sig:"Coronario (arterias del corazón).",ej:["Enfermedad arterial coronaria (EAC)","Síndrome coronario agudo (SCA)","Angiografía coronaria","Revascularización coronaria"],tip:"👑 Arterias del corazón."}
+
+// ─── NEUROLOGÍA ESPECÍFICA ───
+,{cat:"org",t:"p",tx:"menin-",or:"Griego: mḗninx (membrana)",sig:"Meninges.",ej:["Meningitis → infección","Meningioma → tumor","Meningocele","Meningocócico","Meningoencefalitis"],tip:"Membranas del SNC."}
+,{cat:"org",t:"p",tx:"cerebel-",or:"Latín: cerebellum",sig:"Cerebelo.",ej:["Ataxia cerebelosa","Síndrome cerebeloso","Cerebelitis","Hipoplasia cerebelosa"],tip:"Coordinación y equilibrio."}
+,{cat:"org",t:"p",tx:"tálamo-",or:"Griego: thálamos (cámara)",sig:"Tálamo.",ej:["Talamotomía","Síndrome talámico","Hipotálamo → debajo del tálamo","Epitálamo"],tip:"Relé sensorial cerebral."}
+,{cat:"org",t:"p",tx:"radic- / radicul-",or:"Latín: radix (raíz)",sig:"Raíz nerviosa.",ej:["Radiculopatía → dolor radicular","Radiculitis","Poliradiculopatía","Ciática → radiculopatía L5-S1"],tip:"Raíz del nervio espinal."}
+,{cat:"org",t:"p",tx:"plexo-",or:"Latín: plexus (trenzado)",sig:"Plexo (red de nervios).",ej:["Plexopatía braquial","Plexitis","Plexo solar","Plexo lumbosacro"],tip:"Red nerviosa."}
+
+// ─── FARMACOLOGÍA BÁSICA ───
+,{cat:"quim",t:"p",tx:"anti-",or:"Griego: antí (contra)",sig:"Contra, opuesto.",ej:["Antiinflamatorio → AINES","Antihipertensivo","Antibiótico → contra bacterias","Antiarrítmico","Antipirético → baja fiebre","Antiemético → náuseas"],tip:"🚫 Contra algo."}
+,{cat:"quim",t:"p",tx:"ana- (farm)",or:"Griego: aná",sig:"Medicamento que INDUCE o provoca un efecto.",ej:["Anabolizante → construye masa","Analgésico → sin dolor","Anestésico → sin sensibilidad"],tip:"Induce / revierte."}
+,{cat:"quim",t:"s",tx:"-cida",or:"Latín: caedere (matar)",sig:"Que mata.",ej:["Bactericida → mata bacterias","Fungicida → mata hongos","Viricida","Espermicida","Larvicida"],tip:"💀 Mata."}
+,{cat:"quim",t:"s",tx:"-estático",or:"Griego: statikós",sig:"Que detiene el crecimiento (sin matar).",ej:["Bacteriostático → detiene bacterias","Fungistático","Hemostático → detiene sangrado"],tip:"⏸️ Detiene sin matar."}
+,{cat:"quim",t:"s",tx:"-lítico",or:"Griego: lýsis",sig:"Fármaco que rompe / disuelve.",ej:["Fibrinolítico → disuelve coágulos","Ansiolítico → disuelve ansiedad","Trombolítico","Mucolítico → disuelve moco"],tip:"🧊→💧 Disuelve."}
+,{cat:"quim",t:"s",tx:"-ptor",or:"Latín: recipere (recibir)",sig:"Receptor celular.",ej:["Receptor adrenérgico α/β","Receptor muscarínico","Receptor GABAérgico","Receptor nicotínico"],tip:"Antena celular."}
+,{cat:"quim",t:"p",tx:"adren-",or:"Latín: ad + ren",sig:"Adrenalina / sistema adrenérgico.",ej:["Adrenérgico → activado por adrenalina","Alfa-adrenérgico (α1, α2)","Beta-adrenérgico (β1, β2, β3)","Simpaticomimético"],tip:"Sistema simpático."}
+,{cat:"quim",t:"p",tx:"colin-",or:"Griego: cholḗ",sig:"Acetilcolina / sistema colinérgico.",ej:["Colinérgico → activado por ACh","Anticolinérgico","Colinesterasa","Síndrome colinérgico"],tip:"Sistema parasimpático."}
+
+// ─── INFECTOLOGÍA ───
+,{cat:"pato",t:"p",tx:"sepsi- / septic-",or:"Griego: sêpsis (putrefacción)",sig:"Infección con respuesta sistémica.",ej:["Sepsis → infección + SRIS","Shock séptico","Bacteriemia → bacterias en sangre","Fungemia → hongos en sangre","Asepsia → sin infección"],tip:"💀 Infección grave."}
+,{cat:"pato",t:"p",tx:"piro-/ pio-",or:"Griego: pŷon (pus)",sig:"Pus.",ej:["Piuria → pus en orina","Piodermia → piel con pus","Pioderma gangrenoso","Empiema → pus en cavidad","Pionefrosis → pus en riñón"],tip:"🟡 Pus."}
+,{cat:"pato",t:"p",tx:"viru-",or:"Latín: virus (veneno)",sig:"Virus.",ej:["Viremia → virus en sangre","Antiviral","Virulencia → capacidad de causar daño","Provirus"],tip:"Virus."}
+,{cat:"pato",t:"p",tx:"bacteri-",or:"Griego: baktḗria (bastón)",sig:"Bacteria.",ej:["Bacteriemia","Antibacteriano","Bacteriólogo","Bacteriostático vs bactericida"],tip:"Bacteria."}
+,{cat:"pato",t:"p",tx:"miceto- / mico-",or:"Griego: mýkēs (hongo)",sig:"Hongo.",ej:["Micosis → infección fúngica","Onicomicosis → uña","Dermatomicosis","Antimicótico","Aspergilosis"],tip:"🍄 Hongo."}
+,{cat:"pato",t:"p",tx:"parasit-",or:"Griego: parásitos (al lado + comer)",sig:"Parásito.",ej:["Parasitosis","Parasitemia","Antiparasitario","Ectoparásito / Endoparásito"],tip:"Vive de otro."}
+,{cat:"pato",t:"p",tx:"helmint-",or:"Griego: hélmins (gusano)",sig:"Gusano parásito.",ej:["Helmintiasis","Antihelmíntico","Platelmintos → gusanos planos","Nematodos → redondos"],tip:"🪱 Parásito intestinal."}
+,{cat:"pato",t:"p",tx:"zoon-",or:"Griego: zôion (animal)",sig:"Zoonosis (enfermedad de animales a humanos).",ej:["Zoonosis","Antropozoonosis","Brucelosis","Rabia → clásica zoonosis"],tip:"🐾 De animal a humano."}
+
+// ─── GENÉTICA & BIOLOGÍA CELULAR ───
+,{cat:"cel",t:"p",tx:"cario- / carioti-",or:"Griego: káryon (núcleo)",sig:"Núcleo celular / cromosomas.",ej:["Cariotipo → mapa cromosómico","Cariocinesis → división nuclear","Megalocariocito → plaqueta precursora","Eucariota → con núcleo","Procariota → sin núcleo"],tip:"🧬 Núcleo."}
+,{cat:"cel",t:"p",tx:"cromo- (gen)",or:"Griego: chrôma",sig:"Cromosoma.",ej:["Cromosoma → cuerpo coloreado","Cromatina","Cromosomopatía → anomalía cromosómica","Trisomía / Monosomía"],tip:"🧬 Estructura del ADN."}
+,{cat:"cel",t:"p",tx:"mutagen- / teratogen-",or:"Latín: mutare / Griego: téras + gennáō",sig:"Muta- = induce mutación. Terato- = causa malformación.",ej:["Mutágeno → induce mutaciones","Teratógeno → ej: talidomida","Teratoma → tumor con múltiples tejidos","Teratología"],tip:"Agente que daña desarrollo/ADN."}
+,{cat:"cel",t:"p",tx:"mitosi- / meiosi-",or:"Griego: mítos (hilo) / meíosis (disminución)",sig:"Mitosis (división igual) / Meiosis (gametogénesis).",ej:["Mitosis → células hijas iguales","Meiosis → gametos (½ cromosomas)","Cromatina mitótica","Anomalía meiótica"],tip:"División celular."}
+,{cat:"cel",t:"p",tx:"apopto-",or:"Griego: apo- + ptôsis",sig:"Muerte celular programada.",ej:["Apoptosis → 'caída de hojas'","Cuerpo apoptótico","Anti-apoptótico → bloquea (tumores)","Pro-apoptótico → induce muerte"],tip:"🍂 Suicidio celular ordenado."}
+,{cat:"cel",t:"s",tx:"-plasto",or:"Griego: plastós (formado)",sig:"Elemento o partícula celular.",ej:["Cloroplasto","Protoplasto","Leucoplasto","Trombocito también llamado plaqueta"],tip:"Elemento celular."}
+,{cat:"cel",t:"p",tx:"embri-",or:"Griego: émbryon",sig:"Embrión / embrionario.",ej:["Embriología","Embriopatía → daño fetal","Embriogénesis","Células embrionarias"],tip:"👶 Primeras 8 semanas."}
+,{cat:"cel",t:"p",tx:"feto-",or:"Latín: fetus",sig:"Feto (≥9 semanas).",ej:["Fetal","Fetoscopia","Fetopatía","Eritroblastosis fetal","Síndrome alcohólico fetal"],tip:"👶 Desde semana 9."}
+
+// ─── PEDIATRÍA ───
+,{cat:"pato",t:"p",tx:"neon-",or:"Griego: néos + Latín: natus",sig:"Recién nacido (0-28 días).",ej:["Neonatología","Ictericia neonatal","Sepsis neonatal","Asfixia neonatal","Hemorragia neonatal"],tip:"👶 Primeros 28 días."}
+,{cat:"pato",t:"p",tx:"lact- (ped)",or:"Latín: lac",sig:"Lactante (1-24 meses).",ej:["Lactante menor → 1-12 meses","Lactante mayor → 12-24 meses","Dermatitis del lactante"],tip:"🍼 Primer-segundo año."}
+,{cat:"pato",t:"p",tx:"cripto-",or:"Griego: kryptós (oculto)",sig:"Oculto / escondido.",ej:["Criptorquidia → testículo no descendido","Criptogénico → origen oculto","Criptococosis","Criptosporidiosis"],tip:"Escondido."}
+
+// ─── SÍNDROMES Y SIGNOS CLÍNICOS FRECUENTES ───
+,{cat:"term",t:"w",tx:"Tríada",or:"Griego: triás (tres)",sig:"Conjunto de 3 signos/síntomas característicos de una enfermedad.",ej:["Tríada de Charcot → fiebre + ictericia + dolor (colangitis)","Tríada de Beck → taponamiento cardíaco","Tríada de Virchow → trombosis","Tríada de Cushing → HT + bradicardia + alteración respiratoria"],tip:"🔱 Tres hallazgos."}
+,{cat:"term",t:"w",tx:"Péntada",or:"Griego: pénte (cinco)",sig:"Cinco signos característicos.",ej:["Péntada de Reynolds → Charcot + shock + alteración mental (colangitis grave)"],tip:"5 hallazgos."}
+,{cat:"term",t:"w",tx:"Estertores",or:"Latín: stertere (roncar)",sig:"Ruidos respiratorios anormales por líquido o secreciones en vía aérea.",ej:["Crepitantes → edema agudo pulmón, neumonía","Subcrepitantes → bronquiolitis","Estertores secos → bronquitis"],tip:"🫁 Ruidos húmedos."}
+,{cat:"term",t:"w",tx:"Sibilancias",or:"Latín: sibilare (silbar)",sig:"Ruidos respiratorios silbantes por estrechamiento bronquial.",ej:["Asma","EPOC","Broncoespasmo","Bronquiolitis"],tip:"🌬️ Silbido respiratorio."}
+,{cat:"term",t:"w",tx:"Roncus",or:"Latín: ronchus",sig:"Ruidos respiratorios graves y continuos por secreciones gruesas.",ej:["Bronquitis crónica","Neumonía con secreción","EPOC exacerbado"],tip:"Sonido grave de secreciones."}
+,{cat:"term",t:"w",tx:"Escala de Glasgow",or:"Epónimo (Glasgow, Escocia)",sig:"Escala de valoración del estado de conciencia: ocular (1-4) + verbal (1-5) + motor (1-6) = 3-15.",ej:["15/15 → conciencia normal","≤8 → coma (intubar)","9-12 → TCE moderado","13-15 → leve"],tip:"🧠 Valora coma."}
+,{cat:"term",t:"w",tx:"Shock",or:"Francés: choc",sig:"Fallo circulatorio con hipoperfusión tisular.",ej:["Hipovolémico → hemorragia, quemaduras","Cardiogénico → IAM","Distributivo → séptico, anafiláctico","Obstructivo → TEP, taponamiento"],tip:"💔 Hipoperfusión sistémica."}
+,{cat:"term",t:"w",tx:"Síncope vs Lipotimia",or:"Griego: synkopḗ / leipothymía",sig:"Síncope: pérdida completa transitoria de conciencia por hipoperfusión cerebral. Lipotimia: sensación de desmayo sin pérdida completa.",ej:["Vasovagal → el más común","Cardiogénico → arritmia","Ortostático → hipotensión postural","Situacional"],tip:"Desmayo real vs casi desmayo."}
+,{cat:"term",t:"w",tx:"Edema en fóvea / con signo de Godet",or:"Latín: fovea",sig:"Hundimiento persistente tras presión digital en zona edematosa.",ej:["IC derecha → MMII","Sd nefrótico","Hipoalbuminemia","Linfedema (duro, sin fóvea)"],tip:"👆 Deja huella al presionar."}
+,{cat:"term",t:"w",tx:"Cianosis central vs periférica",or:"Griego: kýanos",sig:"Central: lengua/mucosas azules (SpO₂ baja). Periférica: dedos/pies azules (vasoconstricción o ↓gasto).",ej:["Central → cardiopatías congénitas, EPOC","Periférica → frío, shock","Acrocianosis → crónica en extremidades"],tip:"Pulmón/corazón vs flujo."}
+,{cat:"term",t:"w",tx:"Acropaquia / Dedos en palillo de tambor",or:"Griego: ákros + páchos",sig:"Engrosamiento de falanges distales por hipoxia crónica.",ej:["Cáncer pulmonar","Fibrosis quística","Cardiopatías congénitas cianóticas","Endocarditis"],tip:"🥁 Uñas curvas por hipoxia."}
+,{cat:"term",t:"w",tx:"Asterixis / flapping",or:"Griego: a + stērízein (sin apoyo)",sig:"Temblor aleteante de las manos en extensión, típico de encefalopatía metabólica.",ej:["Encefalopatía hepática","Uremia","Retención de CO₂","Intoxicación"],tip:"🦋 Aleteo metabólico."}
+,{cat:"term",t:"w",tx:"Rigidez de nuca / Meningismo",or:"Griego: mḗninx",sig:"Resistencia a la flexión pasiva del cuello por irritación meníngea.",ej:["Meningitis","Hemorragia subaracnoidea","Kernig → flexión cadera + dolor rodilla","Brudzinski → flexión nuca → flexión rodillas"],tip:"🧠 Sospecha meningitis."}
+,{cat:"term",t:"w",tx:"Ictericia: pre/hepática/post",or:"Griego: íkteros",sig:"Prehepática: ↑bilirrubina no conjugada (hemólisis). Hepática: daño celular. Posthepática: obstrucción biliar.",ej:["Prehepática → hemólisis","Hepática → hepatitis, cirrosis","Posthepática → coledocolitiasis, Ca cabeza páncreas"],tip:"🟡 3 causas principales."}
+,{cat:"term",t:"w",tx:"Disnea paroxística nocturna (DPN)",or:"Griego: dis + pnéō",sig:"Crisis súbita de disnea nocturna que despierta al paciente, típica de IC izquierda.",ej:["IC izquierda (redistribución de volumen al decúbito)","Diferenciar de ortopnea (con el decúbito continuo)"],tip:"Despierta por falta de aire."}
+,{cat:"term",t:"w",tx:"Soplo cardíaco",or:"Auscultación",sig:"Ruido producido por flujo turbulento.",ej:["Sistólico → estenosis aórtica, IM mitral","Diastólico → IA aórtica, EM mitral","Continuo → ductus, fístula AV","Inocente → niños sanos"],tip:"🔊 Turbulencia."}
+,{cat:"term",t:"w",tx:"Ruidos cardíacos",or:"Auscultación",sig:"R1: cierre mitral+tricuspídea (inicio sístole). R2: cierre aórtica+pulmonar (inicio diástole). R3 / R4: patológicos en IC.",ej:["R3 → IC (galope ventricular)","R4 → HTA (galope auricular)","Desdoblamiento de R2","Ritmo de galope"],tip:"♥️ Lub-dub normal."}
+,{cat:"term",t:"w",tx:"Fiebre: tipos",or:"Latín: febris",sig:"Continua (sin variación), remitente (baja pero no a normal), intermitente (cíclica), ondulante (Pel-Ebstein).",ej:["Continua → neumonía típica","Intermitente → malaria, TBC","Remitente → viral","Héctica → abscesos"],tip:"🌡️ Patrón orienta al diagnóstico."}
+,{cat:"term",t:"w",tx:"Fiebre de origen desconocido (FOD)",or:"Criterio clínico",sig:"Fiebre >38.3 °C durante >3 semanas sin diagnóstico tras estudio inicial.",ej:["Causas: infecciosa (30%), neoplásica (20%), autoinmune (20%), miscelánea, idiopática (20%)"],tip:"Diagnóstico por descarte."}
+
+// ─── PSIQUIATRÍA & NEUROPSIQUIATRÍA ───
+,{cat:"func",t:"s",tx:"-lalia",or:"Griego: laliá (habla)",sig:"Trastorno del habla.",ej:["Ecolalia → repetir como eco","Coprolalia → palabrotas involuntarias (Tourette)","Glosolalia → hablar incoherente"],tip:"🗣️ Alteración del habla."}
+,{cat:"func",t:"s",tx:"-artria",or:"Griego: arthroun (articular)",sig:"Articulación del habla.",ej:["Disartria → habla mal articulada","Anartria → incapacidad total","Disartria bulbar / pseudobulbar"],tip:"Pronunciar."}
+,{cat:"func",t:"s",tx:"-grafia (psi)",or:"Griego: gráphō",sig:"Escritura.",ej:["Agrafía → no puede escribir","Disgrafía → dificultad","Caligrafía"],tip:"✍️ Escribir."}
+,{cat:"func",t:"s",tx:"-lexia",or:"Griego: léxis (palabra)",sig:"Lectura.",ej:["Dislexia","Alexia → no puede leer","Hiperlexia → lectura precoz (TEA)"],tip:"📖 Leer."}
+,{cat:"func",t:"s",tx:"-tanasia",or:"Griego: thánatos (muerte)",sig:"Muerte.",ej:["Eutanasia → 'buena muerte'","Distanasia → prolongación artificial","Ortotanasia → muerte natural sin prolongar"],tip:"💀 Muerte."}
+// ═══ AGREGADOS v-final-2: músculos compuestos, raíces faltantes, semiología ═══
+
+// ─── MÚSCULOS CUYO NOMBRE ES SU ANATOMÍA ───
+,{cat:"term",t:"w",tx:"Esternocleidomastoideo (ECM)",or:"Griego: stérnon (esternón) + kleís (clavícula) + mastoeidḗs (mastoides)",sig:"Músculo del cuello. Su nombre describe sus 3 inserciones: esternón + clavícula → apófisis mastoides. Si se contrae unilateral: rota la cabeza al lado opuesto.",ej:["Esterno- → inserción en esternón","Cleido- → inserción en clavícula","Mastoideo → inserción en apófisis mastoides","Tortícolis → ECM contracturado"],tip:"🦒 3 inserciones en el nombre."}
+,{cat:"term",t:"w",tx:"Omohioideo",or:"Griego: ōmos (hombro) + hyoeidḗs (hueso hioides)",sig:"Músculo infrahioideo con 2 vientres. Va del omóplato (escápula) al hueso hioides. Su nombre = sus 2 puntos de inserción.",ej:["Omo- → omóplato (escápula)","Hioideo → hueso hioides","Músculo depresor de la laringe","Punto de referencia del triángulo cervical"],tip:"El nombre te dice: escápula → hioides."}
+,{cat:"term",t:"w",tx:"Esternohioideo",or:"Griego: stérnon + hyoeidḗs",sig:"Músculo infrahioideo. Del esternón al hioides. Depresor del hioides.",ej:["Esterno- → esternón","Hioideo → hioides","Deprime hioides al tragar"],tip:"Esternón → hioides."}
+,{cat:"term",t:"w",tx:"Tirohioideo",or:"Griego: thyreoeidḗs (tiroides) + hyoeidḗs (hioides)",sig:"Músculo infrahioideo. Del cartílago tiroides al hioides.",ej:["Tiro- → cartílago tiroides","Hioideo → hioides","Aproxima laringe al hioides"],tip:"Tiroides → hioides."}
+,{cat:"term",t:"w",tx:"Esternotiroideo",or:"Griego: stérnon + thyreoeidḗs",sig:"Músculo infrahioideo. Del esternón al cartílago tiroides.",ej:["Esterno- → esternón","Tiroideo → cartílago tiroides","Deprime la laringe"],tip:"Esternón → tiroides."}
+,{cat:"term",t:"w",tx:"Esternocleidohioideo",or:"Griego: stérnon + kleís + hyoeidḗs",sig:"Variante anatómica que describe la relación esternón-clavícula-hioides en la musculatura anterior del cuello.",ej:["Esternón + clavícula + hioides","Región infrahioidea"],tip:"Cada pieza es un hueso."}
+,{cat:"term",t:"w",tx:"Braquiorradial",or:"Latín: brachium (brazo) + radius (radio)",sig:"Músculo del antebrazo. Va del húmero (brazo) al radio. Principal flexor del antebrazo en posición neutra.",ej:["Braquio- → brazo (húmero)","Radial → hueso radio","Flexor del codo en posición neutra","Reflejo braquiorradial → C5-C6"],tip:"Brazo → radio."}
+,{cat:"term",t:"w",tx:"Coracobranquial",or:"Griego: kórax (cuervo) + brachium (brazo)",sig:"Músculo del brazo. De la apófisis coracoides (escápula) al húmero. Flexor y aductor del hombro.",ej:["Coraco- → apófisis coracoides (forma de pico de cuervo)","Branquial → del brazo","Perfora el músculo → nervio musculocutáneo"],tip:"Pico de cuervo → brazo."}
+,{cat:"term",t:"w",tx:"Tibial anterior / Tibial posterior",or:"Latín: tibia",sig:"Músculos que se insertan en la tibia. Anterior = dorsiflexor del pie. Posterior = inversor + soporte del arco plantar.",ej:["Tibial → hueso tibia","Anterior → compartimiento anterior","Posterior → compartimiento posterior","Insuficiencia del tibial posterior → pie plano adquirido"],tip:"Tibia = origen."}
+,{cat:"term",t:"w",tx:"Gastrocnemio",or:"Griego: gastḗr (vientre) + knḗmē (pierna)",sig:"Músculo gemelo de la pantorrilla. Su nombre significa 'vientre de la pierna'. Principal flexor plantar.",ej:["Gastro- → vientre (la forma abultada)","Cnemio- → pierna","Forma el tendón de Aquiles junto con el sóleo","Contractura = tirón del gemelo"],tip:"El 'vientre' de la pierna."}
+
+// ─── RAÍCES ANATÓMICAS FALTANTES ───
+,{cat:"org",t:"p",tx:"omo- / escapulo-",or:"Griego: ōmos (hombro) / Latín: scapula",sig:"Hombro / omóplato (escápula).",ej:["Omohioideo → escápula + hioides","Omalgia → dolor de hombro","Escapulalgia","Periescapular"],tip:"Hombro / escápula."}
+,{cat:"org",t:"p",tx:"humero-",or:"Latín: humerus",sig:"Húmero (hueso del brazo).",ej:["Fractura humeral","Articulación glenohumeral","Humerorradial"],tip:"Hueso del brazo."}
+,{cat:"org",t:"p",tx:"radio- / ulna- / cubito-",or:"Latín: radius / ulna",sig:"Radio (lateral) y cúbito/ulna (medial) del antebrazo.",ej:["Fractura de radio distal (Colles)","Radial → arteria radial","Cubital → nervio cubital","Radiocubital → articulación"],tip:"Huesos del antebrazo."}
+,{cat:"org",t:"p",tx:"femor-",or:"Latín: femur",sig:"Fémur (hueso del muslo).",ej:["Arteria femoral","Hernia femoral","Fractura femoral","Cabeza del fémur"],tip:"Hueso del muslo."}
+,{cat:"org",t:"p",tx:"tibi- / peron- / fibul-",or:"Latín: tibia / fibula",sig:"Tibia (medial) y peroné/fíbula (lateral) de la pierna.",ej:["Fractura tibial","Peroneal → nervio","Tibial anterior (músculo)","Fracturas bimaleolares"],tip:"Huesos de la pierna."}
+,{cat:"org",t:"p",tx:"sacro- / coccig-",or:"Latín: os sacrum / coccyx",sig:"Sacro (hueso triangular base de columna) y cóccix (coxis).",ej:["Sacroileítis → articulación sacroilíaca","Sacralización → L5 fusionada al sacro","Coccigodinia → dolor de cóccix"],tip:"Base de la columna."}
+,{cat:"org",t:"p",tx:"pelvi-",or:"Latín: pelvis (palangana)",sig:"Pelvis ósea.",ej:["Pelvimetría → medir pelvis (obstetricia)","Pelviectasia → dilatación pélvica","Piso pélvico","Fractura de pelvis"],tip:"Palangana ósea."}
+,{cat:"org",t:"p",tx:"hioideo",or:"Griego: hyoeidḗs (forma de U)",sig:"Hueso hioides. Único hueso que no articula con otro. Base de la lengua.",ej:["Hueso hioides → forma de U","Omohioideo","Esternohioideo","Tirohioideo","Fractura del hioides → indicador forense de estrangulamiento"],tip:"El hueso 'suelto' del cuello."}
+,{cat:"org",t:"p",tx:"coraco-",or:"Griego: kórax (cuervo)",sig:"Apófisis coracoides de la escápula (forma de pico de cuervo).",ej:["Coracobraquial → músculo","Ligamento coracoacromial","Ligamento coracoclavicular","Proceso coracoides"],tip:"🐦 Pico de cuervo."}
+,{cat:"org",t:"p",tx:"glenoideo-",or:"Griego: glḗnē (cavidad)",sig:"Cavidad glenoidea de la escápula (donde articula el húmero).",ej:["Articulación glenohumeral","Labrum glenoideo","Fractura glenoidea"],tip:"Encaje del hombro."}
+,{cat:"org",t:"p",tx:"acromio-",or:"Griego: ákron + ōmos (extremo del hombro)",sig:"Acromion: extensión de la escápula que forma el techo del hombro.",ej:["Acromioclavicular → articulación","Acromionectomía","Espacio subacromial → pinzamiento"],tip:"Techo del hombro."}
+
+// ─── RAÍCES DE MOVIMIENTO & POSICIÓN ───
+,{cat:"func",t:"s",tx:"-flexión",or:"Latín: flexio (doblar)",sig:"Doblar / disminuir ángulo articular.",ej:["Flexión de codo","Dorsiflexión → levantar el pie","Flexión plantar → apuntar el pie","Flexión cervical → barbilla al pecho"],tip:"Doblar."}
+,{cat:"func",t:"s",tx:"-extensión",or:"Latín: extensio (estirar)",sig:"Estirar / aumentar ángulo articular.",ej:["Extensión de rodilla","Hiperextensión → más allá de 180°","Extensión cervical → mirar arriba"],tip:"Estirar."}
+,{cat:"func",t:"s",tx:"-ducción",or:"Latín: ducere (conducir)",sig:"Ab-ducción = alejar de la línea media. Ad-ducción = acercar.",ej:["Abducción → abrir brazos","Aducción → cerrar brazos","Abductor / Aductor","Abducción de cadera"],tip:"Ab = alejar · Ad = acercar."}
+,{cat:"func",t:"s",tx:"-rotación",or:"Latín: rotare (girar)",sig:"Giro sobre el eje longitudinal.",ej:["Rotación interna → hacia adentro","Rotación externa → hacia afuera","Pronación → palma abajo (rotación)","Supinación → palma arriba (rotación)"],tip:"🔄 Girar."}
+,{cat:"func",t:"s",tx:"-versión",or:"Latín: vertere (girar)",sig:"Giro como unidad o posición relativa.",ej:["Anteversión → inclinado adelante","Retroversión → inclinado atrás","Inversión → planta hacia adentro","Eversión → planta hacia afuera","Conversión → transformar"],tip:"Giro de posición."}
+
+// ─── RAÍCES DE EXPLORACIÓN FÍSICA ───
+,{cat:"diag",t:"p",tx:"palp-",or:"Latín: palpare (tocar suavemente)",sig:"Palpación: exploración con las manos.",ej:["Palpación abdominal","Palpación tiroidea","Palpable vs no palpable","Masas palpables"],tip:"🤚 Tocar con las manos."}
+,{cat:"diag",t:"p",tx:"percu-",or:"Latín: percutere (golpear)",sig:"Percusión: golpear para escuchar resonancia.",ej:["Percusión torácica","Matidez → líquido o masa","Timpanismo → aire","Percusión hepática → borde superior"],tip:"🥁 Golpear para escuchar."}
+,{cat:"diag",t:"p",tx:"auscult-",or:"Latín: auscultare (escuchar)",sig:"Auscultación: escuchar con estetoscopio.",ej:["Auscultación cardíaca → 4 focos","Auscultación pulmonar → murmullo vesicular","Ruidos hidroaéreos (RHA)","Auscultar soplos"],tip:"🩺 Escuchar."}
+
+// ─── RAÍCES FALTANTES COMUNES ───
+,{cat:"pato",t:"p",tx:"iso- / aniso- (pato)",or:"Griego: ísos / an-ísos",sig:"Iso = igual. Aniso = desigual. Usado en hematología y oftalmología.",ej:["Anisocitosis → hematíes de distinto tamaño","Poiquilocitosis → distintas formas","Isocoria → pupilas iguales","Anisocoria → pupilas desiguales → pensar en herniación cerebral"],tip:"= vs ≠ en el examen."}
+,{cat:"pato",t:"p",tx:"poiquilo-",or:"Griego: poikílos (variado)",sig:"Variado, irregular.",ej:["Poiquilocitosis → eritrocitos de distintas formas","Poiquilotermia → no regula temperatura","Poiquilodermia → piel con atrofia + pigmentación"],tip:"Formas irregulares."}
+,{cat:"quim",t:"p",tx:"bili-",or:"Latín: bilis",sig:"Bilis / bilirrubina.",ej:["Bilirrubina → pigmento biliar","Bilirrubinemia → BR en sangre","Hiperbilirrubinemia → ictericia","Biliverdin → BR verde (primer metabolito)"],tip:"🟡 Pigmento hepático."}
+,{cat:"quim",t:"p",tx:"albúmino-",or:"Latín: albumen (clara de huevo)",sig:"Albúmina, principal proteína plasmática.",ej:["Hipoalbuminemia → edema, ascitis","Albuminuria → en orina (daño renal)","Microalbuminuria → nefropatía diabética temprana"],tip:"Proteína plasmática #1."}
+,{cat:"quim",t:"p",tx:"creatin-",or:"Griego: kréas (carne)",sig:"Creatinina / creatina. Marcador de función renal.",ej:["Creatinina sérica → TFG","Creatina-kinasa (CK) → infarto, rabdomiólisis","Clearance de creatinina → función renal"],tip:"Marcador renal."}
+,{cat:"quim",t:"p",tx:"ureasa- / urea-",or:"Griego: oûron (orina)",sig:"Urea, producto final del metabolismo proteico.",ej:["Uremia → urea elevada en sangre","BUN → nitrógeno ureico","Ciclo de la urea → hígado","Test de ureasa → H. pylori"],tip:"Desecho nitrogenado."}
+,{cat:"loc",t:"p",tx:"proximal / distal",or:"Latín: proximus / distare",sig:"Proximal = más cerca del tronco. Distal = más lejos del tronco.",ej:["Falange proximal → más cercana","Falange distal → punta del dedo","Fractura distal del radio (Colles)","Obstrucción proximal vs distal"],tip:"Cerca vs lejos del centro."}
+,{cat:"loc",t:"p",tx:"lateral / medial",or:"Latín: latus / medius",sig:"Lateral = hacia afuera. Medial = hacia la línea media.",ej:["Menisco lateral vs medial","Ligamento colateral lateral/medial","Epicóndilo lateral → codo de tenista","Epicóndilo medial → codo de golfista"],tip:"Fuera vs dentro."}
+,{cat:"loc",t:"p",tx:"ventral / dorsal",or:"Latín: venter / dorsum",sig:"Ventral = anterior (frente). Dorsal = posterior (espalda).",ej:["Cara ventral de la mano → palma","Cara dorsal → dorso","Decúbito ventral = prono","Decúbito dorsal = supino"],tip:"Frente vs espalda."}
+,{cat:"loc",t:"p",tx:"superior / inferior",or:"Latín: superus / inferus",sig:"Superior = craneal (arriba). Inferior = caudal (abajo).",ej:["Vena cava superior/inferior","Miembro superior/inferior","Mesentérica superior/inferior"],tip:"Arriba vs abajo."}
+,{cat:"loc",t:"p",tx:"superficial / profundo",or:"Latín: superficialis / profundus",sig:"Superficial = cerca de la piel. Profundo = más interno.",ej:["Venas superficiales → safena","Venas profundas → femoral","Quemadura superficial vs profunda","Fascia superficial/profunda"],tip:"Piel vs interior."}
+];
+// ══════════════════════════════════════════════════════════════
+// DEMOS VISUALES — 5 palabras con SVG anatómico animado
+// ══════════════════════════════════════════════════════════════
+var DEMOS=[
+{
+id:"ecm",
+w:"Esternocleidomastoideo",
+sub:"Las 3 inserciones del músculo, escritas en el nombre",
+type:"neck",
+p:[
+{s:"Esterno-",m:"Esternón",c:"#f472b6",d:"Inserción inferior medial"},
+{s:"-cleido-",m:"Clavícula (gr. kleís)",c:"#fbbf24",d:"Inserción inferior lateral"},
+{s:"-mastoideo",m:"Apófisis mastoides",c:"#60a5fa",d:"Inserción superior"}
+],
+rev:"Un músculo que va del esternón y la clavícula hasta la mastoides. El nombre TE DICE dónde se inserta. No memorizas: deduces."
+},
+{
+id:"heart",
+w:"Peri·mio·endo·cardio",
+sub:"Las 3 capas del corazón de fuera hacia dentro",
+type:"heart",
+p:[
+{s:"Peri-",m:"Alrededor (fuera)",c:"#f472b6",d:"Saco pericárdico"},
+{s:"Mio-",m:"Músculo (medio)",c:"#ef4444",d:"Capa muscular cardíaca"},
+{s:"Endo-",m:"Dentro (interior)",c:"#60a5fa",d:"Capa endotelial interna"}
+],
+rev:"Peri = afuera. Mio = músculo. Endo = adentro. Mismo prefijo, distintas capas: pericardio, miocardio, endocardio."
+},
+{
+id:"abd",
+w:"Hipo·gastrio / Meso·gastrio / Epi·gastrio",
+sub:"Las 3 regiones del abdomen según la altura del estómago",
+type:"abd",
+p:[
+{s:"Epi-",m:"Sobre (arriba)",c:"#60a5fa",d:"Por encima del estómago"},
+{s:"Meso-",m:"En medio",c:"#fbbf24",d:"Zona umbilical"},
+{s:"Hipo-",m:"Debajo",c:"#ef4444",d:"Debajo del estómago"}
+],
+rev:"Gastrio = estómago. Con un prefijo de localización ya nombras las 3 regiones centrales del abdomen."
+},
+{
+id:"colecist",
+w:"Cole·cist·ectomía",
+sub:"La cirugía más común de abdomen, decodificada",
+type:"word",
+p:[
+{s:"Cole-",m:"Bilis",c:"#fbbf24",d:"Órgano relacionado con la bilis"},
+{s:"-cist-",m:"Saco / vejiga",c:"#a78bfa",d:"El saco de la bilis = vesícula"},
+{s:"-ectomía",m:"Extirpación",c:"#f472b6",d:"Sacar el órgano"}
+],
+rev:"Extirpación del saco de la bilis → retirar la vesícula biliar."
+},
+{
+id:"eeg",
+w:"Electro·encefalo·grafía",
+sub:"Palabra larga, lógica clara",
+type:"word",
+p:[
+{s:"Electro-",m:"Eléctrico",c:"#fbbf24",d:"Señal eléctrica"},
+{s:"-encefalo-",m:"Cerebro",c:"#a78bfa",d:"Ubicación de la señal"},
+{s:"-grafía",m:"Registrar",c:"#60a5fa",d:"Técnica de registro"}
+],
+rev:"Técnica que registra la actividad eléctrica del cerebro → EEG."
+},
+{
+id:"pielo",
+w:"Pielo·nefr·itis",
+sub:"Con la raíz sabes qué órgano está infectado",
+type:"word",
+p:[
+{s:"Pielo-",m:"Pelvis renal",c:"#34d399",d:"La pelvis del riñón"},
+{s:"-nefr-",m:"Riñón",c:"#fb7185",d:"El parénquima renal"},
+{s:"-itis",m:"Inflamación",c:"#ef4444",d:"Proceso inflamatorio"}
+],
+rev:"Inflamación/infección que afecta pelvis + riñón → pielonefritis aguda. Por eso duele el flanco y da fiebre."
+},
+{
+id:"hepato",
+w:"Hepato·espleno·megalia",
+sub:"Tres partes, un solo hallazgo",
+type:"word",
+p:[
+{s:"Hepato-",m:"Hígado",c:"#fb7185",d:"Órgano 1"},
+{s:"-espleno-",m:"Bazo",c:"#a78bfa",d:"Órgano 2"},
+{s:"-megalia",m:"Agrandamiento",c:"#fbbf24",d:"Ambos aumentados de tamaño"}
+],
+rev:"Hígado + bazo aumentados. Se palpa en mononucleosis, cirrosis, linfoma, leishmaniasis."
+},
+{
+id:"otorhino",
+w:"Oto·rino·laringo·logía",
+sub:"La especialidad cuyo nombre es su mapa",
+type:"word",
+p:[
+{s:"Oto-",m:"Oído",c:"#60a5fa",d:"👂"},
+{s:"-rino-",m:"Nariz",c:"#fbbf24",d:"👃"},
+{s:"-laringo-",m:"Laringe",c:"#ef4444",d:"Garganta / voz"},
+{s:"-logía",m:"Estudio",c:"#34d399",d:"La ciencia"}
+],
+rev:"Una sola palabra te dice: es el médico del oído + nariz + laringe. ORL."
+},
+{
+id:"oligo",
+w:"Oligo·uria / Poli·uria / An·uria",
+sub:"Tres cantidades de orina con un cambio de prefijo",
+type:"word",
+p:[
+{s:"Oligo-",m:"Poco",c:"#fbbf24",d:"<400 ml/día"},
+{s:"Poli-",m:"Mucho",c:"#34d399",d:">3000 ml/día"},
+{s:"An-",m:"Ninguno",c:"#ef4444",d:"<100 ml/día"}
+],
+rev:"La raíz -uria (orina) no cambia. Cambias el prefijo y nombras las 3 alteraciones del volumen urinario."
+},
+{
+id:"hemi",
+w:"Hemi·plejia / Hemi·paresia / Hemi·anopsia",
+sub:"'La mitad' define la semiología neurológica",
+type:"word",
+p:[
+{s:"Hemi-",m:"Mitad",c:"#a78bfa",d:"Un lado del cuerpo"},
+{s:"-plejia",m:"Parálisis total",c:"#ef4444",d:"No se mueve"},
+{s:"-paresia",m:"Debilidad",c:"#fbbf24",d:"Se mueve pero flojo"},
+{s:"-anopsia",m:"Pérdida visual",c:"#60a5fa",d:"No ve ese lado"}
+],
+rev:"Hemi = mitad. Un ACV produce hemiplejia, hemiparesia o hemianopsia según qué afecta y cuánto."
+}
+];
+
+// ══════════════════════════════════════════════════════════════
+// SMART DECODER — descompone CUALQUIER palabra médica
+// ══════════════════════════════════════════════════════════════
+function normalize(s){
+  return s.toLowerCase().replace(/[áàä]/g,"a").replace(/[éèë]/g,"e").replace(/[íìï]/g,"i").replace(/[óòö]/g,"o").replace(/[úùü]/g,"u").replace(/ñ/g,"n").replace(/[^a-z]/g,"");
+}
+function cleanPart(tx){
+  return normalize(tx.replace(/^-/,"").replace(/-$/,""));
+}
+function decomposeWord(input){
+  var word=normalize(input);
+  if(!word||word.length<3)return null;
+  // Build a list of all matchable pieces (prefixes, suffixes, roots)
+  // Strategy: greedy longest-match from left to right, then try to cover the rest.
+  var pieces=[];
+  VOC.forEach(function(v){
+    // handle compound entries like "cole- / colecisto-"
+    var variants=v.tx.split("/").map(function(x){return cleanPart(x.trim())});
+    variants.forEach(function(p){
+      if(p.length>=2)pieces.push({p:p,v:v,t:v.t});
+    });
+  });
+  // Dedupe and sort by length desc
+  var seen={};
+  pieces=pieces.filter(function(x){
+    if(seen[x.p])return false;
+    seen[x.p]=true;
+    return true;
+  }).sort(function(a,b){return b.p.length-a.p.length});
+  // Greedy scan
+  var result=[];
+  var pos=0;
+  var remaining=word;
+  var safety=0;
+  while(remaining.length>0 && safety<40){
+    safety++;
+    var matched=null;
+    for(var i=0;i<pieces.length;i++){
+      if(remaining.indexOf(pieces[i].p)===0){
+        matched=pieces[i];
+        break;
+      }
+    }
+    if(matched){
+      result.push({piece:matched.p,voc:matched.v,start:pos});
+      remaining=remaining.slice(matched.p.length);
+      pos+=matched.p.length;
+    } else {
+      // shift 1 char and continue searching (gap = connector like 'o')
+      remaining=remaining.slice(1);
+      pos++;
+    }
+  }
+  return result;
+}
+
+// ══════════════════════════════════════════════════════════════
+// TIPO
+// ══════════════════════════════════════════════════════════════
+var TIPO={s:{l:"Sufijo",c:"#60a5fa"},p:{l:"Prefijo",c:"#fbbf24"},w:{l:"Término",c:"#e879f9"}};
+
+// ══════════════════════════════════════════════════════════════
+// PALABRA DEL DÍA — rotación automática por hash de fecha
+// ══════════════════════════════════════════════════════════════
+function wordOfTheDay(){
+  var d=new Date();
+  // Deterministic hash from YYYY-MM-DD that changes each day
+  var seed=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
+  // Mix with a prime to spread the distribution across the VOC array
+  var idx=(seed*2654435761)%VOC.length;
+  if(idx<0)idx+=VOC.length;
+  return VOC[idx];
+}
+
+function WordOfDay(){
+  var w=useMemo(wordOfTheDay,[]);
+  var cat=CATS.find(function(c){return c.id===w.cat});
+  var dState=useState(false);var d=dState[0],setD=dState[1];
+  var today=new Date();
+  var dateStr=today.toLocaleDateString("es",{weekday:"long",day:"numeric",month:"long"});
+  return e("div",{onClick:function(){setD(!d)},style:{margin:"0 20px 18px",padding:"18px",background:"linear-gradient(135deg, "+cat.c+"15 0%, rgba(13,18,36,.7) 100%)",border:"1px solid "+cat.c+"44",borderRadius:"16px",cursor:"pointer",transition:"all .3s"}},
+    e("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}},
+      e("div",{style:{fontSize:"10px",color:cat.c,letterSpacing:"2px",textTransform:"uppercase",fontWeight:700}},"◆ Palabra del día"),
+      e("div",{style:{fontSize:"10px",color:C.mt,textTransform:"capitalize"}},dateStr)
+    ),
+    e("div",{style:{display:"flex",alignItems:"center",gap:"12px",marginBottom:d?"12px":0}},
+      e("div",{style:{fontSize:"32px"}},cat.i),
+      e("div",{style:{flex:1,minWidth:0}},
+        e("div",{style:{fontFamily:"'JetBrains Mono',monospace",fontSize:"18px",fontWeight:800,color:TIPO[w.t].c}},w.tx),
+        e("div",{style:{fontSize:"11px",color:C.mt,fontStyle:"italic"}},w.or)
+      ),
+      e("div",{style:{fontSize:"16px",color:cat.c,transform:d?"rotate(180deg)":"rotate(0)",transition:"transform .3s"}},"▾")
+    ),
+    d && e("div",{style:{animation:"fadeIn .3s"}},
+      e("div",{style:{fontSize:"13px",color:C.tx,lineHeight:1.5,marginBottom:"10px"}},w.sig),
+      e("div",{style:{fontSize:"10px",color:cat.c,fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:"6px"}},"Ejemplos"),
+      e("div",{style:{display:"flex",flexDirection:"column",gap:"4px",marginBottom:"10px"}},
+        w.ej.slice(0,3).map(function(ex,i){
+          return e("div",{key:i,style:{padding:"7px 10px",background:"rgba(6,10,20,.4)",borderLeft:"2px solid "+cat.c,borderRadius:"6px",fontSize:"11px",color:C.tx}},ex);
+        })
+      ),
+      e("div",{style:{padding:"8px 10px",background:cat.c+"15",border:"1px solid "+cat.c+"33",borderRadius:"8px",fontSize:"11px",color:C.tx}},w.tip)
+    ),
+    !d && e("div",{style:{fontSize:"10px",color:C.dm,textAlign:"center",marginTop:"6px"}},"Toca para ver definición y ejemplos")
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// ANATOMICAL SVG RENDERERS
+// ══════════════════════════════════════════════════════════════
+
+// ECM — Neck
+function NeckSVG(props){
+  var step=props.step,p=props.p;
+  return e("svg",{viewBox:"0 0 300 300",style:{width:"100%",height:"100%",filter:"drop-shadow(0 0 15px rgba(96,165,250,.15))"}},
+    e("ellipse",{cx:"150",cy:"65",rx:"45",ry:"55",fill:"none",stroke:"#1a2040",strokeWidth:"1.5"}),
+    e("path",{d:"M 108 110 Q 150 140 192 110",stroke:"#1a2040",strokeWidth:"1.5",fill:"none",strokeDasharray:"3,3"}),
+    e("path",{d:"M 115 115 L 105 180 L 90 230 L 210 230 L 195 180 L 185 115",stroke:"#1a2040",strokeWidth:"1.5",fill:"rgba(26,32,64,.2)"}),
+    e("path",{d:"M 60 235 Q 95 225 130 232",stroke:"#1a2040",strokeWidth:"3",fill:"none",strokeLinecap:"round"}),
+    e("path",{d:"M 170 232 Q 205 225 240 235",stroke:"#1a2040",strokeWidth:"3",fill:"none",strokeLinecap:"round"}),
+    e("rect",{x:"140",y:"232",width:"20",height:"55",rx:"4",fill:"rgba(26,32,64,.4)",stroke:"#1a2040",strokeWidth:"1.5"}),
+    e("path",{d:"M 148 240 Q 140 200 130 165 Q 125 140 118 115",stroke:step>=1?p[0].c:"#1a2040",strokeWidth:"6",fill:"none",strokeLinecap:"round",opacity:step>=1?.9:.3,style:{transition:"all .6s"}}),
+    e("path",{d:"M 118 235 Q 120 200 122 165 Q 123 140 122 118",stroke:step>=2?p[1].c:"#1a2040",strokeWidth:"5",fill:"none",strokeLinecap:"round",opacity:step>=2?.9:.3,style:{transition:"all .6s"}}),
+    e("circle",{cx:"148",cy:"243",r:"8",fill:p[0].c,opacity:step>=1?1:.2,style:{transition:"all .5s",filter:step===1?"drop-shadow(0 0 10px "+p[0].c+")":"none"}}),
+    e("circle",{cx:"118",cy:"233",r:"8",fill:p[1].c,opacity:step>=2?1:.2,style:{transition:"all .5s",filter:step===2?"drop-shadow(0 0 10px "+p[1].c+")":"none"}}),
+    e("circle",{cx:"120",cy:"113",r:"8",fill:p[2].c,opacity:step>=3?1:.2,style:{transition:"all .5s",filter:step===3?"drop-shadow(0 0 10px "+p[2].c+")":"none"}}),
+    step>=1 && e("text",{x:"168",y:"246",fill:p[0].c,fontSize:"10",fontWeight:"700",fontFamily:"DM Sans"},"Esternón"),
+    step>=2 && e("text",{x:"30",y:"236",fill:p[1].c,fontSize:"10",fontWeight:"700",fontFamily:"DM Sans"},"Clavícula"),
+    step>=3 && e("text",{x:"132",y:"108",fill:p[2].c,fontSize:"10",fontWeight:"700",fontFamily:"DM Sans"},"Mastoides")
+  );
+}
+
+// HEART — 3 layers
+function HeartSVG(props){
+  var step=props.step,p=props.p;
+  return e("svg",{viewBox:"0 0 300 300",style:{width:"100%",height:"100%",filter:"drop-shadow(0 0 15px rgba(96,165,250,.15))"}},
+    e("path",{d:"M 150 70 Q 60 65 55 140 Q 55 220 150 270 Q 245 220 245 140 Q 240 65 150 70 Z",fill:step>=1?p[0].c+"33":"rgba(26,32,64,.2)",stroke:step>=1?p[0].c:"#1a2040",strokeWidth:"3",style:{transition:"all .6s"}}),
+    e("path",{d:"M 150 90 Q 80 90 75 145 Q 75 210 150 255 Q 225 210 225 145 Q 220 90 150 90 Z",fill:step>=2?p[1].c+"44":"rgba(26,32,64,.15)",stroke:step>=2?p[1].c:"#1a2040",strokeWidth:"3",style:{transition:"all .6s"}}),
+    e("path",{d:"M 150 110 Q 100 110 100 150 Q 100 200 150 235 Q 200 200 200 150 Q 200 110 150 110 Z",fill:step>=3?p[2].c+"33":"rgba(6,10,20,.4)",stroke:step>=3?p[2].c:"#1a2040",strokeWidth:"3",style:{transition:"all .6s"}}),
+    e("line",{x1:"150",y1:"120",x2:"150",y2:"225",stroke:step>=3?p[2].c:"#1a2040",strokeWidth:"1.5",opacity:.5,strokeDasharray:"4,4"}),
+    step>=1 && e("text",{x:"150",y:"55",fill:p[0].c,fontSize:"11",fontWeight:"700",fontFamily:"DM Sans",textAnchor:"middle"},"Pericardio"),
+    step>=2 && e("text",{x:"150",y:"85",fill:p[1].c,fontSize:"10",fontWeight:"700",fontFamily:"DM Sans",textAnchor:"middle"},"Miocardio"),
+    step>=3 && e("text",{x:"150",y:"175",fill:p[2].c,fontSize:"10",fontWeight:"700",fontFamily:"DM Sans",textAnchor:"middle"},"Endocardio"),
+    step>=3 && e("circle",{cx:"150",cy:"290",r:"4",fill:"#ef4444",style:{animation:"pulse 1.2s infinite"}})
+  );
+}
+
+// ABDOMEN
+function AbdSVG(props){
+  var step=props.step,p=props.p;
+  return e("svg",{viewBox:"0 0 300 300",style:{width:"100%",height:"100%",filter:"drop-shadow(0 0 15px rgba(96,165,250,.15))"}},
+    e("path",{d:"M 60 50 L 60 270 L 240 270 L 240 50 Q 240 30 220 30 L 80 30 Q 60 30 60 50 Z",fill:"rgba(26,32,64,.15)",stroke:"#1a2040",strokeWidth:"1.5"}),
+    e("line",{x1:"60",y1:"110",x2:"240",y2:"110",stroke:"#1a2040",strokeWidth:"1",strokeDasharray:"3,3"}),
+    e("line",{x1:"60",y1:"180",x2:"240",y2:"180",stroke:"#1a2040",strokeWidth:"1",strokeDasharray:"3,3"}),
+    e("line",{x1:"120",y1:"30",x2:"120",y2:"270",stroke:"#1a2040",strokeWidth:"1",strokeDasharray:"3,3"}),
+    e("line",{x1:"180",y1:"30",x2:"180",y2:"270",stroke:"#1a2040",strokeWidth:"1",strokeDasharray:"3,3"}),
+    e("rect",{x:"120",y:"30",width:"60",height:"80",fill:step>=1?p[0].c+"44":"rgba(26,32,64,.1)",stroke:step>=1?p[0].c:"#1a2040",strokeWidth:step>=1?"2":"1",style:{transition:"all .5s",filter:step===1?"drop-shadow(0 0 10px "+p[0].c+")":"none"}}),
+    e("rect",{x:"120",y:"110",width:"60",height:"70",fill:step>=2?p[1].c+"44":"rgba(26,32,64,.1)",stroke:step>=2?p[1].c:"#1a2040",strokeWidth:step>=2?"2":"1",style:{transition:"all .5s",filter:step===2?"drop-shadow(0 0 10px "+p[1].c+")":"none"}}),
+    step>=2 && e("circle",{cx:"150",cy:"145",r:"4",fill:p[1].c}),
+    e("rect",{x:"120",y:"180",width:"60",height:"90",fill:step>=3?p[2].c+"44":"rgba(26,32,64,.1)",stroke:step>=3?p[2].c:"#1a2040",strokeWidth:step>=3?"2":"1",style:{transition:"all .5s",filter:step===3?"drop-shadow(0 0 10px "+p[2].c+")":"none"}}),
+    step>=1 && e("text",{x:"150",y:"75",fill:p[0].c,fontSize:"11",fontWeight:"700",fontFamily:"DM Sans",textAnchor:"middle"},"Epigastrio"),
+    step>=2 && e("text",{x:"150",y:"165",fill:p[1].c,fontSize:"10",fontWeight:"700",fontFamily:"DM Sans",textAnchor:"middle"},"Mesogastrio"),
+    step>=3 && e("text",{x:"150",y:"230",fill:p[2].c,fontSize:"11",fontWeight:"700",fontFamily:"DM Sans",textAnchor:"middle"},"Hipogastrio"),
+    e("text",{x:"40",y:"75",fill:"#64748b",fontSize:"9",fontFamily:"DM Sans",textAnchor:"middle"},"sobre"),
+    e("text",{x:"40",y:"150",fill:"#64748b",fontSize:"9",fontFamily:"DM Sans",textAnchor:"middle"},"medio"),
+    e("text",{x:"40",y:"225",fill:"#64748b",fontSize:"9",fontFamily:"DM Sans",textAnchor:"middle"},"debajo")
+  );
+}
+
+// Generic word-break
+function WordSVG(props){
+  var step=props.step,p=props.p;
+  return e("div",{style:{display:"flex",alignItems:"center",justifyContent:"center",flexWrap:"wrap",gap:"8px",padding:"40px 20px",minHeight:"200px"}},
+    p.map(function(pt,i){
+      var act=step>=(i+1);
+      return e(F,{key:i},
+        e("div",{style:{
+          padding:"14px 18px",
+          background:act?pt.c+"22":"rgba(26,32,64,.3)",
+          border:"2px solid "+(act?pt.c:"#1a2040"),
+          borderRadius:"14px",
+          textAlign:"center",
+          transform:act?"scale(1)":"scale(.9)",
+          opacity:act?1:.4,
+          transition:"all .5s cubic-bezier(.4,0,.2,1)",
+          filter:step===(i+1)?"drop-shadow(0 0 15px "+pt.c+"66)":"none",
+          minWidth:"90px"
+        }},
+          e("div",{style:{fontFamily:"'JetBrains Mono',monospace",fontSize:"14px",fontWeight:800,color:pt.c,marginBottom:"4px"}},pt.s),
+          e("div",{style:{fontSize:"11px",color:"#e2e8f0",fontWeight:600}},pt.m)
+        ),
+        i<p.length-1 && e("div",{style:{color:act?"#60a5fa":"#64748b",fontSize:"22px",fontWeight:800,transition:"color .5s"}},"+")
+      );
+    })
+  );
+}
+
+// Router
+function DemoSVG(props){
+  if(props.type==="neck")return e(NeckSVG,props);
+  if(props.type==="heart")return e(HeartSVG,props);
+  if(props.type==="abd")return e(AbdSVG,props);
+  return e(WordSVG,props);
+}
+
+// ══════════════════════════════════════════════════════════════
+// HERO VISUAL — single static demo (Peri·mio·endo·cardio)
+// Animates once on mount, user can replay with button
+// ══════════════════════════════════════════════════════════════
+function HeroVisual(){
+  // Always show demo with id "heart"
+  var d=DEMOS.find(function(x){return x.id==="heart"})||DEMOS[1];
+  var stepState=useState(0);var step=stepState[0],setStep=stepState[1];
+  var maxStep=d.p.length;
+  var replayKey=useState(0);var rk=replayKey[0],setRk=replayKey[1];
+
+  useEffect(function(){
+    setStep(0);
+    var i=setInterval(function(){
+      setStep(function(s){
+        if(s>=maxStep){clearInterval(i);return maxStep}
+        return s+1;
+      });
+    },1400);
+    return function(){clearInterval(i)};
+  },[rk,maxStep]);
+
+  function replay(){setRk(rk+1)}
+
+  return e("div",{style:{marginTop:"16px",padding:"22px 18px",background:"linear-gradient(135deg, rgba(13,18,36,.95) 0%, rgba(13,18,36,.6) 100%)",border:"1px solid "+C.bd,borderRadius:"20px",position:"relative",overflow:"hidden"}},
+    e("div",{style:{position:"absolute",top:"-30px",right:"-30px",width:"160px",height:"160px",background:"radial-gradient(circle, rgba(96,165,250,.2) 0%, transparent 70%)",filter:"blur(20px)",pointerEvents:"none"}}),
+    e("div",{style:{position:"relative"}},
+      e("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"6px"}},
+        e("div",{style:{fontSize:"10px",letterSpacing:"2.5px",color:"#60a5fa",textTransform:"uppercase",fontWeight:700}},"◆ Ejemplo visual"),
+        e("button",{
+          onClick:replay,
+          style:{background:"rgba(96,165,250,.15)",border:"1px solid rgba(96,165,250,.4)",borderRadius:"16px",padding:"4px 10px",color:"#60a5fa",fontSize:"10px",fontWeight:700,cursor:"pointer"}
+        },"↻ Repetir")
+      ),
+      e("div",{style:{fontFamily:"'Playfair Display',serif",fontSize:"26px",fontWeight:900,color:C.tx,lineHeight:1.1,marginBottom:"4px"}},d.w),
+      e("div",{style:{fontSize:"12px",color:C.mt,marginBottom:"14px",fontStyle:"italic"}},d.sub),
+      e("div",{style:{position:"relative",maxWidth:"300px",margin:"0 auto 14px",aspectRatio:"1/1"}},
+        e(DemoSVG,{type:d.type,step:step,p:d.p})
+      ),
+      e("div",{style:{display:"grid",gridTemplateColumns:"repeat("+d.p.length+",1fr)",gap:"6px",marginBottom:"14px"}},
+        d.p.map(function(pt,i){
+          var act=step>=(i+1);
+          return e("div",{key:i,style:{
+            padding:"9px 6px",
+            background:act?pt.c+"18":"rgba(13,18,36,.4)",
+            border:"1px solid "+(act?pt.c+"66":C.bd),
+            borderRadius:"9px",
+            textAlign:"center",
+            transition:"all .5s",
+            transform:act?"scale(1)":"scale(.95)",
+            opacity:act?1:.5
+          }},
+            e("div",{style:{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",fontWeight:700,color:pt.c,marginBottom:"2px"}},pt.s),
+            e("div",{style:{fontSize:"10px",color:C.tx,fontWeight:600,marginBottom:"1px"}},pt.m),
+            e("div",{style:{fontSize:"9px",color:C.dm,lineHeight:1.2}},pt.d)
+          );
+        })
+      ),
+      step>=maxStep && e("div",{style:{padding:"12px 14px",background:"linear-gradient(135deg, rgba(52,211,153,.12), rgba(96,165,250,.08))",border:"1px solid rgba(52,211,153,.3)",borderRadius:"12px",animation:"fadeIn .4s"}},
+        e("div",{style:{fontSize:"10px",color:"#34d399",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:"6px"}},"💡 La clave"),
+        e("div",{style:{fontSize:"12px",color:C.tx,lineHeight:1.5,fontWeight:500}},d.rev)
+      )
+    )
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// HERO
+// ══════════════════════════════════════════════════════════════
+function Hero(){
+  return e("div",{style:{position:"relative",padding:"36px 20px 14px",overflow:"hidden"}},
+    e("div",{style:{position:"absolute",top:"-80px",left:"50%",transform:"translateX(-50%)",width:"520px",height:"420px",background:"radial-gradient(ellipse, rgba(59,130,246,.18) 0%, transparent 70%)",pointerEvents:"none",filter:"blur(30px)"}}),
+    e("div",{style:{position:"relative",textAlign:"center",animation:"fadeIn .6s"}},
+      e("div",{style:{fontSize:"56px",marginBottom:"12px",animation:"float 3.5s ease-in-out infinite",filter:"drop-shadow(0 10px 25px rgba(96,165,250,.3))"}},"📖"),
+      e("div",{style:{fontSize:"11px",letterSpacing:"3px",color:C.mt,textTransform:"uppercase",fontWeight:600,marginBottom:"8px"}},"Generalidades · ECEPT"),
+      e("h1",{style:{fontFamily:"'Playfair Display',serif",fontSize:"42px",fontWeight:900,lineHeight:1,background:"linear-gradient(135deg,#e2e8f0 0%,#60a5fa 50%,#a78bfa 100%)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text",marginBottom:"14px"}},"Vocabulario",e("br",null),"Médico"),
+      e("p",{style:{color:C.mt,fontSize:"14px",maxWidth:"520px",margin:"0 auto",lineHeight:1.6}},"La etimología es la llave. Cada palabra médica es un mapa: si conoces las piezas, sabes el significado ",e("strong",{style:{color:C.tx}},"sin memorizar"),"."),
+      e("div",{style:{marginTop:"16px",display:"flex",gap:"7px",justifyContent:"center",flexWrap:"wrap"}},
+        e("div",{style:{padding:"5px 12px",background:"rgba(96,165,250,.12)",border:"1px solid rgba(96,165,250,.3)",borderRadius:"20px",fontSize:"11px",color:"#60a5fa",fontWeight:700}},"🏛️ "+VOC.length+" raíces"),
+        e("div",{style:{padding:"5px 12px",background:"rgba(251,191,36,.12)",border:"1px solid rgba(251,191,36,.3)",borderRadius:"20px",fontSize:"11px",color:"#fbbf24",fontWeight:700}},"📚 "+CATS.length+" categorías"),
+        e("div",{style:{padding:"5px 12px",background:"rgba(232,121,249,.12)",border:"1px solid rgba(232,121,249,.3)",borderRadius:"20px",fontSize:"11px",color:"#e879f9",fontWeight:700}},"✨ "+DEMOS.length+" demos")
+      )
+    ),
+    e("div",{style:{maxWidth:"560px",margin:"20px auto 0"}},e(HeroVisual,null))
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// DEMO CARD (for Ejemplos tab)
+// ══════════════════════════════════════════════════════════════
+function DemoCard(props){
+  var d=props.d;
+  var stepState=useState(0);var step=stepState[0],setStep=stepState[1];
+  var expState=useState(false);var exp=expState[0],setExp=expState[1];
+  useEffect(function(){
+    if(!exp){setStep(0);return}
+    var max=d.p.length;
+    var i=setInterval(function(){
+      setStep(function(s){return s>=max?0:s+1});
+    },1400);
+    return function(){clearInterval(i)};
+  },[exp,d.p.length]);
+  return e("div",{style:{background:"linear-gradient(135deg, rgba(13,18,36,.95) 0%, rgba(13,18,36,.5) 100%)",border:"1px solid "+C.bd,borderRadius:"16px",overflow:"hidden",transition:"all .3s"}},
+    e("div",{
+      onClick:function(){setExp(!exp)},
+      style:{padding:"16px 18px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"12px"}
+    },
+      e("div",{style:{flex:1,minWidth:0}},
+        e("div",{style:{fontSize:"10px",color:"#60a5fa",letterSpacing:"1.5px",textTransform:"uppercase",fontWeight:700,marginBottom:"4px"}},exp?"En vivo":"Decodifica"),
+        e("div",{style:{fontFamily:"'Playfair Display',serif",fontSize:"18px",fontWeight:800,color:C.tx,marginBottom:"2px",lineHeight:1.2}},d.w),
+        e("div",{style:{fontSize:"11px",color:C.mt,fontStyle:"italic"}},d.sub)
+      ),
+      e("div",{style:{fontSize:"18px",color:"#60a5fa",transform:exp?"rotate(180deg)":"rotate(0)",transition:"transform .3s"}},"▾")
+    ),
+    exp && e("div",{style:{padding:"0 18px 18px",animation:"fadeIn .4s",borderTop:"1px solid "+C.bd}},
+      (d.type!=="word"&&d.type!=="neck"&&d.type!=="heart"&&d.type!=="abd") && e("div",null) ||
+      (d.type==="neck"||d.type==="heart"||d.type==="abd") && e("div",{style:{maxWidth:"260px",margin:"12px auto 0",aspectRatio:"1/1"}},e(DemoSVG,{type:d.type,step:step,p:d.p})),
+      d.type==="word" && e(WordSVG,{step:step,p:d.p}),
+      e("div",{style:{display:"grid",gridTemplateColumns:"repeat("+d.p.length+",1fr)",gap:"5px",marginTop:"10px",marginBottom:"10px"}},
+        d.p.map(function(pt,i){
+          var act=step>=(i+1);
+          return e("div",{key:i,style:{
+            padding:"8px 6px",
+            background:act?pt.c+"22":"rgba(13,18,36,.4)",
+            border:"1px solid "+(act?pt.c+"66":C.bd),
+            borderRadius:"9px",
+            textAlign:"center",
+            transition:"all .5s",
+            opacity:act?1:.45
+          }},
+            e("div",{style:{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",fontWeight:700,color:pt.c,marginBottom:"1px"}},pt.s),
+            e("div",{style:{fontSize:"10px",color:C.tx,fontWeight:600}},pt.m)
+          );
+        })
+      ),
+      e("div",{style:{padding:"10px 12px",background:"rgba(52,211,153,.08)",border:"1px solid rgba(52,211,153,.3)",borderRadius:"10px",fontSize:"12px",color:C.tx,lineHeight:1.5}},"💡 "+d.rev)
+    )
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// SMART LIVE DECODER — breaks ANY word
+// ══════════════════════════════════════════════════════════════
+function SmartDecoder(props){
+  var v=props.v,set=props.set;
+  var decomp=useMemo(function(){
+    return v.length>=3?decomposeWord(v):null;
+  },[v]);
+  return e("div",{style:{margin:"0 20px 20px",padding:"22px 20px",background:"linear-gradient(135deg, rgba(59,130,246,.08) 0%, rgba(167,139,250,.08) 100%)",border:"1px solid rgba(96,165,250,.25)",borderRadius:"20px",animation:"fadeIn .7s"}},
+    e("div",{style:{display:"flex",alignItems:"center",gap:"12px",marginBottom:"14px"}},
+      e("div",{style:{fontSize:"26px"}},"🔎"),
+      e("div",{style:{flex:1}},
+        e("div",{style:{fontSize:"15px",fontWeight:700,color:C.tx}},"Decodificador inteligente"),
+        e("div",{style:{fontSize:"11px",color:C.mt}},"Escribe cualquier palabra médica — la partiré en piezas")
+      )
+    ),
+    e("input",{
+      type:"text",
+      value:v,
+      onChange:function(ev){set(ev.target.value)},
+      placeholder:"Ej: pielonefritis, hepatoesplenomegalia, colecistitis...",
+      style:{width:"100%",padding:"14px 16px",background:"rgba(6,10,20,.7)",border:"1px solid "+C.bd,borderRadius:"12px",color:C.tx,fontSize:"14px",fontFamily:"'JetBrains Mono',monospace"}
+    }),
+    decomp && decomp.length>0 && e("div",{style:{marginTop:"16px"}},
+      e("div",{style:{fontSize:"10px",color:"#60a5fa",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:"10px"}},"◆ Descomposición"),
+      // word pieces as chips
+      e("div",{style:{display:"flex",flexWrap:"wrap",gap:"5px",alignItems:"center",justifyContent:"center",padding:"14px 10px",background:"rgba(6,10,20,.4)",borderRadius:"12px",marginBottom:"12px"}},
+        decomp.map(function(piece,i){
+          var cat=CATS.find(function(c){return c.id===piece.voc.cat});
+          return e(F,{key:i},
+            i>0 && e("div",{style:{color:C.dm,fontSize:"14px",fontWeight:700}},"+"),
+            e("div",{title:piece.voc.sig,style:{padding:"8px 11px",background:cat.c+"22",border:"1px solid "+cat.c+"66",borderRadius:"10px",animation:"slideInLeft ."+(3+i)+"s"}},
+              e("div",{style:{fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",fontWeight:700,color:cat.c}},piece.piece),
+              e("div",{style:{fontSize:"9px",color:C.tx,marginTop:"1px"}},piece.voc.sig.split(".")[0].slice(0,28))
+            )
+          );
+        })
+      ),
+      // detailed list
+      e("div",{style:{display:"flex",flexDirection:"column",gap:"7px"}},
+        decomp.map(function(piece,i){
+          var x=piece.voc;
+          var cat=CATS.find(function(c){return c.id===x.cat});
+          return e("div",{key:i,style:{padding:"10px 12px",background:"rgba(13,18,36,.8)",border:"1px solid "+C.bd,borderLeft:"3px solid "+cat.c,borderRadius:"10px"}},
+            e("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"3px"}},
+              e("span",{style:{fontFamily:"'JetBrains Mono',monospace",fontSize:"13px",fontWeight:700,color:cat.c}},x.tx),
+              e("span",{style:{fontSize:"8px",padding:"2px 5px",background:TIPO[x.t].c+"22",color:TIPO[x.t].c,borderRadius:"4px",fontWeight:700,textTransform:"uppercase"}},TIPO[x.t].l),
+              e("span",{style:{fontSize:"9px",color:C.dm}},cat.i)
+            ),
+            e("div",{style:{fontSize:"11px",color:C.mt,lineHeight:1.4}},x.sig.length>90?x.sig.slice(0,90)+"...":x.sig)
+          );
+        })
+      )
+    ),
+    decomp && decomp.length===0 && v.length>=3 && e("div",{style:{marginTop:"14px",padding:"14px",textAlign:"center",color:C.mt,fontSize:"12px",background:"rgba(13,18,36,.4)",borderRadius:"10px"}},"No encontré raíces reconocibles en \""+v+"\". Prueba con otras palabras como 'neumonía', 'artralgia', 'taquicardia'.")
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// CAT CARD
+// ══════════════════════════════════════════════════════════════
+function CatCard(props){
+  var c=props.c,cnt=props.cnt,onClick=props.onClick,active=props.active;
+  return e("div",{
+    onClick:onClick,
+    style:{
+      padding:"14px 12px",
+      background:active?"linear-gradient(135deg, "+c.c+"18 0%, "+c.c+"06 100%)":"linear-gradient(135deg, rgba(13,18,36,.8) 0%, rgba(13,18,36,.4) 100%)",
+      border:"1px solid "+(active?c.c+"77":C.bd),
+      borderRadius:"14px",
+      cursor:"pointer",
+      transition:"all .25s",
+      position:"relative",
+      overflow:"hidden"
+    }
+  },
+    active && e("div",{style:{position:"absolute",top:0,left:0,right:0,height:"2px",background:"linear-gradient(90deg,"+c.c+",transparent)"}}),
+    e("div",{style:{fontSize:"26px",marginBottom:"6px",filter:active?"none":"grayscale(.2)"}},c.i),
+    e("div",{style:{fontSize:"12px",fontWeight:700,color:C.tx,marginBottom:"3px",lineHeight:1.2}},c.n),
+    e("div",{style:{fontSize:"10px",color:C.mt,lineHeight:1.3,marginBottom:"7px"}},c.d),
+    e("div",{style:{display:"inline-flex",padding:"2px 7px",background:c.c+"22",color:c.c,borderRadius:"5px",fontSize:"10px",fontWeight:700}},cnt)
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// TERM CARD
+// ══════════════════════════════════════════════════════════════
+function TermCard(props){
+  var x=props.x,cat=props.cat,open=props.open,toggle=props.toggle;
+  return e("div",{
+    style:{
+      background:"linear-gradient(135deg, rgba(13,18,36,.95) 0%, rgba(13,18,36,.65) 100%)",
+      border:"1px solid "+(open?cat.c+"55":C.bd),
+      borderRadius:"14px",
+      overflow:"hidden",
+      transition:"all .3s",
+      boxShadow:open?"0 8px 24px -8px "+cat.c+"40":"none"
+    }
+  },
+    e("div",{
+      onClick:toggle,
+      style:{padding:"14px 16px",cursor:"pointer",display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:"10px"}
+    },
+      e("div",{style:{flex:1,minWidth:0}},
+        e("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"5px",flexWrap:"wrap"}},
+          e("span",{style:{fontFamily:"'JetBrains Mono',monospace",fontSize:"15px",fontWeight:700,color:TIPO[x.t].c,letterSpacing:"-.3px"}},x.tx),
+          e("span",{style:{fontSize:"9px",padding:"2px 6px",background:TIPO[x.t].c+"22",color:TIPO[x.t].c,borderRadius:"5px",fontWeight:700,textTransform:"uppercase",letterSpacing:".5px"}},TIPO[x.t].l)
+        ),
+        e("div",{style:{fontSize:"10px",color:C.dm,fontStyle:"italic",marginBottom:"5px"}},"⟨ "+x.or+" ⟩"),
+        !open && e("div",{style:{fontSize:"12px",color:C.mt,lineHeight:1.4}},x.sig.length>80?x.sig.slice(0,80)+"...":x.sig)
+      ),
+      e("div",{style:{fontSize:"18px",color:cat.c,transform:open?"rotate(180deg)":"rotate(0)",transition:"transform .3s"}},"▾")
+    ),
+    open && e("div",{style:{padding:"0 16px 16px",borderTop:"1px solid "+C.bd,animation:"fadeIn .3s"}},
+      e("div",{style:{paddingTop:"12px",marginBottom:"12px",fontSize:"13px",color:C.tx,lineHeight:1.5}},x.sig),
+      e("div",{style:{marginBottom:"12px"}},
+        e("div",{style:{fontSize:"10px",color:cat.c,fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:"7px"}},"◆ Ejemplos"),
+        e("div",{style:{display:"flex",flexDirection:"column",gap:"5px"}},
+          x.ej.map(function(ej,i){
+            return e("div",{key:i,style:{padding:"8px 11px",background:"rgba(6,10,20,.5)",border:"1px solid "+C.bd,borderLeft:"3px solid "+cat.c,borderRadius:"7px",fontSize:"12px",color:C.tx,lineHeight:1.4}},ej);
+          })
+        )
+      ),
+      e("div",{style:{padding:"9px 11px",background:"linear-gradient(135deg, "+cat.c+"15 0%, "+cat.c+"05 100%)",border:"1px solid "+cat.c+"33",borderRadius:"9px",fontSize:"11px",color:C.tx,lineHeight:1.4,fontWeight:500}},x.tip)
+    )
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// QUIZ
+// ══════════════════════════════════════════════════════════════
+function Quiz(props){
+  var qz=useMemo(function(){
+    var arr=VOC.slice().sort(function(){return Math.random()-.5}).slice(0,10);
+    return arr.map(function(x){
+      var others=VOC.filter(function(o){return o.tx!==x.tx&&o.cat!==x.cat}).sort(function(){return Math.random()-.5}).slice(0,3);
+      var shortDef=function(t){return t.sig.split(".")[0].slice(0,70)};
+      var opts=[shortDef(x)].concat(others.map(shortDef)).sort(function(){return Math.random()-.5});
+      return {p:"¿Qué significa "+x.tx+"?",o:opts,r:opts.indexOf(shortDef(x)),x:x.tip,or:x.or,cat:x.cat};
+    });
+  },[props.seed]);
+  var state=useState(0),i=state[0],setI=state[1];
+  var aState=useState(null),ans=aState[0],setAns=aState[1];
+  var sState=useState(0),score=sState[0],setScore=sState[1];
+  var dState=useState(false),done=dState[0],setDone=dState[1];
+  function pick(idx){
+    if(ans!==null)return;
+    setAns(idx);
+    if(idx===qz[i].r)setScore(score+1);
+  }
+  function next(){
+    if(i<qz.length-1){setI(i+1);setAns(null)}
+    else setDone(true);
+  }
+  function restart(){setI(0);setAns(null);setScore(0);setDone(false);props.restart()}
+  if(done){
+    var pct=Math.round(score/qz.length*100);
+    var col=pct>=80?"#34d399":pct>=50?"#fbbf24":"#ef4444";
+    var msg=pct>=80?"Dominio":pct>=50?"Vas bien":"Sigue practicando";
+    return e("div",{style:{padding:"32px 24px",background:"linear-gradient(135deg, "+col+"18 0%, "+col+"05 100%)",border:"1px solid "+col+"44",borderRadius:"18px",textAlign:"center"}},
+      e("div",{style:{fontSize:"52px",marginBottom:"10px",animation:"float 2s infinite"}},pct>=80?"🏆":pct>=50?"👍":"📚"),
+      e("div",{style:{fontSize:"42px",fontWeight:900,color:col,fontFamily:"'Playfair Display',serif",lineHeight:1}},score+"/"+qz.length),
+      e("div",{style:{fontSize:"13px",color:C.mt,marginTop:"4px",marginBottom:"4px"}},pct+"% de aciertos"),
+      e("div",{style:{fontSize:"14px",color:col,fontWeight:700,marginBottom:"20px"}},msg),
+      e("button",{
+        onClick:restart,
+        style:{padding:"12px 28px",background:col,color:"#060a14",border:"none",borderRadius:"12px",fontWeight:700,fontSize:"14px",cursor:"pointer"}
+      },"↻ Nuevo intento")
+    );
+  }
+  var q=qz[i];
+  return e("div",{style:{background:"rgba(13,18,36,.7)",border:"1px solid "+C.bd,borderRadius:"18px",padding:"20px",animation:"fadeIn .5s"}},
+    e("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"14px"}},
+      e("div",{style:{fontSize:"11px",color:C.mt,fontWeight:600,letterSpacing:"1px",textTransform:"uppercase"}},"Pregunta "+(i+1)+" / "+qz.length),
+      e("div",{style:{fontSize:"12px",color:"#fbbf24",fontWeight:700}},"🔥 "+score)
+    ),
+    e("div",{style:{height:"3px",background:"rgba(26,32,64,.5)",borderRadius:"2px",overflow:"hidden",marginBottom:"18px"}},
+      e("div",{style:{height:"100%",width:((i+1)/qz.length*100)+"%",background:"linear-gradient(90deg,#60a5fa,#a78bfa)",transition:"width .3s"}})
+    ),
+    e("div",{style:{fontFamily:"'Playfair Display',serif",fontSize:"19px",fontWeight:700,color:C.tx,marginBottom:"14px",lineHeight:1.3}},q.p),
+    e("div",{style:{display:"flex",flexDirection:"column",gap:"6px",marginBottom:"14px"}},
+      q.o.map(function(opt,idx){
+        var isR=ans!==null && idx===q.r;
+        var isW=ans===idx && idx!==q.r;
+        var bg=isR?"rgba(52,211,153,.15)":isW?"rgba(239,68,68,.15)":"rgba(6,10,20,.4)";
+        var br=isR?"#34d399":isW?"#ef4444":C.bd;
+        return e("button",{
+          key:idx,
+          onClick:function(){pick(idx)},
+          disabled:ans!==null,
+          style:{
+            padding:"11px 13px",
+            background:bg,
+            border:"1px solid "+br,
+            borderRadius:"10px",
+            color:C.tx,
+            textAlign:"left",
+            fontSize:"12px",
+            cursor:ans===null?"pointer":"default",
+            lineHeight:1.4
+          }
+        },
+          e("span",{style:{color:isR?"#34d399":isW?"#ef4444":C.ac2,fontWeight:700,marginRight:"8px"}},String.fromCharCode(65+idx)),
+          opt,
+          isR && e("span",{style:{float:"right",color:"#34d399",fontWeight:700}},"✓"),
+          isW && e("span",{style:{float:"right",color:"#ef4444",fontWeight:700}},"✗")
+        );
+      })
+    ),
+    ans!==null && e(F,null,
+      e("div",{style:{padding:"10px 12px",background:"rgba(251,191,36,.1)",border:"1px solid rgba(251,191,36,.3)",borderRadius:"10px",fontSize:"11px",color:C.tx,marginBottom:"6px",lineHeight:1.5}},"💡 "+q.x),
+      e("div",{style:{padding:"6px 10px",fontSize:"10px",color:C.dm,fontStyle:"italic",textAlign:"center",marginBottom:"8px"}},"⟨ "+q.or+" ⟩"),
+      e("button",{
+        onClick:next,
+        style:{width:"100%",padding:"12px",background:"linear-gradient(135deg,#3b82f6,#a78bfa)",color:"#fff",border:"none",borderRadius:"11px",fontWeight:700,fontSize:"14px",cursor:"pointer"}
+      },i<qz.length-1?"Siguiente →":"Ver resultado")
+    )
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// APP
+// ══════════════════════════════════════════════════════════════
+function App(){
+  var decState=useState("");var dec=decState[0],setDec=decState[1];
+  var catState=useState("all");var cat=catState[0],setCat=catState[1];
+  var searchState=useState("");var search=searchState[0],setSearch=searchState[1];
+  var typeState=useState("all");var tipo=typeState[0],setTipo=typeState[1];
+  var openState=useState({});var open=openState[0],setOpen=openState[1];
+  var viewState=useState("lib");var view=viewState[0],setView=viewState[1];
+  var qSeedState=useState(0);var qSeed=qSeedState[0],setQSeed=qSeedState[1];
+
+  var counts=useMemo(function(){
+    var map={};
+    CATS.forEach(function(c){map[c.id]=VOC.filter(function(x){return x.cat===c.id}).length});
+    return map;
+  },[]);
+
+  var filtered=useMemo(function(){
+    var list=VOC;
+    if(cat!=="all")list=list.filter(function(x){return x.cat===cat});
+    if(tipo!=="all")list=list.filter(function(x){return x.t===tipo});
+    if(search){
+      var q=search.toLowerCase();
+      list=list.filter(function(x){
+        return x.tx.toLowerCase().indexOf(q)>=0 || x.sig.toLowerCase().indexOf(q)>=0 || x.ej.some(function(j){return j.toLowerCase().indexOf(q)>=0});
+      });
+    }
+    return list;
+  },[cat,tipo,search]);
+
+  function toggleItem(k){
+    var n={};
+    Object.keys(open).forEach(function(x){n[x]=open[x]});
+    n[k]=!n[k];
+    setOpen(n);
+  }
+
+  return e("div",{style:{minHeight:"100vh",paddingBottom:"60px"}},
+    e("div",{style:{position:"sticky",top:0,zIndex:100,background:"rgba(6,10,20,.85)",backdropFilter:"blur(16px)",WebkitBackdropFilter:"blur(16px)",borderBottom:"1px solid "+C.bd,padding:"12px 20px",display:"flex",alignItems:"center",gap:"10px"}},
+      e("div",{style:{fontSize:"20px"}},"🧬"),
+      e("div",{style:{flex:1,minWidth:0}},
+        e("div",{style:{fontSize:"10px",color:C.dm,letterSpacing:"2px",textTransform:"uppercase",fontWeight:600}},"ECEPT › Generalidades"),
+        e("div",{style:{fontSize:"14px",color:C.tx,fontWeight:700}},"Vocabulario Médico")
+      )
+    ),
+    e(Hero,null),
+    e("div",{style:{display:"flex",gap:"6px",padding:"12px 20px 14px",overflowX:"auto"}},
+      [{k:"lib",l:"📚 Biblioteca"},{k:"dec",l:"🔎 Decoder"},{k:"ex",l:"✨ Ejemplos"},{k:"qz",l:"🎯 Quiz"}].map(function(t){
+        return e("button",{
+          key:t.k,
+          onClick:function(){setView(t.k)},
+          style:{
+            flex:"0 0 auto",
+            padding:"9px 14px",
+            background:view===t.k?"linear-gradient(135deg,#3b82f6,#a78bfa)":"rgba(13,18,36,.6)",
+            border:"1px solid "+(view===t.k?"transparent":C.bd),
+            borderRadius:"11px",
+            color:view===t.k?"#fff":C.mt,
+            fontSize:"12px",
+            fontWeight:700,
+            cursor:"pointer",
+            whiteSpace:"nowrap"
+          }
+        },t.l);
+      })
+    ),
+    view==="dec" && e(F,null,
+      e(SmartDecoder,{v:dec,set:setDec}),
+      !dec && e("div",{style:{padding:"0 20px"}},
+        e("div",{style:{padding:"16px",background:"rgba(13,18,36,.5)",border:"1px solid "+C.bd,borderRadius:"14px",fontSize:"13px",color:C.mt,lineHeight:1.6}},
+          e("div",{style:{fontSize:"11px",color:"#60a5fa",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:"10px"}},"◆ Cómo funciona"),
+          e("div",{style:{color:C.tx,marginBottom:"6px"}},"El decoder parte cualquier palabra médica en sus raíces reconocidas:"),
+          e("div",{style:{fontSize:"12px",marginTop:"6px",padding:"8px 10px",background:"rgba(6,10,20,.4)",borderRadius:"8px"}},"Ejemplo: ",e("span",{style:{color:"#60a5fa",fontFamily:"'JetBrains Mono',monospace"}},"pielonefritis")," → ",e("strong",{style:{color:"#34d399"}},"pielo")," + ",e("strong",{style:{color:"#fb7185"}},"nefr")," + ",e("strong",{style:{color:"#a78bfa"}},"itis")),
+          e("div",{style:{fontSize:"12px",marginTop:"6px",padding:"8px 10px",background:"rgba(6,10,20,.4)",borderRadius:"8px"}},"Ejemplo: ",e("span",{style:{color:"#60a5fa",fontFamily:"'JetBrains Mono',monospace"}},"hepatoesplenomegalia")," → ",e("strong",{style:{color:"#fb7185"}},"hepato")," + ",e("strong",{style:{color:"#fb7185"}},"esplen")," + ",e("strong",{style:{color:"#fbbf24"}},"megalia")),
+          e("div",{style:{marginTop:"12px",color:C.tx,fontStyle:"italic",fontSize:"12px"}},"Prueba: neumonía · taquicardia · osteoporosis · leucocitosis · broncoespasmo")
+        )
+      )
+    ),
+    view==="ex" && e("div",{style:{padding:"0 20px"}},
+      e("div",{style:{fontSize:"10px",color:C.dm,letterSpacing:"2px",textTransform:"uppercase",fontWeight:700,marginBottom:"12px"}},"◆ "+DEMOS.length+" palabras descompuestas"),
+      e("div",{style:{display:"flex",flexDirection:"column",gap:"10px"}},
+        DEMOS.map(function(d,i){return e(DemoCard,{key:d.id,d:d})})
+      )
+    ),
+    view==="qz" && e("div",{style:{padding:"0 20px"}},e(Quiz,{seed:qSeed,restart:function(){setQSeed(qSeed+1)}})),
+    view==="lib" && e(F,null,
+      e(WordOfDay,null),
+      e("div",{style:{padding:"0 20px 14px"}},
+        e("input",{
+          type:"text",
+          value:search,
+          onChange:function(ev){setSearch(ev.target.value)},
+          placeholder:"🔍 Buscar en "+VOC.length+" términos...",
+          style:{width:"100%",padding:"13px 16px",background:"rgba(13,18,36,.7)",border:"1px solid "+C.bd,borderRadius:"12px",color:C.tx,fontSize:"14px"}
+        })
+      ),
+      e("div",{style:{padding:"0 20px 10px",display:"flex",gap:"6px"}},
+        [{k:"all",l:"Todos",c:"#60a5fa"},{k:"p",l:"Prefijos",c:"#fbbf24"},{k:"s",l:"Sufijos",c:"#60a5fa"},{k:"w",l:"Términos",c:"#e879f9"}].map(function(t){
+          return e("button",{
+            key:t.k,
+            onClick:function(){setTipo(t.k)},
+            style:{
+              flex:1,
+              padding:"8px",
+              background:tipo===t.k?t.c+"22":"transparent",
+              border:"1px solid "+(tipo===t.k?t.c+"66":C.bd),
+              borderRadius:"10px",
+              color:tipo===t.k?t.c:C.mt,
+              fontSize:"11px",
+              fontWeight:700,
+              cursor:"pointer"
+            }
+          },t.l);
+        })
+      ),
+      e("div",{style:{padding:"0 20px 16px"}},
+        e("div",{style:{fontSize:"10px",color:C.dm,letterSpacing:"2px",textTransform:"uppercase",fontWeight:700,marginBottom:"10px"}},"◆ Categorías ("+CATS.length+")"),
+        e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(120px,1fr))",gap:"7px"}},
+          e("div",{
+            onClick:function(){setCat("all")},
+            style:{
+              padding:"14px 12px",
+              background:cat==="all"?"linear-gradient(135deg,rgba(59,130,246,.15),rgba(167,139,250,.08))":"linear-gradient(135deg,rgba(13,18,36,.8),rgba(13,18,36,.4))",
+              border:"1px solid "+(cat==="all"?"rgba(96,165,250,.6)":C.bd),
+              borderRadius:"14px",
+              cursor:"pointer"
+            }
+          },
+            e("div",{style:{fontSize:"26px",marginBottom:"6px"}},"🌐"),
+            e("div",{style:{fontSize:"12px",fontWeight:700,color:C.tx,marginBottom:"3px"}},"Todos"),
+            e("div",{style:{fontSize:"10px",color:C.mt}},"Biblioteca completa"),
+            e("div",{style:{marginTop:"7px",display:"inline-flex",padding:"2px 7px",background:"rgba(96,165,250,.2)",color:"#60a5fa",borderRadius:"5px",fontSize:"10px",fontWeight:700}},VOC.length)
+          ),
+          CATS.map(function(c){
+            return e(CatCard,{key:c.id,c:c,cnt:counts[c.id],active:cat===c.id,onClick:function(){setCat(c.id)}});
+          })
+        )
+      ),
+      e("div",{style:{padding:"0 20px"}},
+        e("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}},
+          e("div",{style:{fontSize:"10px",color:C.dm,letterSpacing:"2px",textTransform:"uppercase",fontWeight:700}},"◆ "+(cat==="all"?"Biblioteca":CATS.find(function(x){return x.id===cat}).n)),
+          e("div",{style:{fontSize:"11px",color:C.mt}},filtered.length+" resultados")
+        ),
+        filtered.length===0
+          ? e("div",{style:{padding:"40px 20px",textAlign:"center",color:C.mt,background:"rgba(13,18,36,.4)",borderRadius:"16px",border:"1px dashed "+C.bd}},
+              e("div",{style:{fontSize:"40px",marginBottom:"10px"}},"🔍"),
+              e("div",null,"Sin coincidencias")
+            )
+          : e("div",{style:{display:"flex",flexDirection:"column",gap:"7px"}},
+              filtered.map(function(x,i){
+                var cobj=CATS.find(function(c){return c.id===x.cat});
+                var k=x.cat+"_"+x.tx+"_"+i;
+                return e(TermCard,{key:k,x:x,cat:cobj,open:!!open[k],toggle:function(){toggleItem(k)}});
+              })
+            )
+      ),
+      e("div",{style:{margin:"40px 20px 0",padding:"24px 20px",background:"linear-gradient(135deg,rgba(96,165,250,.08),rgba(167,139,250,.08))",border:"1px solid "+C.bd,borderRadius:"18px",textAlign:"center"}},
+        e("div",{style:{fontSize:"28px",marginBottom:"10px"}},"🏛️"),
+        e("div",{style:{fontFamily:"'Playfair Display',serif",fontSize:"18px",color:C.tx,fontWeight:700,marginBottom:"4px"}},"El Conocimiento Es Para Todos"),
+        e("div",{style:{fontSize:"12px",color:C.mt,lineHeight:1.5,fontStyle:"italic"}},"La etimología médica es la llave maestra.",e("br",null),"Cada palabra es un mapa de significado."),
+        e("div",{style:{marginTop:"14px",fontSize:"10px",color:C.dm,letterSpacing:"1.5px"}},"ECEPT · v3.0 · "+VOC.length+" raíces · "+DEMOS.length+" demos")
+      )
+    )
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(e(App));
+</script>
+</body>
+</html>
