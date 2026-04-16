@@ -25,9 +25,9 @@ function TraumaEmbedView(props) {
         e("span", {style: {color: C.mt, fontWeight: 600}}, "Trauma \u2014 Unidad 1")
       )
     ),
-    // Iframe
+    // Iframe (srcdoc — artifact inlined at build time, no external file needed)
     e("iframe", {
-      src: "trauma_unidad_1.html",
+      srcDoc: TRAUMA_U1_HTML,
       style: {
         flex: 1, width: "100%", height: "calc(100vh - " + headerH + ")",
         border: "none", margin: 0, padding: 0, display: "block"

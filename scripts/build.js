@@ -41,6 +41,21 @@ var bundle = parts.map(function(f) {
 
 var output = shell.replace('/* BUNDLE */', bundle);
 
+// Inline trauma artifact as a JS variable (srcdoc avoids 404 on GitHub Pages)
+var artifactSrc = 'artifacts/trauma_unidad_1.html';
+if (fs.existsSync(artifactSrc)) {
+  var traumaRaw = fs.readFileSync(artifactSrc, 'utf8');
+  var traumaEscaped = traumaRaw
+    .replace(/\\/g, '\\\\')
+    .replace(/`/g, '\\`')
+    .replace(/\$\{/g, '\\${');
+  output = output.replace(
+    '/* TRAUMA_ARTIFACT_PLACEHOLDER */',
+    'var TRAUMA_U1_HTML = `' + traumaEscaped + '`;'
+  );
+  console.log('Inlined trauma_unidad_1.html as TRAUMA_U1_HTML (' + (traumaRaw.length / 1024).toFixed(0) + 'KB)');
+}
+
 fs.mkdirSync('build', { recursive: true });
 fs.writeFileSync('build/ECSC.html', output);
 fs.writeFileSync('index.html', output);
@@ -48,10 +63,3 @@ fs.writeFileSync('index.html', output);
 var sizeKB = (Buffer.byteLength(output, 'utf8') / 1024).toFixed(0);
 var lineCount = output.split('\n').length;
 console.log('Built build/ECSC.html + index.html: ' + sizeKB + 'KB, ' + lineCount + ' lines');
-
-// Copy standalone artifacts to build output (byte-identical)
-var artifactSrc = 'artifacts/trauma_unidad_1.html';
-if (fs.existsSync(artifactSrc)) {
-  fs.copyFileSync(artifactSrc, 'build/trauma_unidad_1.html');
-  console.log('Copied trauma_unidad_1.html to build/');
-}
