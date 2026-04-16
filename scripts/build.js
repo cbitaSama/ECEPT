@@ -41,19 +41,15 @@ var bundle = parts.map(function(f) {
 
 var output = shell.replace('/* BUNDLE */', bundle);
 
-// Inline trauma artifact as a JS variable (srcdoc avoids 404 on GitHub Pages)
+// Inline trauma artifact as base64 (avoids </script> collision in template literals)
 var artifactSrc = 'artifacts/trauma_unidad_1.html';
 if (fs.existsSync(artifactSrc)) {
   var traumaRaw = fs.readFileSync(artifactSrc, 'utf8');
-  var traumaEscaped = traumaRaw
-    .replace(/\\/g, '\\\\')
-    .replace(/`/g, '\\`')
-    .replace(/\$\{/g, '\\${');
-  output = output.replace(
-    '/* TRAUMA_ARTIFACT_PLACEHOLDER */',
-    'var TRAUMA_U1_HTML = `' + traumaEscaped + '`;'
-  );
-  console.log('Inlined trauma_unidad_1.html as TRAUMA_U1_HTML (' + (traumaRaw.length / 1024).toFixed(0) + 'KB)');
+  var traumaB64 = Buffer.from(traumaRaw).toString('base64');
+  var injection = 'var TRAUMA_U1_B64 = "' + traumaB64 + '";\n' +
+    'var TRAUMA_U1_HTML = atob(TRAUMA_U1_B64);';
+  output = output.replace('/* TRAUMA_ARTIFACT_PLACEHOLDER */', injection);
+  console.log('Inlined trauma_unidad_1.html as base64 (' + (traumaB64.length / 1024).toFixed(0) + 'KB encoded)');
 }
 
 fs.mkdirSync('build', { recursive: true });
