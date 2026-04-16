@@ -70,50 +70,53 @@ function globalSearch(q){
     var txt=stripAccents([s.t,s.x||""].concat(s.p).join(" ").toLowerCase());
     if(txt.indexOf(l)>-1) res.push({type:"inm",name:"🛡️ "+s.t,sub:"Generalidades — Inmunología",go:"general"});
   });
-  // ── Trauma Unidad 1: sub-topic search entries ──
-  var TRAUMA_SEARCH=[
-    // Generalidades
-    {name:"Generalidades y Deontología",sub:"Trauma · Generalidades",kw:"emergencia urgencia definiciones trauma policontuso politraumatizado deontologia"},
-    {name:"Consentimiento Informado",sub:"Trauma · Generalidades",kw:"consentimiento informado explicito implicito deontologia autonomia"},
-    {name:"Responsabilidad Profesional",sub:"Trauma · Generalidades",kw:"impericia negligencia imprudencia iatrogenia responsabilidad"},
-    {name:"Curva Trimodal de Mortalidad",sub:"Trauma · Generalidades",kw:"curva trimodal mortalidad hora de oro inmediata precoz tardia"},
-    {name:"Triage START",sub:"Trauma · Generalidades",kw:"triage start colores rojo amarillo verde negro victimas masivas manchester extrahospitalario intrahospitalario"},
-    // Vía Aérea
-    {name:"Manejo de la Vía Aérea",sub:"Trauma · Vía Aérea",kw:"via aerea obstruccion lengua manejo apertura"},
-    {name:"Maniobras Manuales",sub:"Trauma · Vía Aérea",kw:"subluxacion hiperextension traccion mandibular esmarch maniobra manual"},
-    {name:"Cánulas Faríngeas",sub:"Trauma · Vía Aérea",kw:"canula guedel berman mayo orofaringea nasofaringea faringea"},
-    {name:"Intubación Endotraqueal",sub:"Trauma · Vía Aérea",kw:"intubacion endotraqueal tubo laringoscopio macintosh miller magill murphy hi-lo"},
-    {name:"Secuencia Rápida de Intubación — SIR",sub:"Trauma · Vía Aérea",kw:"sir secuencia rapida intubacion midazolam succinilcolina fentanilo propofol ketamina"},
-    {name:"Cricotiroidotomía",sub:"Trauma · Vía Aérea",kw:"cricotiroidotomia via aerea quirurgica membrana cricotiroidea"},
-    {name:"Mallampati y Cormack-Lehane",sub:"Trauma · Vía Aérea",kw:"mallampati cormack lehane clasificacion via aerea dificil"},
-    // Politraumatizado
-    {name:"ABCDE del Trauma",sub:"Trauma · Politraumatizado",kw:"abcde abcdefg revision primaria primary survey airway breathing circulation disability exposure"},
-    {name:"Escala de Glasgow",sub:"Trauma · Politraumatizado",kw:"glasgow coma escala puntaje gcs apertura ocular respuesta motora verbal tec"},
-    {name:"Revisión Secundaria y AMPLE",sub:"Trauma · Politraumatizado",kw:"revision secundaria ample alergias medicamentos antecedentes ultima comida"},
-    {name:"Sonda Nasogástrica y Vesical",sub:"Trauma · Politraumatizado",kw:"sonda nasogastrica vesical lamina cribosa foley"},
-    {name:"Radiografías de Revisión Primaria",sub:"Trauma · Politraumatizado",kw:"radiografia rx cervical torax pelvis revision primaria"},
-    {name:"Traslado y Log-Roll",sub:"Trauma · Politraumatizado",kw:"traslado log roll tabla espinal collar cervical inmovilizacion"},
-    // Shock
-    {name:"Tipos de Shock",sub:"Trauma · Shock",kw:"shock hipovolemico distributivo cardiogenico obstructivo tipos clasificacion"},
-    {name:"Shock Neurogénico",sub:"Trauma · Shock",kw:"shock neurogenico hipotension bradicardia medular espinal vasodilatacion"},
-    {name:"Clasificación Hemorrágica",sub:"Trauma · Shock",kw:"hemorragia clasificacion hemorrágica grados sangrado taquicardia clase i ii iii iv perdida sanguinea"},
-    {name:"Tríada Letal del Trauma",sub:"Trauma · Shock",kw:"triada letal hipotermia acidosis coagulopatia"},
-    {name:"Reanimación con Líquidos",sub:"Trauma · Shock",kw:"reanimacion liquidos cristaloides ringer lactato transfusion volumen"},
-    {name:"Parámetros Hemodinámicos",sub:"Trauma · Shock",kw:"hemodinamico precarga pvc gasto cardiaco postcarga"},
-    // Tórax
-    {name:"Lesiones Letales del Tórax",sub:"Trauma · Tórax",kw:"lesiones letales torax seis seis letales"},
-    {name:"Neumotórax a Tensión",sub:"Trauma · Tórax",kw:"neumotorax tension desviacion traqueal timpanismo aguja descompresion segundo espacio intercostal"},
-    {name:"Neumotórax Abierto",sub:"Trauma · Tórax",kw:"neumotorax abierto aspirante aposito tres lados herida soplante"},
-    {name:"Hemotórax Masivo",sub:"Trauma · Tórax",kw:"hemotorax masivo toracotomia drenaje 1500 sangre"},
-    {name:"Volet Costal",sub:"Trauma · Tórax",kw:"volet costal torax inestable contusion pulmonar respiracion paradojica fracturas costales"},
-    {name:"Taponamiento Cardíaco",sub:"Trauma · Tórax",kw:"taponamiento cardiaco beck pericardiocentesis triada ingurgitacion yugular ruidos hipotension"},
-    {name:"Contusión Pulmonar",sub:"Trauma · Tórax",kw:"contusion pulmonar trauma torax parenquima"},
-    {name:"Asfixia Traumática",sub:"Trauma · Tórax",kw:"asfixia traumatica petequias compresion toracica cianosis"},
-    {name:"Puntos Anatómicos de Emergencia",sub:"Trauma · Tórax",kw:"puntos anatomicos toracocentesis toracostomia pericardiocentesis cricotiroidotomia 2 eic 5 eic xifoides linea medio clavicular"},
-    {name:"Drenaje Bajo Sello de Agua",sub:"Trauma · Tórax",kw:"drenaje sello de agua tubo toracico pleurevac"},
-    {name:"Toracotomía de Resucitación",sub:"Trauma · Tórax",kw:"toracotomia resucitacion anterolateral clampeo aorta"},
-    {name:"Lesión Aórtica",sub:"Trauma · Tórax",kw:"lesion aortica mediastino desaceleracion ensanchamiento"}
-  ];
+  // ── Trauma Unidad 1: native search entries (1 per sección) ──
+  // Generated from TRAUMA_SECCIONES + keyword aliases for high-value topics
+  // (e.g., "Neumotórax a Tensión", "Triada de Beck"). Each entry carries a
+  // secId so the click handler can route directly into the right sección via
+  // window._traumaFocus(secId) after vista flips to "trauma-u1".
+  var TRAUMA_TOPIC_LABEL={gen:"Generalidades",via:"Vía Aérea",poli:"Politraumatizado",shock:"Shock",torax:"Tórax"};
+  var TRAUMA_SEC_KW={
+    "gen-1":"emergencia urgencia trauma policontuso politraumatizado definiciones",
+    "gen-2":"deontologia consentimiento informado impericia negligencia imprudencia iatrogenia responsabilidad",
+    "gen-3":"curva trimodal mortalidad hora de oro inmediata precoz tardia 50 30 20",
+    "gen-4":"triage start colores rojo amarillo verde negro victimas masivas manchester extrahospitalario intrahospitalario",
+    "via-1":"via aerea obstruccion lengua signos cianosis estridor tiraje",
+    "via-2":"maniobras manuales subluxacion hiperextension traccion mandibular esmarch elevacion menton",
+    "via-3":"canula guedel berman mayo orofaringea nasofaringea robertazzi faringea",
+    "via-4":"intubacion endotraqueal tubo laringoscopio macintosh miller magill murphy hi-lo cuerdas vocales capnografia sellick complicaciones bronquio derecho",
+    "via-5":"sir secuencia rapida intubacion midazolam morfina fentanilo succinilcolina flumazenil naloxona atropina vecuronio etomidato",
+    "via-6":"cricotiroidotomia via aerea quirurgica membrana cricotiroidea mascara laringea LMA combitube",
+    "via-7":"mallampati cormack lehane clasificacion via aerea dificil paladar uvula glotis",
+    "poli-1":"trauma cerrado penetrante 80 20 pronostico evaluacion preparacion fast tac rx columna cervical torax pelvis",
+    "poli-2":"distribucion trimodal mortalidad hora de oro picos 50 30 20",
+    "poli-3":"prehospitalaria notificar inmovilizacion levanto y corro me quedo y actuo critico",
+    "poli-4":"abcde abcdefg revision primaria airway breathing circulation disability exposure neumotorax aposito 3 lados orden multiples lesiones",
+    "poli-5":"glasgow coma escala puntaje gcs apertura ocular respuesta motora verbal tec leve moderado grave intubar avdn",
+    "poli-6":"revision secundaria ample alergias medicamentos patologias libaciones eventos sondas nasogastrica vesical lamina cribosa foley uretra mapache battle diuresis oximetria",
+    "poli-7":"traslado log roll tabla espinal collar cervical inmovilizacion bloque normotermia",
+    "sh-1":"shock hipoperfusion tisular oxigenacion celular metabolismo anaerobio lactato acidosis disfuncion bomba ionica",
+    "sh-2":"fases shock noxa inicial preshock fom muerte compensada descompensada irreversible",
+    "sh-3":"triada letal shock hipotermia acidosis coagulopatia 35 grados ph 730",
+    "sh-4":"clasificacion shock tipos hipovolemico distributivo cardiogenico obstructivo septico anafilactico neurogenico iam tep taponamiento parametros hemodinamicos precarga gc rvp rvs",
+    "sh-5":"trampas clinicas shock neurogenico medular espinal hipotension bradicardia hemotorax 1000 cardiogenico llenado pvc yugulares",
+    "sh-6":"hemorragia clasificacion grados I II III IV taquicardia hipotension cristaloides hemoderivados secuestro sangre fractura femur pelvis tibia humero calculadora",
+    "sh-7":"diagnostico shock taquicardia hipotension oliguria pvc presion venosa central pulso radial femoral carotideo PAS estimada",
+    "sh-8":"manejo shock pam satO2 diuresis fluidoterapia ringer lactato transfusion 3 a 1 inotropicos vasopresores especifico hipovolemico septico cardiogenico obstructivo",
+    "sh-9":"no hacer shock errores rx inestable inotropicos hipovolemico saltar ab sondas prematuras",
+    "tx-1":"trauma torax definicion mecanismos cerrado penetrante aceleracion desaceleracion compresion electrocucion ippa caida 6 metros oxigeno suplementario",
+    "tx-2":"6 lesiones letales torax obstruccion neumotorax tension neumotorax abierto hemotorax masivo volet costal taponamiento beck Triada de Beck pericardiocentesis 1500 toracotomia",
+    "tx-3":"lesiones secundarias contusion pulmonar lesion traqueal neumotorax simple hemotorax mediastino aorta desaceleracion asfixia traumatica",
+    "tx-4":"puntos anatomicos toracocentesis toracostomia pericardiocentesis cricotiroidotomia 2 eic 5 eic xifoides linea medio clavicular sello de agua mnemotecnia"
+  };
+  var TRAUMA_SEARCH=TRAUMA_SECCIONES.map(function(s){
+    return {
+      secId: s.id,
+      name: s.title,
+      sub:  "Trauma · " + (TRAUMA_TOPIC_LABEL[s.topic] || s.topic),
+      kw:   TRAUMA_SEC_KW[s.id] || ""
+    };
+  });
   // ── Vocabulario Médico: sub-topic search entries ──
   var VOCAB_SEARCH=[
     {name:"Vocabulario Médico",sub:"Generalidades",kw:"vocabulario medico raices prefijos sufijos etimologia"},
@@ -135,7 +138,7 @@ function globalSearch(q){
   });
   TRAUMA_SEARCH.forEach(function(tt){
     var txt=stripAccents([tt.name,tt.sub,tt.kw].join(" ").toLowerCase());
-    if(txt.indexOf(l)>-1) res.push({type:"trauma",name:"🩸 "+tt.name,sub:tt.sub,go:"trauma-u1"});
+    if(txt.indexOf(l)>-1) res.push({type:"trauma",name:"🩸 "+tt.name,sub:tt.sub,go:"trauma-u1",secId:tt.secId});
   });
   // Remove duplicates by name
   var seen={};var unique=[];
