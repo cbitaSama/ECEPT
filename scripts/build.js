@@ -25,6 +25,7 @@ var parts = [
   'src/data/fisiologia.js',
   'src/data/generalidades.js',
   'src/data/trauma.js',
+  'src/data/vocabulario.js',
   'src/data/links.js',
   // components
   'src/components/SearchEngine.js',
@@ -43,6 +44,20 @@ var parts = [
   'src/components/BloqueRenderer.js',
   // trauma view (depends on BloqueRenderer + widgets + data)
   'src/components/TraumaView.js',
+  // vocab native: SVGs → decoder → components → view
+  'src/components/vocab/NeckSVG.js',
+  'src/components/vocab/HeartSVG.js',
+  'src/components/vocab/AbdSVG.js',
+  'src/components/vocab/WordSVG.js',
+  'src/components/vocab/DemoSVG.js',
+  'src/components/vocab/wordDecoder.js',
+  'src/components/vocab/WordOfDay.js',
+  'src/components/vocab/SmartDecoder.js',
+  'src/components/vocab/VocabQuiz.js',
+  'src/components/vocab/CatCard.js',
+  'src/components/vocab/TermCard.js',
+  'src/components/vocab/DemoCard.js',
+  'src/components/VocabularioView.js',
   // app
   'src/app.js'
 ];
@@ -171,7 +186,14 @@ var expectedGlobals = [
   'TRAUMA_TOPICS', 'TRAUMA_SECCIONES', 'TRAUMA_ETT', 'TRAUMA_ABCD', 'TRAUMA_LETHAL', 'TRAUMA_REPASO', 'TRAUMA_HUB',
   'function BloqueRenderer', 'function TraumaView',
   'function GlasgowCalculator', 'function HemorrhageCalculator', 'function ETTSelector',
-  'function ABCDEFGAccordion', 'function LethalLesionsGrid', 'function PuntosAnatomicos'
+  'function ABCDEFGAccordion', 'function LethalLesionsGrid', 'function PuntosAnatomicos',
+  // native vocab module
+  'VOCAB_CATS', 'VOCAB_VOC', 'VOCAB_DEMOS', 'VOCAB_TIPO',
+  'function vocabNormalize', 'function vocabCleanPart', 'function vocabDecomposeWord', 'function vocabWordOfDay',
+  'function NeckSVG', 'function HeartSVG', 'function AbdSVG', 'function WordSVG', 'function DemoSVG',
+  'function VocabWordOfDay', 'function VocabSmartDecoder', 'function VocabQuiz',
+  'function VocabCatCard', 'function VocabTermCard', 'function VocabDemoCard',
+  'function VocabularioView'
 ];
 expectedGlobals.forEach(function(g) {
   if (output.indexOf(g) === -1) errors.push('missing global: ' + g);

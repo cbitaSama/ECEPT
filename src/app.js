@@ -208,12 +208,8 @@ function App(){
       ),
       e("div",{onClick:function(){setSb(false)},style:{flex:1,background:"rgba(0,0,0,.6)"}})
     ),
-    // ════════════ VOCABULARIO MÉDICO (EMBED, full-bleed iframe) ════════════
-    // (Trauma now renders natively inside the content wrapper below.)
-    vista==="vocabulario"&&e(VocabularioEmbedView),
-
-    // ════════════ MAIN (content wrapper for all non-embed views) ════════════
-    vista!=="vocabulario"&&e("div",{style:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
+    // ════════════ MAIN (content wrapper — Trauma + Vocab now render natively inside) ════════════
+    e("div",{style:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
 
     // ════════════ HOME ════════════
     vista==="home"&&e(F,null,
@@ -423,6 +419,9 @@ function App(){
 
     // ════════════ TRAUMA — UNIDAD 1 (NATIVE) ════════════
     vista==="trauma-u1"&&e(TraumaView,{widgets:traumaWidgets,onBackRef:traumaBackRef}),
+
+    // ════════════ VOCABULARIO MÉDICO (NATIVE) ════════════
+    vista==="vocabulario"&&e(VocabularioView),
 
     // ════════════ QUEMADURAS ════════════
     vista==="cir_quem"&&e(F,null,
