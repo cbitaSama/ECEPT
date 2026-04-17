@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Mediadores de la Inflamación · ECEPT</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#060a14;font-family:'DM Sans',sans-serif;color:#e2e8f0;-webkit-tap-highlight-color:transparent;min-height:100vh;overflow-x:hidden;padding:20px 12px 60px}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#1a2040;border-radius:3px}
+button{font-family:inherit;-webkit-appearance:none;cursor:pointer;border:none;background:none;color:inherit}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+@keyframes slideRight{from{transform:translateX(-8px);opacity:0}to{transform:translateX(0);opacity:1}}
+.wrap{max-width:720px;margin:0 auto}
+.fade{animation:fadeIn .35s ease-out}
+.pulse{animation:pulse 2s ease-in-out infinite}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script>
+var e=React.createElement,F=React.Fragment;
+var useState=React.useState,useMemo=React.useMemo;
+
+// ══════════════════════════════════════════════════════════════
+// PALETTE (matches ECEPT theme.js)
+// ══════════════════════════════════════════════════════════════
+var C={bg:"#060a14",cd:"#0d1224",bd:"#1a2040",ac:"#3b82f6",ac2:"#60a5fa",tx:"#e2e8f0",mt:"#94a3b8",dm:"#64748b"};
+
+// Role color map
+var ROLE={
+  pro:{c:"#ef4444",bg:"rgba(239,68,68,.08)",bd:"rgba(239,68,68,.25)",l:"Pro-inflamatorio",i:"🔥"},
+  anti:{c:"#34d399",bg:"rgba(52,211,153,.08)",bd:"rgba(52,211,153,.25)",l:"Anti-inflamatorio",i:"🧊"},
+  dual:{c:"#fbbf24",bg:"rgba(251,191,36,.08)",bd:"rgba(251,191,36,.25)",l:"Dual / Regulador",i:"⚖️"},
+  vaso:{c:"#f472b6",bg:"rgba(244,114,182,.08)",bd:"rgba(244,114,182,.25)",l:"Vasoactivo",i:"💨"},
+  quim:{c:"#a78bfa",bg:"rgba(167,139,250,.08)",bd:"rgba(167,139,250,.25)",l:"Quimiotáctico",i:"🧭"}
+};
+
+// ══════════════════════════════════════════════════════════════
+// DATA · MEDIADORES DE LA INFLAMACIÓN
+// Cada mediador: {id, n(ombre), r(ol), o(rigen), f(unción), k(ey points[]), t(erapia?), p(earl?)}
+// ══════════════════════════════════════════════════════════════
+
+var FAMILIES=[
+  {id:"citok", n:"Citocinas & Interleucinas", i:"🧬", c:"#3b82f6",
+    d:"Proteínas de señalización entre células inmunitarias. IL=interleucinas (entre leucocitos), TNF=necrosis tumoral, IFN=interferones."},
+  {id:"eico", n:"Eicosanoides", i:"🔄", c:"#f472b6",
+    d:"Derivados del ácido araquidónico (AA). Vía COX → prostaglandinas/tromboxanos. Vía LOX → leucotrienos."},
+  {id:"comp", n:"Complemento", i:"💎", c:"#a78bfa",
+    d:"Cascada de ~30 proteínas plasmáticas. 3 vías: clásica (Ag-Ac), alternativa (patógenos), lectinas (manosa)."},
+  {id:"amin", n:"Aminas Vasoactivas", i:"💨", c:"#e879f9",
+    d:"Preformadas en gránulos. Liberación inmediata ante estímulo. Histamina y serotonina."},
+  {id:"pept", n:"Péptidos & Quininas", i:"🧩", c:"#fbbf24",
+    d:"Sistema calicreína-quinina. Bradicinina es el prototipo: dolor + vasodilatación + edema."},
+  {id:"nit",  n:"Radicales & Gases", i:"⚡", c:"#22d3ee",
+    d:"ROS, NO y gas H₂S. Mediadores difusibles con vida media muy corta."}
+];
+
+var MED=[
+
+// ───────── CITOCINAS / INTERLEUCINAS ─────────
+{id:"il1", fam:"citok", n:"IL-1 (α y β)", r:"pro", o:"Macrófagos, monocitos, células endoteliales",
+ f:"Pirógeno endógeno principal. Induce fiebre, activa linfocitos T, ↑ moléculas de adhesión endoteliales.",
+ k:["Junto con TNF-α y IL-6 = la TRIADA PROINFLAMATORIA","Induce fiebre actuando sobre el hipotálamo (vía PGE₂)","Activa COX-2 y iNOS","IL-1β requiere procesamiento por el inflamasoma (caspasa-1)"],
+ t:"Anakinra (antagonista del receptor), Canakinumab (anti-IL-1β). Usos: artritis reumatoide, Still, fiebres periódicas.",
+ p:"La fiebre de la gota, pseudogota y enfermedad de Still es mediada principalmente por IL-1."},
+
+{id:"il2", fam:"citok", n:"IL-2", r:"pro", o:"Linfocitos T CD4+ (Th1)",
+ f:"Factor de crecimiento de linfocitos T. Expande clonalmente células T activadas y NK.",
+ k:["Clave en la respuesta adaptativa temprana","Diana del inmunosupresor ciclosporina y tacrolimus (bloquean calcineurina → ↓ IL-2)","Aldesleukin (IL-2 recombinante) se usó en melanoma y cáncer renal"],
+ t:"Basiliximab (anti-CD25/receptor de IL-2) para rechazo de trasplante.",
+ p:"Ciclosporina, tacrolimus y sirolimus → todos terminan bloqueando la vía de IL-2."},
+
+{id:"il4", fam:"citok", n:"IL-4", r:"anti", o:"Linfocitos Th2, mastocitos, basófilos",
+ f:"Diferenciación a Th2. Switch de isotipo a IgE. INHIBE la respuesta Th1 y macrófagos M1.",
+ k:["⭐ SUPRIME IL-6 e IL-11 y otras citocinas proinflamatorias","Promueve alergia (IgE) y defensa antiparasitaria","Polariza macrófagos al fenotipo M2 (reparador)","Antagonista funcional de IFN-γ"],
+ t:"Dupilumab bloquea IL-4Rα (comparte con IL-13) — dermatitis atópica, asma eosinofílico.",
+ p:"IL-4/IL-13/IL-5 = eje Th2 (alergia). IL-4 es la 'pacificadora' que baja IL-6/11."},
+
+{id:"il5", fam:"citok", n:"IL-5", r:"pro", o:"Th2, mastocitos",
+ f:"Diferenciación y activación de EOSINÓFILOS. Prolonga su supervivencia tisular.",
+ k:["Elevada en asma eosinofílico, poliangeítis eosinofílica con granulomatosis (EGPA)","También en parasitosis tisulares (helmintos)","Sin IL-5 → sin eosinofilia significativa"],
+ t:"Mepolizumab, Reslizumab (anti-IL-5). Benralizumab (anti-IL-5Rα, depleta eosinófilos)."},
+
+{id:"il6", fam:"citok", n:"IL-6", r:"pro", o:"Macrófagos, fibroblastos, células T y endoteliales",
+ f:"Principal inductor de la respuesta de fase aguda hepática (PCR, fibrinógeno, hepcidina). Diferenciación de Th17.",
+ k:["⭐ PRINCIPAL inductor de PCR — por eso PCR es marcador indirecto de IL-6","Pirógeno (sube fiebre con IL-1 y TNF)","Hepcidina ↑ → secuestro de hierro → ANEMIA DE TRASTORNOS CRÓNICOS","Tormenta de citocinas (COVID grave, CAR-T): IL-6 es protagonista","IL-4 la BAJA"],
+ t:"Tocilizumab, Sarilumab (anti-IL-6R). AR, arteritis células gigantes, síndrome de liberación de citocinas.",
+ p:"Anemia en AR/LES crónico = hepcidina ↑ por IL-6. No dar hierro, tratar la inflamación."},
+
+{id:"il8", fam:"citok", n:"IL-8 (CXCL8)", r:"quim", o:"Macrófagos, endotelio",
+ f:"Quimiocina prototipo: atrae y activa NEUTRÓFILOS al sitio de inflamación.",
+ k:["Es la quimiocina por excelencia para PMN","↑ en infecciones bacterianas, IAM, IBD","Induce degranulación y burst oxidativo"],
+ p:"Si hay pus (PMN), IL-8 estuvo en la escena."},
+
+{id:"il10", fam:"citok", n:"IL-10", r:"anti", o:"Treg, macrófagos M2, Th2",
+ f:"Inmunosupresora potente. Apaga a los macrófagos y células dendríticas. Fin de la respuesta inflamatoria.",
+ k:["Junto con TGF-β = las principales ANTIINFLAMATORIAS","Su déficit → enfermedad inflamatoria intestinal grave pediátrica","Inhibe IL-1, IL-6, IL-12, TNF-α e IFN-γ"],
+ p:"IL-10 es el 'apaga-fuegos' del sistema. Déficit = inflamación descontrolada."},
+
+{id:"il11", fam:"citok", n:"IL-11", r:"pro", o:"Estroma medular, fibroblastos",
+ f:"Familia de IL-6 (comparte receptor gp130). Trombopoyetina secundaria. Reparación tisular (pero puede inducir fibrosis).",
+ k:["⭐ Sube junto con IL-6, y IL-4 también la SUPRIME","Estimula plaquetas (oprelvekin para trombocitopenia por QT)","Crecientes datos en fibrosis cardíaca, renal y pulmonar"]},
+
+{id:"il12", fam:"citok", n:"IL-12", r:"pro", o:"Células dendríticas, macrófagos",
+ f:"Polariza linfocitos T vírgenes hacia Th1 (defensa intracelular). Activa NK → IFN-γ.",
+ k:["Eje IL-12/IFN-γ = defensa contra micobacterias, Listeria, Leishmania","Déficit de receptor → susceptibilidad a micobacterias no tuberculosas"],
+ t:"Ustekinumab bloquea p40 (subunidad compartida con IL-23) — psoriasis, Crohn."},
+
+{id:"il13", fam:"citok", n:"IL-13", r:"pro", o:"Th2, mastocitos",
+ f:"Hermana funcional de IL-4. Hiperreactividad bronquial, producción de moco, fibrosis.",
+ k:["Clave en el asma alérgico y la dermatitis atópica","Comparte receptor con IL-4 (IL-4Rα)"],
+ t:"Dupilumab (bloquea IL-4Rα → también bloquea IL-13). Tralokinumab (anti-IL-13)."},
+
+{id:"il17", fam:"citok", n:"IL-17", r:"pro", o:"Linfocitos Th17",
+ f:"Reclutamiento de neutrófilos. Defensa antifúngica (Candida) y contra bacterias extracelulares.",
+ k:["Eje IL-23/IL-17 patogénico en psoriasis, espondilitis anquilosante, EII","Déficit (hiper-IgE / Job) → candidiasis mucocutánea crónica"],
+ t:"Secukinumab, Ixekizumab (anti-IL-17A). Brodalumab (anti-IL-17R)."},
+
+{id:"il23", fam:"citok", n:"IL-23", r:"pro", o:"Células dendríticas",
+ f:"Mantiene y expande la línea Th17. Sin IL-23, Th17 no se perpetúa.",
+ k:["Diana moderna en psoriasis (más selectiva que anti-p40)","Comparte subunidad p40 con IL-12"],
+ t:"Guselkumab, Risankizumab, Tildrakizumab (anti-p19 específicos de IL-23)."},
+
+{id:"tnfa", fam:"citok", n:"TNF-α", r:"pro", o:"Macrófagos activados, células T, NK",
+ f:"Master-regulator proinflamatorio. Activa endotelio, induce apoptosis, media shock séptico y caquexia.",
+ k:["⭐ Junto con IL-1 e IL-6 = triada proinflamatoria","Caquexia neoplásica y de infecciones crónicas","Induce ↑ moléculas de adhesión (ICAM, VCAM, E-selectina)","Granuloma se DESARMA sin TNF (riesgo de reactivar TBC con anti-TNF)"],
+ t:"Infliximab, Adalimumab, Etanercept, Golimumab, Certolizumab. AR, espondilitis, psoriasis, Crohn.",
+ p:"Antes de iniciar anti-TNF → PPD/IGRA obligatorio. Reactivación de TBC."},
+
+{id:"tgfb", fam:"citok", n:"TGF-β", r:"dual", o:"Plaquetas, macrófagos, Treg",
+ f:"Antiinflamatorio e inmunosupresor, PERO también induce fibrosis y diferenciación a Th17/Treg según contexto.",
+ k:["Induce diferenciación de Treg (junto con IL-2) y Th17 (junto con IL-6)","Clave en fibrosis pulmonar idiopática, cirrosis, esclerodermia","Promueve cicatrización pero también cicatriz patológica"],
+ p:"TGF-β es ambiguo: apaga inflamación pero enciende fibrosis."},
+
+{id:"ifng", fam:"citok", n:"IFN-γ", r:"pro", o:"Th1, NK, linfocitos T CD8",
+ f:"Activa macrófagos (M1), potencia MHC-I y MHC-II. Respuesta contra patógenos INTRACELULARES.",
+ k:["Activa el macrófago para fagocitar y formar granulomas","Quantiferon / IGRA se basa en la liberación de IFN-γ","Déficit del receptor → susceptibilidad a micobacterias"]},
+
+{id:"ifnab", fam:"citok", n:"IFN-α / IFN-β", r:"pro", o:"Leucocitos (α), fibroblastos (β), cualquier célula infectada",
+ f:"Antivirales. Inducen estado antiviral celular y activación de NK.",
+ k:["Firma de interferones tipo I está elevada en LES","Usados en hepatitis B y C (histórico), esclerosis múltiple (IFN-β)"],
+ t:"Anifrolumab (anti-IFN-α/β receptor) aprobado para LES."},
+
+// ───────── EICOSANOIDES ─────────
+{id:"pge2", fam:"eico", n:"Prostaglandina E₂ (PGE₂)", r:"vaso", o:"COX-1 y COX-2 en casi todas las células",
+ f:"Vasodilatación, dolor (hiperalgesia), fiebre, protección gástrica, ovulación, contracción uterina.",
+ k:["PGE₂ hipotalámica = causa DIRECTA de fiebre (por eso AINEs bajan fiebre)","Protectora de mucosa gástrica (COX-1) → por eso AINEs producen úlceras","Misoprostol = análogo PGE₁ → úlcera por AINEs, aborto, hemorragia postparto"],
+ t:"AINEs bloquean COX-1 y COX-2. Coxibs selectivos COX-2 (celecoxib) respetan mucosa gástrica pero ↑ riesgo CV."},
+
+{id:"pgi2", fam:"eico", n:"Prostaciclina (PGI₂)", r:"vaso", o:"Endotelio vascular (COX-2)",
+ f:"Potente VASODILATADOR e INHIBIDOR de la agregación plaquetaria. Antagonista funcional del TXA₂.",
+ k:["Producida por el endotelio sano","Balance PGI₂/TXA₂ = tono vascular y hemostasia","AAS a dosis baja mantiene PGI₂ (endotelio regenera COX) pero inhibe TXA₂ plaquetaria (irreversible)"],
+ t:"Epoprostenol, Iloprost, Treprostinil → hipertensión pulmonar."},
+
+{id:"txa2", fam:"eico", n:"Tromboxano A₂ (TXA₂)", r:"pro", o:"Plaquetas (COX-1)",
+ f:"Vasoconstrictor y agregante plaquetario. Antagonista del PGI₂.",
+ k:["AAS → inhibición IRREVERSIBLE de COX-1 plaquetaria → efecto antiagregante por 7-10 días (vida plaquetaria)","Las plaquetas son anucleadas → no regeneran COX → por eso AAS basta dosis baja (100 mg)"],
+ p:"AAS 100 mg: suficiente para inhibir TXA₂ plaquetaria sin tocar mucho la PGI₂ endotelial."},
+
+{id:"ltb4", fam:"eico", n:"Leucotrieno B₄ (LTB₄)", r:"quim", o:"Neutrófilos, macrófagos (vía LOX-5)",
+ f:"Potente QUIMIOTÁCTICO de neutrófilos. Favorece adhesión y degranulación.",
+ k:["Es el LT 'pro-neutrófilo'","Zileuton (inhibidor de 5-LOX) bloquea su síntesis"]},
+
+{id:"ltcde", fam:"eico", n:"Leucotrienos C₄ / D₄ / E₄ (SRS-A)", r:"pro", o:"Mastocitos, basófilos, eosinófilos (LOX-5)",
+ f:"Antiguamente llamados 'sustancia de reacción lenta de la anafilaxia' (SRS-A). Broncoconstricción POTENTE, ↑ permeabilidad, secreción de moco.",
+ k:["Mediadores clave del ASMA, sobre todo en asma por AINEs (Samter)","Broncoconstricción 1000x más potente que la histamina","Sí, responden a antileucotrienos"],
+ t:"Montelukast, Zafirlukast = antagonistas del receptor CysLT1. Zileuton = inhibidor de síntesis."},
+
+{id:"samter", fam:"eico", n:"⚠ Tríada de Samter (contexto)", r:"pro", o:"AINEs bloquean COX → acumula AA → se desvía a LOX → ↑ LTs",
+ f:"Asma + poliposis nasal + intolerancia a AAS/AINEs. Pseudoalergia mediada por leucotrienos.",
+ k:["Mecanismo: inhibición de COX redirige ácido araquidónico a producción de leucotrienos","Evitar TODOS los AINEs","Paracetamol en dosis < 1g suele ser tolerado"],
+ p:"Samter = el ejemplo clásico de por qué los leucotrienos importan clínicamente."},
+
+// ───────── COMPLEMENTO ─────────
+{id:"c3a_c5a", fam:"comp", n:"C3a / C5a (anafilotoxinas)", r:"pro", o:"Escisión de C3 y C5 en las 3 vías",
+ f:"Quimiotaxis de neutrófilos (C5a es el más potente), degranulación de mastocitos, ↑ permeabilidad, vasodilatación.",
+ k:["C5a = quimiotáctico MÁS potente del sistema","Anafilotoxina: imitan anafilaxia por liberación de histamina","C3a < C5a en potencia"]},
+
+{id:"c3b", fam:"comp", n:"C3b (opsonina)", r:"pro", o:"Escisión de C3",
+ f:"Opsoniza patógenos para fagocitosis por macrófagos y neutrófilos (receptor CR1).",
+ k:["Opsonina PRINCIPAL del sistema inmune innato","Déficit de C3 → infecciones piógenas recurrentes (encapsulados)"]},
+
+{id:"mac", fam:"comp", n:"C5b-9 (MAC)", r:"pro", o:"Ensamblaje terminal (C5b + C6-C9)",
+ f:"Complejo de Ataque a la Membrana. Poro transmembrana → lisis osmótica del patógeno (sobre todo Neisseria).",
+ k:["⭐ Déficit de C5-C9 → infecciones recurrentes por NEISSERIA (meningitis, gonococemia)","Eculizumab bloquea C5 → HPN y SHUa","Vacuna antimeningocócica obligatoria antes de eculizumab"]},
+
+{id:"c1inh", fam:"comp", n:"C1-inhibidor (regulador)", r:"anti", o:"Hepático",
+ f:"Inhibe C1 (vía clásica), calicreína y factores XII/XI. Controla complemento y bradicinina.",
+ k:["⭐ Déficit = ANGIOEDEMA HEREDITARIO (no responde a antihistamínicos ni corticoides)","Icatibant (antagonista bradicinina), C1-INH concentrado, Ecallantide"],
+ p:"Angioedema que no cede con adrenalina/antihistamínicos → pensar en déficit de C1-inhibidor."},
+
+// ───────── AMINAS VASOACTIVAS ─────────
+{id:"hist", fam:"amin", n:"Histamina", r:"vaso", o:"Mastocitos, basófilos (gránulos preformados)",
+ f:"PRIMER mediador liberado. Vasodilatación arteriolar, ↑ permeabilidad venular, broncoconstricción, prurito.",
+ k:["Receptores: H1 (alergia/inflamación), H2 (ácido gástrico), H3/H4 (SNC/inmunidad)","H1: loratadina, cetirizina, difenhidramina","H2: ranitidina (retirada), famotidina","Liberación triple respuesta de Lewis: eritema, edema, halo"],
+ p:"Reacción aguda = histamina. Reacción tardía mantenida = leucotrienos + citocinas."},
+
+{id:"sero", fam:"amin", n:"Serotonina (5-HT)", r:"vaso", o:"Plaquetas (97% del cuerpo en TGI)",
+ f:"Vasoconstricción, agregación plaquetaria secundaria, papel mínimo en inflamación cutánea humana.",
+ k:["Clínica inflamatoria menor que histamina en humanos","Clave en síndrome carcinoide (flush, diarrea, broncoespasmo)"]},
+
+// ───────── PÉPTIDOS / QUININAS ─────────
+{id:"brad", fam:"pept", n:"Bradicinina", r:"vaso", o:"Sistema calicreína-quinina (HMWK → bradicinina)",
+ f:"Vasodilatación, ↑ permeabilidad, DOLOR (activa nociceptores), broncoconstricción.",
+ k:["⭐ IECA inhiben degradación → acumulación → TOS y ANGIOEDEMA por IECA","Degradada por la ECA (kininasa II)","Los ARAII (losartán) NO causan este efecto"],
+ t:"Icatibant (antagonista B2) para angioedema por IECA o hereditario.",
+ p:"Paciente con tos seca al tomar enalapril = bradicinina acumulada. Cambiar a ARAII."},
+
+{id:"sp", fam:"pept", n:"Sustancia P", r:"pro", o:"Fibras C nociceptivas, linfocitos",
+ f:"Neuropéptido pro-inflamatorio. Vasodilatación, degranulación mastocitaria, dolor neurogénico.",
+ k:["Inflamación neurogénica (migraña, dermatitis por contacto irritativa)","Aprepitant (antagonista NK1) para náuseas/vómitos por QT"]},
+
+// ───────── RADICALES / GASES ─────────
+{id:"no", fam:"nit", n:"Óxido Nítrico (NO)", r:"dual", o:"eNOS (endotelial), iNOS (inducible, inflamatoria), nNOS (neuronal)",
+ f:"Vasodilatador potente (eNOS). En inflamación (iNOS): microbicida, pero en exceso causa shock séptico.",
+ k:["Nitratos/nitritos (nitroglicerina) → liberan NO → vasodilatación","iNOS inducido por TNF-α, IL-1 y LPS","Shock séptico: NO masivo → vasoplejía refractaria"],
+ t:"Azul de metileno (inhibe guanilato ciclasa) en shock vasopléjico refractario."},
+
+{id:"ros", fam:"nit", n:"ROS (especies reactivas de O₂)", r:"pro", o:"Neutrófilos (burst oxidativo), macrófagos, mitocondria",
+ f:"Microbicidas intracelulares: H₂O₂, OH·, O₂⁻, HOCl.",
+ k:["NADPH oxidasa: déficit → ENFERMEDAD GRANULOMATOSA CRÓNICA (Catalasa+: S.aureus, Aspergillus)","Mieloperoxidasa genera HOCl (hipoclorito = lejía biológica)","Daño colateral = lesión tisular inflamatoria"]}
+
+];
+
+// ══════════════════════════════════════════════════════════════
+// RELATIONS MAP (for dynamic connections)
+// ══════════════════════════════════════════════════════════════
+var REL=[
+  {from:"IL-4", to:["IL-6","IL-11"], label:"suprime", color:"#34d399"},
+  {from:"IL-10", to:["IL-1","IL-6","TNF-α","IFN-γ"], label:"apaga", color:"#34d399"},
+  {from:"TNF-α", to:["IL-1","IL-6"], label:"induce", color:"#ef4444"},
+  {from:"IL-6", to:["PCR","fibrinógeno","hepcidina"], label:"induce fase aguda", color:"#ef4444"}
+];
+
+// ══════════════════════════════════════════════════════════════
+// COMPONENTS
+// ══════════════════════════════════════════════════════════════
+
+function Header(){
+  return e("div",{style:{textAlign:"center",marginBottom:"22px"}},
+    e("div",{style:{fontSize:"44px",marginBottom:"4px"}},"🔥"),
+    e("h1",{style:{fontFamily:"'Playfair Display',serif",fontSize:"26px",fontWeight:900,
+      background:"linear-gradient(135deg,#ef4444 0%,#f472b6 50%,#a78bfa 100%)",
+      WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",letterSpacing:"-0.5px"}},
+      "Mediadores de la Inflamación"),
+    e("p",{style:{color:C.dm,fontSize:"12px",letterSpacing:"1px",textTransform:"uppercase",marginTop:"4px"}},
+      "Citocinas · Eicosanoides · Complemento · Quininas"),
+    e("div",{style:{marginTop:"10px",display:"inline-flex",gap:"6px",padding:"5px 14px",
+      background:"rgba(59,130,246,.08)",borderRadius:"20px",border:"1px solid rgba(59,130,246,.18)"}},
+      e("span",{style:{fontSize:"10px",color:C.ac,fontWeight:700,letterSpacing:"1.5px"}},
+        MED.length+" MEDIADORES · "+FAMILIES.length+" FAMILIAS"))
+  );
+}
+
+function Legend(){
+  return e("div",{style:{display:"flex",flexWrap:"wrap",gap:"6px",justifyContent:"center",marginBottom:"18px"}},
+    Object.keys(ROLE).map(function(k){
+      var r=ROLE[k];
+      return e("div",{key:k,style:{display:"inline-flex",alignItems:"center",gap:"5px",padding:"4px 10px",
+        background:r.bg,border:"1px solid "+r.bd,borderRadius:"12px",fontSize:"10px",fontWeight:600,color:r.c}},
+        e("span",null,r.i),
+        e("span",null,r.l))
+    })
+  );
+}
+
+function FamilyTabs(props){
+  return e("div",{style:{display:"flex",gap:"6px",overflowX:"auto",paddingBottom:"8px",marginBottom:"14px",
+    scrollbarWidth:"thin"}},
+    [{id:"all",n:"Todos",i:"⚪",c:C.ac}].concat(FAMILIES).map(function(f){
+      var active=props.active===f.id;
+      var count=f.id==="all"?MED.length:MED.filter(function(m){return m.fam===f.id}).length;
+      return e("button",{key:f.id,onClick:function(){props.set(f.id)},
+        style:{padding:"9px 14px",borderRadius:"11px",whiteSpace:"nowrap",
+          background:active?f.c+"18":C.cd,
+          border:"1px solid "+(active?f.c+"55":C.bd),
+          color:active?f.c:C.mt,fontSize:"12px",fontWeight:700,
+          display:"flex",alignItems:"center",gap:"6px",transition:"all .2s",flexShrink:0}},
+        e("span",{style:{fontSize:"14px"}},f.i),
+        e("span",null,f.n),
+        e("span",{style:{padding:"1px 6px",borderRadius:"6px",fontSize:"9px",fontWeight:800,
+          background:active?f.c+"25":"rgba(255,255,255,.04)",color:active?f.c:C.dm}},count))
+    })
+  );
+}
+
+function RoleFilter(props){
+  return e("div",{style:{display:"flex",gap:"5px",flexWrap:"wrap",marginBottom:"18px"}},
+    [{id:"all",l:"Todos los roles",c:C.mt}].concat(Object.keys(ROLE).map(function(k){
+      return {id:k,l:ROLE[k].l,c:ROLE[k].c,i:ROLE[k].i}
+    })).map(function(rf){
+      var active=props.active===rf.id;
+      return e("button",{key:rf.id,onClick:function(){props.set(rf.id)},
+        style:{padding:"6px 10px",borderRadius:"8px",
+          background:active?rf.c+"15":"transparent",
+          border:"1px solid "+(active?rf.c+"40":C.bd),
+          color:active?rf.c:C.dm,fontSize:"10.5px",fontWeight:600,
+          display:"inline-flex",alignItems:"center",gap:"4px",transition:"all .15s"}},
+        rf.i&&e("span",null,rf.i),
+        e("span",null,rf.l))
+    })
+  );
+}
+
+function SearchBar(props){
+  return e("div",{style:{position:"relative",marginBottom:"14px"}},
+    e("input",{value:props.q,onChange:function(ev){props.set(ev.target.value)},
+      placeholder:"Buscar mediador, función, fármaco...",
+      style:{width:"100%",padding:"11px 14px 11px 38px",background:C.cd,border:"1px solid "+C.bd,
+        borderRadius:"11px",color:C.tx,fontSize:"13px",outline:"none",fontFamily:"inherit"}}),
+    e("span",{style:{position:"absolute",left:"13px",top:"50%",transform:"translateY(-50%)",
+      fontSize:"14px",opacity:.6}},"🔎")
+  );
+}
+
+function MediatorCard(props){
+  var m=props.m,role=ROLE[m.r],fam=FAMILIES.filter(function(f){return f.id===m.fam})[0];
+  var open=props.open;
+  return e("div",{onClick:props.toggle,
+    className:"fade",
+    style:{background:C.cd,border:"1px solid "+(open?role.bd.replace(".25",".5"):C.bd),
+      borderRadius:"14px",marginBottom:"10px",overflow:"hidden",cursor:"pointer",
+      borderLeft:"3px solid "+role.c,transition:"border-color .2s"}},
+    // Header
+    e("div",{style:{padding:"14px 16px",display:"flex",alignItems:"center",gap:"12px"}},
+      e("div",{style:{flexShrink:0,width:"38px",height:"38px",borderRadius:"10px",
+        background:role.bg,border:"1px solid "+role.bd,
+        display:"flex",alignItems:"center",justifyContent:"center",fontSize:"18px"}},role.i),
+      e("div",{style:{flex:1,minWidth:0}},
+        e("div",{style:{display:"flex",alignItems:"center",gap:"6px",flexWrap:"wrap",marginBottom:"2px"}},
+          e("h3",{style:{fontSize:"15px",fontWeight:700,color:C.tx,fontFamily:"'DM Sans',sans-serif"}},m.n),
+          e("span",{style:{fontSize:"9px",padding:"1px 6px",borderRadius:"5px",
+            background:fam.c+"15",color:fam.c,fontWeight:700,letterSpacing:".5px"}},fam.n.split(" ")[0].toUpperCase())
+        ),
+        e("p",{style:{fontSize:"11.5px",color:C.mt,lineHeight:1.4,
+          overflow:"hidden",textOverflow:"ellipsis",display:"-webkit-box",
+          WebkitLineClamp:open?10:2,WebkitBoxOrient:"vertical"}},m.f)
+      ),
+      e("span",{style:{fontSize:"11px",color:role.c,transform:open?"rotate(180deg)":"none",
+        transition:"transform .25s",flexShrink:0}},"▼")
+    ),
+    // Expanded content
+    open&&e("div",{className:"fade",style:{borderTop:"1px solid "+C.bd,padding:"14px 16px",
+      background:"rgba(0,0,0,.15)"}},
+      // Origen
+      e("div",{style:{marginBottom:"12px"}},
+        e("div",{style:{fontSize:"9px",fontWeight:800,color:C.dm,letterSpacing:"1.5px",
+          textTransform:"uppercase",marginBottom:"4px"}},"📍 Origen"),
+        e("p",{style:{fontSize:"12.5px",color:C.tx,lineHeight:1.5}},m.o)
+      ),
+      // Key points
+      m.k&&m.k.length>0&&e("div",{style:{marginBottom:m.t||m.p?"12px":0}},
+        e("div",{style:{fontSize:"9px",fontWeight:800,color:C.dm,letterSpacing:"1.5px",
+          textTransform:"uppercase",marginBottom:"6px"}},"🎯 Puntos clave"),
+        e("div",{style:{display:"flex",flexDirection:"column",gap:"6px"}},
+          m.k.map(function(kp,i){
+            return e("div",{key:i,style:{display:"flex",gap:"8px",alignItems:"flex-start",
+              fontSize:"12.5px",color:C.tx,lineHeight:1.55,
+              animation:"slideRight .3s ease-out backwards",animationDelay:(i*60)+"ms"}},
+              e("span",{style:{color:role.c,flexShrink:0,fontWeight:700,marginTop:"1px"}},"▸"),
+              e("span",{dangerouslySetInnerHTML:{__html:kp.replace(/\*\*(.+?)\*\*/g,'<strong style="color:'+role.c+'">$1</strong>')}}))
+          })
+        )
+      ),
+      // Therapy
+      m.t&&e("div",{style:{marginBottom:m.p?"12px":0,padding:"10px 12px",
+        background:"rgba(59,130,246,.06)",borderLeft:"2px solid "+C.ac,borderRadius:"0 8px 8px 0"}},
+        e("div",{style:{fontSize:"9px",fontWeight:800,color:C.ac,letterSpacing:"1.5px",
+          textTransform:"uppercase",marginBottom:"4px"}},"💊 Farmacología"),
+        e("p",{style:{fontSize:"12px",color:C.tx,lineHeight:1.55}},m.t)
+      ),
+      // Pearl
+      m.p&&e("div",{style:{padding:"10px 12px",background:"rgba(251,191,36,.06)",
+        borderLeft:"2px solid #fbbf24",borderRadius:"0 8px 8px 0"}},
+        e("div",{style:{fontSize:"9px",fontWeight:800,color:"#fbbf24",letterSpacing:"1.5px",
+          textTransform:"uppercase",marginBottom:"4px"}},"💎 Perla"),
+        e("p",{style:{fontSize:"12px",color:C.tx,lineHeight:1.55,fontStyle:"italic"}},m.p)
+      )
+    )
+  );
+}
+
+function RelationsPanel(){
+  var _u=useState(false),show=_u[0],setShow=_u[1];
+  return e("div",{style:{marginBottom:"18px"}},
+    e("button",{onClick:function(){setShow(!show)},
+      style:{width:"100%",padding:"12px 14px",background:C.cd,border:"1px solid "+C.bd,
+        borderRadius:"11px",display:"flex",alignItems:"center",justifyContent:"space-between",
+        color:C.tx,fontWeight:600,fontSize:"13px"}},
+      e("span",{style:{display:"flex",alignItems:"center",gap:"8px"}},
+        e("span",{style:{fontSize:"16px"}},"🔗"),
+        e("span",null,"Red de interacciones clave")),
+      e("span",{style:{fontSize:"10px",color:C.dm,transform:show?"rotate(180deg)":"none",transition:"transform .2s"}},"▼")
+    ),
+    show&&e("div",{className:"fade",style:{marginTop:"8px",padding:"14px",background:C.cd,
+      border:"1px solid "+C.bd,borderRadius:"11px"}},
+      REL.map(function(r,i){
+        return e("div",{key:i,style:{padding:"10px 0",borderBottom:i<REL.length-1?"1px dashed "+C.bd:"none"}},
+          e("div",{style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap",fontSize:"12px"}},
+            e("span",{style:{padding:"3px 8px",borderRadius:"6px",background:r.color+"15",
+              color:r.color,fontWeight:700,fontSize:"11px"}},r.from),
+            e("span",{style:{color:r.color,fontWeight:600,fontSize:"10.5px",fontStyle:"italic"}},
+              "— "+r.label+" →"),
+            r.to.map(function(t,j){
+              return e("span",{key:j,style:{padding:"3px 8px",borderRadius:"6px",
+                background:"rgba(255,255,255,.04)",color:C.mt,fontWeight:600,fontSize:"11px"}},t)
+            })
+          )
+        )
+      })
+    )
+  );
+}
+
+function QuickFacts(){
+  var facts=[
+    {t:"Triada pirógena",v:"IL-1 + IL-6 + TNF-α",c:"#ef4444"},
+    {t:"PCR la induce",v:"IL-6 (por eso sube en inflamación)",c:"#f472b6"},
+    {t:"IL-4 suprime",v:"IL-6 e IL-11",c:"#34d399"},
+    {t:"Antiinflamatorias",v:"IL-4, IL-10, TGF-β",c:"#34d399"},
+    {t:"Asma — mediador clave",v:"Leucotrienos (LTC₄/D₄/E₄)",c:"#a78bfa"},
+    {t:"Angioedema hereditario",v:"Déficit de C1-inhibidor",c:"#22d3ee"},
+    {t:"MAC deficit → infección por",v:"Neisseria (meningitis, GC)",c:"#fbbf24"},
+    {t:"Tos por IECA",v:"Bradicinina acumulada",c:"#e879f9"}
+  ];
+  return e("div",{style:{marginBottom:"18px"}},
+    e("div",{style:{fontSize:"10px",fontWeight:800,color:C.dm,letterSpacing:"2px",
+      textTransform:"uppercase",marginBottom:"8px",paddingLeft:"4px"}},"⚡ Datos fulminantes"),
+    e("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"6px"}},
+      facts.map(function(f,i){
+        return e("div",{key:i,style:{padding:"10px 12px",background:C.cd,
+          border:"1px solid "+C.bd,borderRadius:"10px",borderLeft:"2px solid "+f.c}},
+          e("div",{style:{fontSize:"9px",color:f.c,fontWeight:700,letterSpacing:".5px",
+            textTransform:"uppercase",marginBottom:"3px"}},f.t),
+          e("div",{style:{fontSize:"11.5px",color:C.tx,fontWeight:600,lineHeight:1.3}},f.v)
+        )
+      })
+    )
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// APP
+// ══════════════════════════════════════════════════════════════
+function App(){
+  var _f=useState("all"),fam=_f[0],setFam=_f[1];
+  var _r=useState("all"),rol=_r[0],setRol=_r[1];
+  var _q=useState(""),q=_q[0],setQ=_q[1];
+  var _o=useState(null),open=_o[0],setOpen=_o[1];
+
+  var filtered=useMemo(function(){
+    var l=q.toLowerCase();
+    return MED.filter(function(m){
+      if(fam!=="all"&&m.fam!==fam) return false;
+      if(rol!=="all"&&m.r!==rol) return false;
+      if(!l) return true;
+      var hay=(m.n+" "+m.f+" "+m.o+" "+(m.t||"")+" "+(m.p||"")+" "+(m.k||[]).join(" ")).toLowerCase();
+      return hay.indexOf(l)>-1;
+    });
+  },[fam,rol,q]);
+
+  var familyDesc=fam==="all"?null:FAMILIES.filter(function(f){return f.id===fam})[0];
+
+  return e("div",{className:"wrap"},
+    e(Header,null),
+    e(Legend,null),
+    e(SearchBar,{q:q,set:setQ}),
+    e(FamilyTabs,{active:fam,set:function(x){setFam(x);setOpen(null)}}),
+    familyDesc&&e("div",{className:"fade",style:{padding:"11px 14px",marginBottom:"14px",
+      background:familyDesc.c+"0c",border:"1px solid "+familyDesc.c+"30",borderRadius:"10px",
+      display:"flex",gap:"10px",alignItems:"flex-start"}},
+      e("span",{style:{fontSize:"20px",flexShrink:0}},familyDesc.i),
+      e("p",{style:{fontSize:"12px",color:C.mt,lineHeight:1.5}},familyDesc.d)),
+    e(RoleFilter,{active:rol,set:setRol}),
+    fam==="all"&&!q&&rol==="all"&&e(QuickFacts,null),
+    fam==="all"&&!q&&rol==="all"&&e(RelationsPanel,null),
+    // Results count
+    e("div",{style:{fontSize:"10px",color:C.dm,fontWeight:700,letterSpacing:"1.5px",
+      textTransform:"uppercase",marginBottom:"10px",paddingLeft:"4px"}},
+      filtered.length+" "+(filtered.length===1?"resultado":"resultados")),
+    // List
+    filtered.length===0?
+      e("div",{style:{textAlign:"center",padding:"40px 20px",color:C.dm}},
+        e("div",{style:{fontSize:"32px",marginBottom:"8px",opacity:.4}},"🔍"),
+        e("p",{style:{fontSize:"13px"}},"Sin resultados. Probá otro filtro o término.")):
+      filtered.map(function(m){
+        return e(MediatorCard,{key:m.id,m:m,open:open===m.id,
+          toggle:function(){setOpen(open===m.id?null:m.id)}})
+      })
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(e(App,null));
+</script>
+</body>
+</html>
