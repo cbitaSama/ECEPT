@@ -160,10 +160,115 @@ Estructuras paralelas al resto de módulos con quiz.
 // Debe declararse DESPUÉS de TR (usa TR.length en triadas card).
 ```
 
+## Trauma — `src/data/trauma.js`
+
+Usa la **bloque-schema** nativa (ver sección siguiente).
+
+### `TRAUMA_TOPICS` (5 temas)
+```js
+{id, num, chip, title, accent, desc, chips[]}
+// id: "gen"|"via"|"poli"|"shock"|"torax"
+// num: "00"|"01"|"02"|"03"|"04"  (label del hub)
+// chip: etiqueta tipográfica
+// accent: color hex por tema
+// desc: descripción corta en el hub
+// chips[]: etiquetas cortas listadas bajo la descripción
+```
+
+### `TRAUMA_SECCIONES` (31 secciones)
+```js
+{id, topic, title, bloques: []}
+// id: "gen-1", "via-4", "poli-5", "sh-3", "tx-2", ...
+// topic: ref a TRAUMA_TOPICS.id
+// bloques: array de primitivas (ver bloque-schema abajo)
+```
+
+### `TRAUMA_ETT` (9 filas — selector endotraqueal)
+```js
+{l, s, b, p, r}
+// l: etiqueta de paciente ("Mujer adulta", "Prematuro", ...)
+// s: tamaño ("7.0 – 7.5"), b: balón, p: profundidad, r: rama
+```
+
+### `TRAUMA_ABCD` (5 pasos)
+```js
+{letter, title, body: [...bloques]}
+```
+
+### `TRAUMA_LETHAL` (6 lesiones)
+```js
+{n, t, body: [...bloques]}
+```
+
+### `TRAUMA_REPASO` (5 bloques del modal)
+```js
+{accent, title, pairs: [[dt, dd], ...]}
+// dt/dd soportan HTML inline
+```
+
+### `TRAUMA_HUB`
+```js
+{eyebrow, title, sub, stats: [{ico, label}]}
+```
+
+## Vocabulario — `src/data/vocabulario.js`
+
+### `VOCAB_CATS` (14 categorías)
+```js
+{id, n, i, c, d}   // id slug, nombre, emoji, color hex, descripción
+```
+
+### `VOCAB_VOC` (373 entradas)
+```js
+{cat, t, tx, or, sig, ej[], tip}
+// cat: ref a VOCAB_CATS.id
+// t: "p" (prefijo) | "s" (sufijo) | "w" (término)
+// tx: el morfema ("-tomía", "leuco-", "Esteatosis")
+// or: etimología ("Griego: tomḗ (corte)")
+// sig: definición en español
+// ej: array de ejemplos clínicos
+// tip: regla mnemotécnica con emoji
+```
+
+### `VOCAB_DEMOS` (10 decomposiciones animadas)
+```js
+{id, w, sub, type, p: [{s, m, c, d}], rev}
+// type: "neck" | "heart" | "abd" | "word"  (router a SVG)
+// p: partes del morfema (símbolo, significado, color, descripción)
+// rev: texto de "la clave" que aparece al final de la animación
+```
+
+### `VOCAB_TIPO`
+```js
+{s: {l, c}, p: {l, c}, w: {l, c}}
+// label + color por tipo de entrada
+```
+
+## Bloque-schema (Trauma)
+
+Usada por `TRAUMA_SECCIONES[*].bloques` y por los bodies de `TRAUMA_ABCD` y `TRAUMA_LETHAL`. Cada bloque es uno de:
+
+```js
+{k:"p",       html}                              // párrafo (HTML inline permitido)
+{k:"h3",      text}                              // subtítulo
+{k:"h4",      text}                              // subtítulo menor (estilo mayúsculas)
+{k:"list",    ordered?, items: []}               // ul o ol (items admiten HTML)
+{k:"table",   compact?, headers: [], rows: [[]], hi?: [rowIdx]}
+{k:"callout", tone, title?, html?, items?}       // tone: blue|green|purple|yellow|red|orange
+{k:"pearl",   ico?, html}                        // perla clínica (naranja)
+{k:"danger",  ico?, html}                        // alerta roja
+{k:"trap",    ico?, html}                        // "TRAMPA DE EXAMEN"
+{k:"cards",   layout, items: [...]}              // layout: triage|drug|card
+{k:"widget",  name}                              // name: glasgow|hemorrhage|ett|abcdefg|lethal|anat_pts
+{k:"link",    to?|jump?, label}                  // linkbadge clickeable; to=sec_id, jump=topic_id
+```
+
+`BloqueRenderer` (`src/components/BloqueRenderer.js`) mapea cada primitiva a su JSX correspondiente. Para widgets, el componente padre pasa un `widgets` map por props (`{glasgow:GlasgowCalculator, ...}`).
+
 ## Convenciones transversales
 
 - **IDs** son strings cortos en `snake_case` o slug con guión.
 - **Colores** son hex (`#rrggbb`) — el alpha (`+color+"15"`) se concatena al renderizar.
 - **Iconos** son emojis Unicode directos.
-- **Quiz** sigue el shape `{p, o[], r, x}` en todos los módulos (unificado).
-- **Búsqueda**: cada módulo se indexa en `src/components/SearchEngine.js#globalSearch`. Para agregar un nuevo módulo al buscador, agregar un `forEach` allí que empuje resultados con `{type, name, sub, go}`.
+- **Quiz** sigue el shape `{p, o[], r, x}` en todos los módulos (unificado). Vocabulario genera quizzes dinámicamente en runtime desde `VOCAB_VOC`.
+- **Búsqueda**: cada módulo se indexa en `src/components/SearchEngine.js#globalSearch`. Para agregar un nuevo módulo al buscador, agregar un `forEach` allí que empuje resultados con `{type, name, sub, go}` (+ opcionalmente `secId` o `vocTx` para focus interno).

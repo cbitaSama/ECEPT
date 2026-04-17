@@ -29,6 +29,10 @@ function App(){
   // ─── NAVIGATION ─── back-button history stack
   s=_([]); var hist=s[0],setHist=s[1];
 
+  // Native trauma view back-handler ref + widget registry
+  var traumaBackRef=useRef(null);
+  var traumaWidgets={glasgow:GlasgowCalculator,hemorrhage:HemorrhageCalculator,ett:ETTSelector,abcdefg:ABCDEFGAccordion,lethal:LethalLesionsGrid,anat_pts:PuntosAnatomicos};
+
   var go=useCallback(function(x,sc,dc){
     setAn(false);
     setTimeout(function(){
@@ -52,7 +56,9 @@ function App(){
   },[hist]);
 
   var handleBack=useCallback(function(){
-    if(vista==="trauma-u1"&&window._traumaGoBack&&window._traumaGoBack()) return;
+    if(vista==="trauma-u1"){
+      if(traumaBackRef.current&&traumaBackRef.current()) return;
+    }
     goBack();
   },[vista,goBack]);
 
@@ -109,7 +115,7 @@ function App(){
         e("div",{style:{flex:1,position:"relative"}},
           e("span",{style:{position:"absolute",left:"10px",top:"50%",transform:"translateY(-50%)",color:C.dm,fontSize:"13px",pointerEvents:"none"}},"🔍"),
           e("input",{style:{width:"100%",background:"rgba(255,255,255,.04)",border:"1px solid "+C.bd,borderRadius:"12px",padding:"8px 12px 8px 34px",color:C.tx,fontSize:"14px",outline:"none"},placeholder:"Buscar todo...",value:sq,onChange:function(ev){setSq(ev.target.value);setSo(true)},onFocus:function(){setSo(true)},onBlur:function(){setTimeout(function(){setSo(false)},250)}}),
-          so&&sr.length>0&&e("div",{style:{position:"absolute",top:"100%",left:0,right:0,background:C.cd,border:"1px solid "+C.bd,borderRadius:"12px",marginTop:"4px",maxHeight:"350px",overflow:"auto",zIndex:200,boxShadow:"0 20px 40px rgba(0,0,0,.5)"}},sr.map(function(r,i){return e("div",{key:i,onMouseDown:function(){setSq("");setSo(false);go(r.go,r.sec||null,r.id||null)},style:{padding:"10px 16px",cursor:"pointer",borderBottom:"1px solid "+C.bd,fontSize:"13px"}},e("div",{style:{fontWeight:600}},r.name),e("div",{style:{fontSize:"11px",color:C.dm,marginTop:"2px"}},r.sub))}))
+          so&&sr.length>0&&e("div",{style:{position:"absolute",top:"100%",left:0,right:0,background:C.cd,border:"1px solid "+C.bd,borderRadius:"12px",marginTop:"4px",maxHeight:"350px",overflow:"auto",zIndex:200,boxShadow:"0 20px 40px rgba(0,0,0,.5)"}},sr.map(function(r,i){return e("div",{key:i,onMouseDown:function(){setSq("");setSo(false);go(r.go,r.sec||null,r.id||null);if(r.secId&&window._traumaFocus)setTimeout(function(){window._traumaFocus(r.secId)},200);if(r.vocTx&&window._vocabFocus)setTimeout(function(){window._vocabFocus(r.vocTx)},200)},style:{padding:"10px 16px",cursor:"pointer",borderBottom:"1px solid "+C.bd,fontSize:"13px"}},e("div",{style:{fontWeight:600}},r.name),e("div",{style:{fontSize:"11px",color:C.dm,marginTop:"2px"}},r.sub))}))
         )
       )
     ),
@@ -202,16 +208,8 @@ function App(){
       ),
       e("div",{onClick:function(){setSb(false)},style:{flex:1,background:"rgba(0,0,0,.6)"}})
     ),
-    // ════════════ TRAUMA — UNIDAD 1 (EMBED, full-bleed iframe) ════════════
-    // Rendered outside the 900px content wrapper so the artifact takes the full viewport.
-    // The artifact (artifacts/trauma_unidad_1.html) is inlined base64 by scripts/build.js.
-    vista==="trauma-u1"&&e(TraumaEmbedView),
-
-    // ════════════ VOCABULARIO MÉDICO (EMBED, full-bleed iframe) ════════════
-    vista==="vocabulario"&&e(VocabularioEmbedView),
-
-    // ════════════ MAIN (content wrapper for all non-embed views) ════════════
-    vista!=="trauma-u1"&&vista!=="vocabulario"&&e("div",{style:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
+    // ════════════ MAIN (content wrapper — Trauma + Vocab now render natively inside) ════════════
+    e("div",{style:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
 
     // ════════════ HOME ════════════
     vista==="home"&&e(F,null,
@@ -418,6 +416,12 @@ function App(){
         )
       })
     ),
+
+    // ════════════ TRAUMA — UNIDAD 1 (NATIVE) ════════════
+    vista==="trauma-u1"&&e(TraumaView,{widgets:traumaWidgets,onBackRef:traumaBackRef}),
+
+    // ════════════ VOCABULARIO MÉDICO (NATIVE) ════════════
+    vista==="vocabulario"&&e(VocabularioView),
 
     // ════════════ QUEMADURAS ════════════
     vista==="cir_quem"&&e(F,null,
