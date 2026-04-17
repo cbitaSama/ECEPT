@@ -117,24 +117,29 @@ function globalSearch(q){
       kw:   TRAUMA_SEC_KW[s.id] || ""
     };
   });
-  // ── Vocabulario Médico: sub-topic search entries ──
-  var VOCAB_SEARCH=[
-    {name:"Vocabulario Médico",sub:"Generalidades",kw:"vocabulario medico raices prefijos sufijos etimologia"},
-    {name:"Acción Quirúrgica — Sufijos",sub:"Vocabulario · Quirúrgica",kw:"tomia ectomia stomia rrafia plastia pexia desis tripsia lisis centesis scopia"},
-    {name:"Diagnóstico — Sufijos",sub:"Vocabulario · Diagnóstico",kw:"scopia grafia grama metria"},
-    {name:"Patología — Raíces",sub:"Vocabulario · Patología",kw:"itis osis oma emia penia algia dinia astenia plegia paresia fobia"},
-    {name:"Colores Celulares",sub:"Vocabulario · Colores",kw:"leuco eritro melano ciano cloro xanto polio cromo"},
-    {name:"Sangre y Vasos",sub:"Vocabulario · Sangre",kw:"hemo hemato angio vaso flebos arterio trombo"},
-    {name:"Raíces de Órganos",sub:"Vocabulario · Órganos",kw:"cardio neumo hepato nefro gastro entero osteo mio dermato oftalmo oto rino"},
-    {name:"Genitourinario",sub:"Vocabulario · GU",kw:"nefro cistro uretro litro orqui colpo histero salpingo ooforo"},
-    {name:"Endocrino",sub:"Vocabulario · Endocrino",kw:"adeno tiro insulino gluco cortico"},
-    {name:"Decodificador de Palabras",sub:"Vocabulario · Herramienta",kw:"decodificador decoder descomponer palabra medica raiz"},
-    {name:"Quiz de Vocabulario",sub:"Vocabulario · Quiz",kw:"quiz vocabulario practica examen raices"},
-    {name:"Demos Anatómicos",sub:"Vocabulario · Demos",kw:"demo anatomico cuello corazon abdomen interactivo svg"}
+  // ── Vocabulario Médico: per-term search entries (1 per VOCAB_VOC entry) ──
+  // Each result carries vocTx so clicking it focuses the Biblioteca search on
+  // that exact morpheme via window._vocabFocus(tx).
+  var VOCAB_CAT_LBL={};
+  VOCAB_CATS.forEach(function(c){VOCAB_CAT_LBL[c.id]=c.n});
+  VOCAB_VOC.forEach(function(vv){
+    var txt=stripAccents([vv.tx,vv.or,vv.sig].concat(vv.ej||[]).concat([vv.tip||""]).join(" ").toLowerCase());
+    if(txt.indexOf(l)>-1){
+      var catLbl=VOCAB_CAT_LBL[vv.cat]||vv.cat;
+      var firstDef=vv.sig.split(".")[0].slice(0,60);
+      res.push({type:"vocab",name:"📖 "+vv.tx+" — "+firstDef,sub:"Vocabulario · "+catLbl,go:"vocabulario",vocTx:vv.tx});
+    }
+  });
+  // High-level navigation entries (tabs) so users can search "decoder", "quiz", etc.
+  var VOCAB_NAV=[
+    {name:"Biblioteca de Vocabulario",kw:"vocabulario medico raices prefijos sufijos biblioteca etimologia"},
+    {name:"Decodificador de Palabras",kw:"decodificador decoder descomponer palabra medica raiz smart"},
+    {name:"Quiz de Vocabulario",kw:"quiz vocabulario practica examen raices puntuacion"},
+    {name:"Demos Anatómicos",kw:"demo anatomico cuello corazon abdomen interactivo svg ejemplos"}
   ];
-  VOCAB_SEARCH.forEach(function(vv){
-    var txt=stripAccents([vv.name,vv.sub,vv.kw].join(" ").toLowerCase());
-    if(txt.indexOf(l)>-1) res.push({type:"vocab",name:"📖 "+vv.name,sub:vv.sub,go:"vocabulario"});
+  VOCAB_NAV.forEach(function(vv){
+    var txt=stripAccents([vv.name,vv.kw].join(" ").toLowerCase());
+    if(txt.indexOf(l)>-1) res.push({type:"vocab",name:"📖 "+vv.name,sub:"Vocabulario · Herramienta",go:"vocabulario"});
   });
   TRAUMA_SEARCH.forEach(function(tt){
     var txt=stripAccents([tt.name,tt.sub,tt.kw].join(" ").toLowerCase());
