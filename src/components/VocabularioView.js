@@ -203,23 +203,8 @@ function VocabularioView() {
   }
 
   return e("div", {style:{minHeight:"100vh", paddingBottom:"60px"}},
-    /* Sticky header (below the ECEPT shell header) */
-    e("div", {style:{position:"sticky", top:0, zIndex:10,
-                     background:"rgba(6,10,20,.85)",
-                     backdropFilter:"blur(16px)",
-                     WebkitBackdropFilter:"blur(16px)",
-                     borderBottom:"1px solid "+C.bd,
-                     padding:"12px 20px",
-                     display:"flex", alignItems:"center", gap:"10px"}},
-      e("div", {style:{fontSize:"20px"}}, "🧬"),
-      e("div", {style:{flex:1, minWidth:0}},
-        e("div", {style:{fontSize:"10px", color:C.dm,
-                         letterSpacing:"2px", textTransform:"uppercase",
-                         fontWeight:600}}, "ECEPT › Generalidades"),
-        e("div", {style:{fontSize:"14px", color:C.tx, fontWeight:700}},
-          "Vocabulario Médico")
-      )
-    ),
+    /* Internal sub-header removed — ECEPT shell already shows
+       Inicio › Generalidades › Vocabulario Médico. */
 
     e(VocabHero, null),
 

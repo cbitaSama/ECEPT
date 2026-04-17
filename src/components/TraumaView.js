@@ -87,31 +87,12 @@ function TraumaView(props) {
   }
 
   return e(F, null,
-    /* Local top bar (matches artifact's .topbar, minus the "ECEPT" crumb
-       since the app shell already shows that). */
+    /* Repaso launcher (right-aligned; crumb removed — ECEPT shell
+       already shows Inicio › Emergenciología › Trauma · Unidad 1) */
     e("div", {
-      style:{display:"flex", alignItems:"center", gap:"12px",
-             marginBottom:"20px", flexWrap:"wrap"}
+      style:{display:"flex", justifyContent:"flex-end",
+             marginBottom:"16px"}
     },
-      e("div", {
-        style:{display:"flex", alignItems:"center", gap:"8px",
-               fontSize:"13px", color:"#94a3b8", flex:"1", minWidth:"0"}
-      },
-        e("span", null, "🧬 Emergenciología"),
-        e("span", {style:{color:"#475569"}}, "›"),
-        e("button", {
-          onClick: function(){ setTopic(null); setSec(null); },
-          style:{background:"none", border:"none", padding:0, cursor:"pointer",
-                 color: topic ? "#94a3b8" : "#e2e8f0",
-                 fontWeight: topic ? 400 : 600, fontSize:"13px"}
-        }, "Trauma · Unidad 1"),
-        topicObj && e(F, null,
-          e("span", {style:{color:"#475569"}}, " › "),
-          e("span", {style:{color:"#e2e8f0", fontWeight:600,
-                            overflow:"hidden", textOverflow:"ellipsis",
-                            whiteSpace:"nowrap"}}, topicObj.title)
-        )
-      ),
       e("button", {
         onClick: function(){ setRepaso(true); },
         style:{display:"inline-flex", alignItems:"center", gap:"6px",
