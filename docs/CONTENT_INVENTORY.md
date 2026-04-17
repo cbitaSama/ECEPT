@@ -6,9 +6,20 @@
 ## Cirugía (`src/data/cirugia.js`)
 - Abdomen Agudo (algoritmo completo con estudios y manejo).
 
-## Emergenciología (`src/data/emergencias.js` + artefacto)
+## Emergenciología
+
+### `src/data/emergencias.js`
 - Algoritmo de Quemaduras + Calculadoras (SCQ, Parkland, criterios de internación).
-- Trauma — Unidad 1 ✅ (artefacto embebido: 5 temas, 29 secciones, 7 widgets interactivos).
+
+### Trauma — Unidad 1 ✅ nativo (`src/data/trauma.js` + `src/components/TraumaView.js` + `src/components/trauma/*`)
+- 5 temas · 31 secciones · 6 widgets interactivos · modo repaso.
+- **gen** (Generalidades, 4): Definiciones, Deontología, Curva trimodal, Triage/START + Manchester.
+- **via** (Vía Aérea, 7): Concepto, Maniobras, Cánulas, Intubación (con selector ETT), SIR + fármacos, Quirúrgica, Vía difícil.
+- **poli** (Politraumatizado, 7): Clasificación, Hora de oro, Prehospitalario, ABCDEFG (acordeón), Glasgow (calculadora), Secundaria, Traslado.
+- **shock** (9): Definición, Fases, Tríada letal, Clasificación (con calculadora hemorrágica), Trampas, Hemorrágico, Dx, Manejo, No hacer.
+- **torax** (Tórax, 4): Definición, 6 lesiones letales (grid), Lesiones secundarias, Puntos anatómicos.
+- **Widgets**: GlasgowCalculator, HemorrhageCalculator, ETTSelector, ABCDEFGAccordion, LethalLesionsGrid, PuntosAnatomicos.
+- **Búsqueda**: 31 entradas (una por sección) con keyword aliases por tema.
 
 ## Anatomía (`src/data/anatomia.js` + `src/components/NervesMap.js`)
 - Conducto Inguinal (paredes, contenido, clínica).
@@ -25,11 +36,20 @@
 - Receptores Adrenérgicos.
 - Sistema Nervioso Autónomo.
 
-## Generalidades (`src/data/generalidades.js` + `src/data/inmuno.js`)
+## Generalidades
+
+### `src/data/generalidades.js` + `src/data/inmuno.js`
 - Pares Craneales (tabla sinóptica).
 - Factores de Coagulación.
 - Inmunología (poblaciones celulares, citoquinas, HLA).
-- Vocabulario Médico ✅ (embedded artifact: 270+ roots, 13 categories, decoder, quiz, SVG demos, word of the day).
+
+### Vocabulario Médico ✅ nativo (`src/data/vocabulario.js` + `src/components/VocabularioView.js` + `src/components/vocab/*`)
+- **373 raíces** en 14 categorías (quir, diag, pato, col, sang, org, gu, endo, func, loc, med, cel, quim, term).
+- **10 demos anatómicos** con SVGs propios: Esternocleidomastoideo (cuello), Peri-Mio-Endocardio (corazón), Epi-Meso-Hipogastrio (abdomen) + 7 demos tipo "word".
+- **Decodificador inteligente** (SmartDecoder): descompone cualquier palabra médica por longest-match greedy.
+- **Palabra del día**: entrada rotativa determinística por fecha (hash Knuth).
+- **Quiz**: 10 preguntas MCQ generadas dinámicamente desde VOC (score + emoji + restart).
+- **Búsqueda**: 1 entrada por raíz (373) + 4 entradas de navegación (Biblioteca/Decoder/Quiz/Ejemplos). Los resultados de búsqueda hacen focus al término exacto via `window._vocabFocus`.
 
 ## Laboratorios (`src/data/labs.js`)
 - Hemograma.
