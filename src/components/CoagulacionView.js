@@ -1,7 +1,8 @@
 // ══════════════════════════════════════════════════════════════
 // COMPONENT: CoagulacionView — Fisiología · cascade + pearls
 // ══════════════════════════════════════════════════════════════
-function CoagulacionView(){
+function CoagulacionView(props){
+  var go=props.go;
   return e("div",{style:{paddingBottom:"40px"}},
     // Header
     e("div",{style:{textAlign:"center",marginBottom:"22px"}},

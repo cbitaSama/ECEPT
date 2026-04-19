@@ -4196,7 +4196,8 @@ function MediadoresView(){
 // ══════════════════════════════════════════════════════════════
 // COMPONENT: CoagulacionView — Fisiología · cascade + pearls
 // ══════════════════════════════════════════════════════════════
-function CoagulacionView(){
+function CoagulacionView(props){
+  var go=props.go;
   return e("div",{style:{paddingBottom:"40px"}},
     // Header
     e("div",{style:{textAlign:"center",marginBottom:"22px"}},
@@ -7277,7 +7278,7 @@ function App(){
     vista==="receptores"&&e(ReceptoresView,null),
 
     // ════════════ CASCADA DE COAGULACIÓN ════════════
-    vista==="coagulacion"&&e(CoagulacionView,null),
+    vista==="coagulacion"&&e(CoagulacionView,{go:go}),
 
 
     // ════════════ IMÁGENES DIAGNÓSTICAS (VACÍA) ════════════

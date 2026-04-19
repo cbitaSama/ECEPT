@@ -762,7 +762,7 @@ function App(){
     vista==="receptores"&&e(ReceptoresView,null),
 
     // ════════════ CASCADA DE COAGULACIÓN ════════════
-    vista==="coagulacion"&&e(CoagulacionView,null),
+    vista==="coagulacion"&&e(CoagulacionView,{go:go}),
 
 
     // ════════════ IMÁGENES DIAGNÓSTICAS (VACÍA) ════════════
