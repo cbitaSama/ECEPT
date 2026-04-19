@@ -83,3 +83,97 @@ var ADR=[
       {n:'Mirabegrón',r:'Agonista β₃ selectivo',u:'Vejiga hiperactiva',c:'#a78bfa'}
     ]}
 ];
+
+var MUSC=[
+  {id:'m1',symbol:'M₁',letter:'M',name:'Muscarínico 1',color:'#34d399',colorBg:'rgba(52,211,153,.08)',
+    protein:'Gq',messenger:['↑ IP₃','↑ Ca²⁺'],net:'Excitación SNC / Gástrico',
+    pathway:['ACh','Receptor M₁','Gq','↑ PLC','↑ IP₃ + DAG','↑ Ca²⁺','EXCITACIÓN'],
+    effects:[
+      {t:'SNC (corteza, hipocampo)',d:'↑',x:'Cognición, memoria, aprendizaje'},
+      {t:'Ganglios autonómicos',d:'↑',x:'EPSP lento ganglionar'},
+      {t:'Células parietales gástricas',d:'↑',x:'↑ Secreción HCl'}
+    ],
+    clinical:'Déficit M₁ = Alzheimer. Donepezilo ↑ ACh endógena estimulando M₁. Pirenzepina (antagonista) era usada para úlcera (hoy IBP).',
+    drugs:[
+      {n:'Donepezilo',r:'Inhibidor AChE',u:'Alzheimer (↑ ACh)',c:'#10b981'},
+      {n:'Pirenzepina',r:'Antagonista M₁',u:'Úlcera péptica (obsoleto)',c:'#34d399'}
+    ]},
+  {id:'m2',symbol:'M₂',letter:'M',name:'Muscarínico 2',color:'#2dd4bf',colorBg:'rgba(45,212,191,.08)',
+    protein:'Gi',messenger:['↓ AMPc','↑ K⁺'],net:'Inhibición cardíaca',
+    pathway:['ACh','Receptor M₂','Gi','↓ AMPc','↑ K⁺ (hiperpolariza)','BRADICARDIA'],
+    effects:[
+      {t:'Nódulo SA',d:'↓',x:'↓ Cronotropismo → BRADICARDIA'},
+      {t:'Nódulo AV',d:'↓',x:'↓ Dromotropismo → enlentece conducción'},
+      {t:'Aurícula',d:'↓',x:'↓ Inotropismo auricular'}
+    ],
+    clinical:'Receptor del vago cardíaco. Bloqueo (atropina) → taquicardia. Tto bradicardias sinusales, bloqueos AV.',
+    drugs:[
+      {n:'Atropina',r:'Antagonista muscarínico',u:'Bradicardia / Bloqueo AV / Organofosforados',c:'#2dd4bf'}
+    ]},
+  {id:'m3',symbol:'M₃',letter:'M',name:'Muscarínico 3',color:'#14b8a6',colorBg:'rgba(20,184,166,.08)',
+    protein:'Gq',messenger:['↑ IP₃','↑ Ca²⁺'],net:'Secreción / Contracción lisa',
+    pathway:['ACh','Receptor M₃','Gq','↑ PLC','↑ IP₃/DAG','↑ Ca²⁺','SECRECIÓN/CONTRACCIÓN'],
+    effects:[
+      {t:'Músculo liso bronquial',d:'↑',x:'Broncoconstricción'},
+      {t:'Músculo liso GI',d:'↑',x:'↑ Peristaltismo, ↑ secreciones'},
+      {t:'Detrusor vesical',d:'↑',x:'Contracción (micción)'},
+      {t:'Glándulas exocrinas',d:'↑',x:'↑ Salivación, sudor, lágrimas'},
+      {t:'Iris esfínter',d:'↑',x:'Miosis'},
+      {t:'Músculo ciliar',d:'↑',x:'Acomodación cercana'}
+    ],
+    clinical:'Antagonistas M₃: tiotropio (EPOC), oxibutinina (vejiga). Adversos clásicos: boca seca, midriasis, retención urinaria, constipación.',
+    drugs:[
+      {n:'Tiotropio',r:'Antagonista M₃ (LAMA)',u:'EPOC',c:'#14b8a6'},
+      {n:'Ipratropio',r:'Antagonista muscarínico (SAMA)',u:'EPOC / Asma aguda',c:'#0d9488'},
+      {n:'Oxibutinina',r:'Antagonista M₃',u:'Vejiga hiperactiva',c:'#0f766e'},
+      {n:'Pilocarpina',r:'Agonista muscarínico',u:'Glaucoma / Síndrome seco',c:'#2dd4bf'}
+    ]},
+  {id:'m4',symbol:'M₄',letter:'M',name:'Muscarínico 4',color:'#0d9488',colorBg:'rgba(13,148,136,.08)',
+    protein:'Gi',messenger:['↓ AMPc'],net:'Modulación motora SNC',
+    pathway:['ACh','Receptor M₄','Gi','↓ AMPc','Modulación dopaminérgica'],
+    effects:[
+      {t:'Estriado',d:'↓',x:'Balance colinérgico/dopaminérgico motor'},
+      {t:'Corteza prefrontal',d:'↓',x:'Cognición, función ejecutiva'}
+    ],
+    clinical:'Diana emergente en esquizofrenia. Xanomelina-trospio (Cobenfy, FDA 2024): agonista M₁/M₄ → antipsicótico sin bloqueo D₂ (sin SEP).',
+    drugs:[
+      {n:'Xanomelina-trospio',r:'Agonista M₁/M₄',u:'Esquizofrenia (FDA 2024)',c:'#0d9488'}
+    ]},
+  {id:'m5',symbol:'M₅',letter:'M',name:'Muscarínico 5',color:'#047857',colorBg:'rgba(4,120,87,.08)',
+    protein:'Gq',messenger:['↑ IP₃','↑ Ca²⁺'],net:'Vasodilatación cerebral',
+    pathway:['ACh','Receptor M₅','Gq','↑ IP₃','Vasodilatación SNC'],
+    effects:[
+      {t:'Vasos cerebrales',d:'↓',x:'Vasodilatación cerebral'},
+      {t:'Mesencéfalo dopaminérgico',d:'↑',x:'↑ Dopamina (recompensa)'}
+    ],
+    clinical:'Diana emergente en adicción. Menos estudiado clínicamente.',
+    drugs:[{n:'Sin fármacos específicos',r:'Diana en investigación',u:'Adicción',c:'#047857'}]}
+];
+
+var NIC=[
+  {id:'nm',symbol:'Nm',letter:'N',name:'Nicotínico muscular',color:'#a78bfa',colorBg:'rgba(167,139,250,.08)',
+    protein:'Canal iónico',messenger:['↑ Na⁺ → despolarización'],net:'Contracción muscular',
+    pathway:['ACh (motoneurona)','Receptor Nm (placa)','Canal iónico abierto','↑ Na⁺','DESPOLARIZACIÓN','CONTRACCIÓN'],
+    effects:[
+      {t:'Placa neuromuscular',d:'↑',x:'Contracción del músculo esquelético'}
+    ],
+    clinical:'Bloqueantes Nm = relajantes musculares. Despolarizantes (succinilcolina) vs no-despolarizantes (rocuronio). Miastenia gravis = Ac anti-Nm.',
+    drugs:[
+      {n:'Succinilcolina',r:'Bloqueante Nm despolarizante',u:'Intubación rápida',c:'#a78bfa'},
+      {n:'Rocuronio',r:'No despolarizante',u:'Relajación en cirugía',c:'#8b5cf6'},
+      {n:'Neostigmina',r:'Inhibidor AChE',u:'Miastenia / Reverso BNM',c:'#7c3aed'}
+    ]},
+  {id:'nn',symbol:'Nn',letter:'N',name:'Nicotínico neuronal',color:'#c084fc',colorBg:'rgba(192,132,252,.08)',
+    protein:'Canal iónico',messenger:['↑ Na⁺/Ca²⁺'],net:'Transmisión ganglionar / SNC',
+    pathway:['ACh preganglionar','Receptor Nn','Canal iónico','↑ Na⁺/Ca²⁺','EPSP rápido'],
+    effects:[
+      {t:'Ganglios autonómicos',d:'↑',x:'Transmisión sináptica (EPSP rápido)'},
+      {t:'Médula suprarrenal',d:'↑',x:'Liberación de adrenalina'},
+      {t:'SNC (VTA)',d:'↑',x:'Refuerzo / adicción (nicotina)'}
+    ],
+    clinical:'Vareniclina (agonista parcial Nn α4β2) = cesación tabáquica.',
+    drugs:[
+      {n:'Vareniclina',r:'Agonista parcial Nn α4β2',u:'Cesación tabáquica',c:'#c084fc'},
+      {n:'Nicotina (parches)',r:'Agonista Nn',u:'TRN',c:'#a78bfa'}
+    ]}
+];
