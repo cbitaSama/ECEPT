@@ -104,6 +104,7 @@ function App(){
           vista==="cir_quem"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("emergen_menu")},style:{color:C.dm,cursor:"pointer"}},"Emergenciología"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Quemaduras")),
           vista==="trauma-u1"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("emergen_menu")},style:{color:C.dm,cursor:"pointer"}},"Emergenciología"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Trauma — Unidad 1")),
           vista==="vocabulario"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("general")},style:{color:C.dm,cursor:"pointer"}},"Generalidades"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Vocabulario Médico")),
+          vista==="mediadores"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("general")},style:{color:C.dm,cursor:"pointer"}},"Generalidades"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Mediadores de la Inflamación")),
           vista==="epid"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Epidemiología")),
           vista==="labs"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Laboratorios")),
           vista==="fisio"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Fisiología")),
@@ -136,7 +137,7 @@ function App(){
         e("div",{style:{fontSize:"9px",fontWeight:700,color:C.dm,textTransform:"uppercase",letterSpacing:"2px",padding:"0 4px",marginBottom:"8px"}},"⚡ SECCIONES ESPECIALES"),
         [{ic:"🔺",n:"Tríadas y Síndromes",v:"triadas",col:"#e879f9",sub:[]},
          {ic:"📊",n:"Laboratorios",v:"labs",col:"#4caf82",sub:[]},
-         {ic:"📚",n:"Generalidades",v:"general",col:"#8b5cf6",sub:[{n:"🛡️ Bases Inmunológicas",v:"general"},{n:"🩸 Factores de Coagulación",v:"general"},{n:"🔥 Mediadores de la Inflamación",v:"general"},{n:"📖 Vocabulario Médico",v:"vocabulario"}]},
+         {ic:"📚",n:"Generalidades",v:"general",col:"#8b5cf6",sub:[{n:"🛡️ Bases Inmunológicas",v:"general"},{n:"🩸 Factores de Coagulación",v:"general"},{n:"🔥 Mediadores de la Inflamación",v:"mediadores"},{n:"📖 Vocabulario Médico",v:"vocabulario"}]},
          {ic:"📷",n:"Imágenes Diagnósticas",v:"imagenes",col:"#06b6d4",sub:[]}
         ].map(function(sec){
           var isExp=sbExp===sec.v;
@@ -433,6 +434,9 @@ function App(){
 
     // ════════════ VOCABULARIO MÉDICO (NATIVE) ════════════
     vista==="vocabulario"&&e(VocabularioView),
+
+    // ════════════ MEDIADORES DE LA INFLAMACIÓN ════════════
+    vista==="mediadores"&&e(MediadoresView),
 
     // ════════════ QUEMADURAS ════════════
     vista==="cir_quem"&&e(F,null,
@@ -781,22 +785,11 @@ function App(){
         )
       ),
 
-      // Mediadores de la Inflamación
-      e("div",{style:{marginBottom:"24px"}},
-        e("div",{onClick:function(){setAbdOpen(abdOpen==="mediadores"?null:"mediadores")},
-          style:{background:C.cd,border:"1px solid "+(abdOpen==="mediadores"?"#ef444444":C.bd),
-            borderRadius:"14px",padding:"18px",cursor:"pointer",
-            display:"flex",alignItems:"center",justifyContent:"space-between"}},
-          e("div",{style:{display:"flex",alignItems:"center",gap:"12px"}},
-            e("span",{style:{fontSize:"24px"}},"🔥"),
-            e("div",null,
-              e("h3",{style:{fontSize:"16px",fontWeight:700,color:"#ef4444"}},"Mediadores de la Inflamación"),
-              e("p",{style:{fontSize:"11px",color:C.dm}},"Citocinas, eicosanoides, complemento, quininas"))),
-          e("span",{style:{color:C.dm,transform:abdOpen==="mediadores"?"rotate(180deg)":"none",transition:"transform .2s"}},"▼")
-        ),
-        abdOpen==="mediadores" && e("div",{style:{marginTop:"10px"}},
-          e(MediadoresView, null)
-        )
+      // Mediadores de la Inflamación — active card
+      e("div",{onClick:function(){go("mediadores")},style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"16px",marginBottom:"10px",cursor:"pointer",display:"flex",alignItems:"center",gap:"14px"}},
+        e("span",{style:{fontSize:"22px"}},"🔥"),
+        e("div",null,e("h3",{style:{fontSize:"14px",fontWeight:700,color:"#ef4444"}},"Mediadores de la Inflamación"),e("p",{style:{fontSize:"11px",color:C.dm}},"Citocinas, eicosanoides, complemento, quininas · 33 mediadores")),
+        e("span",{style:{color:C.dm,marginLeft:"auto"}},"›")
       ),
 
       // Vocabulario Médico — active card

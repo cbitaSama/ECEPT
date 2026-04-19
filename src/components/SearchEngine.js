@@ -74,7 +74,7 @@ function globalSearch(q){
     var famObj=MED_FAMILIES.filter(function(fm){return fm.id===md.fam})[0];
     var famName=famObj?famObj.n:"Mediadores";
     var txt=stripAccents([md.n,md.f,md.o,md.t||"",md.p||""].concat(md.k||[]).join(" ").toLowerCase());
-    if(txt.indexOf(l)>-1) res.push({type:"med",name:"🔥 "+md.n,sub:"Generalidades — "+famName,go:"general"});
+    if(txt.indexOf(l)>-1) res.push({type:"med",name:"🔥 "+md.n,sub:"Generalidades — "+famName,go:"mediadores"});
   });
   INT.s.forEach(function(s){
     var txt=stripAccents([s.t,s.x||""].concat(s.p).join(" ").toLowerCase());
