@@ -58,13 +58,23 @@ function globalSearch(q){
     var txt=stripAccents([cf.num,cf.nombre,cf.alt||""].join(" ").toLowerCase());
     if(txt.indexOf(l)>-1) res.push({type:"coag",name:"🩸 Factor "+cf.num+" — "+cf.nombre,sub:"Generalidades — Coagulación",go:"general"});
   });
-  FISIO_RECEPTORS.forEach(function(r){
-    var txt=stripAccents([r.name,r.symbol,r.protein,r.clinical].concat(r.effects.map(function(ef){return ef.desc})).join(" ").toLowerCase());
-    if(txt.indexOf(l)>-1) res.push({type:"fisio",name:"🔬 "+r.symbol+" "+r.name,sub:"Fisiología — Receptores",go:"fisio"});
+  RECEPTOR_FAMILIES.forEach(function(fam){
+    fam.receptors.forEach(function(r){
+      var txt=stripAccents([r.name,r.symbol,r.protein,r.clinical,r.net].concat((r.effects||[]).map(function(ef){return ef.t+" "+ef.x})).concat((r.drugs||[]).map(function(d){return d.n+" "+d.u})).join(" ").toLowerCase());
+      if(txt.indexOf(l)>-1) res.push({type:"fisio",name:"🧬 "+r.symbol+" "+r.name,sub:"Fisiología — "+fam.name,go:"receptores"});
+    });
   });
-  FISIO_PERLAS.forEach(function(fp){
-    var txt=stripAccents([fp.t].concat(fp.items).join(" ").toLowerCase());
-    if(txt.indexOf(l)>-1) res.push({type:"fisio",name:"🔬 "+fp.t,sub:"Fisiología — Perlas",go:"fisio"});
+  Object.keys(RECEPTOR_PEARLS).forEach(function(famKey){
+    (RECEPTOR_PEARLS[famKey]||[]).forEach(function(p){
+      var txt=stripAccents([p.t].concat(p.i||[]).join(" ").toLowerCase());
+      if(txt.indexOf(l)>-1) res.push({type:"fisio",name:"🧬 "+p.t,sub:"Fisiología — Perlas",go:"receptores"});
+    });
+  });
+  MED_LIST.forEach(function(md){
+    var famObj=MED_FAMILIES.filter(function(fm){return fm.id===md.fam})[0];
+    var famName=famObj?famObj.n:"Mediadores";
+    var txt=stripAccents([md.n,md.f,md.o,md.t||"",md.p||""].concat(md.k||[]).join(" ").toLowerCase());
+    if(txt.indexOf(l)>-1) res.push({type:"med",name:"🔥 "+md.n,sub:"Generalidades — "+famName,go:"mediadores"});
   });
   INT.s.forEach(function(s){
     var txt=stripAccents([s.t,s.x||""].concat(s.p).join(" ").toLowerCase());

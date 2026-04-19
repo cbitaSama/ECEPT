@@ -19,7 +19,6 @@ function App(){
   s=_(0);var ingTab=s[0],setIngTab=s[1];
   s=_(0);var calcPeso=s[0],setCalcPeso=s[1]; s=_(0);var calcSCQ=s[0],setCalcSCQ=s[1];
   s=_(0);var calcGotas=s[0],setCalcGotas=s[1]; s=_(null);var sbExp=s[0],setSbExp=s[1]; s=_(null);var sbSub=s[0],setSbSub=s[1];
-  s=_(0);var fisioTab=s[0],setFisioTab=s[1]; s=_(0);var fisioRec=s[0],setFisioRec=s[1]; s=_({});var fisioQa=s[0],setFisioQa=s[1];
   s=_([]);var favs=s[0],setFavs=s[1];
   s=_(0);var streak=s[0],setStreak=s[1]; s=_(0);var bestStreak=s[0],setBestStreak=s[1]; s=_(0);var calcHoras=s[0],setCalcHoras=s[1];
   s=_(function(){try{return JSON.parse(localStorage.getItem("ecept_v1")||"[]")}catch(e2){return[]}});
@@ -85,6 +84,50 @@ function App(){
     }
   }
 
+  // Fisiología hub — topic picker (Receptores Celulares ready; rest placeholders)
+  function FisiologiaHub(){
+    var topics=[
+      {id:"receptores",ic:"🧬",n:"Receptores Celulares",d:"10 familias · 34 subtipos · quiz por familia",col:"#ec4899",ready:true,v:"receptores"},
+      {id:"endo",ic:"🧪",n:"Endocrinología",d:"Hormonas, ejes, retroalimentación — Próximamente",col:"#f59e0b",ready:false},
+      {id:"cardio",ic:"❤️",n:"Cardiovascular",d:"Ciclo cardíaco, hemodinamia — Próximamente",col:"#ef4444",ready:false},
+      {id:"renal",ic:"💧",n:"Renal",d:"Filtración, reabsorción, equilibrio — Próximamente",col:"#06b6d4",ready:false},
+      {id:"resp",ic:"🫁",n:"Respiratorio",d:"Ventilación, perfusión, gases — Próximamente",col:"#14b8a6",ready:false},
+      {id:"neuro",ic:"🧠",n:"Neurofisiología",d:"Potenciales, sinapsis, reflejos — Próximamente",col:"#8b5cf6",ready:false},
+      {id:"gi",ic:"🍽️",n:"Gastrointestinal",d:"Motilidad, secreción, absorción — Próximamente",col:"#84cc16",ready:false},
+      {id:"hemato",ic:"🩸",n:"Hematología",d:"Hemostasia, eritropoyesis — Próximamente",col:"#dc2626",ready:false}
+    ];
+    var readyCount=topics.filter(function(t){return t.ready}).length;
+    return e("div",null,
+      e("div",{style:{marginBottom:"20px"}},
+        e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"24px",fontWeight:800,marginBottom:"4px",color:C.tx}},"🔬 Fisiología"),
+        e("p",{style:{fontSize:"13px",color:C.dm}},"Funcionamiento normal del cuerpo humano · "+readyCount+" tema"+(readyCount===1?"":"s")+" disponible"+(readyCount===1?"":"s"))
+      ),
+      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:"12px"}},
+        topics.map(function(t){
+          return e("div",{key:t.id,
+            onClick:t.ready?function(){go(t.v)}:null,
+            style:{
+              background:C.cd,
+              border:"1.5px solid "+(t.ready?t.col+"40":C.bd),
+              borderRadius:"14px",padding:"18px",
+              cursor:t.ready?"pointer":"default",
+              opacity:t.ready?1:0.55,
+              transition:"all .2s"}},
+            e("div",{style:{display:"flex",alignItems:"center",gap:"12px",marginBottom:"8px"}},
+              e("span",{style:{fontSize:"28px"}},t.ic),
+              e("div",{style:{flex:1}},
+                e("h3",{style:{fontSize:"15px",fontWeight:700,color:t.ready?t.col:C.mt,marginBottom:"2px"}},t.n),
+                t.ready&&e("span",{style:{fontSize:"9px",letterSpacing:"1.5px",textTransform:"uppercase",color:"#34d399",fontWeight:700}},"✓ Disponible")
+              )
+            ),
+            e("p",{style:{fontSize:"11.5px",color:C.dm,lineHeight:1.5}},t.d),
+            t.ready&&e("div",{style:{marginTop:"10px",fontSize:"12px",color:t.col,fontWeight:600}},"Abrir →")
+          )
+        })
+      )
+    );
+  }
+
   // ═══ RENDER ═══
   return e("div",{style:{background:C.bg,minHeight:"100vh",fontFamily:"'DM Sans',sans-serif",color:C.tx}},
     // HEADER
@@ -105,9 +148,11 @@ function App(){
           vista==="cir_quem"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("emergen_menu")},style:{color:C.dm,cursor:"pointer"}},"Emergenciología"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Quemaduras")),
           vista==="trauma-u1"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("emergen_menu")},style:{color:C.dm,cursor:"pointer"}},"Emergenciología"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Trauma — Unidad 1")),
           vista==="vocabulario"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("general")},style:{color:C.dm,cursor:"pointer"}},"Generalidades"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Vocabulario Médico")),
+          vista==="mediadores"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("general")},style:{color:C.dm,cursor:"pointer"}},"Generalidades"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Mediadores de la Inflamación")),
           vista==="epid"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Epidemiología")),
           vista==="labs"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Laboratorios")),
           vista==="fisio"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Fisiología")),
+          vista==="receptores"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("fisio")},style:{color:C.dm,cursor:"pointer"}},"Fisiología"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Receptores Celulares")),
           vista==="general"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Generalidades")),
           vista==="triadas"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Tríadas")),
           vista==="imagenes"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Imágenes"))
@@ -137,7 +182,7 @@ function App(){
         e("div",{style:{fontSize:"9px",fontWeight:700,color:C.dm,textTransform:"uppercase",letterSpacing:"2px",padding:"0 4px",marginBottom:"8px"}},"⚡ SECCIONES ESPECIALES"),
         [{ic:"🔺",n:"Tríadas y Síndromes",v:"triadas",col:"#e879f9",sub:[]},
          {ic:"📊",n:"Laboratorios",v:"labs",col:"#4caf82",sub:[]},
-         {ic:"📚",n:"Generalidades",v:"general",col:"#8b5cf6",sub:[{n:"🛡️ Bases Inmunológicas",v:"general"},{n:"🩸 Factores de Coagulación",v:"general"},{n:"📖 Vocabulario Médico",v:"vocabulario"}]},
+         {ic:"📚",n:"Generalidades",v:"general",col:"#8b5cf6",sub:[{n:"🛡️ Bases Inmunológicas",v:"general"},{n:"🩸 Factores de Coagulación",v:"general"},{n:"🔥 Mediadores de la Inflamación",v:"mediadores"},{n:"📖 Vocabulario Médico",v:"vocabulario"}]},
          {ic:"📷",n:"Imágenes Diagnósticas",v:"imagenes",col:"#06b6d4",sub:[]}
         ].map(function(sec){
           var isExp=sbExp===sec.v;
@@ -162,7 +207,19 @@ function App(){
         e("div",{style:{fontSize:"9px",fontWeight:700,color:C.dm,textTransform:"uppercase",letterSpacing:"2px",padding:"0 4px",marginTop:"16px",marginBottom:"8px",paddingTop:"12px",borderTop:"1px solid "+C.bd}},"📋 MATERIAS"),
         [{ic:"🦴",n:"Reumatología",v:"reuma",col:"#60a5fa",act:true,sub:REUMA_SECS.map(function(s){return{n:s.i+" "+s.n,v:"reuma_sec",sec:s.id}})},
          {ic:"🔪",n:"Cirugía",v:"cir_menu",col:"#ef4444",act:true,sub:[{n:"🔴 Abdomen Agudo",v:"cir_abd"}]},
-         {ic:"🔬",n:"Fisiología",v:"fisio",col:"#ec4899",act:true,sub:[{n:"🧬 Receptores Adrenérgicos",v:"fisio"}]},
+         {ic:"🔬",n:"Fisiología",v:"fisio",col:"#ec4899",act:true,sub:[
+           {n:"🧬 Receptores Celulares",v:"receptores"},
+           {n:"  ⚡ Adrenérgicos",v:"receptores"},
+           {n:"  🌿 Muscarínicos",v:"receptores"},
+           {n:"  🧬 Nicotínicos",v:"receptores"},
+           {n:"  🎯 Dopaminérgicos",v:"receptores"},
+           {n:"  💫 Serotoninérgicos",v:"receptores"},
+           {n:"  🔥 Histaminérgicos",v:"receptores"},
+           {n:"  ☯️ Opioides",v:"receptores"},
+           {n:"  🧠 Glutamatérgicos",v:"receptores"},
+           {n:"  😴 GABAérgicos",v:"receptores"},
+           {n:"  🌱 Cannabinoides",v:"receptores"}
+         ]},
          {ic:"🚑",n:"Emergenciología",v:"emergen_menu",col:"#ef4444",act:true,sub:[{n:"🔥 Quemaduras + Calculadoras",v:"cir_quem"},{n:"🩸 Trauma — Unidad 1",v:"trauma-u1"}]},
          {ic:"🩻",n:"Anatomía",v:"anatomia",col:"#f59e0b",act:true,sub:[{n:"🧠 Pares Craneales",grp:true,items:[{n:"🗺️ Mapa Interactivo",v:"anatomia",openMap:true},{n:"📋 Lista de Pares",v:"anatomia"}]},{n:"🧱 Conducto Inguinal",v:"cir_ing"}]},
          {ic:"📊",n:"Epidemiología (Salud Pública)",v:"epid",col:"#00b4d8",act:true,sub:[{n:"🔺 Pirámide de Evidencia",v:"epid"},{n:"📋 Tipos de Estudio",v:"epid"},{n:"⚠️ Sesgos",v:"epid"},{n:"📐 Medidas",v:"epid"},{n:"✅ Lectura Crítica",v:"epid"}]},
@@ -422,6 +479,9 @@ function App(){
 
     // ════════════ VOCABULARIO MÉDICO (NATIVE) ════════════
     vista==="vocabulario"&&e(VocabularioView),
+
+    // ════════════ MEDIADORES DE LA INFLAMACIÓN ════════════
+    vista==="mediadores"&&e(MediadoresView),
 
     // ════════════ QUEMADURAS ════════════
     vista==="cir_quem"&&e(F,null,
@@ -691,191 +751,13 @@ function App(){
     ),
 
 
+
     // ════════════ FISIOLOGÍA ════════════
-    vista==="fisio"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"24px"}},
-        e("span",{style:{display:"inline-block",fontSize:"10px",letterSpacing:"3px",textTransform:"uppercase",color:"#ec4899",background:"rgba(236,72,153,.12)",border:"1px solid rgba(236,72,153,.3)",padding:"5px 14px",borderRadius:"4px",marginBottom:"12px"}},"Fisiología · SNA"),
-        e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"24px",fontWeight:900,background:"linear-gradient(135deg,#e2e8f0,#94a3b8)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}},"Receptores Adrenérgicos"),
-        e("p",{style:{color:C.dm,fontSize:"13px"}},"Sistema nervioso autónomo simpático · Receptores α y β · Proteínas G")
-      ),
-      // Main tabs
-      e("div",{style:{display:"flex",gap:"6px",marginBottom:"20px",flexWrap:"wrap"}},
-        [{l:"🧬 Receptores",i:0},{l:"📊 Comparación",i:1},{l:"🧠 Quiz",i:2},{l:"📌 Perlas",i:3}].map(function(tb){
-          var cols=["#ec4899","#60a5fa","#34d399","#fbbf24"];
-          return e("button",{key:tb.i,onClick:function(){setFisioTab(tb.i)},style:{
-            flex:"1 1 auto",minWidth:"80px",padding:"10px 14px",background:fisioTab===tb.i?"#e2e8f0":"transparent",
-            border:"1.5px solid "+(fisioTab===tb.i?"transparent":C.bd),borderRadius:"100px",
-            cursor:"pointer",fontSize:"13px",fontWeight:fisioTab===tb.i?600:500,
-            color:fisioTab===tb.i?"#060a14":C.mt
-          }},tb.l)
-        })
-      ),
+    vista==="fisio"&&e(F,null,e(FisiologiaHub,null)),
 
-      // TAB 0: RECEPTORES
-      fisioTab===0&&e(F,null,
-        // Receptor sub-tabs
-        e("div",{style:{display:"flex",gap:"8px",overflowX:"auto",marginBottom:"20px",paddingBottom:"4px"}},
-          FISIO_RECEPTORS.map(function(r,i){
-            var isAct=fisioRec===i;
-            return e("button",{key:r.id,onClick:function(){setFisioRec(i)},style:{
-              flexShrink:0,display:"flex",alignItems:"center",gap:"8px",
-              padding:"10px 18px",borderRadius:"100px",border:"1.5px solid "+(isAct?r.color:r.color+"40"),
-              background:isAct?r.color:"transparent",color:isAct?"#060a14":r.color,
-              fontSize:"14px",fontWeight:isAct?600:500,cursor:"pointer",whiteSpace:"nowrap"
-            }},e("span",{style:{fontSize:"18px",fontWeight:700}},r.symbol)," ",r.name)
-          })
-        ),
-        // Receptor card
-        (function(){
-          var r=FISIO_RECEPTORS[fisioRec];if(!r)return null;
-          return e("div",{style:{animation:"fadeIn .3s ease"}},
-            // Hero card
-            e("div",{style:{borderRadius:"12px",padding:"24px",marginBottom:"20px",border:"1.5px solid "+r.color+"40",background:r.colorBg,position:"relative",overflow:"hidden"}},
-              e("div",{style:{display:"flex",alignItems:"flex-start",gap:"16px",marginBottom:"20px"}},
-                e("span",{style:{fontFamily:"'Playfair Display',serif",fontSize:"56px",fontWeight:900,lineHeight:1,color:r.color}},r.letter),
-                e("div",{style:{flex:1}},
-                  e("h3",{style:{fontFamily:"'Playfair Display',serif",fontSize:"22px",fontWeight:700,marginBottom:"4px"}},r.symbol+" — "+r.name),
-                  e("div",{style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap"}},
-                    e("span",{style:{display:"inline-flex",alignItems:"center",gap:"4px",background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.12)",padding:"3px 10px",borderRadius:"100px",fontSize:"12px",fontWeight:500}},"🔗 Proteína: "+r.protein),
-                    r.messenger.map(function(m,mi){return e("span",{key:mi,style:{fontSize:"12px",color:C.mt}},m)})
-                  )
-                )
-              ),
-              // Pathway
-              e("div",{style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap",marginBottom:"20px",padding:"14px",background:"rgba(0,0,0,.3)",borderRadius:"8px"}},
-                r.pathway.map(function(p,pi){
-                  return e(F,{key:pi},
-                    pi>0&&e("span",{style:{color:C.dm,fontSize:"14px"}},"→"),
-                    e("span",{style:{padding:"4px 10px",borderRadius:"6px",background:"rgba(255,255,255,.07)",border:"1px solid rgba(255,255,255,.1)",fontSize:"13px"}},p.label)
-                  )
-                })
-              ),
-              // Effects
-              e("div",{style:{fontSize:"12px",fontWeight:600,letterSpacing:".1em",textTransform:"uppercase",color:C.dm,marginBottom:"10px"}},"EFECTOS POR TEJIDO"),
-              r.effects.map(function(ef,ei){
-                return e("div",{key:ei,style:{display:"flex",alignItems:"flex-start",gap:"12px",padding:"10px 0",borderBottom:ei<r.effects.length-1?"1px solid rgba(255,255,255,.05)":"none"}},
-                  e("span",{style:{minWidth:"130px",fontSize:"13px",color:C.mt,flexShrink:0}},ef.tissue),
-                  e("span",{style:{fontSize:"14px",color:ef.dir==="↑"?"#34d399":"#60a5fa",flexShrink:0}},ef.dir),
-                  e("span",{style:{fontSize:"13px",color:C.tx,lineHeight:1.4,flex:1}},ef.desc)
-                )
-              }),
-              // Clinical pearl
-              e("div",{style:{display:"flex",gap:"12px",alignItems:"flex-start",padding:"14px 16px",borderRadius:"10px",background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.1)",marginTop:"16px"}},
-                e("span",{style:{fontSize:"20px",flexShrink:0}},"💊"),
-                e("span",{style:{fontSize:"14px",color:C.tx,lineHeight:1.6}},r.clinical)
-              ),
-              // Drugs
-              r.drugs&&r.drugs.length>0&&e("div",{style:{marginTop:"16px"}},
-                e("div",{style:{fontSize:"12px",fontWeight:600,letterSpacing:".1em",textTransform:"uppercase",color:C.dm,marginBottom:"10px"}},"FÁRMACOS CLAVE"),
-                e("div",{style:{display:"flex",flexDirection:"column",gap:"8px"}},
-                  r.drugs.map(function(d,di){
-                    return e("div",{key:di,style:{display:"flex",alignItems:"center",gap:"12px",padding:"12px 16px",borderRadius:"10px",background:"rgba(255,255,255,.03)",border:"1px solid rgba(255,255,255,.07)"}},
-                      e("div",{style:{width:"10px",height:"10px",borderRadius:"50%",background:d.color,flexShrink:0,boxShadow:"0 0 8px "+d.color+"80"}}),
-                      e("div",{style:{flex:1}},
-                        e("div",{style:{fontSize:"14px",fontWeight:600,color:d.color,marginBottom:"2px"}},d.name),
-                        e("div",{style:{fontSize:"12px",color:C.dm}},d.role),
-                        e("div",{style:{fontSize:"12px",color:C.mt,marginTop:"2px"}},"📌 "+d.use)
-                      )
-                    )
-                  })
-                )
-              )
-            )
-          )
-        })()
-      ),
+    // ════════════ RECEPTORES CELULARES ════════════
+    vista==="receptores"&&e(ReceptoresView,null),
 
-      // TAB 1: COMPARACIÓN
-      fisioTab===1&&e(F,null,
-        e("h3",{style:{fontFamily:"'Playfair Display',serif",fontSize:"18px",fontWeight:700,marginBottom:"16px"}},"📊 Tabla Comparativa"),
-        e("div",{style:{overflowX:"auto",borderRadius:"12px",border:"1.5px solid "+C.bd}},
-          e("table",{style:{width:"100%",borderCollapse:"collapse",fontSize:"13px"}},
-            e("thead",null,e("tr",{style:{background:C.cd}},
-              e("th",{style:{padding:"12px 14px",textAlign:"left",fontSize:"11px",fontWeight:600,letterSpacing:".08em",textTransform:"uppercase",color:C.dm}},"Receptor"),
-              e("th",{style:{padding:"12px 14px",textAlign:"left",fontSize:"11px",fontWeight:600,color:C.dm}},"Prot. G"),
-              e("th",{style:{padding:"12px 14px",textAlign:"left",fontSize:"11px",fontWeight:600,color:C.dm}},"2º Mensajero"),
-              e("th",{style:{padding:"12px 14px",textAlign:"left",fontSize:"11px",fontWeight:600,color:C.dm}},"Efecto principal"),
-              e("th",{style:{padding:"12px 14px",textAlign:"left",fontSize:"11px",fontWeight:600,color:C.dm}},"Fármacos")
-            )),
-            e("tbody",null,FISIO_COMPARISON.map(function(fc,i){
-              return e("tr",{key:i,style:{borderTop:"1px solid "+C.bd}},
-                e("td",{style:{padding:"11px 14px",fontWeight:700,color:fc.col,fontSize:"16px"}},fc.receptor),
-                e("td",{style:{padding:"11px 14px"}},e("span",{style:{display:"inline-block",padding:"2px 8px",borderRadius:"100px",fontSize:"11px",fontWeight:600,background:fc.col+"15",color:fc.col}},fc.prot)),
-                e("td",{style:{padding:"11px 14px",color:C.mt}},fc.msg),
-                e("td",{style:{padding:"11px 14px",color:C.mt}},fc.efecto),
-                e("td",{style:{padding:"11px 14px"}},fc.farmacos.map(function(f2,fi){return e("span",{key:fi,style:{display:"inline-block",padding:"2px 8px",borderRadius:"100px",fontSize:"11px",fontWeight:600,background:fc.col+"12",color:fc.col,margin:"1px"}},f2)}))
-              )
-            }))
-          )
-        ),
-        // Proteínas G resumen
-        e("h3",{style:{fontFamily:"'Playfair Display',serif",fontSize:"18px",fontWeight:700,marginTop:"24px",marginBottom:"16px"}},"🔬 Resumen Proteínas G"),
-        e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:"12px"}},
-          FISIO_PROTEINAS_G.map(function(g,i){
-            return e("div",{key:i,style:{padding:"16px",borderRadius:"10px",background:"linear-gradient(135deg,"+g.color+"10,rgba(13,18,36,.8))",border:"1.5px solid "+g.color+"30"}},
-              e("div",{style:{fontSize:"22px",fontWeight:800,fontFamily:"'Playfair Display',serif",color:g.color,marginBottom:"6px"}},g.name),
-              e("div",{style:{fontSize:"12px",color:C.mt,marginBottom:"4px"}},g.desc),
-              e("div",{style:{fontSize:"13px",fontWeight:600,color:C.tx,marginBottom:"8px"}},g.result),
-              e("div",{style:{fontSize:"11px",color:C.dm,borderTop:"1px solid rgba(255,255,255,.07)",paddingTop:"8px"}},"Receptores: ",e("span",{style:{color:g.color}},g.receptors))
-            )
-          })
-        )
-      ),
-
-      // TAB 2: QUIZ
-      fisioTab===2&&e(F,null,
-        e("h3",{style:{fontFamily:"'Playfair Display',serif",fontSize:"18px",fontWeight:700,marginBottom:"6px"}},"🧠 Quiz · Receptores Adrenérgicos"),
-        e("p",{style:{fontSize:"13px",color:C.dm,marginBottom:"20px"}},FISIO_QUIZ.length+" preguntas"),
-        FISIO_QUIZ.map(function(q,qi){
-          var answered=fisioQa[qi]!==undefined;var isCorrect=answered&&fisioQa[qi]===q.r;
-          return e("div",{key:qi,style:{background:C.cd,border:"1.5px solid "+C.bd,borderRadius:"12px",padding:"20px",marginBottom:"16px"}},
-            e("div",{style:{fontSize:"11px",fontWeight:600,letterSpacing:".1em",textTransform:"uppercase",color:C.dm,marginBottom:"8px"}},"Pregunta "+(qi+1)+" de "+FISIO_QUIZ.length),
-            e("div",{style:{fontFamily:"'Playfair Display',serif",fontSize:"16px",fontWeight:600,marginBottom:"16px",lineHeight:1.4}},q.q),
-            e("div",{style:{display:"flex",flexDirection:"column",gap:"8px"}},
-              q.opts.map(function(opt,oi){
-                var cls_bg="rgba(255,255,255,.03)";var cls_bd=C.bd;var cls_col=C.mt;
-                if(answered&&oi===q.r){cls_bg="rgba(52,211,153,.1)";cls_bd="#34d399";cls_col="#34d399"}
-                if(answered&&oi===fisioQa[qi]&&oi!==q.r){cls_bg="rgba(239,68,68,.1)";cls_bd="#ef4444";cls_col="#ef4444"}
-                return e("button",{key:oi,onClick:function(){
-                  if(!answered){
-                    var nw={};for(var k in fisioQa)nw[k]=fisioQa[k];nw[qi]=oi;setFisioQa(nw);
-                    if(oi===q.r){setStreak(function(s2){var ns=s2+1;if(ns>bestStreak)setBestStreak(ns);return ns})}else{setStreak(0)}
-                  }
-                },style:{padding:"11px 16px",borderRadius:"8px",cursor:answered?"default":"pointer",border:"1.5px solid "+cls_bd,background:cls_bg,color:cls_col,textAlign:"left",width:"100%",fontSize:"14px"}},opt)
-              })
-            ),
-            answered&&e("div",{style:{marginTop:"12px",padding:"12px 14px",background:"rgba(255,255,255,.04)",borderRadius:"8px",borderLeft:"3px solid "+(isCorrect?"#34d399":"#ef4444"),fontSize:"13px",color:C.mt,lineHeight:1.6}},
-              e("span",{style:{color:isCorrect?"#34d399":"#ef4444",fontWeight:600}},isCorrect?"✓ Correcto — ":"✗ Incorrecto — "),q.x
-            )
-          )
-        }),
-        Object.keys(fisioQa).length===FISIO_QUIZ.length&&e("div",{style:{textAlign:"center",marginTop:"16px"}},
-          e("button",{onClick:function(){setFisioQa({})},style:{padding:"12px 24px",borderRadius:"100px",border:"1.5px solid "+C.bd,background:"transparent",color:C.mt,fontSize:"14px",fontWeight:500,cursor:"pointer"}},"↺ Repetir quiz")
-        )
-      ),
-
-      // TAB 3: PERLAS
-      fisioTab===3&&e(F,null,
-        e("h3",{style:{fontFamily:"'Playfair Display',serif",fontSize:"18px",fontWeight:700,marginBottom:"16px"}},"📌 Perlas Clínicas para el Examen"),
-        FISIO_PERLAS.map(function(fp,i){
-          return e("div",{key:i,style:{background:C.cd,border:"1.5px solid "+C.bd,borderRadius:"12px",padding:"20px",marginBottom:"12px",animation:"slideUp .3s ease-out "+(i*0.06)+"s both"}},
-            e("div",{style:{fontFamily:"'Playfair Display',serif",fontSize:"16px",fontWeight:700,marginBottom:"10px",color:"#fbbf24"}},fp.ic+" "+fp.t),
-            e(Ls,{items:fp.items,color:"#fbbf24"})
-          )
-        }),
-        // Preguntas tipo examen
-        e("div",{style:{padding:"20px",borderRadius:"12px",background:"rgba(251,191,36,.06)",border:"1.5px solid rgba(251,191,36,.25)",marginTop:"16px"}},
-          e("div",{style:{fontSize:"12px",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",color:"#fbbf24",marginBottom:"12px"}},"🎯 Preguntas tipo examen docente"),
-          e(Ls,{items:[
-            "¿Qué proteína G usa el receptor α₁ y cuál es su segundo mensajero? → Gq → IP₃/DAG/Ca²⁺",
-            "¿Por qué se usa metildopa en embarazo y no propranolol? → Seguridad fetal + agonista α₂ central",
-            "¿Cuál es el mecanismo de hipokalemia del salbutamol? → β₂ → ↑Na/K-ATPasa → K⁺ entra a célula",
-            "¿Cuál β-bloqueador se usa en ICC y por qué carvedilol bloquea también α₁? → ↓ vasoconstricción, ↓ postcarga",
-            "¿Por qué el retiro abrupto de clonidina es peligroso? → HTA de rebote (dependencia neuroadaptativa)"
-          ],color:"#fbbf24"})
-        )
-      )
-    ),
 
     // ════════════ IMÁGENES DIAGNÓSTICAS (VACÍA) ════════════
     vista==="imagenes"&&e(F,null,
@@ -951,21 +833,19 @@ function App(){
         )
       ),
 
+      // Mediadores de la Inflamación — active card
+      e("div",{onClick:function(){go("mediadores")},style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"16px",marginBottom:"10px",cursor:"pointer",display:"flex",alignItems:"center",gap:"14px"}},
+        e("span",{style:{fontSize:"22px"}},"🔥"),
+        e("div",null,e("h3",{style:{fontSize:"14px",fontWeight:700,color:"#ef4444"}},"Mediadores de la Inflamación"),e("p",{style:{fontSize:"11px",color:C.dm}},"Citocinas, eicosanoides, complemento, quininas · 33 mediadores")),
+        e("span",{style:{color:C.dm,marginLeft:"auto"}},"›")
+      ),
+
       // Vocabulario Médico — active card
       e("div",{onClick:function(){go("vocabulario")},style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"16px",marginBottom:"10px",cursor:"pointer",display:"flex",alignItems:"center",gap:"14px"}},
         e("span",{style:{fontSize:"22px"}},"📖"),
         e("div",null,e("h3",{style:{fontSize:"14px",fontWeight:700}},"Vocabulario Médico"),e("p",{style:{fontSize:"11px",color:C.dm}},"270+ raíces · 13 categorías · Decodificador · Quiz · SVG")),
         e("span",{style:{color:C.dm,marginLeft:"auto"}},"›")
-      ),
-
-      // Remaining placeholders
-      [{ic:"🧬",n:"Citocinas e Interleucinas",d:"TNF, IL-1 a IL-38, Interferones — Próximamente"},{ic:"💎",n:"Complemento",d:"Vías clásica, alternativa y de lectinas — Próximamente"}].map(function(ph,i){
-        return e("div",{key:i,style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"16px",marginBottom:"10px",opacity:.45,display:"flex",alignItems:"center",gap:"14px"}},
-          e("span",{style:{fontSize:"22px"}},ph.ic),
-          e("div",null,e("h3",{style:{fontSize:"14px",fontWeight:700}},ph.n),e("p",{style:{fontSize:"11px",color:C.dm}},ph.d)),
-          e("span",{style:{fontSize:"9px",padding:"3px 8px",borderRadius:"6px",background:"rgba(255,255,255,.05)",color:C.dm,marginLeft:"auto"}},"Pronto")
-        )
-      })
+      )
     ),
 
     // ════════════ EPIDEMIOLOGÍA (SALUD PÚBLICA) ════════════
