@@ -1,14 +1,12 @@
 // ══════════════════════════════════════════════════════════════
-// RECEPTORES CELULARES — 10 FAMILIAS · 34 SUBTIPOS
+// DATOS FISIOLOGÍA — RECEPTORES CELULARES (10 familias, 34 subtipos)
+// Identifiers renamed: FAMILIES→RECEPTOR_FAMILIES, QUIZZES→RECEPTOR_QUIZZES,
+//                      PEARLS→RECEPTOR_PEARLS, PROT_G→RECEPTOR_PROT_G
 // ══════════════════════════════════════════════════════════════
-// Replaces legacy FISIO_RECEPTORS / FISIO_QUIZ / FISIO_PERLAS /
-// FISIO_COMPARISON / FISIO_PROTEINAS_G (the 5 adrenergic receptors
-// are preserved verbatim inside ADR + RECEPTOR_QUIZZES.adr +
-// RECEPTOR_PEARLS.adr below).
-// Object shape: {id,symbol,letter,name,color,colorBg,protein,
-// messenger,net,pathway(string[]),effects({t,d,x}),clinical,drugs({n,r,u,c})}
 
-var ADR=[
+// ═══════════════════════════════════════════════════════
+
+var ADR = [
   {id:'a1',symbol:'α₁',letter:'α',name:'Alfa-1',color:'#f472b6',colorBg:'rgba(244,114,182,.08)',
     protein:'Gq',messenger:['↑ IP₃','↑ DAG','↑ Ca²⁺'],net:'Excitatorio / Contracción',
     pathway:['NE / Epi','Receptor α₁','Gq','↑ PLC','↑ IP₃ + DAG','↑ Ca²⁺ intracelular','CONTRACCIÓN'],
@@ -84,7 +82,7 @@ var ADR=[
     ]}
 ];
 
-var MUSC=[
+var MUSC = [
   {id:'m1',symbol:'M₁',letter:'M',name:'Muscarínico 1',color:'#34d399',colorBg:'rgba(52,211,153,.08)',
     protein:'Gq',messenger:['↑ IP₃','↑ Ca²⁺'],net:'Excitación SNC / Gástrico',
     pathway:['ACh','Receptor M₁','Gq','↑ PLC','↑ IP₃ + DAG','↑ Ca²⁺','EXCITACIÓN'],
@@ -150,7 +148,7 @@ var MUSC=[
     drugs:[{n:'Sin fármacos específicos',r:'Diana en investigación',u:'Adicción',c:'#047857'}]}
 ];
 
-var NIC=[
+var NIC = [
   {id:'nm',symbol:'Nm',letter:'N',name:'Nicotínico muscular',color:'#a78bfa',colorBg:'rgba(167,139,250,.08)',
     protein:'Canal iónico',messenger:['↑ Na⁺ → despolarización'],net:'Contracción muscular',
     pathway:['ACh (motoneurona)','Receptor Nm (placa)','Canal iónico abierto','↑ Na⁺','DESPOLARIZACIÓN','CONTRACCIÓN'],
@@ -178,7 +176,7 @@ var NIC=[
     ]}
 ];
 
-var DOP=[
+var DOP = [
   {id:'d1',symbol:'D₁',letter:'D',name:'Dopamina D₁ (D1-like: D₁, D₅)',color:'#fbbf24',colorBg:'rgba(251,191,36,.08)',
     protein:'Gs',messenger:['↑ AMPc'],net:'Excitatorio postsináptico',
     pathway:['Dopamina','Receptor D₁','Gs','↑ Adenilato ciclasa','↑ AMPc → PKA','EXCITACIÓN'],
@@ -214,7 +212,7 @@ var DOP=[
     ]}
 ];
 
-var SEROT=[
+var SEROT = [
   {id:'5ht1a',symbol:'5-HT₁ₐ',letter:'5-HT',name:'Serotonina 1A',color:'#f472b6',colorBg:'rgba(244,114,182,.08)',
     protein:'Gi',messenger:['↓ AMPc'],net:'Ansiolítico / Antidepresivo',
     pathway:['5-HT','Receptor 5-HT₁ₐ','Gi','↓ AMPc','Autorreceptor / Postsináptico'],
@@ -291,7 +289,7 @@ var SEROT=[
     ]}
 ];
 
-var HIST=[
+var HIST = [
   {id:'h1',symbol:'H₁',letter:'H',name:'Histamina 1',color:'#fbbf24',colorBg:'rgba(251,191,36,.08)',
     protein:'Gq',messenger:['↑ IP₃','↑ Ca²⁺'],net:'Alergia / Inflamación',
     pathway:['Histamina','Receptor H₁','Gq','↑ IP₃/DAG','↑ Ca²⁺','VASODILAT + PRURITO'],
@@ -341,7 +339,7 @@ var HIST=[
     drugs:[{n:'Toreforant (fase clínica)',r:'Antagonista H₄',u:'Inflamación alérgica',c:'#b45309'}]}
 ];
 
-var OPI=[
+var OPI = [
   {id:'mu',symbol:'μ (MOR)',letter:'μ',name:'Opioide Mu',color:'#06b6d4',colorBg:'rgba(6,182,212,.08)',
     protein:'Gi/o',messenger:['↓ AMPc','↑ K⁺','↓ Ca²⁺'],net:'Analgesia / Euforia',
     pathway:['β-endorfina','Receptor μ','Gi/o','↓ AMPc','HIPERPOLARIZACIÓN','ANALGESIA'],
@@ -384,7 +382,7 @@ var OPI=[
     drugs:[{n:'En investigación',r:'Agonistas δ',u:'Depresión / Dolor neuropático',c:'#38bdf8'}]}
 ];
 
-var GLU=[
+var GLU = [
   {id:'nmda',symbol:'NMDA',letter:'NMDA',name:'NMDA',color:'#60a5fa',colorBg:'rgba(96,165,250,.08)',
     protein:'Canal iónico',messenger:['↑ Ca²⁺ (clave LTP)'],net:'Plasticidad / Excitotoxicidad',
     pathway:['Glu + Glicina','Receptor NMDA (Mg²⁺)','Despolarización retira Mg²⁺','↑ Ca²⁺','LTP / Excitotoxicidad'],
@@ -422,7 +420,7 @@ var GLU=[
     drugs:[{n:'Topiramato',r:'Múltiples dianas',u:'Epilepsia / Migraña',c:'#1d4ed8'}]}
 ];
 
-var GABA=[
+var GABA = [
   {id:'gabaa',symbol:'GABAᴀ',letter:'GABA',name:'GABA-A (ionotrópico)',color:'#8b5cf6',colorBg:'rgba(139,92,246,.08)',
     protein:'Canal Cl⁻',messenger:['↑ Cl⁻ → hiperpolariza'],net:'Inhibición rápida',
     pathway:['GABA','Receptor GABAᴀ','Apertura canal','↑ Cl⁻','HIPERPOLARIZACIÓN'],
@@ -453,7 +451,7 @@ var GABA=[
     ]}
 ];
 
-var CB=[
+var CB = [
   {id:'cb1',symbol:'CB₁',letter:'CB',name:'Cannabinoide 1',color:'#10b981',colorBg:'rgba(16,185,129,.08)',
     protein:'Gi/o',messenger:['↓ AMPc'],net:'Psicoactivo / Modulador SNC',
     pathway:['Anandamida / THC','Receptor CB₁','Gi/o','↓ AMPc','↓ Liberación NT (retrógrada)'],
@@ -480,7 +478,7 @@ var CB=[
     ]}
 ];
 
-var RECEPTOR_FAMILIES=[
+var RECEPTOR_FAMILIES = [
   {id:'adr',name:'Adrenérgicos',icon:'⚡',col:'#ec4899',desc:'α₁, α₂, β₁, β₂, β₃ · Simpático',receptors:ADR,nt:'Noradrenalina / Adrenalina'},
   {id:'musc',name:'Muscarínicos',icon:'🌿',col:'#14b8a6',desc:'M₁–M₅ · Parasimpático',receptors:MUSC,nt:'Acetilcolina'},
   {id:'nic',name:'Nicotínicos',icon:'🧬',col:'#a78bfa',desc:'Nm · Nn',receptors:NIC,nt:'Acetilcolina'},
@@ -492,3 +490,186 @@ var RECEPTOR_FAMILIES=[
   {id:'gaba',name:'GABAérgicos',icon:'😴',col:'#8b5cf6',desc:'GABAᴀ · GABAʙ',receptors:GABA,nt:'GABA'},
   {id:'cb',name:'Cannabinoides',icon:'🌱',col:'#10b981',desc:'CB₁ · CB₂',receptors:CB,nt:'Anandamida / 2-AG'}
 ];
+
+// ═══════════════════════════════════════════════════════
+// QUIZZES
+// ═══════════════════════════════════════════════════════
+var RECEPTOR_QUIZZES = {
+  adr:[
+    {q:'¿Qué proteína G está acoplada al receptor α₁?',opts:['Gi','Gs','Gq','G12/13'],r:2,x:'α₁ → Gq → ↑PLC → ↑IP₃+DAG → ↑Ca²⁺ → contracción. Vía clásica de vasoconstricción.'},
+    {q:'Mecanismo de la metildopa en HTA:',opts:['Bloquea α₁ periférico','Agonista α₂ central','Inhibe ECA','Bloquea β₁'],r:1,x:'Agonista α₂ central → ↓ tono simpático → ↓ PA. Primera elección en HTA del embarazo.'},
+    {q:'Salbutamol produce broncodilatación por:',opts:['β₁ → contracción','β₂ → Gs → ↑AMPc → relajación','α₂ → Gi','β₂ → Gq'],r:1,x:'β₂ → Gs → ↑AMPc → PKA → fosforila miosina kinasa → relajación músculo liso bronquial.'},
+    {q:'¿Por qué metoprolol es "cardioselectivo"?',opts:['Solo α₁ cardíaco','Mayor afinidad β₁ vs β₂','Agonista parcial β₂','Inhibe catecolaminas'],r:1,x:'Cardioselectivos = mayor afinidad β₁. Evita broncoespasmo. NO son 100% selectivos a dosis altas.'},
+    {q:'¿Por qué salbutamol produce hipokalemia?',opts:['↑ aldosterona','Activa Na/K-ATPasa, K⁺ entra a célula','↓ reabsorción K⁺','↑ sudor'],r:1,x:'β₂ → ↑AMPc → activa Na/K-ATPasa en músculo → K⁺ entra → ↓K⁺ sérico.'},
+    {q:'Receptor adrenérgico para vejiga hiperactiva:',opts:['α₁','α₂','β₁','β₃'],r:3,x:'β₃ → Gs → ↑AMPc → relajación detrusor → ↑ capacidad. Mirabegrón.'},
+    {q:'Retiro abrupto de clonidina causa:',opts:['Hipokalemia','HTA de rebote','Bradicardia','Broncoespasmo'],r:1,x:'Crisis hipertensiva por dependencia neuroadaptativa. Retirar gradualmente.'},
+    {q:'¿Por qué carvedilol es útil en ICC?',opts:['Solo β₁','Solo α₁','β₁+β₂+α₁','Agonista β₂'],r:2,x:'Bloqueo β₁ (↓FC, ↓remodelación) + α₁ (↓postcarga) = mejora supervivencia.'}
+  ],
+  musc:[
+    {q:'¿Qué receptor muscarínico produce bradicardia?',opts:['M₁','M₂','M₃','M₄'],r:1,x:'M₂ → Gi → ↑K⁺ nodo SA/AV → hiperpolarización → bradicardia. Receptor del vago cardíaco.'},
+    {q:'Tiotropio (EPOC) actúa en:',opts:['M₂','M₃ bronquial','β₂','H₁'],r:1,x:'Tiotropio = antagonista M₃ de larga duración (LAMA) → broncodilatación.'},
+    {q:'Antídoto de intoxicación por organofosforados:',opts:['Naloxona','Flumazenil','Atropina + pralidoxima','Dexmedetomidina'],r:2,x:'Organofosforados inhiben AChE → exceso ACh. Atropina bloquea muscarínicos; pralidoxima regenera AChE.'},
+    {q:'Receptor M en células parietales gástricas:',opts:['M₁','M₂','M₃','Todos'],r:0,x:'M₁ → ↑HCl. Pirenzepina (antagonista) se usaba para úlcera, hoy IBP.'},
+    {q:'Oxibutinina trata vejiga hiperactiva bloqueando:',opts:['M₁','M₂','M₃','β₃'],r:2,x:'M₃ en detrusor → contracción. Antagonistas M₃ → ↓ micción.'},
+    {q:'Receptor colinérgico clave en Alzheimer:',opts:['M₁','M₂','M₃','M₄'],r:0,x:'M₁ en corteza/hipocampo → aprendizaje. Donepezilo ↑ACh → estimula M₁.'},
+    {q:'Xanomelina-trospio (2024) trata esquizofrenia sin bloquear D₂ porque activa:',opts:['M₁/M₄','M₂/M₃','D₁','5-HT₂ₐ'],r:0,x:'Agonista M₁/M₄ = primer antipsicótico sin bloqueo dopaminérgico.'}
+  ],
+  nic:[
+    {q:'Receptor de la placa neuromuscular:',opts:['Nm','Nn','M₃','GABAᴀ'],r:0,x:'Nm → canal iónico → Na⁺ → despolarización → contracción muscular.'},
+    {q:'Succinilcolina produce:',opts:['Bloqueo no despolarizante','Bloqueo despolarizante (fasciculaciones)','Antagonismo muscarínico','Agonismo β₂'],r:1,x:'Agonista Nm persistente → despolariza y luego músculo no responde. Intubación rápida.'},
+    {q:'Miastenia gravis: anticuerpos contra:',opts:['D₂','Nm','GABAᴀ','M₃'],r:1,x:'Anti-Nm → ↓ receptores → debilidad fluctuante. Neostigmina mejora síntomas.'},
+    {q:'Vareniclina (cesación tabáquica) es:',opts:['Antagonista Nm','Agonista parcial Nn α4β2','Agonista μ','Bloqueo β₂'],r:1,x:'↓ ansia + ↓ placer si fuma.'},
+    {q:'Nn ganglionar transmite con:',opts:['EPSP lento','EPSP rápido','Inhibición','Hiperpolarización'],r:1,x:'Nicotínicos = canales iónicos → EPSP rápido (ms). M₁ = EPSP lento (G-proteína).'},
+    {q:'Neostigmina en reverso de BNM:',opts:['Bloquea Nm','Inhibe AChE (↑ACh)','Agoniza Nn','Relajante'],r:1,x:'↑ ACh en placa → desplaza al BNM no-despolarizante. Combinar con glicopirrolato.'}
+  ],
+  dop:[
+    {q:'D1-like incluye:',opts:['D₁ y D₅','D₂, D₃, D₄','Solo D₁','Todos'],r:0,x:'D1-like = D₁ + D₅ (Gs). D2-like = D₂, D₃, D₄ (Gi).'},
+    {q:'SEP por antipsicóticos se debe a:',opts:['Bloqueo D₁','Bloqueo D₂ nigroestriado','↑ dopamina','Bloqueo M₁'],r:1,x:'Bloqueo D₂ vía nigroestriada → parkinsonismo, distonía, acatisia, disquinesia tardía.'},
+    {q:'¿Por qué domperidona produce menos SEP que metoclopramida?',opts:['Es D₁','No cruza BHE','Es agonista','No actúa en D₂'],r:1,x:'Domperidona bloquea D₂ periférico pero NO cruza BHE → menos efectos centrales.'},
+    {q:'Prolactinoma se trata con:',opts:['Haloperidol','Cabergolina (agonista D₂)','Metoclopramida','Clozapina'],r:1,x:'D₂ en hipófisis inhibe prolactina. Cabergolina → ↓ prolactina → ↓ tumor.'},
+    {q:'Dopamina dosis bajas (1-3 μg/kg/min) activan:',opts:['β₁','α₁','D₁ (vasodilatación renal)','β₂'],r:2,x:'D₁ → vasodilatación renal. Dosis β₁ (3-10). Dosis α₁ (>10).'},
+    {q:'Parkinson se trata con:',opts:['Antagonistas D₂','Agonistas D₂ + L-DOPA','Bloqueo M₁','Antagonistas NMDA'],r:1,x:'Déficit dopaminérgico → L-DOPA + agonistas D₂ directos (pramipexol).'},
+    {q:'Hiperprolactinemia por antipsicóticos es por bloqueo de:',opts:['Vía nigroestriada','Vía tuberoinfundibular','Vía mesolímbica','Vía mesocortical'],r:1,x:'Tuberoinfundibular: DA inhibe prolactina. Bloqueo D₂ → ↑prolactina.'}
+  ],
+  sero:[
+    {q:'Triptanes (migraña) actúan en:',opts:['5-HT₁ₐ','5-HT₁B/D','5-HT₂ₐ','5-HT₃'],r:1,x:'Agonistas 5-HT₁B/D → vasoconstricción craneal + ↓CGRP. Contraindicados en cardiopatía.'},
+    {q:'Ondansetrón bloquea:',opts:['5-HT₁ₐ','5-HT₂ₐ','5-HT₃','5-HT₄'],r:2,x:'Setrones = antagonistas 5-HT₃ → antieméticos de elección en NVPQ.'},
+    {q:'Buspirona (ansiolítico) es:',opts:['BZD','Agonista parcial 5-HT₁ₐ','ISRS','Antagonista β'],r:1,x:'5-HT₁ₐ → ansiolítico sin dependencia (vs BZD).'},
+    {q:'LSD y psilocibina actúan en:',opts:['5-HT₁ₐ','5-HT₂ₐ','5-HT₃','5-HT₇'],r:1,x:'5-HT₂ₐ cortical → efectos psicodélicos. En investigación para depresión resistente.'},
+    {q:'Síndrome serotoninérgico por combinar:',opts:['ISRS + IMAO + tramadol','Solo ISRS','Antagonistas 5-HT','BZD'],r:0,x:'Exceso 5-HT (principalmente 5-HT₂ₐ). Tríada: mental, autonómica, neuromuscular.'},
+    {q:'Prucaloprida (constipación) es:',opts:['Antagonista 5-HT₁','Antagonista 5-HT₃','Agonista 5-HT₄','Antagonista H₁'],r:2,x:'5-HT₄ en plexo mientérico → ↑ACh → ↑motilidad GI.'},
+    {q:'Mirtazapina causa ↑ apetito por bloquear:',opts:['5-HT₁','5-HT₂c + H₁','D₂','M₃'],r:1,x:'Bloqueo 5-HT₂c (saciedad) + H₁ → útil en depresión con anorexia.'},
+    {q:'Atípicos tienen menos SEP que típicos porque bloquean:',opts:['Solo D₂','D₂ + 5-HT₂ₐ','Solo 5-HT₃','5-HT₄'],r:1,x:'Bloqueo 5-HT₂ₐ atenúa efectos del bloqueo D₂ nigroestriado.'}
+  ],
+  hist:[
+    {q:'Anafilaxia activa principalmente:',opts:['H₁ + H₂','H₃','H₄','Solo H₁'],r:0,x:'H₁ (vasodilatación, broncoespasmo) + H₂ (hipotensión). Adrenalina revierte.'},
+    {q:'Loratadina no causa sedación porque:',opts:['No bloquea H₁','Bloquea H₂','No cruza BHE','Bloquea H₄'],r:2,x:'2ª gen → poca penetración SNC. No sedantes.'},
+    {q:'Famotidina trata ERGE bloqueando:',opts:['H₁','H₂ parietales','H₃','Bomba de protones'],r:1,x:'H₂ → Gs → ↑AMPc → bomba H⁺/K⁺ → HCl. IBP son más potentes.'},
+    {q:'Difenhidramina (1ª gen) tiene usos off-label en:',opts:['Solo alergias','Alergias + sedante + antimareo','HTA','Antiinflamatorio'],r:1,x:'Cruza BHE → sedación + anti-M₃ adicional.'},
+    {q:'Pitolisant (narcolepsia) actúa en:',opts:['H₁','H₂','H₃','H₄'],r:2,x:'H₃ es autorreceptor presináptico. Antagonismo → ↑ histamina → ↑ vigilia.'},
+    {q:'H₁ vs H₂: ¿cuál causa broncoconstricción?',opts:['H₁','H₂','Ambos','Ninguno'],r:0,x:'H₁ → broncoconstricción. H₂ → secreción gástrica.'},
+    {q:'H₄ es objetivo emergente en:',opts:['HTA','Asma / dermatitis atópica','Parkinson','Esquizofrenia'],r:1,x:'En eosinófilos/mastocitos. Antagonistas en investigación para patología alérgica.'}
+  ],
+  opi:[
+    {q:'Receptor principal de la morfina:',opts:['μ (MOR)','κ','δ','ORL1'],r:0,x:'μ = analgesia, euforia, depresión respiratoria, constipación. Clave en adicción.'},
+    {q:'Naloxona revierte sobredosis porque es:',opts:['Agonista μ','Antagonista μ','Agonista κ','Inhibidor AChE'],r:1,x:'Antagonista μ → desplaza al opioide y restaura respiración. Vida media corta → re-dosis.'},
+    {q:'Depresión respiratoria por opioides es por:',opts:['κ central','μ en bulbo','δ','5-HT₃'],r:1,x:'μ en centro respiratorio → ↓ sensibilidad a CO₂ → bradipnea/apnea.'},
+    {q:'Metadona (tto adicción) es:',opts:['Agonista μ larga duración','Antagonista μ','Agonista κ','Inhibidor'],r:0,x:'Vida media larga → elimina abstinencia sin picos de euforia.'},
+    {q:'Miosis puntiforme en intoxicación opioide es por:',opts:['β₁','μ en núcleo Edinger-Westphal','α₁','M₃'],r:1,x:'μ central → ↑ tono parasimpático ocular → miosis. Signo clínico clave.'},
+    {q:'Tramadol actúa por:',opts:['Solo μ','Agonista μ débil + IRSN','Antagonista μ','κ puro'],r:1,x:'Doble mecanismo: μ + inhibición recaptación 5-HT/NE.'},
+    {q:'Buprenorfina es:',opts:['Agonista μ pleno','Agonista parcial μ','Antagonista μ','Agonista κ'],r:1,x:'Agonista parcial μ (efecto techo) → tto adicción (Suboxone).'},
+    {q:'Naltrexona en adicción alcohol/opioide:',opts:['Agonista μ','Antagonista μ VO','Inhibidor AChE','Agonista GABAᴀ'],r:1,x:'Antagonista μ VO → bloquea placer + modula refuerzo alcohólico.'}
+  ],
+  glu:[
+    {q:'Ketamina es:',opts:['Agonista NMDA','Antagonista NMDA','Agonista GABAᴀ','Antagonista AMPA'],r:1,x:'Antagonista NMDA → anestesia disociativa + antidepresivo rápido.'},
+    {q:'Memantina (Alzheimer) actúa en:',opts:['AChE','NMDA','GABAᴀ','D₂'],r:1,x:'Antagonista NMDA moderado → ↓ excitotoxicidad.'},
+    {q:'LTP (potenciación largo plazo) requiere:',opts:['NMDA + ↑Ca²⁺','Solo AMPA','GABAᴀ','Kainato'],r:0,x:'NMDA se activa con despolarización (retira Mg²⁺) → ↑Ca²⁺ → plasticidad = base de memoria.'},
+    {q:'Excitotoxicidad en ACV involucra:',opts:['↓ Glu','Exceso Glu → NMDA → ↑Ca²⁺','GABA excesivo','DA baja'],r:1,x:'Isquemia → glutamato masivo → NMDA → Ca²⁺ → muerte neuronal.'},
+    {q:'Perampanel (epilepsia) bloquea:',opts:['NMDA','AMPA','Kainato','GABAᴀ'],r:1,x:'Antagonista AMPA no competitivo → epilepsia refractaria.'},
+    {q:'Receptor glutamatérgico bloqueado por Mg²⁺ en reposo:',opts:['AMPA','Kainato','NMDA','mGluR'],r:2,x:'NMDA bloqueado por Mg²⁺. Necesita despolarización + Glu + glicina → coincidencia.'}
+  ],
+  gaba:[
+    {q:'Benzodiazepinas potencian:',opts:['GABAᴀ (↑ frecuencia apertura Cl⁻)','GABAʙ','NMDA','5-HT₁ₐ'],r:0,x:'BZD = moduladores alostéricos GABAᴀ → ↑ frecuencia apertura → hiperpolarización.'},
+    {q:'Flumazenil revierte intoxicación por:',opts:['Opioides','BZD','Barbitúricos','Alcohol'],r:1,x:'Antagonista competitivo BZD en GABAᴀ. NO revierte barbitúricos ni OH.'},
+    {q:'Baclofeno (espasticidad) es:',opts:['Agonista GABAᴀ','Agonista GABAʙ','Antagonista NMDA','Opioide'],r:1,x:'Agonista GABAʙ → ↓ tono muscular. EM, lesión medular.'},
+    {q:'¿Por qué zolpidem causa menos dependencia que diazepam?',opts:['No afecta GABAᴀ','Selectivo α1 (sedante puro)','Es antagonista','Vida media larga'],r:1,x:'Z-drug selectivo α1 → solo sedación, menos efectos multidimensionales.'},
+    {q:'Barbitúricos actúan en:',opts:['GABAʙ','GABAᴀ (↑ duración apertura)','NMDA','μ'],r:1,x:'↑ duración de apertura (vs BZD que ↑ frecuencia). Dosis altas = letal.'},
+    {q:'Abstinencia alcohólica causa convulsiones porque:',opts:['↑ GABA','Al retirar OH hay ↓GABA + ↑NMDA','↑ NMDA directo','↑ μ'],r:1,x:'Adaptación crónica: ↓GABAᴀ + ↑NMDA → hiperexcitabilidad al retirar. Tto: BZD.'}
+  ],
+  cb:[
+    {q:'CB₁ está principalmente en:',opts:['Hígado','SNC','Pulmón','Células inmunes'],r:1,x:'CB₁ en SNC (corteza, hipocampo, cerebelo). Mediador efectos psicoactivos THC.'},
+    {q:'CB₂ está principalmente en:',opts:['SNC','Células inmunes y periferia','Corazón','Riñón'],r:1,x:'CB₂ en macrófagos, linfocitos. Antiinflamación. CBD preferencial aquí.'},
+    {q:'Epidiolex (CBD) está aprobado para:',opts:['Depresión','Epilepsia refractaria','HTA','Diabetes'],r:1,x:'FDA 2018 para síndromes de Dravet y Lennox-Gastaut.'},
+    {q:'Rimonabant fue retirado porque:',opts:['Inefectivo','↑ ideación suicida','Cáncer','Hepatotoxicidad'],r:1,x:'Bloqueo CB₁ → ↑ depresión, suicidio. Muestra rol endocannabinoide en humor.'},
+    {q:'Endocannabinoides (anandamida, 2-AG) actúan como:',opts:['NT anterogrades','Mensajeros retrógrados','Hormonas','Factores de crecimiento'],r:1,x:'Síntesis postsináptica → activan CB₁ presináptico → ↓ liberación NT. Único mecanismo.'}
+  ]
+};
+
+// ═══════════════════════════════════════════════════════
+// PEARLS (Perlas Clínicas)
+// ═══════════════════════════════════════════════════════
+var RECEPTOR_PEARLS = {
+  adr:[
+    {t:'⚡ Regla de los 3 Gs',i:['Gq → "Q de Quema" (Ca²⁺ → contracción) → α₁','Gi → "i de inhibe" (↓AMPc) → α₂','Gs → "s de Sube" (↑AMPc) → β₁, β₂, β₃']},
+    {t:'💊 α₁-bloqueadores: prazosina vs tamsulosina',i:['Prazosina → antihipertensivo (hipotensión 1ª dosis)','Tamsulosina → uroSelectiva (HBP, menos efecto vascular)','📌 HBP → tamsulosina']},
+    {t:'🤰 Metildopa = HTA embarazo',i:['Agonista α₂ central → ↓ tono simpático','Primera elección por seguridad fetal','Segunda: labetalol IV en emergencia']},
+    {t:'🫁 β₂: SABA vs LABA',i:['SABA (salbutamol) — RESCATE 4-6h','LABA (formoterol, salmeterol) — MANTENIMIENTO 12h','NO usar LABA solo en asma','Adverso: hipokalemia, temblor']},
+    {t:'❤️ β-bloqueadores',i:['Cardioselectivos (β₁): metoprolol, atenolol, bisoprolol','No selectivos: propranolol, carvedilol (+α₁), labetalol','⚠️ No selectivos → broncoespasmo en asmáticos']},
+    {t:'🧠 Clonidina — retirada abrupta',i:['α₂ agonista central','Retiro brusco → HTA de rebote','Retirar SIEMPRE gradualmente']}
+  ],
+  musc:[
+    {t:'🌿 Regla básica muscarínica',i:['M₁ → SNC + gástrico (Gq)','M₂ → corazón: bradicardia (Gi)','M₃ → liso + glándulas (Gq)','M₄ → motora basal (Gi)','M₅ → cerebrovascular (Gq)']},
+    {t:'💊 Atropina: bloqueo muscarínico global',i:['Taquicardia (bloqueo M₂)','Midriasis + cicloplejía (M₃ ocular)','Boca/piel seca (M₃ glandular)','Retención urinaria (M₃ detrusor)','🆘 Antídoto organofosforados: atropina + pralidoxima']},
+    {t:'🫁 Tiotropio (LAMA) vs Ipratropio (SAMA)',i:['Ambos bloquean M₃ bronquial','Tiotropio: 1x/día, EPOC crónico','Ipratropio: 4x/día, asma/EPOC aguda']},
+    {t:'🧠 Demencia y muscarínicos',i:['Déficit colinérgico en Alzheimer','Donepezilo/rivastigmina inhiben AChE → ↑ACh','Estimulan M₁ → mejora leve cognición']},
+    {t:'🆕 Xanomelina-trospio (2024)',i:['Primer antipsicótico M₁/M₄ agonista','No bloquea D₂ → NO causa SEP','Revolución en esquizofrenia — FDA sept 2024']}
+  ],
+  nic:[
+    {t:'🧬 Nm vs Nn',i:['Nm → placa neuromuscular (esquelético)','Nn → ganglios + suprarrenal + SNC','Ambos canales iónicos (EPSP rápido)']},
+    {t:'💊 Bloqueantes Nm en anestesia',i:['Despolarizantes: succinilcolina (fasciculaciones, corta)','No despolarizantes: rocuronio, vecuronio','Reverso: neostigmina + glicopirrolato']},
+    {t:'🔴 Miastenia gravis',i:['Ac anti-Nm en placa neuromuscular','Debilidad fluctuante, empeora con ejercicio','Tto: piridostigmina, corticoides, timectomía']},
+    {t:'🚬 Cesación tabáquica',i:['Vareniclina = agonista parcial Nn α4β2','↓ ansia + bloquea refuerzo si fuma','Mayor éxito que TRN sola']}
+  ],
+  dop:[
+    {t:'🎯 D1-like vs D2-like',i:['D1-like (D₁, D₅) → Gs → ↑AMPc','D2-like (D₂, D₃, D₄) → Gi → ↓AMPc','D₂ = blanco principal en antipsicóticos']},
+    {t:'💊 SEP por antipsicóticos',i:['Bloqueo D₂ vía nigroestriada','Parkinsonismo, distonía, acatisia, disquinesia tardía','Haloperidol > risperidona > olanzapina','Atípicos bloquean 5-HT₂ₐ → menos SEP']},
+    {t:'💊 Hiperprolactinemia',i:['Vía tuberoinfundibular: DA inhibe PRL','Bloqueo D₂ → galactorrea, amenorrea','Risperidona, haloperidol alto riesgo','Aripiprazol bajo riesgo']},
+    {t:'🫀 Dopamina según dosis',i:['1-3 μg/kg/min → D₁: vasodilatación renal','3-10 → β₁: inotrópico','>10 → α₁: vasoconstrictor','Hoy se prefiere NE en shock séptico']},
+    {t:'🔄 Parkinson',i:['L-DOPA + carbidopa (bloquea DDC periférica)','Pramipexol, ropinirol = agonistas D₂/D₃','iMAO-B (selegilina) → ↓ degradación','Problemas: fluctuaciones, disquinesias']},
+    {t:'🤢 Domperidona vs metoclopramida',i:['Ambas bloquean D₂ en ZQT','Domperidona NO cruza BHE → menos SEP','Ambas prolongan QT → precaución']}
+  ],
+  sero:[
+    {t:'💫 Familia 5-HT',i:['5-HT₁ → Gi (autorreceptor)','5-HT₂ → Gq (alucinógenos, saciedad)','5-HT₃ → canal iónico (vómito)','5-HT₄/6/7 → Gs (procinético)']},
+    {t:'🤕 Triptanes en migraña',i:['Agonistas 5-HT₁B/D → vasoconstricción craneal','Sumatriptán, rizatriptán, eletriptán','Contraindicados: cardiopatía isquémica','Adversos: opresión torácica, parestesias']},
+    {t:'🤢 Setrones en quimioterapia',i:['Antagonistas 5-HT₃ → previenen NVPQ','Ondansetrón 8 mg, granisetrón, palonosetrón','Combinar con dexametasona + aprepitant']},
+    {t:'😰 Síndrome serotoninérgico',i:['Exceso 5-HT: ISRS + IMAO + tramadol','Tríada: mental + autonómica + neuromuscular','Tto: suspender, BZD, ciproheptadina']},
+    {t:'💊 Antipsicóticos atípicos',i:['Bloqueo D₂ + 5-HT₂ₐ → menos SEP','Clozapina: resistentes (agranulocitosis)','Aripiprazol: agonista parcial D₂']},
+    {t:'🍽️ 5-HT₂c y apetito',i:['Activación → saciedad (lorcaserina retirada)','Bloqueo (mirtazapina) → ↑apetito','Útil en depresión con anorexia']}
+  ],
+  hist:[
+    {t:'🔥 H₁ 1ª vs 2ª generación',i:['1ª gen (difenhidramina, clorfeniramina) → cruzan BHE → sedación','2ª gen (loratadina, cetirizina) → no cruzan → no sedantes','Hidroxizina: sedación deliberada']},
+    {t:'🆘 Anafilaxia',i:['H₁ + H₂ + mastocitos → vasodilatación + broncoespasmo','ADRENALINA IM = tto fundamental','Adyuvantes: corticoides, antihistamínicos','Oxígeno + líquidos IV']},
+    {t:'🔥 H₂ y ácido gástrico',i:['H₂ → Gs → ↑AMPc → bomba H⁺/K⁺ → HCl','Famotidina (ranitidina retirada por NDMA)','IBP más potentes']},
+    {t:'😴 H₃ y narcolepsia',i:['H₃ autorreceptor','Pitolisant → ↑ histamina → ↑ vigilia','Alternativa a modafinilo']},
+    {t:'🔬 H₄ en investigación',i:['En células inmunes','Antagonistas en estudio: asma, dermatitis atópica','Sin fármacos aprobados aún']}
+  ],
+  opi:[
+    {t:'☯️ Los 3 principales',i:['μ (MOR) → analgesia + euforia + depresión respiratoria','κ (KOR) → analgesia espinal + DISFORIA','δ (DOR) → modulación afectiva, investigación']},
+    {t:'🆘 Intoxicación opioide',i:['Tríada: miosis + depresión respiratoria + coma','Naloxona IV/IM/nasal → revierte en 1-2 min','Vida media naloxona < morfina → re-dosificar']},
+    {t:'💊 Dolor crónico oncológico',i:['Escalera OMS: paracetamol → tramadol → morfina','Parches fentanilo: dolor estable','Metadona: tolerancia, cuidado QT','Siempre laxantes (constipación)']},
+    {t:'🔄 Tratamiento de adicción',i:['Metadona: agonista μ larga duración','Buprenorfina/naloxona (Suboxone)','Naltrexona (VO o LAI)','Todas reducen mortalidad']},
+    {t:'🌡️ Tramadol: cuidados',i:['μ débil + IRSN','Riesgo: síndrome serotoninérgico','Convulsiones en dosis altas']}
+  ],
+  glu:[
+    {t:'🧠 Principal excitador del SNC',i:['Glutamato = NT más abundante','Ionotrópicos: NMDA, AMPA, Kainato','Metabotrópicos: mGluR I-III','Exceso → excitotoxicidad']},
+    {t:'💊 Ketamina',i:['Antagonista NMDA','Anestesia disociativa sin depresión respiratoria','Esketamina nasal FDA 2019 para depresión resistente']},
+    {t:'🧠 LTP y memoria',i:['NMDA bloqueado por Mg²⁺ en reposo','Despolarización + Glu + glicina → abre','↑Ca²⁺ → plasticidad sináptica']},
+    {t:'🧓 Memantina en Alzheimer',i:['Antagonista NMDA moderado','Bloquea excitotoxicidad','Combina con donepezilo']},
+    {t:'⚡ Excitotoxicidad',i:['ACV, TCE → glutamato masivo','Ca²⁺ masivo → muerte neuronal','Perampanel (AMPA) → epilepsia']}
+  ],
+  gaba:[
+    {t:'😴 Principal inhibidor del SNC',i:['GABAᴀ → canal Cl⁻ (rápida)','GABAʙ → Gi (lenta)','Balance Glu/GABA crítico']},
+    {t:'💊 Benzodiazepinas',i:['Moduladores alostéricos GABAᴀ','Ansiolítico + sedante + anticonvulsivo + relajante','Corta (midazolam), intermedia (lorazepam), larga (diazepam)','Antídoto: FLUMAZENIL']},
+    {t:'⚠️ Barbitúricos',i:['↑ duración apertura GABAᴀ','Dosis altas activan canal sin GABA → letal','Usos: fenobarbital (epilepsia), tiopental (anestesia)']},
+    {t:'💊 Baclofeno',i:['Agonista GABAʙ','EM, lesión medular','Intratecal en refractarios']},
+    {t:'🍺 Abstinencia alcohólica',i:['Alcohol potencia GABAᴀ crónicamente','Al retirar: ↓GABA + ↑NMDA → hiperexcitabilidad','Temblor → convulsiones → delirium tremens','Tto: BZD, tiamina']}
+  ],
+  cb:[
+    {t:'🌱 CB₁ (SNC) vs CB₂ (periferia)',i:['CB₁: cerebro → psicoactivo','CB₂: inmunes, piel, hueso → antiinflamatorio','THC ambos; CBD preferencial CB₂']},
+    {t:'💊 Endocannabinoides',i:['Anandamida, 2-AG','Síntesis postsináptica "on demand"','Mensajeros RETRÓGRADOS (único)','Modulan dolor, apetito, humor']},
+    {t:'💊 Epidiolex (CBD)',i:['Primera aprobación FDA (2018) de cannabis','Dravet, Lennox-Gastaut, esclerosis tuberosa','Epilepsias infantiles refractarias']},
+    {t:'⚠️ Rimonabant',i:['Antagonista CB₁ aprobado para obesidad (2006)','Retirado 2008: ideación suicida','Rol del endocannabinoide en humor']},
+    {t:'🇧🇴 Cannabis medicinal',i:['Nabiximols (Sativex): espasticidad EM','Dronabinol: caquexia VIH, náusea quimio','Bolivia: no aprobado aún']}
+  ]
+};
+
+// ═══════════════════════════════════════════════════════
+// PROTEIN G SUMMARY
+// ═══════════════════════════════════════════════════════
+var RECEPTOR_PROT_G = [
+  {name:'Gq',color:'#f472b6',desc:'Activa PLC',result:'↑ IP₃ → ↑ Ca²⁺ + DAG',receptors:'α₁ · M₁ · M₃ · M₅ · H₁ · 5-HT₂'},
+  {name:'Gi/o',color:'#fb923c',desc:'Inhibe adenilato ciclasa',result:'↓ AMPc + ↑K⁺ + ↓Ca²⁺',receptors:'α₂ · M₂ · M₄ · D₂ · μ · κ · δ · H₃ · H₄ · GABAʙ · 5-HT₁ · CB'},
+  {name:'Gs',color:'#60a5fa',desc:'Activa adenilato ciclasa',result:'↑ AMPc → PKA',receptors:'β₁ · β₂ · β₃ · D₁ · H₂ · 5-HT₄'},
+  {name:'Canal iónico',color:'#34d399',desc:'Ionotrópico directo',result:'Flujo iónico rápido',receptors:'Nm · Nn · 5-HT₃ · NMDA · AMPA · GABAᴀ'}
+];
+
