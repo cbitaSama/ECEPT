@@ -383,3 +383,99 @@ var OPI=[
     clinical:'Diana emergente. Agonistas δ en investigación para depresión y dolor.',
     drugs:[{n:'En investigación',r:'Agonistas δ',u:'Depresión / Dolor neuropático',c:'#38bdf8'}]}
 ];
+
+var GLU=[
+  {id:'nmda',symbol:'NMDA',letter:'NMDA',name:'NMDA',color:'#60a5fa',colorBg:'rgba(96,165,250,.08)',
+    protein:'Canal iónico',messenger:['↑ Ca²⁺ (clave LTP)'],net:'Plasticidad / Excitotoxicidad',
+    pathway:['Glu + Glicina','Receptor NMDA (Mg²⁺)','Despolarización retira Mg²⁺','↑ Ca²⁺','LTP / Excitotoxicidad'],
+    effects:[
+      {t:'Hipocampo (CA1)',d:'↑',x:'LTP = aprendizaje, memoria'},
+      {t:'Corteza cerebral',d:'↑',x:'Cognición, procesamiento'},
+      {t:'Neuronas dañadas',d:'↑',x:'Excitotoxicidad (ACV, TCE, Alzheimer)'}
+    ],
+    clinical:'Memantina → Alzheimer. Ketamina → anestesia + antidepresivo rápido (depresión resistente). Esketamina nasal FDA 2019.',
+    drugs:[
+      {n:'Memantina',r:'Antagonista NMDA',u:'Alzheimer moderado-severo',c:'#60a5fa'},
+      {n:'Ketamina',r:'Antagonista NMDA',u:'Anestesia / Depresión / Dolor',c:'#3b82f6'},
+      {n:'Esketamina',r:'Antagonista NMDA (nasal)',u:'Depresión resistente (FDA 2019)',c:'#2563eb'},
+      {n:'Dextrometorfano',r:'Antagonista NMDA',u:'Antitusivo / Auvelity',c:'#1d4ed8'}
+    ]},
+  {id:'ampa',symbol:'AMPA',letter:'AMPA',name:'AMPA',color:'#3b82f6',colorBg:'rgba(59,130,246,.08)',
+    protein:'Canal iónico',messenger:['↑ Na⁺ → despolarización'],net:'Transmisión excitatoria rápida',
+    pathway:['Glutamato','Receptor AMPA','↑ Na⁺ (rápido)','DESPOLARIZACIÓN → EPSP'],
+    effects:[
+      {t:'Sinapsis glutamatérgicas',d:'↑',x:'Principal transmisión excitatoria rápida'},
+      {t:'Focos epileptógenos',d:'↑',x:'Génesis y propagación de descargas'}
+    ],
+    clinical:'Perampanel = antagonista AMPA → epilepsia refractaria.',
+    drugs:[
+      {n:'Perampanel',r:'Antagonista AMPA',u:'Epilepsia refractaria',c:'#3b82f6'}
+    ]},
+  {id:'kainato',symbol:'Kainato',letter:'KA',name:'Kainato',color:'#1d4ed8',colorBg:'rgba(29,78,216,.08)',
+    protein:'Canal iónico',messenger:['↑ Na⁺/Ca²⁺'],net:'Modulación sináptica',
+    pathway:['Glutamato','Receptor Kainato','Modulación pre/post'],
+    effects:[
+      {t:'Interneuronas GABA',d:'↑',x:'Modulación de circuitos inhibitorios'},
+      {t:'Hipocampo',d:'↑',x:'Regulación de plasticidad'}
+    ],
+    clinical:'Topiramato tiene actividad kainato parcial (epilepsia, migraña).',
+    drugs:[{n:'Topiramato',r:'Múltiples dianas',u:'Epilepsia / Migraña',c:'#1d4ed8'}]}
+];
+
+var GABA=[
+  {id:'gabaa',symbol:'GABAᴀ',letter:'GABA',name:'GABA-A (ionotrópico)',color:'#8b5cf6',colorBg:'rgba(139,92,246,.08)',
+    protein:'Canal Cl⁻',messenger:['↑ Cl⁻ → hiperpolariza'],net:'Inhibición rápida',
+    pathway:['GABA','Receptor GABAᴀ','Apertura canal','↑ Cl⁻','HIPERPOLARIZACIÓN'],
+    effects:[
+      {t:'SNC (ubicuo)',d:'↓',x:'Principal inhibición rápida del cerebro'},
+      {t:'Médula espinal',d:'↓',x:'Modulación refleja, tono muscular'}
+    ],
+    clinical:'BENZODIAZEPINAS potencian GABAᴀ → ansiolíticos. FLUMAZENIL = antídoto BZD. Barbitúricos, alcohol, propofol también aquí.',
+    drugs:[
+      {n:'Diazepam',r:'BZD',u:'Ansiedad / Status epiléptico / Abstinencia OH',c:'#8b5cf6'},
+      {n:'Lorazepam',r:'BZD intermedia',u:'Ansiedad / Convulsiones',c:'#7c3aed'},
+      {n:'Midazolam',r:'BZD corta',u:'Sedación procedimental',c:'#6d28d9'},
+      {n:'Zolpidem',r:'Z-drug α1',u:'Insomnio',c:'#a78bfa'},
+      {n:'Fenobarbital',r:'Barbitúrico',u:'Epilepsia / Status',c:'#5b21b6'},
+      {n:'Flumazenil',r:'Antagonista BZD',u:'Antídoto intoxicación BZD',c:'#c4b5fd'},
+      {n:'Propofol',r:'GABAᴀ',u:'Anestesia IV',c:'#4c1d95'}
+    ]},
+  {id:'gabab',symbol:'GABAʙ',letter:'GABA',name:'GABA-B (metabotrópico)',color:'#7c3aed',colorBg:'rgba(124,58,237,.08)',
+    protein:'Gi/o',messenger:['↓ AMPc','↑ K⁺'],net:'Inhibición lenta / Espasticidad',
+    pathway:['GABA','Receptor GABAʙ','Gi/o','↑ K⁺, ↓ Ca²⁺','Inhibición lenta'],
+    effects:[
+      {t:'Presináptico',d:'↓',x:'↓ Liberación de NT'},
+      {t:'Médula espinal',d:'↓',x:'↓ Tono muscular'}
+    ],
+    clinical:'BACLOFENO = agonista GABAʙ → espasticidad (EM, lesión medular).',
+    drugs:[
+      {n:'Baclofeno',r:'Agonista GABAʙ',u:'Espasticidad (EM, lesión medular)',c:'#7c3aed'}
+    ]}
+];
+
+var CB=[
+  {id:'cb1',symbol:'CB₁',letter:'CB',name:'Cannabinoide 1',color:'#10b981',colorBg:'rgba(16,185,129,.08)',
+    protein:'Gi/o',messenger:['↓ AMPc'],net:'Psicoactivo / Modulador SNC',
+    pathway:['Anandamida / THC','Receptor CB₁','Gi/o','↓ AMPc','↓ Liberación NT (retrógrada)'],
+    effects:[
+      {t:'SNC (corteza, hipocampo)',d:'↓',x:'Euforia, ↓ memoria, ↓ coordinación'},
+      {t:'Hipotálamo',d:'↑',x:'↑ Apetito'},
+      {t:'Sistema nociceptivo',d:'↓',x:'Analgesia'}
+    ],
+    clinical:'Nabiximols para espasticidad EM. Rimonabant retirado (suicidio). Cannabis medicinal: dolor crónico, náusea quimio.',
+    drugs:[
+      {n:'Nabiximols',r:'Agonista CB₁/CB₂',u:'Espasticidad EM / Dolor',c:'#10b981'},
+      {n:'Dronabinol',r:'THC sintético',u:'Caquexia VIH / Náusea',c:'#059669'}
+    ]},
+  {id:'cb2',symbol:'CB₂',letter:'CB',name:'Cannabinoide 2',color:'#059669',colorBg:'rgba(5,150,105,.08)',
+    protein:'Gi/o',messenger:['↓ AMPc'],net:'Inmunomodulación',
+    pathway:['2-AG / CBD','Receptor CB₂','Gi/o','↓ AMPc','Antiinflamatorio'],
+    effects:[
+      {t:'Células inmunes',d:'↓',x:'Antiinflamación, ↓ citocinas'},
+      {t:'Hueso',d:'↑',x:'Formación ósea (investigación)'}
+    ],
+    clinical:'CBD (Epidiolex) aprobado para epilepsia refractaria (Dravet, Lennox-Gastaut).',
+    drugs:[
+      {n:'Cannabidiol (Epidiolex)',r:'Agonista parcial CB₂',u:'Epilepsia (Dravet, Lennox)',c:'#059669'}
+    ]}
+];
