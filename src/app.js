@@ -769,21 +769,30 @@ function App(){
         )
       ),
 
+      // Mediadores de la Inflamación
+      e("div",{style:{marginBottom:"24px"}},
+        e("div",{onClick:function(){setAbdOpen(abdOpen==="mediadores"?null:"mediadores")},
+          style:{background:C.cd,border:"1px solid "+(abdOpen==="mediadores"?"#ef444444":C.bd),
+            borderRadius:"14px",padding:"18px",cursor:"pointer",
+            display:"flex",alignItems:"center",justifyContent:"space-between"}},
+          e("div",{style:{display:"flex",alignItems:"center",gap:"12px"}},
+            e("span",{style:{fontSize:"24px"}},"🔥"),
+            e("div",null,
+              e("h3",{style:{fontSize:"16px",fontWeight:700,color:"#ef4444"}},"Mediadores de la Inflamación"),
+              e("p",{style:{fontSize:"11px",color:C.dm}},"Citocinas, eicosanoides, complemento, quininas"))),
+          e("span",{style:{color:C.dm,transform:abdOpen==="mediadores"?"rotate(180deg)":"none",transition:"transform .2s"}},"▼")
+        ),
+        abdOpen==="mediadores" && e("div",{style:{marginTop:"10px"}},
+          e(MediadoresView, null)
+        )
+      ),
+
       // Vocabulario Médico — active card
       e("div",{onClick:function(){go("vocabulario")},style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"16px",marginBottom:"10px",cursor:"pointer",display:"flex",alignItems:"center",gap:"14px"}},
         e("span",{style:{fontSize:"22px"}},"📖"),
         e("div",null,e("h3",{style:{fontSize:"14px",fontWeight:700}},"Vocabulario Médico"),e("p",{style:{fontSize:"11px",color:C.dm}},"270+ raíces · 13 categorías · Decodificador · Quiz · SVG")),
         e("span",{style:{color:C.dm,marginLeft:"auto"}},"›")
-      ),
-
-      // Remaining placeholders
-      [{ic:"🧬",n:"Citocinas e Interleucinas",d:"TNF, IL-1 a IL-38, Interferones — Próximamente"},{ic:"💎",n:"Complemento",d:"Vías clásica, alternativa y de lectinas — Próximamente"}].map(function(ph,i){
-        return e("div",{key:i,style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"16px",marginBottom:"10px",opacity:.45,display:"flex",alignItems:"center",gap:"14px"}},
-          e("span",{style:{fontSize:"22px"}},ph.ic),
-          e("div",null,e("h3",{style:{fontSize:"14px",fontWeight:700}},ph.n),e("p",{style:{fontSize:"11px",color:C.dm}},ph.d)),
-          e("span",{style:{fontSize:"9px",padding:"3px 8px",borderRadius:"6px",background:"rgba(255,255,255,.05)",color:C.dm,marginLeft:"auto"}},"Pronto")
-        )
-      })
+      )
     ),
 
     // ════════════ EPIDEMIOLOGÍA (SALUD PÚBLICA) ════════════
