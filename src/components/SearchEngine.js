@@ -61,13 +61,13 @@ function globalSearch(q){
   RECEPTOR_FAMILIES.forEach(function(fam){
     fam.receptors.forEach(function(r){
       var txt=stripAccents([r.name,r.symbol,r.protein,r.clinical,r.net].concat((r.effects||[]).map(function(ef){return ef.t+" "+ef.x})).concat((r.drugs||[]).map(function(d){return d.n+" "+d.u})).join(" ").toLowerCase());
-      if(txt.indexOf(l)>-1) res.push({type:"fisio",name:"🧬 "+r.symbol+" "+r.name,sub:"Fisiología — "+fam.name,go:"fisio"});
+      if(txt.indexOf(l)>-1) res.push({type:"fisio",name:"🧬 "+r.symbol+" "+r.name,sub:"Fisiología — "+fam.name,go:"receptores"});
     });
   });
   Object.keys(RECEPTOR_PEARLS).forEach(function(famKey){
     (RECEPTOR_PEARLS[famKey]||[]).forEach(function(p){
       var txt=stripAccents([p.t].concat(p.i||[]).join(" ").toLowerCase());
-      if(txt.indexOf(l)>-1) res.push({type:"fisio",name:"🧬 "+p.t,sub:"Fisiología — Perlas",go:"fisio"});
+      if(txt.indexOf(l)>-1) res.push({type:"fisio",name:"🧬 "+p.t,sub:"Fisiología — Perlas",go:"receptores"});
     });
   });
   MED_LIST.forEach(function(md){

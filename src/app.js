@@ -84,6 +84,50 @@ function App(){
     }
   }
 
+  // Fisiología hub — topic picker (Receptores Celulares ready; rest placeholders)
+  function FisiologiaHub(){
+    var topics=[
+      {id:"receptores",ic:"🧬",n:"Receptores Celulares",d:"10 familias · 34 subtipos · quiz por familia",col:"#ec4899",ready:true,v:"receptores"},
+      {id:"endo",ic:"🧪",n:"Endocrinología",d:"Hormonas, ejes, retroalimentación — Próximamente",col:"#f59e0b",ready:false},
+      {id:"cardio",ic:"❤️",n:"Cardiovascular",d:"Ciclo cardíaco, hemodinamia — Próximamente",col:"#ef4444",ready:false},
+      {id:"renal",ic:"💧",n:"Renal",d:"Filtración, reabsorción, equilibrio — Próximamente",col:"#06b6d4",ready:false},
+      {id:"resp",ic:"🫁",n:"Respiratorio",d:"Ventilación, perfusión, gases — Próximamente",col:"#14b8a6",ready:false},
+      {id:"neuro",ic:"🧠",n:"Neurofisiología",d:"Potenciales, sinapsis, reflejos — Próximamente",col:"#8b5cf6",ready:false},
+      {id:"gi",ic:"🍽️",n:"Gastrointestinal",d:"Motilidad, secreción, absorción — Próximamente",col:"#84cc16",ready:false},
+      {id:"hemato",ic:"🩸",n:"Hematología",d:"Hemostasia, eritropoyesis — Próximamente",col:"#dc2626",ready:false}
+    ];
+    var readyCount=topics.filter(function(t){return t.ready}).length;
+    return e("div",null,
+      e("div",{style:{marginBottom:"20px"}},
+        e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"24px",fontWeight:800,marginBottom:"4px",color:C.tx}},"🔬 Fisiología"),
+        e("p",{style:{fontSize:"13px",color:C.dm}},"Funcionamiento normal del cuerpo humano · "+readyCount+" tema"+(readyCount===1?"":"s")+" disponible"+(readyCount===1?"":"s"))
+      ),
+      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:"12px"}},
+        topics.map(function(t){
+          return e("div",{key:t.id,
+            onClick:t.ready?function(){go(t.v)}:null,
+            style:{
+              background:C.cd,
+              border:"1.5px solid "+(t.ready?t.col+"40":C.bd),
+              borderRadius:"14px",padding:"18px",
+              cursor:t.ready?"pointer":"default",
+              opacity:t.ready?1:0.55,
+              transition:"all .2s"}},
+            e("div",{style:{display:"flex",alignItems:"center",gap:"12px",marginBottom:"8px"}},
+              e("span",{style:{fontSize:"28px"}},t.ic),
+              e("div",{style:{flex:1}},
+                e("h3",{style:{fontSize:"15px",fontWeight:700,color:t.ready?t.col:C.mt,marginBottom:"2px"}},t.n),
+                t.ready&&e("span",{style:{fontSize:"9px",letterSpacing:"1.5px",textTransform:"uppercase",color:"#34d399",fontWeight:700}},"✓ Disponible")
+              )
+            ),
+            e("p",{style:{fontSize:"11.5px",color:C.dm,lineHeight:1.5}},t.d),
+            t.ready&&e("div",{style:{marginTop:"10px",fontSize:"12px",color:t.col,fontWeight:600}},"Abrir →")
+          )
+        })
+      )
+    );
+  }
+
   // ═══ RENDER ═══
   return e("div",{style:{background:C.bg,minHeight:"100vh",fontFamily:"'DM Sans',sans-serif",color:C.tx}},
     // HEADER
@@ -108,6 +152,7 @@ function App(){
           vista==="epid"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Epidemiología")),
           vista==="labs"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Laboratorios")),
           vista==="fisio"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Fisiología")),
+          vista==="receptores"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("fisio")},style:{color:C.dm,cursor:"pointer"}},"Fisiología"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Receptores Celulares")),
           vista==="general"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Generalidades")),
           vista==="triadas"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Tríadas")),
           vista==="imagenes"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Imágenes"))
@@ -163,17 +208,17 @@ function App(){
         [{ic:"🦴",n:"Reumatología",v:"reuma",col:"#60a5fa",act:true,sub:REUMA_SECS.map(function(s){return{n:s.i+" "+s.n,v:"reuma_sec",sec:s.id}})},
          {ic:"🔪",n:"Cirugía",v:"cir_menu",col:"#ef4444",act:true,sub:[{n:"🔴 Abdomen Agudo",v:"cir_abd"}]},
          {ic:"🔬",n:"Fisiología",v:"fisio",col:"#ec4899",act:true,sub:[
-           {n:"🧬 Receptores Celulares",v:"fisio"},
-           {n:"⚡ Adrenérgicos",v:"fisio"},
-           {n:"🌿 Muscarínicos",v:"fisio"},
-           {n:"🧬 Nicotínicos",v:"fisio"},
-           {n:"🎯 Dopaminérgicos",v:"fisio"},
-           {n:"💫 Serotoninérgicos",v:"fisio"},
-           {n:"🔥 Histaminérgicos",v:"fisio"},
-           {n:"☯️ Opioides",v:"fisio"},
-           {n:"🧠 Glutamatérgicos",v:"fisio"},
-           {n:"😴 GABAérgicos",v:"fisio"},
-           {n:"🌱 Cannabinoides",v:"fisio"}
+           {n:"🧬 Receptores Celulares",v:"receptores"},
+           {n:"  ⚡ Adrenérgicos",v:"receptores"},
+           {n:"  🌿 Muscarínicos",v:"receptores"},
+           {n:"  🧬 Nicotínicos",v:"receptores"},
+           {n:"  🎯 Dopaminérgicos",v:"receptores"},
+           {n:"  💫 Serotoninérgicos",v:"receptores"},
+           {n:"  🔥 Histaminérgicos",v:"receptores"},
+           {n:"  ☯️ Opioides",v:"receptores"},
+           {n:"  🧠 Glutamatérgicos",v:"receptores"},
+           {n:"  😴 GABAérgicos",v:"receptores"},
+           {n:"  🌱 Cannabinoides",v:"receptores"}
          ]},
          {ic:"🚑",n:"Emergenciología",v:"emergen_menu",col:"#ef4444",act:true,sub:[{n:"🔥 Quemaduras + Calculadoras",v:"cir_quem"},{n:"🩸 Trauma — Unidad 1",v:"trauma-u1"}]},
          {ic:"🩻",n:"Anatomía",v:"anatomia",col:"#f59e0b",act:true,sub:[{n:"🧠 Pares Craneales",grp:true,items:[{n:"🗺️ Mapa Interactivo",v:"anatomia",openMap:true},{n:"📋 Lista de Pares",v:"anatomia"}]},{n:"🧱 Conducto Inguinal",v:"cir_ing"}]},
@@ -708,7 +753,10 @@ function App(){
 
 
     // ════════════ FISIOLOGÍA ════════════
-    vista==="fisio"&&e(F,null,e(ReceptoresView,null)),
+    vista==="fisio"&&e(F,null,e(FisiologiaHub,null)),
+
+    // ════════════ RECEPTORES CELULARES ════════════
+    vista==="receptores"&&e(ReceptoresView,null),
 
 
     // ════════════ IMÁGENES DIAGNÓSTICAS (VACÍA) ════════════
