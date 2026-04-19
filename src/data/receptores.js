@@ -479,3 +479,16 @@ var CB=[
       {n:'Cannabidiol (Epidiolex)',r:'Agonista parcial CB₂',u:'Epilepsia (Dravet, Lennox)',c:'#059669'}
     ]}
 ];
+
+var RECEPTOR_FAMILIES=[
+  {id:'adr',name:'Adrenérgicos',icon:'⚡',col:'#ec4899',desc:'α₁, α₂, β₁, β₂, β₃ · Simpático',receptors:ADR,nt:'Noradrenalina / Adrenalina'},
+  {id:'musc',name:'Muscarínicos',icon:'🌿',col:'#14b8a6',desc:'M₁–M₅ · Parasimpático',receptors:MUSC,nt:'Acetilcolina'},
+  {id:'nic',name:'Nicotínicos',icon:'🧬',col:'#a78bfa',desc:'Nm · Nn',receptors:NIC,nt:'Acetilcolina'},
+  {id:'dop',name:'Dopaminérgicos',icon:'🎯',col:'#f59e0b',desc:'D1-like · D2-like',receptors:DOP,nt:'Dopamina'},
+  {id:'sero',name:'Serotoninérgicos',icon:'💫',col:'#ec4899',desc:'5-HT₁–5-HT₇',receptors:SEROT,nt:'Serotonina (5-HT)'},
+  {id:'hist',name:'Histaminérgicos',icon:'🔥',col:'#fbbf24',desc:'H₁, H₂, H₃, H₄',receptors:HIST,nt:'Histamina'},
+  {id:'opi',name:'Opioides',icon:'☯️',col:'#06b6d4',desc:'μ · κ · δ',receptors:OPI,nt:'Endorfinas / Encefalinas'},
+  {id:'glu',name:'Glutamatérgicos',icon:'🧠',col:'#60a5fa',desc:'NMDA, AMPA, Kainato',receptors:GLU,nt:'Glutamato'},
+  {id:'gaba',name:'GABAérgicos',icon:'😴',col:'#8b5cf6',desc:'GABAᴀ · GABAʙ',receptors:GABA,nt:'GABA'},
+  {id:'cb',name:'Cannabinoides',icon:'🌱',col:'#10b981',desc:'CB₁ · CB₂',receptors:CB,nt:'Anandamida / 2-AG'}
+];
