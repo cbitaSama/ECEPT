@@ -290,3 +290,96 @@ var SEROT=[
       {n:'Prucaloprida',r:'Agonista 5-HT₄ selectivo',u:'Constipación crónica',c:'#f97316'}
     ]}
 ];
+
+var HIST=[
+  {id:'h1',symbol:'H₁',letter:'H',name:'Histamina 1',color:'#fbbf24',colorBg:'rgba(251,191,36,.08)',
+    protein:'Gq',messenger:['↑ IP₃','↑ Ca²⁺'],net:'Alergia / Inflamación',
+    pathway:['Histamina','Receptor H₁','Gq','↑ IP₃/DAG','↑ Ca²⁺','VASODILAT + PRURITO'],
+    effects:[
+      {t:'Vasos (endotelio)',d:'↓',x:'Vasodilatación → edema, hipotensión (anafilaxia)'},
+      {t:'Músculo liso bronquial',d:'↑',x:'Broncoconstricción'},
+      {t:'Terminales sensitivas',d:'↑',x:'Prurito, dolor'},
+      {t:'SNC (hipotálamo post.)',d:'↑',x:'Vigilia (antagonistas 1ª gen = sedación)'}
+    ],
+    clinical:'Antihistamínicos H₁: 1ª gen (difenhidramina) cruzan BHE = sedantes. 2ª gen (loratadina, cetirizina) no sedantes.',
+    drugs:[
+      {n:'Loratadina',r:'Antagonista H₁ 2ª gen',u:'Rinitis alérgica / urticaria',c:'#fbbf24'},
+      {n:'Cetirizina',r:'Antagonista H₁ 2ª gen',u:'Alergias',c:'#f59e0b'},
+      {n:'Difenhidramina',r:'Antagonista H₁ 1ª gen',u:'Alergias + sedante',c:'#d97706'},
+      {n:'Hidroxizina',r:'Antagonista H₁ 1ª gen',u:'Ansiedad / Prurito',c:'#b45309'}
+    ]},
+  {id:'h2',symbol:'H₂',letter:'H',name:'Histamina 2',color:'#f59e0b',colorBg:'rgba(245,158,11,.08)',
+    protein:'Gs',messenger:['↑ AMPc'],net:'Secreción ácida gástrica',
+    pathway:['Histamina','Receptor H₂','Gs','↑ AMPc','Bomba H⁺/K⁺','↑ HCl'],
+    effects:[
+      {t:'Células parietales',d:'↑',x:'↑ Secreción HCl'},
+      {t:'Corazón',d:'↑',x:'Inotropismo y cronotropismo (menor que β₁)'}
+    ],
+    clinical:'Famotidina actual (ranitidina retirada por NDMA). Reemplazada por IBP más potentes.',
+    drugs:[
+      {n:'Famotidina',r:'Antagonista H₂',u:'ERGE / úlcera péptica',c:'#f59e0b'},
+      {n:'Cimetidina',r:'Antagonista H₂',u:'Inhibe CYP450 (hoy poco usada)',c:'#d97706'}
+    ]},
+  {id:'h3',symbol:'H₃',letter:'H',name:'Histamina 3',color:'#d97706',colorBg:'rgba(217,119,6,.08)',
+    protein:'Gi',messenger:['↓ AMPc'],net:'Autorreceptor / Modulación SNC',
+    pathway:['Histamina','Receptor H₃ (pre)','Gi','↓ AMPc','↓ Liberación histamina'],
+    effects:[
+      {t:'Terminales histaminérgicos',d:'↓',x:'Autorreceptor'},
+      {t:'Modulación de DA, 5-HT, ACh',d:'↓',x:'Regulación aminérgica'}
+    ],
+    clinical:'Pitolisant = antagonista/agonista inverso H₃ → narcolepsia.',
+    drugs:[
+      {n:'Pitolisant',r:'Antagonista/agonista inverso H₃',u:'Narcolepsia',c:'#d97706'}
+    ]},
+  {id:'h4',symbol:'H₄',letter:'H',name:'Histamina 4',color:'#b45309',colorBg:'rgba(180,83,9,.08)',
+    protein:'Gi',messenger:['↓ AMPc'],net:'Inmunomodulación',
+    pathway:['Histamina','Receptor H₄','Gi','Quimiotaxis inmune'],
+    effects:[
+      {t:'Eosinófilos, mastocitos',d:'↑',x:'Quimiotaxis → inflamación'}
+    ],
+    clinical:'Diana emergente. Antagonistas en investigación para asma, dermatitis atópica.',
+    drugs:[{n:'Toreforant (fase clínica)',r:'Antagonista H₄',u:'Inflamación alérgica',c:'#b45309'}]}
+];
+
+var OPI=[
+  {id:'mu',symbol:'μ (MOR)',letter:'μ',name:'Opioide Mu',color:'#06b6d4',colorBg:'rgba(6,182,212,.08)',
+    protein:'Gi/o',messenger:['↓ AMPc','↑ K⁺','↓ Ca²⁺'],net:'Analgesia / Euforia',
+    pathway:['β-endorfina','Receptor μ','Gi/o','↓ AMPc','HIPERPOLARIZACIÓN','ANALGESIA'],
+    effects:[
+      {t:'PAG, asta dorsal',d:'↓',x:'Analgesia potente (supraspinal y espinal)'},
+      {t:'Sistema mesolímbico',d:'↑',x:'Euforia, refuerzo (adicción)'},
+      {t:'Centro respiratorio bulbar',d:'↓',x:'Depresión respiratoria (muerte en sobredosis)'},
+      {t:'Tracto GI',d:'↓',x:'Constipación'},
+      {t:'Iris',d:'↑',x:'Miosis puntiforme'}
+    ],
+    clinical:'MORFINA = prototipo. Fentanilo (epidemia opioide). Metadona = mantenimiento. NALOXONA = antídoto sobredosis.',
+    drugs:[
+      {n:'Morfina',r:'Agonista μ',u:'Dolor severo (cáncer, postop)',c:'#06b6d4'},
+      {n:'Fentanilo',r:'Agonista μ potente',u:'Anestesia / Dolor crónico (parche)',c:'#0891b2'},
+      {n:'Tramadol',r:'μ débil + IRSN',u:'Dolor moderado',c:'#0e7490'},
+      {n:'Metadona',r:'Agonista μ larga duración',u:'Mantenimiento adicción / Dolor',c:'#155e75'},
+      {n:'Naloxona',r:'Antagonista μ',u:'Antídoto sobredosis',c:'#67e8f9'},
+      {n:'Naltrexona',r:'Antagonista μ VO',u:'Prevención recaída',c:'#a5f3fc'}
+    ]},
+  {id:'kappa',symbol:'κ (KOR)',letter:'κ',name:'Opioide Kappa',color:'#0ea5e9',colorBg:'rgba(14,165,233,.08)',
+    protein:'Gi/o',messenger:['↓ AMPc'],net:'Analgesia espinal / Disforia',
+    pathway:['Dinorfinas','Receptor κ','Gi/o','↓ AMPc','ANALGESIA + DISFORIA'],
+    effects:[
+      {t:'Médula espinal',d:'↓',x:'Analgesia espinal'},
+      {t:'Sistema límbico',d:'↓',x:'Disforia (opuesto a μ)'},
+      {t:'Riñón',d:'↑',x:'Diuresis (↓ ADH)'}
+    ],
+    clinical:'Butorfanol (agonista κ, antagonista μ parcial). Disforia limita uso.',
+    drugs:[
+      {n:'Butorfanol',r:'Agonista κ',u:'Dolor moderado',c:'#0ea5e9'}
+    ]},
+  {id:'delta',symbol:'δ (DOR)',letter:'δ',name:'Opioide Delta',color:'#38bdf8',colorBg:'rgba(56,189,248,.08)',
+    protein:'Gi/o',messenger:['↓ AMPc'],net:'Modulación afectiva',
+    pathway:['Encefalinas','Receptor δ','Gi/o','↓ AMPc','Analgesia + modulación'],
+    effects:[
+      {t:'SNC límbico',d:'↓',x:'Ansiolítico / antidepresivo'},
+      {t:'Médula espinal',d:'↓',x:'Analgesia coadyuvante'}
+    ],
+    clinical:'Diana emergente. Agonistas δ en investigación para depresión y dolor.',
+    drugs:[{n:'En investigación',r:'Agonistas δ',u:'Depresión / Dolor neuropático',c:'#38bdf8'}]}
+];
