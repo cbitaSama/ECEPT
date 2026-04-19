@@ -136,7 +136,7 @@ function App(){
         e("div",{style:{fontSize:"9px",fontWeight:700,color:C.dm,textTransform:"uppercase",letterSpacing:"2px",padding:"0 4px",marginBottom:"8px"}},"⚡ SECCIONES ESPECIALES"),
         [{ic:"🔺",n:"Tríadas y Síndromes",v:"triadas",col:"#e879f9",sub:[]},
          {ic:"📊",n:"Laboratorios",v:"labs",col:"#4caf82",sub:[]},
-         {ic:"📚",n:"Generalidades",v:"general",col:"#8b5cf6",sub:[{n:"🛡️ Bases Inmunológicas",v:"general"},{n:"🩸 Factores de Coagulación",v:"general"},{n:"📖 Vocabulario Médico",v:"vocabulario"}]},
+         {ic:"📚",n:"Generalidades",v:"general",col:"#8b5cf6",sub:[{n:"🛡️ Bases Inmunológicas",v:"general"},{n:"🩸 Factores de Coagulación",v:"general"},{n:"🔥 Mediadores de la Inflamación",v:"general"},{n:"📖 Vocabulario Médico",v:"vocabulario"}]},
          {ic:"📷",n:"Imágenes Diagnósticas",v:"imagenes",col:"#06b6d4",sub:[]}
         ].map(function(sec){
           var isExp=sbExp===sec.v;
@@ -161,7 +161,19 @@ function App(){
         e("div",{style:{fontSize:"9px",fontWeight:700,color:C.dm,textTransform:"uppercase",letterSpacing:"2px",padding:"0 4px",marginTop:"16px",marginBottom:"8px",paddingTop:"12px",borderTop:"1px solid "+C.bd}},"📋 MATERIAS"),
         [{ic:"🦴",n:"Reumatología",v:"reuma",col:"#60a5fa",act:true,sub:REUMA_SECS.map(function(s){return{n:s.i+" "+s.n,v:"reuma_sec",sec:s.id}})},
          {ic:"🔪",n:"Cirugía",v:"cir_menu",col:"#ef4444",act:true,sub:[{n:"🔴 Abdomen Agudo",v:"cir_abd"}]},
-         {ic:"🔬",n:"Fisiología",v:"fisio",col:"#ec4899",act:true,sub:[{n:"🧬 Receptores Adrenérgicos",v:"fisio"}]},
+         {ic:"🔬",n:"Fisiología",v:"fisio",col:"#ec4899",act:true,sub:[
+           {n:"🧬 Receptores Celulares",v:"fisio"},
+           {n:"⚡ Adrenérgicos",v:"fisio"},
+           {n:"🌿 Muscarínicos",v:"fisio"},
+           {n:"🧬 Nicotínicos",v:"fisio"},
+           {n:"🎯 Dopaminérgicos",v:"fisio"},
+           {n:"💫 Serotoninérgicos",v:"fisio"},
+           {n:"🔥 Histaminérgicos",v:"fisio"},
+           {n:"☯️ Opioides",v:"fisio"},
+           {n:"🧠 Glutamatérgicos",v:"fisio"},
+           {n:"😴 GABAérgicos",v:"fisio"},
+           {n:"🌱 Cannabinoides",v:"fisio"}
+         ]},
          {ic:"🚑",n:"Emergenciología",v:"emergen_menu",col:"#ef4444",act:true,sub:[{n:"🔥 Quemaduras + Calculadoras",v:"cir_quem"},{n:"🩸 Trauma — Unidad 1",v:"trauma-u1"}]},
          {ic:"🩻",n:"Anatomía",v:"anatomia",col:"#f59e0b",act:true,sub:[{n:"🧠 Pares Craneales",grp:true,items:[{n:"🗺️ Mapa Interactivo",v:"anatomia",openMap:true},{n:"📋 Lista de Pares",v:"anatomia"}]},{n:"🧱 Conducto Inguinal",v:"cir_ing"}]},
          {ic:"📊",n:"Epidemiología (Salud Pública)",v:"epid",col:"#00b4d8",act:true,sub:[{n:"🔺 Pirámide de Evidencia",v:"epid"},{n:"📋 Tipos de Estudio",v:"epid"},{n:"⚠️ Sesgos",v:"epid"},{n:"📐 Medidas",v:"epid"},{n:"✅ Lectura Crítica",v:"epid"}]},
