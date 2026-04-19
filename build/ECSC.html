@@ -712,229 +712,879 @@ var LAB_SECTIONS=[
 ];
 
 // ══════════════════════════════════════════════════════════════
-// DATOS FISIOLOGÍA — RECEPTORES ADRENÉRGICOS
+// DATOS FISIOLOGÍA — RECEPTORES CELULARES (10 familias, 34 subtipos)
+// Identifiers renamed: FAMILIES→RECEPTOR_FAMILIES, QUIZZES→RECEPTOR_QUIZZES,
+//                      PEARLS→RECEPTOR_PEARLS, PROT_G→RECEPTOR_PROT_G
 // ══════════════════════════════════════════════════════════════
-var FISIO_RECEPTORS=[
-  {
-    id: 'a1',
-    symbol: 'α₁',
-    letter: 'α',
-    sub: '1',
-    name: 'Alfa-1',
-    color: '#f472b6',
-    colorBg: 'rgba(244,114,182,.08)',
-    protein: 'Gq',
-    messenger: ['↑ IP₃', '↑ DAG', '↑ Ca²⁺'],
-    net: 'Excitatorio / Contracción',
-    pathway: [
-      { label: 'NE / Epi' },
-      { label: 'Receptor α₁' },
-      { label: 'Gq' },
-      { label: '↑ PLC' },
-      { label: '↑ IP₃ + DAG' },
-      { label: '↑ Ca²⁺ intracelular' },
-      { label: 'CONTRACCIÓN' }
+
+// ═══════════════════════════════════════════════════════
+
+var ADR = [
+  {id:'a1',symbol:'α₁',letter:'α',name:'Alfa-1',color:'#f472b6',colorBg:'rgba(244,114,182,.08)',
+    protein:'Gq',messenger:['↑ IP₃','↑ DAG','↑ Ca²⁺'],net:'Excitatorio / Contracción',
+    pathway:['NE / Epi','Receptor α₁','Gq','↑ PLC','↑ IP₃ + DAG','↑ Ca²⁺ intracelular','CONTRACCIÓN'],
+    effects:[
+      {t:'Músculo liso vascular',d:'↑',x:'Vasoconstricción → ↑ RVP → ↑ PA'},
+      {t:'Músculo liso GU',d:'↑',x:'Contracción próstata/vejiga → relevante en HBP'},
+      {t:'Músculo liso intestinal',d:'↓',x:'Relajamiento (inhibe peristaltismo)'},
+      {t:'Corazón',d:'↑',x:'↑ Inotropismo y excitabilidad'},
+      {t:'Hígado',d:'↑',x:'Glucogenólisis y gluconeogénesis'}
     ],
-    effects: [
-      { tissue: 'Músculo liso vascular', dir: '↑', desc: 'Vasoconstricción → ↑ RVP → ↑ PA' },
-      { tissue: 'Músculo liso genitourinario', dir: '↑', desc: 'Contracción (próstata, vejiga) → relevante en HBP' },
-      { tissue: 'Músculo liso intestinal', dir: '↓', desc: 'Relajamiento (inhibe peristaltismo)' },
-      { tissue: 'Corazón', dir: '↑', desc: '↑ Inotropismo y excitabilidad' },
-      { tissue: 'Hígado', dir: '↑', desc: 'Glucogenólisis y gluconeogénesis → ↑ glucemia' },
+    clinical:'Bloqueadores α₁ (prazosina, tamsulosina): HTA y HBP. Prazosina = anti-HTA. Tamsulosina = selectiva próstata (HBP), menor efecto vascular.',
+    drugs:[
+      {n:'Prazosina',r:'Bloqueador α₁',u:'HTA',c:'#f472b6'},
+      {n:'Tamsulosina',r:'Bloqueador α₁ selectivo',u:'HBP',c:'#fb923c'},
+      {n:'Fenilefrina',r:'Agonista α₁',u:'Descongestivo / vasopresor',c:'#ef4444'}
+    ]},
+  {id:'a2',symbol:'α₂',letter:'α',name:'Alfa-2',color:'#fb923c',colorBg:'rgba(251,146,60,.08)',
+    protein:'Gi',messenger:['↓ AMPc'],net:'Inhibitorio / Autorreceptor',
+    pathway:['NE / Epi','Receptor α₂','Gi','↓ Adenilato ciclasa','↓ AMPc','INHIBICIÓN'],
+    effects:[
+      {t:'Nervio presináptico',d:'↓',x:'Autorreceptor: ↓ liberación de NE (feedback negativo)'},
+      {t:'Células β pancreáticas',d:'↓',x:'↓ Secreción de insulina'},
+      {t:'Plaquetas',d:'↑',x:'Agregación plaquetaria'},
+      {t:'SNC (locus coeruleus)',d:'↓',x:'↓ Tono simpático central → efecto antihipertensivo'}
     ],
-    clinical: 'Bloqueadores α₁ (ej. prazosina, tamsulosina): usados en hipertensión y HBP. Prazosina = anti-HTA. Tamsulosina = selectiva próstata (HBP), menor efecto vascular.',
-    drugs: [
-      { name: 'Prazosina', role: 'Bloqueador α₁', use: 'HTA', color: '#f472b6' },
-      { name: 'Tamsulosina', role: 'Bloqueador α₁ selectivo', use: 'HBP', color: '#fb923c' },
-      { name: 'Fenilefrina', role: 'Agonista α₁', use: 'Descongestivo / vasopressor', color: '#ef4444' },
-    ]
-  },
-  {
-    id: 'a2',
-    symbol: 'α₂',
-    letter: 'α',
-    sub: '2',
-    name: 'Alfa-2',
-    color: '#fb923c',
-    colorBg: 'rgba(251,146,60,.08)',
-    protein: 'Gi',
-    messenger: ['↓ AMPc', 'Inhibición'],
-    net: 'Inhibitorio / Autorreceptor',
-    pathway: [
-      { label: 'NE / Epi' },
-      { label: 'Receptor α₂' },
-      { label: 'Gi' },
-      { label: '↓ Adenilato ciclasa' },
-      { label: '↓ AMPc' },
-      { label: 'INHIBICIÓN' }
+    clinical:'Agonistas α₂ (clonidina, metildopa): ↓ tono simpático → HTA. Metildopa = ELECCIÓN en HTA del embarazo.',
+    drugs:[
+      {n:'Clonidina',r:'Agonista α₂',u:'HTA / abstinencia opioides / TDAH',c:'#fb923c'},
+      {n:'Metildopa',r:'Agonista α₂',u:'HTA en embarazo (1ª elección)',c:'#f472b6'}
+    ]},
+  {id:'b1',symbol:'β₁',letter:'β',name:'Beta-1',color:'#60a5fa',colorBg:'rgba(96,165,250,.08)',
+    protein:'Gs',messenger:['↑ AMPc','↑ Ca²⁺'],net:'Excitatorio cardíaco',
+    pathway:['NE / Epi','Receptor β₁','Gs','↑ Adenilato ciclasa','↑ AMPc → PKA','↑ Ca²⁺ → CONTRACCIÓN'],
+    effects:[
+      {t:'Nódulo SA',d:'↑',x:'↑ Cronotropismo → ↑ FC'},
+      {t:'Miocardio',d:'↑',x:'↑ Inotropismo → ↑ fuerza contráctil'},
+      {t:'Nódulo AV',d:'↑',x:'↑ Dromotropismo → ↑ conducción'},
+      {t:'Riñón (yuxtaglomerular)',d:'↑',x:'↑ Secreción de renina → ↑ SRAA → ↑ PA'}
     ],
-    effects: [
-      { tissue: 'Nervio presináptico', dir: '↓', desc: 'Autorreceptor: ↓ liberación de norepinefrina (feedback negativo)' },
-      { tissue: 'Células β pancreáticas', dir: '↓', desc: '↓ Secreción de insulina' },
-      { tissue: 'Plaquetas', dir: '↑', desc: 'Agregación plaquetaria' },
-      { tissue: 'Músculo liso vascular', dir: '↑', desc: 'Contracción (vasocontricción periférica)' },
-      { tissue: 'SNC (locus coeruleus)', dir: '↓', desc: '↓ Tono simpático central → efecto antihipertensivo central' },
+    clinical:'β₁-bloqueadores (metoprolol, atenolol): ↓ FC, ↓ demanda O₂. IAM, ICC, arritmias. Metoprolol/atenolol = cardioselectivos. Carvedilol = no selectivo (β₁+β₂+α₁).',
+    drugs:[
+      {n:'Metoprolol',r:'β₁-bloqueador cardioselectivo',u:'IAM / ICC / Arritmias / HTA',c:'#60a5fa'},
+      {n:'Atenolol',r:'β₁-bloqueador cardioselectivo',u:'HTA / Angina',c:'#38bdf8'},
+      {n:'Carvedilol',r:'β₁+β₂+α₁ bloqueador',u:'ICC / Post-IAM',c:'#818cf8'},
+      {n:'Dobutamina',r:'Agonista β₁',u:'Shock cardiogénico / IC aguda',c:'#34d399'}
+    ]},
+  {id:'b2',symbol:'β₂',letter:'β',name:'Beta-2',color:'#34d399',colorBg:'rgba(52,211,153,.08)',
+    protein:'Gs',messenger:['↑ AMPc','Relajación'],net:'Broncodilatador / Tocolítico',
+    pathway:['Epi','Receptor β₂','Gs','↑ AMPc → PKA','Fosforila miosina kinasa','RELAJACIÓN músculo liso'],
+    effects:[
+      {t:'Músculo liso bronquial',d:'↓',x:'Broncodilatación → asma/EPOC'},
+      {t:'Músculo liso uterino',d:'↓',x:'Relajación → efecto tocolítico'},
+      {t:'Músculo liso vascular',d:'↓',x:'Vasodilatación'},
+      {t:'Hígado',d:'↑',x:'Glucogenólisis → ↑ glucemia'},
+      {t:'Músculo esquelético',d:'↑',x:'↑ captación K⁺ (hipokalemia)'}
     ],
-    clinical: 'Agonistas α₂ (ej. clonidina, metildopa): ↓ tono simpático central → usados en hipertensión. Metildopa = ELECCIÓN en HTA del embarazo. Clonidina también útil en abstinencia a opioides y TDAH.',
-    drugs: [
-      { name: 'Clonidina', role: 'Agonista α₂', use: 'HTA / abstinencia opioides / TDAH', color: '#fb923c' },
-      { name: 'Metildopa', role: 'Agonista α₂', use: 'HTA en embarazo (1ª elección)', color: '#f472b6' },
-    ]
-  },
-  {
-    id: 'b1',
-    symbol: 'β₁',
-    letter: 'β',
-    sub: '1',
-    name: 'Beta-1',
-    color: '#60a5fa',
-    colorBg: 'rgba(96,165,250,.08)',
-    protein: 'Gs',
-    messenger: ['↑ AMPc', '↑ Ca²⁺ intracelular'],
-    net: 'Excitatorio cardiaco',
-    pathway: [
-      { label: 'NE / Epi' },
-      { label: 'Receptor β₁' },
-      { label: 'Gs' },
-      { label: '↑ Adenilato ciclasa' },
-      { label: '↑ AMPc → PKA' },
-      { label: '↑ Ca²⁺ → CONTRACCIÓN' }
+    clinical:'Agonistas β₂ (salbutamol): SABA — asma/EPOC. Formoterol/Salmeterol = LABA. Adversos: hipokalemia, temblor.',
+    drugs:[
+      {n:'Salbutamol',r:'Agonista β₂ (SABA)',u:'Asma aguda / EPOC / Tocolítico',c:'#34d399'},
+      {n:'Terbutalina',r:'Agonista β₂',u:'Asma / Tocolítico',c:'#10b981'},
+      {n:'Formoterol',r:'Agonista β₂ (LABA)',u:'Asma crónica / EPOC',c:'#6ee7b7'}
+    ]},
+  {id:'b3',symbol:'β₃',letter:'β',name:'Beta-3',color:'#a78bfa',colorBg:'rgba(167,139,250,.08)',
+    protein:'Gs',messenger:['↑ AMPc'],net:'Lipólisis / Vejiga',
+    pathway:['NE / Epi','Receptor β₃','Gs','↑ AMPc → PKA','Lipasa hormonosensible','LIPÓLISIS'],
+    effects:[
+      {t:'Tejido adiposo',d:'↑',x:'Lipólisis → liberación AGL'},
+      {t:'Detrusor vesical',d:'↓',x:'Relajación → ↑ capacidad vesical'}
     ],
-    effects: [
-      { tissue: 'Corazón (nódulo SA)', dir: '↑', desc: '↑ Cronotropismo → ↑ FC' },
-      { tissue: 'Corazón (miocardio)', dir: '↑', desc: '↑ Inotropismo → ↑ fuerza contráctil' },
-      { tissue: 'Corazón (nódulo AV)', dir: '↑', desc: '↑ Dromotropismo → ↑ velocidad de conducción' },
-      { tissue: 'Riñón (cel. yuxtaglomerulares)', dir: '↑', desc: '↑ Secreción de renina → ↑ SRAA → ↑ PA' },
-    ],
-    clinical: 'β₁-bloqueadores (ej. metoprolol, atenolol): ↓ FC, ↓ demanda de O₂. Útiles en IAM, ICC, arritmias. Metoprolol y atenolol = cardioselectivos (β₁ > β₂). Carvedilol = no selectivo (β₁ + β₂ + α₁).',
-    drugs: [
-      { name: 'Metoprolol', role: 'β₁-bloqueador cardioselectivo', use: 'IAM / ICC / Arritmias / HTA', color: '#60a5fa' },
-      { name: 'Atenolol', role: 'β₁-bloqueador cardioselectivo', use: 'HTA / Angina', color: '#38bdf8' },
-      { name: 'Carvedilol', role: 'β₁+β₂+α₁ bloqueador', use: 'ICC / Post-IAM', color: '#818cf8' },
-      { name: 'Dobutamina', role: 'Agonista β₁', use: 'Shock cardiogénico / Insuficiencia cardíaca aguda', color: '#34d399' },
-    ]
-  },
-  {
-    id: 'b2',
-    symbol: 'β₂',
-    letter: 'β',
-    sub: '2',
-    name: 'Beta-2',
-    color: '#34d399',
-    colorBg: 'rgba(52,211,153,.08)',
-    protein: 'Gs',
-    messenger: ['↑ AMPc', 'Relajación músculo liso'],
-    net: 'Broncodilatador / Tocolítico',
-    pathway: [
-      { label: 'Epi (principalmente)' },
-      { label: 'Receptor β₂' },
-      { label: 'Gs' },
-      { label: '↑ AMPc → PKA' },
-      { label: 'Fosforila miosina kinasa' },
-      { label: 'RELAJACIÓN músculo liso' }
-    ],
-    effects: [
-      { tissue: 'Músculo liso bronquial', dir: '↓', desc: 'Broncodilatación → tto de asma/EPOC' },
-      { tissue: 'Músculo liso uterino', dir: '↓', desc: 'Relajación → efecto tocolítico (frena contracciones)' },
-      { tissue: 'Músculo liso vascular', dir: '↓', desc: 'Vasodilatación (musculoesquelético, coronario)' },
-      { tissue: 'Hígado', dir: '↑', desc: 'Glucogenólisis y gluconeogénesis → ↑ glucemia' },
-      { tissue: 'Músculo esquelético', dir: '↑', desc: 'Glucogenólisis + ↑ captación de K⁺ (K⁺ entra a células → ↓ K⁺ sérico)' },
-    ],
-    clinical: 'Agonistas β₂ (ej. salbutamol, terbutalina): SABA — usados en asma aguda, EPOC. Formoterol/Salmeterol = LABA (larga duración). Efecto secundario: hipokalemia, temblor, taquicardia refleja.',
-    drugs: [
-      { name: 'Salbutamol', role: 'Agonista β₂ (SABA)', use: 'Asma aguda / EPOC / Tocolítico', color: '#34d399' },
-      { name: 'Terbutalina', role: 'Agonista β₂', use: 'Asma / Tocolítico (inhibe contracciones parto prematuro)', color: '#10b981' },
-      { name: 'Formoterol', role: 'Agonista β₂ (LABA)', use: 'Asma crónica / EPOC', color: '#6ee7b7' },
-    ]
-  },
-  {
-    id: 'b3',
-    symbol: 'β₃',
-    letter: 'β',
-    sub: '3',
-    name: 'Beta-3',
-    color: '#a78bfa',
-    colorBg: 'rgba(167,139,250,.08)',
-    protein: 'Gs',
-    messenger: ['↑ AMPc'],
-    net: 'Lipólisis / Vejiga',
-    pathway: [
-      { label: 'NE / Epi' },
-      { label: 'Receptor β₃' },
-      { label: 'Gs' },
-      { label: '↑ AMPc → PKA' },
-      { label: 'Activa lipasa hormonosensible' },
-      { label: 'LIPÓLISIS' }
-    ],
-    effects: [
-      { tissue: 'Tejido adiposo', dir: '↑', desc: 'Lipólisis → liberación de ácidos grasos libres' },
-      { tissue: 'Músculo detrusor (vejiga)', dir: '↓', desc: 'Relajación del detrusor → ↑ capacidad vesical' },
-      { tissue: 'Músculo liso vascular', dir: '↓', desc: 'Vasodilatación (efecto menor vs β₂)' },
-    ],
-    clinical: 'β₃ agonistas (ej. mirabegrón): usados en vejiga hiperactiva (urgencia, frecuencia, incontinencia). Ventaja vs antimuscarínicos: menor boca seca y retención urinaria.',
-    drugs: [
-      { name: 'Mirabegrón', role: 'Agonista β₃ selectivo', use: 'Vejiga hiperactiva', color: '#a78bfa' },
-    ]
-  }
+    clinical:'β₃ agonistas (mirabegrón): vejiga hiperactiva. Ventaja: menos boca seca vs antimuscarínicos.',
+    drugs:[
+      {n:'Mirabegrón',r:'Agonista β₃ selectivo',u:'Vejiga hiperactiva',c:'#a78bfa'}
+    ]}
 ];
-var FISIO_QUIZ=[
-  {
-    q: '¿Qué proteína G está acoplada al receptor α₁ adrenérgico?',
-    opts: ['Gi (inhibe AMPc)', 'Gs (activa AMPc)', 'Gq (activa PLC/IP₃)', 'G12/13 (Rho)'],
-    r: 2,
-    x: 'α₁ → Gq → ↑PLC → ↑IP₃ + DAG → ↑Ca²⁺ intracelular → contracción. Esta es la vía clásica de vasoconstricción.'
-  },
-  {
-    q: '¿Cuál es el mecanismo de acción de la metildopa en la hipertensión arterial?',
-    opts: ['Bloquea α₁ periférico reduciendo vasoconstricción', 'Es agonista α₂ central que reduce el tono simpático', 'Inhibe la enzima convertidora de angiotensina', 'Bloquea β₁ reduciendo el gasto cardíaco'],
-    r: 1,
-    x: 'Metildopa → agonista α₂ central (locus coeruleus) → ↓ tono simpático → ↓ PA. Es el antihipertensivo de elección en el embarazo.'
-  },
-  {
-    q: 'Un paciente con asma aguda recibe salbutamol. ¿Cuál es el receptor y vía exacta que produce broncodilatación?',
-    opts: ['β₁ → Gs → ↑AMPc → contracción bronquial', 'β₂ → Gs → ↑AMPc → relajación músculo liso bronquial', 'α₂ → Gi → ↓AMPc → broncodilatación', 'β₂ → Gq → ↑Ca²⁺ → relajación'],
-    r: 1,
-    x: 'Salbutamol activa β₂ → Gs → ↑AMPc → PKA → fosforila miosina kinasa → relajación músculo liso bronquial = broncodilatación. Es un SABA (Short-Acting Beta Agonist).'
-  },
-  {
-    q: '¿Por qué los β₁-bloqueadores como metoprolol son "cardioselectivos"?',
-    opts: ['Porque bloquean exclusivamente α₁ en el corazón', 'Porque tienen mayor afinidad por β₁ (corazón/riñón) que por β₂ (pulmón)', 'Porque son agonistas parciales de β₂ que protegen el pulmón', 'Porque inhiben la síntesis de catecolaminas en la médula adrenal'],
-    r: 1,
-    x: 'Cardioselectivos = mayor afinidad β₁ vs β₂. β₁ está principalmente en corazón y riñón. Así se evita broncoespasmo (β₂ pulmonar). PERO no son 100% selectivos a dosis altas. Atenolol y metoprolol son los ejemplos clásicos.'
-  },
-  {
-    q: '¿Por qué el agonismo β₂ puede producir hipokalemia?',
-    opts: ['Porque activa aldosterona que excreta K⁺ renal', 'Porque estimula la Na/K-ATPasa en músculo esquelético llevando K⁺ al interior celular', 'Porque inhibe la reabsorción de K⁺ en el túbulo distal renal', 'Porque aumenta la pérdida de K⁺ por sudoración'],
-    r: 1,
-    x: 'β₂ → ↑AMPc → activa Na/K-ATPasa en músculo esquelético → K⁺ entra a la célula → ↓ K⁺ sérico (hipokalemia). Efecto adverso relevante del salbutamol a altas dosis o vía IV.'
-  },
-  {
-    q: '¿Cuál es el receptor adrenérgico cuyos agonistas se usan para vejiga hiperactiva?',
-    opts: ['α₁', 'α₂', 'β₁', 'β₃'],
-    r: 3,
-    x: 'β₃ → Gs → ↑AMPc → relajación del músculo detrusor vesical → ↑ capacidad vesical. Mirabegrón es el agonista β₃ aprobado para vejiga hiperactiva, con ventajas sobre antimuscarínicos.'
-  }
+
+var MUSC = [
+  {id:'m1',symbol:'M₁',letter:'M',name:'Muscarínico 1',color:'#34d399',colorBg:'rgba(52,211,153,.08)',
+    protein:'Gq',messenger:['↑ IP₃','↑ Ca²⁺'],net:'Excitación SNC / Gástrico',
+    pathway:['ACh','Receptor M₁','Gq','↑ PLC','↑ IP₃ + DAG','↑ Ca²⁺','EXCITACIÓN'],
+    effects:[
+      {t:'SNC (corteza, hipocampo)',d:'↑',x:'Cognición, memoria, aprendizaje'},
+      {t:'Ganglios autonómicos',d:'↑',x:'EPSP lento ganglionar'},
+      {t:'Células parietales gástricas',d:'↑',x:'↑ Secreción HCl'}
+    ],
+    clinical:'Déficit M₁ = Alzheimer. Donepezilo ↑ ACh endógena estimulando M₁. Pirenzepina (antagonista) era usada para úlcera (hoy IBP).',
+    drugs:[
+      {n:'Donepezilo',r:'Inhibidor AChE',u:'Alzheimer (↑ ACh)',c:'#10b981'},
+      {n:'Pirenzepina',r:'Antagonista M₁',u:'Úlcera péptica (obsoleto)',c:'#34d399'}
+    ]},
+  {id:'m2',symbol:'M₂',letter:'M',name:'Muscarínico 2',color:'#2dd4bf',colorBg:'rgba(45,212,191,.08)',
+    protein:'Gi',messenger:['↓ AMPc','↑ K⁺'],net:'Inhibición cardíaca',
+    pathway:['ACh','Receptor M₂','Gi','↓ AMPc','↑ K⁺ (hiperpolariza)','BRADICARDIA'],
+    effects:[
+      {t:'Nódulo SA',d:'↓',x:'↓ Cronotropismo → BRADICARDIA'},
+      {t:'Nódulo AV',d:'↓',x:'↓ Dromotropismo → enlentece conducción'},
+      {t:'Aurícula',d:'↓',x:'↓ Inotropismo auricular'}
+    ],
+    clinical:'Receptor del vago cardíaco. Bloqueo (atropina) → taquicardia. Tto bradicardias sinusales, bloqueos AV.',
+    drugs:[
+      {n:'Atropina',r:'Antagonista muscarínico',u:'Bradicardia / Bloqueo AV / Organofosforados',c:'#2dd4bf'}
+    ]},
+  {id:'m3',symbol:'M₃',letter:'M',name:'Muscarínico 3',color:'#14b8a6',colorBg:'rgba(20,184,166,.08)',
+    protein:'Gq',messenger:['↑ IP₃','↑ Ca²⁺'],net:'Secreción / Contracción lisa',
+    pathway:['ACh','Receptor M₃','Gq','↑ PLC','↑ IP₃/DAG','↑ Ca²⁺','SECRECIÓN/CONTRACCIÓN'],
+    effects:[
+      {t:'Músculo liso bronquial',d:'↑',x:'Broncoconstricción'},
+      {t:'Músculo liso GI',d:'↑',x:'↑ Peristaltismo, ↑ secreciones'},
+      {t:'Detrusor vesical',d:'↑',x:'Contracción (micción)'},
+      {t:'Glándulas exocrinas',d:'↑',x:'↑ Salivación, sudor, lágrimas'},
+      {t:'Iris esfínter',d:'↑',x:'Miosis'},
+      {t:'Músculo ciliar',d:'↑',x:'Acomodación cercana'}
+    ],
+    clinical:'Antagonistas M₃: tiotropio (EPOC), oxibutinina (vejiga). Adversos clásicos: boca seca, midriasis, retención urinaria, constipación.',
+    drugs:[
+      {n:'Tiotropio',r:'Antagonista M₃ (LAMA)',u:'EPOC',c:'#14b8a6'},
+      {n:'Ipratropio',r:'Antagonista muscarínico (SAMA)',u:'EPOC / Asma aguda',c:'#0d9488'},
+      {n:'Oxibutinina',r:'Antagonista M₃',u:'Vejiga hiperactiva',c:'#0f766e'},
+      {n:'Pilocarpina',r:'Agonista muscarínico',u:'Glaucoma / Síndrome seco',c:'#2dd4bf'}
+    ]},
+  {id:'m4',symbol:'M₄',letter:'M',name:'Muscarínico 4',color:'#0d9488',colorBg:'rgba(13,148,136,.08)',
+    protein:'Gi',messenger:['↓ AMPc'],net:'Modulación motora SNC',
+    pathway:['ACh','Receptor M₄','Gi','↓ AMPc','Modulación dopaminérgica'],
+    effects:[
+      {t:'Estriado',d:'↓',x:'Balance colinérgico/dopaminérgico motor'},
+      {t:'Corteza prefrontal',d:'↓',x:'Cognición, función ejecutiva'}
+    ],
+    clinical:'Diana emergente en esquizofrenia. Xanomelina-trospio (Cobenfy, FDA 2024): agonista M₁/M₄ → antipsicótico sin bloqueo D₂ (sin SEP).',
+    drugs:[
+      {n:'Xanomelina-trospio',r:'Agonista M₁/M₄',u:'Esquizofrenia (FDA 2024)',c:'#0d9488'}
+    ]},
+  {id:'m5',symbol:'M₅',letter:'M',name:'Muscarínico 5',color:'#047857',colorBg:'rgba(4,120,87,.08)',
+    protein:'Gq',messenger:['↑ IP₃','↑ Ca²⁺'],net:'Vasodilatación cerebral',
+    pathway:['ACh','Receptor M₅','Gq','↑ IP₃','Vasodilatación SNC'],
+    effects:[
+      {t:'Vasos cerebrales',d:'↓',x:'Vasodilatación cerebral'},
+      {t:'Mesencéfalo dopaminérgico',d:'↑',x:'↑ Dopamina (recompensa)'}
+    ],
+    clinical:'Diana emergente en adicción. Menos estudiado clínicamente.',
+    drugs:[{n:'Sin fármacos específicos',r:'Diana en investigación',u:'Adicción',c:'#047857'}]}
 ];
-var FISIO_PERLAS=[
-{t:"Regla de los 3 Gs (memorizar proteínas)",ic:"⚡",items:["Gq → Q de Quema (activa, Ca²⁺ → contracción) → α₁, M₁, M₃, H₁","Gi → i de inhibe (↓AMPc) → α₂, M₂, D₂, opioides","Gs → s de Sube (↑AMPc) → β₁, β₂, β₃, D₁, H₂"]},
-{t:"α₁-Bloqueadores: prazosina vs tamsulosina",ic:"💊",items:["Prazosina → antihipertensivo (NO selectiva próstata) → hipotensión 1ª dosis","Tamsulosina → uroSelectiva (próstata) → HBP, MENOS efecto vascular","📌 Pregunta frecuente: ¿cuál usás si tiene HBP? → Tamsulosina"]},
-{t:"Metildopa = HTA en embarazo",ic:"🤰",items:["Metildopa es la primera línea en HTA del embarazo por perfil de seguridad","Mecanismo: agonista α₂ central → ↓ tono simpático","📌 Segunda opción: labetalol IV (emergencia hipertensiva obstétrica)"]},
-{t:"β₂ agonistas: SABA vs LABA",ic:"🫁",items:["SABA (Short-Acting): Salbutamol, Terbutalina — inicio rápido, ~4-6h — RESCATE","LABA (Long-Acting): Formoterol, Salmeterol — 12h — MANTENIMIENTO (NO usar solos en asma)","📌 Efecto adverso importante: hipokalemia (β₂ → K⁺ entra a célula)"]},
-{t:"β₁-bloqueadores cardioselectivos vs no selectivos",ic:"❤️",items:["Cardioselectivos (β₁ > β₂): Metoprolol, Atenolol, Bisoprolol","No selectivos (β₁ + β₂): Propranolol, Carvedilol (+ α₁), Labetalol (+ α₁)","⚠️ β-bloqueadores NO selectivos → broncoespasmo en asmáticos"]},
-{t:"Autorreceptor α₂: feedback negativo simpático",ic:"🧠",items:["α₂ presináptico = freno automático: mucha NE → activa α₂ → Gi → ↓AMPc → ↓ liberación de más NE","Clonidina lo activa centralmente → ↓ tono simpático global","📌 Retiro abrupto de clonidina → HTA de rebote (crisis hipertensiva)"]},
-{t:"Mirabegrón (β₃): ventaja vs antimuscarínicos",ic:"🫧",items:["Vejiga hiperactiva: antes solo antimuscarínicos (oxibutinina) → boca seca, constipación, confusión ancianos","Mirabegrón (β₃ agonista) → relaja detrusor sin bloquear muscarínicos → menos efectos adversos"]}
+
+var NIC = [
+  {id:'nm',symbol:'Nm',letter:'N',name:'Nicotínico muscular',color:'#a78bfa',colorBg:'rgba(167,139,250,.08)',
+    protein:'Canal iónico',messenger:['↑ Na⁺ → despolarización'],net:'Contracción muscular',
+    pathway:['ACh (motoneurona)','Receptor Nm (placa)','Canal iónico abierto','↑ Na⁺','DESPOLARIZACIÓN','CONTRACCIÓN'],
+    effects:[
+      {t:'Placa neuromuscular',d:'↑',x:'Contracción del músculo esquelético'}
+    ],
+    clinical:'Bloqueantes Nm = relajantes musculares. Despolarizantes (succinilcolina) vs no-despolarizantes (rocuronio). Miastenia gravis = Ac anti-Nm.',
+    drugs:[
+      {n:'Succinilcolina',r:'Bloqueante Nm despolarizante',u:'Intubación rápida',c:'#a78bfa'},
+      {n:'Rocuronio',r:'No despolarizante',u:'Relajación en cirugía',c:'#8b5cf6'},
+      {n:'Neostigmina',r:'Inhibidor AChE',u:'Miastenia / Reverso BNM',c:'#7c3aed'}
+    ]},
+  {id:'nn',symbol:'Nn',letter:'N',name:'Nicotínico neuronal',color:'#c084fc',colorBg:'rgba(192,132,252,.08)',
+    protein:'Canal iónico',messenger:['↑ Na⁺/Ca²⁺'],net:'Transmisión ganglionar / SNC',
+    pathway:['ACh preganglionar','Receptor Nn','Canal iónico','↑ Na⁺/Ca²⁺','EPSP rápido'],
+    effects:[
+      {t:'Ganglios autonómicos',d:'↑',x:'Transmisión sináptica (EPSP rápido)'},
+      {t:'Médula suprarrenal',d:'↑',x:'Liberación de adrenalina'},
+      {t:'SNC (VTA)',d:'↑',x:'Refuerzo / adicción (nicotina)'}
+    ],
+    clinical:'Vareniclina (agonista parcial Nn α4β2) = cesación tabáquica.',
+    drugs:[
+      {n:'Vareniclina',r:'Agonista parcial Nn α4β2',u:'Cesación tabáquica',c:'#c084fc'},
+      {n:'Nicotina (parches)',r:'Agonista Nn',u:'TRN',c:'#a78bfa'}
+    ]}
 ];
-var FISIO_COMPARISON=[
-{receptor:"α₁",prot:"Gq",msg:"↑ IP₃, DAG, Ca²⁺",efecto:"Vasoconstricción",farmacos:["Prazosina","Tamsulosina"],col:"#f472b6"},
-{receptor:"α₂",prot:"Gi",msg:"↓ AMPc",efecto:"Autorreceptor / ↓ tono simpático",farmacos:["Clonidina","Metildopa"],col:"#fb923c"},
-{receptor:"β₁",prot:"Gs",msg:"↑ AMPc, ↑ Ca²⁺",efecto:"↑ FC, ↑ contractilidad, ↑ renina",farmacos:["Metoprolol","Atenolol"],col:"#60a5fa"},
-{receptor:"β₂",prot:"Gs",msg:"↑ AMPc",efecto:"Broncodilatación, tocolisis",farmacos:["Salbutamol","Terbutalina"],col:"#34d399"},
-{receptor:"β₃",prot:"Gs",msg:"↑ AMPc",efecto:"Lipólisis, relajación detrusor",farmacos:["Mirabegrón"],col:"#a78bfa"}
+
+var DOP = [
+  {id:'d1',symbol:'D₁',letter:'D',name:'Dopamina D₁ (D1-like: D₁, D₅)',color:'#fbbf24',colorBg:'rgba(251,191,36,.08)',
+    protein:'Gs',messenger:['↑ AMPc'],net:'Excitatorio postsináptico',
+    pathway:['Dopamina','Receptor D₁','Gs','↑ Adenilato ciclasa','↑ AMPc → PKA','EXCITACIÓN'],
+    effects:[
+      {t:'Estriado (vía directa)',d:'↑',x:'Facilita movimiento voluntario'},
+      {t:'Corteza prefrontal',d:'↑',x:'Memoria de trabajo, cognición'},
+      {t:'Vasos renales/mesentéricos',d:'↓',x:'Vasodilatación (dopamina dosis bajas)'},
+      {t:'Túbulo renal',d:'↑',x:'Natriuresis'}
+    ],
+    clinical:'Dopamina dosis bajas (1-3 μg/kg/min) activa D₁ → vasodilatación renal. Dosis β₁ (3-10) → inotrópico. Dosis α₁ (>10) → vasoconstrictor.',
+    drugs:[
+      {n:'Dopamina (dosis baja)',r:'Agonista D₁',u:'Vasodilatación renal',c:'#fbbf24'},
+      {n:'Fenoldopam',r:'Agonista D₁ selectivo',u:'Crisis hipertensiva',c:'#f59e0b'}
+    ]},
+  {id:'d2',symbol:'D₂',letter:'D',name:'Dopamina D₂ (D2-like: D₂, D₃, D₄)',color:'#f59e0b',colorBg:'rgba(245,158,11,.08)',
+    protein:'Gi',messenger:['↓ AMPc','↑ K⁺','↓ Ca²⁺'],net:'Inhibitorio / Autorreceptor',
+    pathway:['Dopamina','Receptor D₂','Gi','↓ AMPc','↑ K⁺ / ↓ Ca²⁺','INHIBICIÓN'],
+    effects:[
+      {t:'Vía mesolímbica',d:'↑',x:'Refuerzo, recompensa (exceso = psicosis)'},
+      {t:'Vía nigroestriada',d:'↑',x:'Control motor (déficit = Parkinson)'},
+      {t:'Vía tuberoinfundibular',d:'↓',x:'Inhibe prolactina'},
+      {t:'Área postrema (ZQT)',d:'↑',x:'Náuseas/vómitos'},
+      {t:'Terminales presinápticos',d:'↓',x:'Autorreceptor: ↓ liberación DA'}
+    ],
+    clinical:'Bloqueo D₂ = antipsicóticos + antieméticos. Adversos: SEP, hiperprolactinemia, disquinesia tardía. Agonistas D₂ = Parkinson (pramipexol) y prolactinoma (cabergolina).',
+    drugs:[
+      {n:'Haloperidol',r:'Antagonista D₂',u:'Psicosis (alto SEP)',c:'#f59e0b'},
+      {n:'Risperidona',r:'Antagonista D₂/5-HT₂',u:'Antipsicótico atípico',c:'#ea580c'},
+      {n:'Metoclopramida',r:'Antagonista D₂',u:'Antiemético / Procinético',c:'#fb923c'},
+      {n:'Domperidona',r:'Antagonista D₂ periférico',u:'Antiemético (no BHE)',c:'#f97316'},
+      {n:'Pramipexol',r:'Agonista D₂/D₃',u:'Parkinson / Piernas inquietas',c:'#fcd34d'},
+      {n:'Cabergolina',r:'Agonista D₂',u:'Prolactinoma',c:'#fde047'}
+    ]}
 ];
-var FISIO_PROTEINAS_G=[
-{name:"Gq",color:"#f472b6",desc:"Activa PLC",result:"↑ IP₃ → ↑ Ca²⁺ intracelular",receptors:"α₁, H₁, M₁, M₃"},
-{name:"Gi",color:"#fb923c",desc:"Inhibe adenilato ciclasa",result:"↓ AMPc",receptors:"α₂, M₂, D₂, μ-opioide"},
-{name:"Gs",color:"#60a5fa",desc:"Activa adenilato ciclasa",result:"↑ AMPc → PKA",receptors:"β₁, β₂, β₃, D₁, H₂"}
+
+var SEROT = [
+  {id:'5ht1a',symbol:'5-HT₁ₐ',letter:'5-HT',name:'Serotonina 1A',color:'#f472b6',colorBg:'rgba(244,114,182,.08)',
+    protein:'Gi',messenger:['↓ AMPc'],net:'Ansiolítico / Antidepresivo',
+    pathway:['5-HT','Receptor 5-HT₁ₐ','Gi','↓ AMPc','Autorreceptor / Postsináptico'],
+    effects:[
+      {t:'Núcleos del rafe (pre)',d:'↓',x:'Autorreceptor: ↓ liberación 5-HT'},
+      {t:'Hipocampo, corteza (post)',d:'↑',x:'Efecto ansiolítico y antidepresivo'}
+    ],
+    clinical:'Buspirona = agonista parcial → ansiolítico sin dependencia. Vilazodona, vortioxetina = antidepresivos con actividad 5-HT₁ₐ.',
+    drugs:[
+      {n:'Buspirona',r:'Agonista parcial 5-HT₁ₐ',u:'Ansiedad (sin dependencia)',c:'#f472b6'},
+      {n:'Vilazodona',r:'ISRS + 5-HT₁ₐ',u:'Depresión mayor',c:'#ec4899'}
+    ]},
+  {id:'5ht1bd',symbol:'5-HT₁B/D',letter:'5-HT',name:'Serotonina 1B/1D',color:'#ec4899',colorBg:'rgba(236,72,153,.08)',
+    protein:'Gi',messenger:['↓ AMPc'],net:'Vasoconstricción trigeminal',
+    pathway:['5-HT','Receptor 5-HT₁B/D','Gi','↓ AMPc','Vasoconstricción + ↓ CGRP'],
+    effects:[
+      {t:'Vasos cerebrales',d:'↓',x:'Vasoconstricción (revierte la migraña)'},
+      {t:'Terminales trigeminales',d:'↓',x:'↓ Liberación CGRP y sustancia P'}
+    ],
+    clinical:'TRIPTANES = agonistas 5-HT₁B/D → tto agudo de migraña. Contraindicados en cardiopatía isquémica.',
+    drugs:[
+      {n:'Sumatriptán',r:'Agonista 5-HT₁B/D',u:'Crisis migraña',c:'#ec4899'},
+      {n:'Rizatriptán',r:'Agonista 5-HT₁B/D',u:'Migraña aguda',c:'#db2777'},
+      {n:'Eletriptán',r:'Agonista 5-HT₁B/D',u:'Migraña aguda',c:'#be185d'}
+    ]},
+  {id:'5ht2a',symbol:'5-HT₂ₐ',letter:'5-HT',name:'Serotonina 2A',color:'#e84a5f',colorBg:'rgba(232,74,95,.08)',
+    protein:'Gq',messenger:['↑ IP₃','↑ DAG','↑ Ca²⁺'],net:'Excitatorio / Psicomimético',
+    pathway:['5-HT / LSD','Receptor 5-HT₂ₐ','Gq','↑ IP₃/DAG','↑ Ca²⁺ → Excitación'],
+    effects:[
+      {t:'Corteza cerebral',d:'↑',x:'Efectos alucinógenos (LSD, psilocibina)'},
+      {t:'Plaquetas',d:'↑',x:'Agregación plaquetaria'},
+      {t:'Músculo liso vascular',d:'↑',x:'Vasoconstricción'}
+    ],
+    clinical:'Antagonistas 5-HT₂ₐ en antipsicóticos atípicos (↓SEP). Psilocibina en investigación para depresión resistente.',
+    drugs:[
+      {n:'Risperidona',r:'Antagonista 5-HT₂ₐ / D₂',u:'Antipsicótico atípico',c:'#e84a5f'},
+      {n:'Olanzapina',r:'Antagonista 5-HT₂ₐ / D₂',u:'Esquizofrenia / bipolar',c:'#dc2626'},
+      {n:'Trazodona',r:'Antagonista 5-HT₂ₐ + SARI',u:'Insomnio / Depresión',c:'#b91c1c'}
+    ]},
+  {id:'5ht2c',symbol:'5-HT₂c',letter:'5-HT',name:'Serotonina 2C',color:'#dc2626',colorBg:'rgba(220,38,38,.08)',
+    protein:'Gq',messenger:['↑ IP₃','↑ Ca²⁺'],net:'Saciedad / Apetito',
+    pathway:['5-HT','Receptor 5-HT₂c','Gq','↑ IP₃','↑ POMC hipotalámica'],
+    effects:[
+      {t:'Hipotálamo (POMC)',d:'↑',x:'Saciedad, ↓ apetito'},
+      {t:'Plexos coroideos',d:'↑',x:'Producción de LCR'}
+    ],
+    clinical:'Mirtazapina bloquea 5-HT₂c → ↑ apetito (útil en depresión con anorexia). Lorcaserina retirada por cáncer.',
+    drugs:[
+      {n:'Mirtazapina',r:'Antagonista 5-HT₂c/H₁',u:'Depresión + insomnio + ↑apetito',c:'#dc2626'}
+    ]},
+  {id:'5ht3',symbol:'5-HT₃',letter:'5-HT',name:'Serotonina 3',color:'#ea580c',colorBg:'rgba(234,88,12,.08)',
+    protein:'Canal iónico',messenger:['↑ Na⁺/Ca²⁺'],net:'Náusea / Vómito',
+    pathway:['5-HT','Receptor 5-HT₃ (ionotrópico)','Apertura canal','↑ Na⁺/Ca²⁺','DESPOLARIZACIÓN → VÓMITO'],
+    effects:[
+      {t:'Área postrema (ZQT)',d:'↑',x:'Náuseas y vómitos'},
+      {t:'Tracto GI (vago)',d:'↑',x:'Vómito post-quimio/RT'}
+    ],
+    clinical:'SETRONES = antagonistas 5-HT₃ → antieméticos de elección en NVPQ y postoperatorio.',
+    drugs:[
+      {n:'Ondansetrón',r:'Antagonista 5-HT₃',u:'NVPQ / postop',c:'#ea580c'},
+      {n:'Granisetrón',r:'Antagonista 5-HT₃',u:'Antiemético',c:'#c2410c'},
+      {n:'Palonosetrón',r:'Antagonista 5-HT₃ larga',u:'NVPQ retardada',c:'#9a3412'}
+    ]},
+  {id:'5ht4',symbol:'5-HT₄',letter:'5-HT',name:'Serotonina 4',color:'#f97316',colorBg:'rgba(249,115,22,.08)',
+    protein:'Gs',messenger:['↑ AMPc'],net:'Procinético GI',
+    pathway:['5-HT','Receptor 5-HT₄','Gs','↑ AMPc','↑ ACh mientérica','↑ MOTILIDAD'],
+    effects:[
+      {t:'Plexo mientérico GI',d:'↑',x:'↑ Motilidad gastrointestinal'},
+      {t:'Hipocampo',d:'↑',x:'Cognición (investigación)'}
+    ],
+    clinical:'Prucaloprida = agonista 5-HT₄ → constipación crónica. Cisaprida retirada (QT).',
+    drugs:[
+      {n:'Prucaloprida',r:'Agonista 5-HT₄ selectivo',u:'Constipación crónica',c:'#f97316'}
+    ]}
+];
+
+var HIST = [
+  {id:'h1',symbol:'H₁',letter:'H',name:'Histamina 1',color:'#fbbf24',colorBg:'rgba(251,191,36,.08)',
+    protein:'Gq',messenger:['↑ IP₃','↑ Ca²⁺'],net:'Alergia / Inflamación',
+    pathway:['Histamina','Receptor H₁','Gq','↑ IP₃/DAG','↑ Ca²⁺','VASODILAT + PRURITO'],
+    effects:[
+      {t:'Vasos (endotelio)',d:'↓',x:'Vasodilatación → edema, hipotensión (anafilaxia)'},
+      {t:'Músculo liso bronquial',d:'↑',x:'Broncoconstricción'},
+      {t:'Terminales sensitivas',d:'↑',x:'Prurito, dolor'},
+      {t:'SNC (hipotálamo post.)',d:'↑',x:'Vigilia (antagonistas 1ª gen = sedación)'}
+    ],
+    clinical:'Antihistamínicos H₁: 1ª gen (difenhidramina) cruzan BHE = sedantes. 2ª gen (loratadina, cetirizina) no sedantes.',
+    drugs:[
+      {n:'Loratadina',r:'Antagonista H₁ 2ª gen',u:'Rinitis alérgica / urticaria',c:'#fbbf24'},
+      {n:'Cetirizina',r:'Antagonista H₁ 2ª gen',u:'Alergias',c:'#f59e0b'},
+      {n:'Difenhidramina',r:'Antagonista H₁ 1ª gen',u:'Alergias + sedante',c:'#d97706'},
+      {n:'Hidroxizina',r:'Antagonista H₁ 1ª gen',u:'Ansiedad / Prurito',c:'#b45309'}
+    ]},
+  {id:'h2',symbol:'H₂',letter:'H',name:'Histamina 2',color:'#f59e0b',colorBg:'rgba(245,158,11,.08)',
+    protein:'Gs',messenger:['↑ AMPc'],net:'Secreción ácida gástrica',
+    pathway:['Histamina','Receptor H₂','Gs','↑ AMPc','Bomba H⁺/K⁺','↑ HCl'],
+    effects:[
+      {t:'Células parietales',d:'↑',x:'↑ Secreción HCl'},
+      {t:'Corazón',d:'↑',x:'Inotropismo y cronotropismo (menor que β₁)'}
+    ],
+    clinical:'Famotidina actual (ranitidina retirada por NDMA). Reemplazada por IBP más potentes.',
+    drugs:[
+      {n:'Famotidina',r:'Antagonista H₂',u:'ERGE / úlcera péptica',c:'#f59e0b'},
+      {n:'Cimetidina',r:'Antagonista H₂',u:'Inhibe CYP450 (hoy poco usada)',c:'#d97706'}
+    ]},
+  {id:'h3',symbol:'H₃',letter:'H',name:'Histamina 3',color:'#d97706',colorBg:'rgba(217,119,6,.08)',
+    protein:'Gi',messenger:['↓ AMPc'],net:'Autorreceptor / Modulación SNC',
+    pathway:['Histamina','Receptor H₃ (pre)','Gi','↓ AMPc','↓ Liberación histamina'],
+    effects:[
+      {t:'Terminales histaminérgicos',d:'↓',x:'Autorreceptor'},
+      {t:'Modulación de DA, 5-HT, ACh',d:'↓',x:'Regulación aminérgica'}
+    ],
+    clinical:'Pitolisant = antagonista/agonista inverso H₃ → narcolepsia.',
+    drugs:[
+      {n:'Pitolisant',r:'Antagonista/agonista inverso H₃',u:'Narcolepsia',c:'#d97706'}
+    ]},
+  {id:'h4',symbol:'H₄',letter:'H',name:'Histamina 4',color:'#b45309',colorBg:'rgba(180,83,9,.08)',
+    protein:'Gi',messenger:['↓ AMPc'],net:'Inmunomodulación',
+    pathway:['Histamina','Receptor H₄','Gi','Quimiotaxis inmune'],
+    effects:[
+      {t:'Eosinófilos, mastocitos',d:'↑',x:'Quimiotaxis → inflamación'}
+    ],
+    clinical:'Diana emergente. Antagonistas en investigación para asma, dermatitis atópica.',
+    drugs:[{n:'Toreforant (fase clínica)',r:'Antagonista H₄',u:'Inflamación alérgica',c:'#b45309'}]}
+];
+
+var OPI = [
+  {id:'mu',symbol:'μ (MOR)',letter:'μ',name:'Opioide Mu',color:'#06b6d4',colorBg:'rgba(6,182,212,.08)',
+    protein:'Gi/o',messenger:['↓ AMPc','↑ K⁺','↓ Ca²⁺'],net:'Analgesia / Euforia',
+    pathway:['β-endorfina','Receptor μ','Gi/o','↓ AMPc','HIPERPOLARIZACIÓN','ANALGESIA'],
+    effects:[
+      {t:'PAG, asta dorsal',d:'↓',x:'Analgesia potente (supraspinal y espinal)'},
+      {t:'Sistema mesolímbico',d:'↑',x:'Euforia, refuerzo (adicción)'},
+      {t:'Centro respiratorio bulbar',d:'↓',x:'Depresión respiratoria (muerte en sobredosis)'},
+      {t:'Tracto GI',d:'↓',x:'Constipación'},
+      {t:'Iris',d:'↑',x:'Miosis puntiforme'}
+    ],
+    clinical:'MORFINA = prototipo. Fentanilo (epidemia opioide). Metadona = mantenimiento. NALOXONA = antídoto sobredosis.',
+    drugs:[
+      {n:'Morfina',r:'Agonista μ',u:'Dolor severo (cáncer, postop)',c:'#06b6d4'},
+      {n:'Fentanilo',r:'Agonista μ potente',u:'Anestesia / Dolor crónico (parche)',c:'#0891b2'},
+      {n:'Tramadol',r:'μ débil + IRSN',u:'Dolor moderado',c:'#0e7490'},
+      {n:'Metadona',r:'Agonista μ larga duración',u:'Mantenimiento adicción / Dolor',c:'#155e75'},
+      {n:'Naloxona',r:'Antagonista μ',u:'Antídoto sobredosis',c:'#67e8f9'},
+      {n:'Naltrexona',r:'Antagonista μ VO',u:'Prevención recaída',c:'#a5f3fc'}
+    ]},
+  {id:'kappa',symbol:'κ (KOR)',letter:'κ',name:'Opioide Kappa',color:'#0ea5e9',colorBg:'rgba(14,165,233,.08)',
+    protein:'Gi/o',messenger:['↓ AMPc'],net:'Analgesia espinal / Disforia',
+    pathway:['Dinorfinas','Receptor κ','Gi/o','↓ AMPc','ANALGESIA + DISFORIA'],
+    effects:[
+      {t:'Médula espinal',d:'↓',x:'Analgesia espinal'},
+      {t:'Sistema límbico',d:'↓',x:'Disforia (opuesto a μ)'},
+      {t:'Riñón',d:'↑',x:'Diuresis (↓ ADH)'}
+    ],
+    clinical:'Butorfanol (agonista κ, antagonista μ parcial). Disforia limita uso.',
+    drugs:[
+      {n:'Butorfanol',r:'Agonista κ',u:'Dolor moderado',c:'#0ea5e9'}
+    ]},
+  {id:'delta',symbol:'δ (DOR)',letter:'δ',name:'Opioide Delta',color:'#38bdf8',colorBg:'rgba(56,189,248,.08)',
+    protein:'Gi/o',messenger:['↓ AMPc'],net:'Modulación afectiva',
+    pathway:['Encefalinas','Receptor δ','Gi/o','↓ AMPc','Analgesia + modulación'],
+    effects:[
+      {t:'SNC límbico',d:'↓',x:'Ansiolítico / antidepresivo'},
+      {t:'Médula espinal',d:'↓',x:'Analgesia coadyuvante'}
+    ],
+    clinical:'Diana emergente. Agonistas δ en investigación para depresión y dolor.',
+    drugs:[{n:'En investigación',r:'Agonistas δ',u:'Depresión / Dolor neuropático',c:'#38bdf8'}]}
+];
+
+var GLU = [
+  {id:'nmda',symbol:'NMDA',letter:'NMDA',name:'NMDA',color:'#60a5fa',colorBg:'rgba(96,165,250,.08)',
+    protein:'Canal iónico',messenger:['↑ Ca²⁺ (clave LTP)'],net:'Plasticidad / Excitotoxicidad',
+    pathway:['Glu + Glicina','Receptor NMDA (Mg²⁺)','Despolarización retira Mg²⁺','↑ Ca²⁺','LTP / Excitotoxicidad'],
+    effects:[
+      {t:'Hipocampo (CA1)',d:'↑',x:'LTP = aprendizaje, memoria'},
+      {t:'Corteza cerebral',d:'↑',x:'Cognición, procesamiento'},
+      {t:'Neuronas dañadas',d:'↑',x:'Excitotoxicidad (ACV, TCE, Alzheimer)'}
+    ],
+    clinical:'Memantina → Alzheimer. Ketamina → anestesia + antidepresivo rápido (depresión resistente). Esketamina nasal FDA 2019.',
+    drugs:[
+      {n:'Memantina',r:'Antagonista NMDA',u:'Alzheimer moderado-severo',c:'#60a5fa'},
+      {n:'Ketamina',r:'Antagonista NMDA',u:'Anestesia / Depresión / Dolor',c:'#3b82f6'},
+      {n:'Esketamina',r:'Antagonista NMDA (nasal)',u:'Depresión resistente (FDA 2019)',c:'#2563eb'},
+      {n:'Dextrometorfano',r:'Antagonista NMDA',u:'Antitusivo / Auvelity',c:'#1d4ed8'}
+    ]},
+  {id:'ampa',symbol:'AMPA',letter:'AMPA',name:'AMPA',color:'#3b82f6',colorBg:'rgba(59,130,246,.08)',
+    protein:'Canal iónico',messenger:['↑ Na⁺ → despolarización'],net:'Transmisión excitatoria rápida',
+    pathway:['Glutamato','Receptor AMPA','↑ Na⁺ (rápido)','DESPOLARIZACIÓN → EPSP'],
+    effects:[
+      {t:'Sinapsis glutamatérgicas',d:'↑',x:'Principal transmisión excitatoria rápida'},
+      {t:'Focos epileptógenos',d:'↑',x:'Génesis y propagación de descargas'}
+    ],
+    clinical:'Perampanel = antagonista AMPA → epilepsia refractaria.',
+    drugs:[
+      {n:'Perampanel',r:'Antagonista AMPA',u:'Epilepsia refractaria',c:'#3b82f6'}
+    ]},
+  {id:'kainato',symbol:'Kainato',letter:'KA',name:'Kainato',color:'#1d4ed8',colorBg:'rgba(29,78,216,.08)',
+    protein:'Canal iónico',messenger:['↑ Na⁺/Ca²⁺'],net:'Modulación sináptica',
+    pathway:['Glutamato','Receptor Kainato','Modulación pre/post'],
+    effects:[
+      {t:'Interneuronas GABA',d:'↑',x:'Modulación de circuitos inhibitorios'},
+      {t:'Hipocampo',d:'↑',x:'Regulación de plasticidad'}
+    ],
+    clinical:'Topiramato tiene actividad kainato parcial (epilepsia, migraña).',
+    drugs:[{n:'Topiramato',r:'Múltiples dianas',u:'Epilepsia / Migraña',c:'#1d4ed8'}]}
+];
+
+var GABA = [
+  {id:'gabaa',symbol:'GABAᴀ',letter:'GABA',name:'GABA-A (ionotrópico)',color:'#8b5cf6',colorBg:'rgba(139,92,246,.08)',
+    protein:'Canal Cl⁻',messenger:['↑ Cl⁻ → hiperpolariza'],net:'Inhibición rápida',
+    pathway:['GABA','Receptor GABAᴀ','Apertura canal','↑ Cl⁻','HIPERPOLARIZACIÓN'],
+    effects:[
+      {t:'SNC (ubicuo)',d:'↓',x:'Principal inhibición rápida del cerebro'},
+      {t:'Médula espinal',d:'↓',x:'Modulación refleja, tono muscular'}
+    ],
+    clinical:'BENZODIAZEPINAS potencian GABAᴀ → ansiolíticos. FLUMAZENIL = antídoto BZD. Barbitúricos, alcohol, propofol también aquí.',
+    drugs:[
+      {n:'Diazepam',r:'BZD',u:'Ansiedad / Status epiléptico / Abstinencia OH',c:'#8b5cf6'},
+      {n:'Lorazepam',r:'BZD intermedia',u:'Ansiedad / Convulsiones',c:'#7c3aed'},
+      {n:'Midazolam',r:'BZD corta',u:'Sedación procedimental',c:'#6d28d9'},
+      {n:'Zolpidem',r:'Z-drug α1',u:'Insomnio',c:'#a78bfa'},
+      {n:'Fenobarbital',r:'Barbitúrico',u:'Epilepsia / Status',c:'#5b21b6'},
+      {n:'Flumazenil',r:'Antagonista BZD',u:'Antídoto intoxicación BZD',c:'#c4b5fd'},
+      {n:'Propofol',r:'GABAᴀ',u:'Anestesia IV',c:'#4c1d95'}
+    ]},
+  {id:'gabab',symbol:'GABAʙ',letter:'GABA',name:'GABA-B (metabotrópico)',color:'#7c3aed',colorBg:'rgba(124,58,237,.08)',
+    protein:'Gi/o',messenger:['↓ AMPc','↑ K⁺'],net:'Inhibición lenta / Espasticidad',
+    pathway:['GABA','Receptor GABAʙ','Gi/o','↑ K⁺, ↓ Ca²⁺','Inhibición lenta'],
+    effects:[
+      {t:'Presináptico',d:'↓',x:'↓ Liberación de NT'},
+      {t:'Médula espinal',d:'↓',x:'↓ Tono muscular'}
+    ],
+    clinical:'BACLOFENO = agonista GABAʙ → espasticidad (EM, lesión medular).',
+    drugs:[
+      {n:'Baclofeno',r:'Agonista GABAʙ',u:'Espasticidad (EM, lesión medular)',c:'#7c3aed'}
+    ]}
+];
+
+var CB = [
+  {id:'cb1',symbol:'CB₁',letter:'CB',name:'Cannabinoide 1',color:'#10b981',colorBg:'rgba(16,185,129,.08)',
+    protein:'Gi/o',messenger:['↓ AMPc'],net:'Psicoactivo / Modulador SNC',
+    pathway:['Anandamida / THC','Receptor CB₁','Gi/o','↓ AMPc','↓ Liberación NT (retrógrada)'],
+    effects:[
+      {t:'SNC (corteza, hipocampo)',d:'↓',x:'Euforia, ↓ memoria, ↓ coordinación'},
+      {t:'Hipotálamo',d:'↑',x:'↑ Apetito'},
+      {t:'Sistema nociceptivo',d:'↓',x:'Analgesia'}
+    ],
+    clinical:'Nabiximols para espasticidad EM. Rimonabant retirado (suicidio). Cannabis medicinal: dolor crónico, náusea quimio.',
+    drugs:[
+      {n:'Nabiximols',r:'Agonista CB₁/CB₂',u:'Espasticidad EM / Dolor',c:'#10b981'},
+      {n:'Dronabinol',r:'THC sintético',u:'Caquexia VIH / Náusea',c:'#059669'}
+    ]},
+  {id:'cb2',symbol:'CB₂',letter:'CB',name:'Cannabinoide 2',color:'#059669',colorBg:'rgba(5,150,105,.08)',
+    protein:'Gi/o',messenger:['↓ AMPc'],net:'Inmunomodulación',
+    pathway:['2-AG / CBD','Receptor CB₂','Gi/o','↓ AMPc','Antiinflamatorio'],
+    effects:[
+      {t:'Células inmunes',d:'↓',x:'Antiinflamación, ↓ citocinas'},
+      {t:'Hueso',d:'↑',x:'Formación ósea (investigación)'}
+    ],
+    clinical:'CBD (Epidiolex) aprobado para epilepsia refractaria (Dravet, Lennox-Gastaut).',
+    drugs:[
+      {n:'Cannabidiol (Epidiolex)',r:'Agonista parcial CB₂',u:'Epilepsia (Dravet, Lennox)',c:'#059669'}
+    ]}
+];
+
+var RECEPTOR_FAMILIES = [
+  {id:'adr',name:'Adrenérgicos',icon:'⚡',col:'#ec4899',desc:'α₁, α₂, β₁, β₂, β₃ · Simpático',receptors:ADR,nt:'Noradrenalina / Adrenalina'},
+  {id:'musc',name:'Muscarínicos',icon:'🌿',col:'#14b8a6',desc:'M₁–M₅ · Parasimpático',receptors:MUSC,nt:'Acetilcolina'},
+  {id:'nic',name:'Nicotínicos',icon:'🧬',col:'#a78bfa',desc:'Nm · Nn',receptors:NIC,nt:'Acetilcolina'},
+  {id:'dop',name:'Dopaminérgicos',icon:'🎯',col:'#f59e0b',desc:'D1-like · D2-like',receptors:DOP,nt:'Dopamina'},
+  {id:'sero',name:'Serotoninérgicos',icon:'💫',col:'#ec4899',desc:'5-HT₁–5-HT₇',receptors:SEROT,nt:'Serotonina (5-HT)'},
+  {id:'hist',name:'Histaminérgicos',icon:'🔥',col:'#fbbf24',desc:'H₁, H₂, H₃, H₄',receptors:HIST,nt:'Histamina'},
+  {id:'opi',name:'Opioides',icon:'☯️',col:'#06b6d4',desc:'μ · κ · δ',receptors:OPI,nt:'Endorfinas / Encefalinas'},
+  {id:'glu',name:'Glutamatérgicos',icon:'🧠',col:'#60a5fa',desc:'NMDA, AMPA, Kainato',receptors:GLU,nt:'Glutamato'},
+  {id:'gaba',name:'GABAérgicos',icon:'😴',col:'#8b5cf6',desc:'GABAᴀ · GABAʙ',receptors:GABA,nt:'GABA'},
+  {id:'cb',name:'Cannabinoides',icon:'🌱',col:'#10b981',desc:'CB₁ · CB₂',receptors:CB,nt:'Anandamida / 2-AG'}
+];
+
+// ═══════════════════════════════════════════════════════
+// QUIZZES
+// ═══════════════════════════════════════════════════════
+var RECEPTOR_QUIZZES = {
+  adr:[
+    {q:'¿Qué proteína G está acoplada al receptor α₁?',opts:['Gi','Gs','Gq','G12/13'],r:2,x:'α₁ → Gq → ↑PLC → ↑IP₃+DAG → ↑Ca²⁺ → contracción. Vía clásica de vasoconstricción.'},
+    {q:'Mecanismo de la metildopa en HTA:',opts:['Bloquea α₁ periférico','Agonista α₂ central','Inhibe ECA','Bloquea β₁'],r:1,x:'Agonista α₂ central → ↓ tono simpático → ↓ PA. Primera elección en HTA del embarazo.'},
+    {q:'Salbutamol produce broncodilatación por:',opts:['β₁ → contracción','β₂ → Gs → ↑AMPc → relajación','α₂ → Gi','β₂ → Gq'],r:1,x:'β₂ → Gs → ↑AMPc → PKA → fosforila miosina kinasa → relajación músculo liso bronquial.'},
+    {q:'¿Por qué metoprolol es "cardioselectivo"?',opts:['Solo α₁ cardíaco','Mayor afinidad β₁ vs β₂','Agonista parcial β₂','Inhibe catecolaminas'],r:1,x:'Cardioselectivos = mayor afinidad β₁. Evita broncoespasmo. NO son 100% selectivos a dosis altas.'},
+    {q:'¿Por qué salbutamol produce hipokalemia?',opts:['↑ aldosterona','Activa Na/K-ATPasa, K⁺ entra a célula','↓ reabsorción K⁺','↑ sudor'],r:1,x:'β₂ → ↑AMPc → activa Na/K-ATPasa en músculo → K⁺ entra → ↓K⁺ sérico.'},
+    {q:'Receptor adrenérgico para vejiga hiperactiva:',opts:['α₁','α₂','β₁','β₃'],r:3,x:'β₃ → Gs → ↑AMPc → relajación detrusor → ↑ capacidad. Mirabegrón.'},
+    {q:'Retiro abrupto de clonidina causa:',opts:['Hipokalemia','HTA de rebote','Bradicardia','Broncoespasmo'],r:1,x:'Crisis hipertensiva por dependencia neuroadaptativa. Retirar gradualmente.'},
+    {q:'¿Por qué carvedilol es útil en ICC?',opts:['Solo β₁','Solo α₁','β₁+β₂+α₁','Agonista β₂'],r:2,x:'Bloqueo β₁ (↓FC, ↓remodelación) + α₁ (↓postcarga) = mejora supervivencia.'}
+  ],
+  musc:[
+    {q:'¿Qué receptor muscarínico produce bradicardia?',opts:['M₁','M₂','M₃','M₄'],r:1,x:'M₂ → Gi → ↑K⁺ nodo SA/AV → hiperpolarización → bradicardia. Receptor del vago cardíaco.'},
+    {q:'Tiotropio (EPOC) actúa en:',opts:['M₂','M₃ bronquial','β₂','H₁'],r:1,x:'Tiotropio = antagonista M₃ de larga duración (LAMA) → broncodilatación.'},
+    {q:'Antídoto de intoxicación por organofosforados:',opts:['Naloxona','Flumazenil','Atropina + pralidoxima','Dexmedetomidina'],r:2,x:'Organofosforados inhiben AChE → exceso ACh. Atropina bloquea muscarínicos; pralidoxima regenera AChE.'},
+    {q:'Receptor M en células parietales gástricas:',opts:['M₁','M₂','M₃','Todos'],r:0,x:'M₁ → ↑HCl. Pirenzepina (antagonista) se usaba para úlcera, hoy IBP.'},
+    {q:'Oxibutinina trata vejiga hiperactiva bloqueando:',opts:['M₁','M₂','M₃','β₃'],r:2,x:'M₃ en detrusor → contracción. Antagonistas M₃ → ↓ micción.'},
+    {q:'Receptor colinérgico clave en Alzheimer:',opts:['M₁','M₂','M₃','M₄'],r:0,x:'M₁ en corteza/hipocampo → aprendizaje. Donepezilo ↑ACh → estimula M₁.'},
+    {q:'Xanomelina-trospio (2024) trata esquizofrenia sin bloquear D₂ porque activa:',opts:['M₁/M₄','M₂/M₃','D₁','5-HT₂ₐ'],r:0,x:'Agonista M₁/M₄ = primer antipsicótico sin bloqueo dopaminérgico.'}
+  ],
+  nic:[
+    {q:'Receptor de la placa neuromuscular:',opts:['Nm','Nn','M₃','GABAᴀ'],r:0,x:'Nm → canal iónico → Na⁺ → despolarización → contracción muscular.'},
+    {q:'Succinilcolina produce:',opts:['Bloqueo no despolarizante','Bloqueo despolarizante (fasciculaciones)','Antagonismo muscarínico','Agonismo β₂'],r:1,x:'Agonista Nm persistente → despolariza y luego músculo no responde. Intubación rápida.'},
+    {q:'Miastenia gravis: anticuerpos contra:',opts:['D₂','Nm','GABAᴀ','M₃'],r:1,x:'Anti-Nm → ↓ receptores → debilidad fluctuante. Neostigmina mejora síntomas.'},
+    {q:'Vareniclina (cesación tabáquica) es:',opts:['Antagonista Nm','Agonista parcial Nn α4β2','Agonista μ','Bloqueo β₂'],r:1,x:'↓ ansia + ↓ placer si fuma.'},
+    {q:'Nn ganglionar transmite con:',opts:['EPSP lento','EPSP rápido','Inhibición','Hiperpolarización'],r:1,x:'Nicotínicos = canales iónicos → EPSP rápido (ms). M₁ = EPSP lento (G-proteína).'},
+    {q:'Neostigmina en reverso de BNM:',opts:['Bloquea Nm','Inhibe AChE (↑ACh)','Agoniza Nn','Relajante'],r:1,x:'↑ ACh en placa → desplaza al BNM no-despolarizante. Combinar con glicopirrolato.'}
+  ],
+  dop:[
+    {q:'D1-like incluye:',opts:['D₁ y D₅','D₂, D₃, D₄','Solo D₁','Todos'],r:0,x:'D1-like = D₁ + D₅ (Gs). D2-like = D₂, D₃, D₄ (Gi).'},
+    {q:'SEP por antipsicóticos se debe a:',opts:['Bloqueo D₁','Bloqueo D₂ nigroestriado','↑ dopamina','Bloqueo M₁'],r:1,x:'Bloqueo D₂ vía nigroestriada → parkinsonismo, distonía, acatisia, disquinesia tardía.'},
+    {q:'¿Por qué domperidona produce menos SEP que metoclopramida?',opts:['Es D₁','No cruza BHE','Es agonista','No actúa en D₂'],r:1,x:'Domperidona bloquea D₂ periférico pero NO cruza BHE → menos efectos centrales.'},
+    {q:'Prolactinoma se trata con:',opts:['Haloperidol','Cabergolina (agonista D₂)','Metoclopramida','Clozapina'],r:1,x:'D₂ en hipófisis inhibe prolactina. Cabergolina → ↓ prolactina → ↓ tumor.'},
+    {q:'Dopamina dosis bajas (1-3 μg/kg/min) activan:',opts:['β₁','α₁','D₁ (vasodilatación renal)','β₂'],r:2,x:'D₁ → vasodilatación renal. Dosis β₁ (3-10). Dosis α₁ (>10).'},
+    {q:'Parkinson se trata con:',opts:['Antagonistas D₂','Agonistas D₂ + L-DOPA','Bloqueo M₁','Antagonistas NMDA'],r:1,x:'Déficit dopaminérgico → L-DOPA + agonistas D₂ directos (pramipexol).'},
+    {q:'Hiperprolactinemia por antipsicóticos es por bloqueo de:',opts:['Vía nigroestriada','Vía tuberoinfundibular','Vía mesolímbica','Vía mesocortical'],r:1,x:'Tuberoinfundibular: DA inhibe prolactina. Bloqueo D₂ → ↑prolactina.'}
+  ],
+  sero:[
+    {q:'Triptanes (migraña) actúan en:',opts:['5-HT₁ₐ','5-HT₁B/D','5-HT₂ₐ','5-HT₃'],r:1,x:'Agonistas 5-HT₁B/D → vasoconstricción craneal + ↓CGRP. Contraindicados en cardiopatía.'},
+    {q:'Ondansetrón bloquea:',opts:['5-HT₁ₐ','5-HT₂ₐ','5-HT₃','5-HT₄'],r:2,x:'Setrones = antagonistas 5-HT₃ → antieméticos de elección en NVPQ.'},
+    {q:'Buspirona (ansiolítico) es:',opts:['BZD','Agonista parcial 5-HT₁ₐ','ISRS','Antagonista β'],r:1,x:'5-HT₁ₐ → ansiolítico sin dependencia (vs BZD).'},
+    {q:'LSD y psilocibina actúan en:',opts:['5-HT₁ₐ','5-HT₂ₐ','5-HT₃','5-HT₇'],r:1,x:'5-HT₂ₐ cortical → efectos psicodélicos. En investigación para depresión resistente.'},
+    {q:'Síndrome serotoninérgico por combinar:',opts:['ISRS + IMAO + tramadol','Solo ISRS','Antagonistas 5-HT','BZD'],r:0,x:'Exceso 5-HT (principalmente 5-HT₂ₐ). Tríada: mental, autonómica, neuromuscular.'},
+    {q:'Prucaloprida (constipación) es:',opts:['Antagonista 5-HT₁','Antagonista 5-HT₃','Agonista 5-HT₄','Antagonista H₁'],r:2,x:'5-HT₄ en plexo mientérico → ↑ACh → ↑motilidad GI.'},
+    {q:'Mirtazapina causa ↑ apetito por bloquear:',opts:['5-HT₁','5-HT₂c + H₁','D₂','M₃'],r:1,x:'Bloqueo 5-HT₂c (saciedad) + H₁ → útil en depresión con anorexia.'},
+    {q:'Atípicos tienen menos SEP que típicos porque bloquean:',opts:['Solo D₂','D₂ + 5-HT₂ₐ','Solo 5-HT₃','5-HT₄'],r:1,x:'Bloqueo 5-HT₂ₐ atenúa efectos del bloqueo D₂ nigroestriado.'}
+  ],
+  hist:[
+    {q:'Anafilaxia activa principalmente:',opts:['H₁ + H₂','H₃','H₄','Solo H₁'],r:0,x:'H₁ (vasodilatación, broncoespasmo) + H₂ (hipotensión). Adrenalina revierte.'},
+    {q:'Loratadina no causa sedación porque:',opts:['No bloquea H₁','Bloquea H₂','No cruza BHE','Bloquea H₄'],r:2,x:'2ª gen → poca penetración SNC. No sedantes.'},
+    {q:'Famotidina trata ERGE bloqueando:',opts:['H₁','H₂ parietales','H₃','Bomba de protones'],r:1,x:'H₂ → Gs → ↑AMPc → bomba H⁺/K⁺ → HCl. IBP son más potentes.'},
+    {q:'Difenhidramina (1ª gen) tiene usos off-label en:',opts:['Solo alergias','Alergias + sedante + antimareo','HTA','Antiinflamatorio'],r:1,x:'Cruza BHE → sedación + anti-M₃ adicional.'},
+    {q:'Pitolisant (narcolepsia) actúa en:',opts:['H₁','H₂','H₃','H₄'],r:2,x:'H₃ es autorreceptor presináptico. Antagonismo → ↑ histamina → ↑ vigilia.'},
+    {q:'H₁ vs H₂: ¿cuál causa broncoconstricción?',opts:['H₁','H₂','Ambos','Ninguno'],r:0,x:'H₁ → broncoconstricción. H₂ → secreción gástrica.'},
+    {q:'H₄ es objetivo emergente en:',opts:['HTA','Asma / dermatitis atópica','Parkinson','Esquizofrenia'],r:1,x:'En eosinófilos/mastocitos. Antagonistas en investigación para patología alérgica.'}
+  ],
+  opi:[
+    {q:'Receptor principal de la morfina:',opts:['μ (MOR)','κ','δ','ORL1'],r:0,x:'μ = analgesia, euforia, depresión respiratoria, constipación. Clave en adicción.'},
+    {q:'Naloxona revierte sobredosis porque es:',opts:['Agonista μ','Antagonista μ','Agonista κ','Inhibidor AChE'],r:1,x:'Antagonista μ → desplaza al opioide y restaura respiración. Vida media corta → re-dosis.'},
+    {q:'Depresión respiratoria por opioides es por:',opts:['κ central','μ en bulbo','δ','5-HT₃'],r:1,x:'μ en centro respiratorio → ↓ sensibilidad a CO₂ → bradipnea/apnea.'},
+    {q:'Metadona (tto adicción) es:',opts:['Agonista μ larga duración','Antagonista μ','Agonista κ','Inhibidor'],r:0,x:'Vida media larga → elimina abstinencia sin picos de euforia.'},
+    {q:'Miosis puntiforme en intoxicación opioide es por:',opts:['β₁','μ en núcleo Edinger-Westphal','α₁','M₃'],r:1,x:'μ central → ↑ tono parasimpático ocular → miosis. Signo clínico clave.'},
+    {q:'Tramadol actúa por:',opts:['Solo μ','Agonista μ débil + IRSN','Antagonista μ','κ puro'],r:1,x:'Doble mecanismo: μ + inhibición recaptación 5-HT/NE.'},
+    {q:'Buprenorfina es:',opts:['Agonista μ pleno','Agonista parcial μ','Antagonista μ','Agonista κ'],r:1,x:'Agonista parcial μ (efecto techo) → tto adicción (Suboxone).'},
+    {q:'Naltrexona en adicción alcohol/opioide:',opts:['Agonista μ','Antagonista μ VO','Inhibidor AChE','Agonista GABAᴀ'],r:1,x:'Antagonista μ VO → bloquea placer + modula refuerzo alcohólico.'}
+  ],
+  glu:[
+    {q:'Ketamina es:',opts:['Agonista NMDA','Antagonista NMDA','Agonista GABAᴀ','Antagonista AMPA'],r:1,x:'Antagonista NMDA → anestesia disociativa + antidepresivo rápido.'},
+    {q:'Memantina (Alzheimer) actúa en:',opts:['AChE','NMDA','GABAᴀ','D₂'],r:1,x:'Antagonista NMDA moderado → ↓ excitotoxicidad.'},
+    {q:'LTP (potenciación largo plazo) requiere:',opts:['NMDA + ↑Ca²⁺','Solo AMPA','GABAᴀ','Kainato'],r:0,x:'NMDA se activa con despolarización (retira Mg²⁺) → ↑Ca²⁺ → plasticidad = base de memoria.'},
+    {q:'Excitotoxicidad en ACV involucra:',opts:['↓ Glu','Exceso Glu → NMDA → ↑Ca²⁺','GABA excesivo','DA baja'],r:1,x:'Isquemia → glutamato masivo → NMDA → Ca²⁺ → muerte neuronal.'},
+    {q:'Perampanel (epilepsia) bloquea:',opts:['NMDA','AMPA','Kainato','GABAᴀ'],r:1,x:'Antagonista AMPA no competitivo → epilepsia refractaria.'},
+    {q:'Receptor glutamatérgico bloqueado por Mg²⁺ en reposo:',opts:['AMPA','Kainato','NMDA','mGluR'],r:2,x:'NMDA bloqueado por Mg²⁺. Necesita despolarización + Glu + glicina → coincidencia.'}
+  ],
+  gaba:[
+    {q:'Benzodiazepinas potencian:',opts:['GABAᴀ (↑ frecuencia apertura Cl⁻)','GABAʙ','NMDA','5-HT₁ₐ'],r:0,x:'BZD = moduladores alostéricos GABAᴀ → ↑ frecuencia apertura → hiperpolarización.'},
+    {q:'Flumazenil revierte intoxicación por:',opts:['Opioides','BZD','Barbitúricos','Alcohol'],r:1,x:'Antagonista competitivo BZD en GABAᴀ. NO revierte barbitúricos ni OH.'},
+    {q:'Baclofeno (espasticidad) es:',opts:['Agonista GABAᴀ','Agonista GABAʙ','Antagonista NMDA','Opioide'],r:1,x:'Agonista GABAʙ → ↓ tono muscular. EM, lesión medular.'},
+    {q:'¿Por qué zolpidem causa menos dependencia que diazepam?',opts:['No afecta GABAᴀ','Selectivo α1 (sedante puro)','Es antagonista','Vida media larga'],r:1,x:'Z-drug selectivo α1 → solo sedación, menos efectos multidimensionales.'},
+    {q:'Barbitúricos actúan en:',opts:['GABAʙ','GABAᴀ (↑ duración apertura)','NMDA','μ'],r:1,x:'↑ duración de apertura (vs BZD que ↑ frecuencia). Dosis altas = letal.'},
+    {q:'Abstinencia alcohólica causa convulsiones porque:',opts:['↑ GABA','Al retirar OH hay ↓GABA + ↑NMDA','↑ NMDA directo','↑ μ'],r:1,x:'Adaptación crónica: ↓GABAᴀ + ↑NMDA → hiperexcitabilidad al retirar. Tto: BZD.'}
+  ],
+  cb:[
+    {q:'CB₁ está principalmente en:',opts:['Hígado','SNC','Pulmón','Células inmunes'],r:1,x:'CB₁ en SNC (corteza, hipocampo, cerebelo). Mediador efectos psicoactivos THC.'},
+    {q:'CB₂ está principalmente en:',opts:['SNC','Células inmunes y periferia','Corazón','Riñón'],r:1,x:'CB₂ en macrófagos, linfocitos. Antiinflamación. CBD preferencial aquí.'},
+    {q:'Epidiolex (CBD) está aprobado para:',opts:['Depresión','Epilepsia refractaria','HTA','Diabetes'],r:1,x:'FDA 2018 para síndromes de Dravet y Lennox-Gastaut.'},
+    {q:'Rimonabant fue retirado porque:',opts:['Inefectivo','↑ ideación suicida','Cáncer','Hepatotoxicidad'],r:1,x:'Bloqueo CB₁ → ↑ depresión, suicidio. Muestra rol endocannabinoide en humor.'},
+    {q:'Endocannabinoides (anandamida, 2-AG) actúan como:',opts:['NT anterogrades','Mensajeros retrógrados','Hormonas','Factores de crecimiento'],r:1,x:'Síntesis postsináptica → activan CB₁ presináptico → ↓ liberación NT. Único mecanismo.'}
+  ]
+};
+
+// ═══════════════════════════════════════════════════════
+// PEARLS (Perlas Clínicas)
+// ═══════════════════════════════════════════════════════
+var RECEPTOR_PEARLS = {
+  adr:[
+    {t:'⚡ Regla de los 3 Gs',i:['Gq → "Q de Quema" (Ca²⁺ → contracción) → α₁','Gi → "i de inhibe" (↓AMPc) → α₂','Gs → "s de Sube" (↑AMPc) → β₁, β₂, β₃']},
+    {t:'💊 α₁-bloqueadores: prazosina vs tamsulosina',i:['Prazosina → antihipertensivo (hipotensión 1ª dosis)','Tamsulosina → uroSelectiva (HBP, menos efecto vascular)','📌 HBP → tamsulosina']},
+    {t:'🤰 Metildopa = HTA embarazo',i:['Agonista α₂ central → ↓ tono simpático','Primera elección por seguridad fetal','Segunda: labetalol IV en emergencia']},
+    {t:'🫁 β₂: SABA vs LABA',i:['SABA (salbutamol) — RESCATE 4-6h','LABA (formoterol, salmeterol) — MANTENIMIENTO 12h','NO usar LABA solo en asma','Adverso: hipokalemia, temblor']},
+    {t:'❤️ β-bloqueadores',i:['Cardioselectivos (β₁): metoprolol, atenolol, bisoprolol','No selectivos: propranolol, carvedilol (+α₁), labetalol','⚠️ No selectivos → broncoespasmo en asmáticos']},
+    {t:'🧠 Clonidina — retirada abrupta',i:['α₂ agonista central','Retiro brusco → HTA de rebote','Retirar SIEMPRE gradualmente']}
+  ],
+  musc:[
+    {t:'🌿 Regla básica muscarínica',i:['M₁ → SNC + gástrico (Gq)','M₂ → corazón: bradicardia (Gi)','M₃ → liso + glándulas (Gq)','M₄ → motora basal (Gi)','M₅ → cerebrovascular (Gq)']},
+    {t:'💊 Atropina: bloqueo muscarínico global',i:['Taquicardia (bloqueo M₂)','Midriasis + cicloplejía (M₃ ocular)','Boca/piel seca (M₃ glandular)','Retención urinaria (M₃ detrusor)','🆘 Antídoto organofosforados: atropina + pralidoxima']},
+    {t:'🫁 Tiotropio (LAMA) vs Ipratropio (SAMA)',i:['Ambos bloquean M₃ bronquial','Tiotropio: 1x/día, EPOC crónico','Ipratropio: 4x/día, asma/EPOC aguda']},
+    {t:'🧠 Demencia y muscarínicos',i:['Déficit colinérgico en Alzheimer','Donepezilo/rivastigmina inhiben AChE → ↑ACh','Estimulan M₁ → mejora leve cognición']},
+    {t:'🆕 Xanomelina-trospio (2024)',i:['Primer antipsicótico M₁/M₄ agonista','No bloquea D₂ → NO causa SEP','Revolución en esquizofrenia — FDA sept 2024']}
+  ],
+  nic:[
+    {t:'🧬 Nm vs Nn',i:['Nm → placa neuromuscular (esquelético)','Nn → ganglios + suprarrenal + SNC','Ambos canales iónicos (EPSP rápido)']},
+    {t:'💊 Bloqueantes Nm en anestesia',i:['Despolarizantes: succinilcolina (fasciculaciones, corta)','No despolarizantes: rocuronio, vecuronio','Reverso: neostigmina + glicopirrolato']},
+    {t:'🔴 Miastenia gravis',i:['Ac anti-Nm en placa neuromuscular','Debilidad fluctuante, empeora con ejercicio','Tto: piridostigmina, corticoides, timectomía']},
+    {t:'🚬 Cesación tabáquica',i:['Vareniclina = agonista parcial Nn α4β2','↓ ansia + bloquea refuerzo si fuma','Mayor éxito que TRN sola']}
+  ],
+  dop:[
+    {t:'🎯 D1-like vs D2-like',i:['D1-like (D₁, D₅) → Gs → ↑AMPc','D2-like (D₂, D₃, D₄) → Gi → ↓AMPc','D₂ = blanco principal en antipsicóticos']},
+    {t:'💊 SEP por antipsicóticos',i:['Bloqueo D₂ vía nigroestriada','Parkinsonismo, distonía, acatisia, disquinesia tardía','Haloperidol > risperidona > olanzapina','Atípicos bloquean 5-HT₂ₐ → menos SEP']},
+    {t:'💊 Hiperprolactinemia',i:['Vía tuberoinfundibular: DA inhibe PRL','Bloqueo D₂ → galactorrea, amenorrea','Risperidona, haloperidol alto riesgo','Aripiprazol bajo riesgo']},
+    {t:'🫀 Dopamina según dosis',i:['1-3 μg/kg/min → D₁: vasodilatación renal','3-10 → β₁: inotrópico','>10 → α₁: vasoconstrictor','Hoy se prefiere NE en shock séptico']},
+    {t:'🔄 Parkinson',i:['L-DOPA + carbidopa (bloquea DDC periférica)','Pramipexol, ropinirol = agonistas D₂/D₃','iMAO-B (selegilina) → ↓ degradación','Problemas: fluctuaciones, disquinesias']},
+    {t:'🤢 Domperidona vs metoclopramida',i:['Ambas bloquean D₂ en ZQT','Domperidona NO cruza BHE → menos SEP','Ambas prolongan QT → precaución']}
+  ],
+  sero:[
+    {t:'💫 Familia 5-HT',i:['5-HT₁ → Gi (autorreceptor)','5-HT₂ → Gq (alucinógenos, saciedad)','5-HT₃ → canal iónico (vómito)','5-HT₄/6/7 → Gs (procinético)']},
+    {t:'🤕 Triptanes en migraña',i:['Agonistas 5-HT₁B/D → vasoconstricción craneal','Sumatriptán, rizatriptán, eletriptán','Contraindicados: cardiopatía isquémica','Adversos: opresión torácica, parestesias']},
+    {t:'🤢 Setrones en quimioterapia',i:['Antagonistas 5-HT₃ → previenen NVPQ','Ondansetrón 8 mg, granisetrón, palonosetrón','Combinar con dexametasona + aprepitant']},
+    {t:'😰 Síndrome serotoninérgico',i:['Exceso 5-HT: ISRS + IMAO + tramadol','Tríada: mental + autonómica + neuromuscular','Tto: suspender, BZD, ciproheptadina']},
+    {t:'💊 Antipsicóticos atípicos',i:['Bloqueo D₂ + 5-HT₂ₐ → menos SEP','Clozapina: resistentes (agranulocitosis)','Aripiprazol: agonista parcial D₂']},
+    {t:'🍽️ 5-HT₂c y apetito',i:['Activación → saciedad (lorcaserina retirada)','Bloqueo (mirtazapina) → ↑apetito','Útil en depresión con anorexia']}
+  ],
+  hist:[
+    {t:'🔥 H₁ 1ª vs 2ª generación',i:['1ª gen (difenhidramina, clorfeniramina) → cruzan BHE → sedación','2ª gen (loratadina, cetirizina) → no cruzan → no sedantes','Hidroxizina: sedación deliberada']},
+    {t:'🆘 Anafilaxia',i:['H₁ + H₂ + mastocitos → vasodilatación + broncoespasmo','ADRENALINA IM = tto fundamental','Adyuvantes: corticoides, antihistamínicos','Oxígeno + líquidos IV']},
+    {t:'🔥 H₂ y ácido gástrico',i:['H₂ → Gs → ↑AMPc → bomba H⁺/K⁺ → HCl','Famotidina (ranitidina retirada por NDMA)','IBP más potentes']},
+    {t:'😴 H₃ y narcolepsia',i:['H₃ autorreceptor','Pitolisant → ↑ histamina → ↑ vigilia','Alternativa a modafinilo']},
+    {t:'🔬 H₄ en investigación',i:['En células inmunes','Antagonistas en estudio: asma, dermatitis atópica','Sin fármacos aprobados aún']}
+  ],
+  opi:[
+    {t:'☯️ Los 3 principales',i:['μ (MOR) → analgesia + euforia + depresión respiratoria','κ (KOR) → analgesia espinal + DISFORIA','δ (DOR) → modulación afectiva, investigación']},
+    {t:'🆘 Intoxicación opioide',i:['Tríada: miosis + depresión respiratoria + coma','Naloxona IV/IM/nasal → revierte en 1-2 min','Vida media naloxona < morfina → re-dosificar']},
+    {t:'💊 Dolor crónico oncológico',i:['Escalera OMS: paracetamol → tramadol → morfina','Parches fentanilo: dolor estable','Metadona: tolerancia, cuidado QT','Siempre laxantes (constipación)']},
+    {t:'🔄 Tratamiento de adicción',i:['Metadona: agonista μ larga duración','Buprenorfina/naloxona (Suboxone)','Naltrexona (VO o LAI)','Todas reducen mortalidad']},
+    {t:'🌡️ Tramadol: cuidados',i:['μ débil + IRSN','Riesgo: síndrome serotoninérgico','Convulsiones en dosis altas']}
+  ],
+  glu:[
+    {t:'🧠 Principal excitador del SNC',i:['Glutamato = NT más abundante','Ionotrópicos: NMDA, AMPA, Kainato','Metabotrópicos: mGluR I-III','Exceso → excitotoxicidad']},
+    {t:'💊 Ketamina',i:['Antagonista NMDA','Anestesia disociativa sin depresión respiratoria','Esketamina nasal FDA 2019 para depresión resistente']},
+    {t:'🧠 LTP y memoria',i:['NMDA bloqueado por Mg²⁺ en reposo','Despolarización + Glu + glicina → abre','↑Ca²⁺ → plasticidad sináptica']},
+    {t:'🧓 Memantina en Alzheimer',i:['Antagonista NMDA moderado','Bloquea excitotoxicidad','Combina con donepezilo']},
+    {t:'⚡ Excitotoxicidad',i:['ACV, TCE → glutamato masivo','Ca²⁺ masivo → muerte neuronal','Perampanel (AMPA) → epilepsia']}
+  ],
+  gaba:[
+    {t:'😴 Principal inhibidor del SNC',i:['GABAᴀ → canal Cl⁻ (rápida)','GABAʙ → Gi (lenta)','Balance Glu/GABA crítico']},
+    {t:'💊 Benzodiazepinas',i:['Moduladores alostéricos GABAᴀ','Ansiolítico + sedante + anticonvulsivo + relajante','Corta (midazolam), intermedia (lorazepam), larga (diazepam)','Antídoto: FLUMAZENIL']},
+    {t:'⚠️ Barbitúricos',i:['↑ duración apertura GABAᴀ','Dosis altas activan canal sin GABA → letal','Usos: fenobarbital (epilepsia), tiopental (anestesia)']},
+    {t:'💊 Baclofeno',i:['Agonista GABAʙ','EM, lesión medular','Intratecal en refractarios']},
+    {t:'🍺 Abstinencia alcohólica',i:['Alcohol potencia GABAᴀ crónicamente','Al retirar: ↓GABA + ↑NMDA → hiperexcitabilidad','Temblor → convulsiones → delirium tremens','Tto: BZD, tiamina']}
+  ],
+  cb:[
+    {t:'🌱 CB₁ (SNC) vs CB₂ (periferia)',i:['CB₁: cerebro → psicoactivo','CB₂: inmunes, piel, hueso → antiinflamatorio','THC ambos; CBD preferencial CB₂']},
+    {t:'💊 Endocannabinoides',i:['Anandamida, 2-AG','Síntesis postsináptica "on demand"','Mensajeros RETRÓGRADOS (único)','Modulan dolor, apetito, humor']},
+    {t:'💊 Epidiolex (CBD)',i:['Primera aprobación FDA (2018) de cannabis','Dravet, Lennox-Gastaut, esclerosis tuberosa','Epilepsias infantiles refractarias']},
+    {t:'⚠️ Rimonabant',i:['Antagonista CB₁ aprobado para obesidad (2006)','Retirado 2008: ideación suicida','Rol del endocannabinoide en humor']},
+    {t:'🇧🇴 Cannabis medicinal',i:['Nabiximols (Sativex): espasticidad EM','Dronabinol: caquexia VIH, náusea quimio','Bolivia: no aprobado aún']}
+  ]
+};
+
+// ═══════════════════════════════════════════════════════
+// PROTEIN G SUMMARY
+// ═══════════════════════════════════════════════════════
+var RECEPTOR_PROT_G = [
+  {name:'Gq',color:'#f472b6',desc:'Activa PLC',result:'↑ IP₃ → ↑ Ca²⁺ + DAG',receptors:'α₁ · M₁ · M₃ · M₅ · H₁ · 5-HT₂'},
+  {name:'Gi/o',color:'#fb923c',desc:'Inhibe adenilato ciclasa',result:'↓ AMPc + ↑K⁺ + ↓Ca²⁺',receptors:'α₂ · M₂ · M₄ · D₂ · μ · κ · δ · H₃ · H₄ · GABAʙ · 5-HT₁ · CB'},
+  {name:'Gs',color:'#60a5fa',desc:'Activa adenilato ciclasa',result:'↑ AMPc → PKA',receptors:'β₁ · β₂ · β₃ · D₁ · H₂ · 5-HT₄'},
+  {name:'Canal iónico',color:'#34d399',desc:'Ionotrópico directo',result:'Flujo iónico rápido',receptors:'Nm · Nn · 5-HT₃ · NMDA · AMPA · GABAᴀ'}
+];
+
+
+// ══════════════════════════════════════════════════════════════
+// DATOS GENERALIDADES — MEDIADORES DE LA INFLAMACIÓN
+// Cada mediador: {id, fam, n(ombre), r(ol), o(rigen), f(unción), k(ey points[]), t(erapia?), p(earl?)}
+// ══════════════════════════════════════════════════════════════
+
+var MED_ROLES={
+  pro:{c:"#ef4444",bg:"rgba(239,68,68,.08)",bd:"rgba(239,68,68,.25)",l:"Pro-inflamatorio",i:"🔥"},
+  anti:{c:"#34d399",bg:"rgba(52,211,153,.08)",bd:"rgba(52,211,153,.25)",l:"Anti-inflamatorio",i:"🧊"},
+  dual:{c:"#fbbf24",bg:"rgba(251,191,36,.08)",bd:"rgba(251,191,36,.25)",l:"Dual / Regulador",i:"⚖️"},
+  vaso:{c:"#f472b6",bg:"rgba(244,114,182,.08)",bd:"rgba(244,114,182,.25)",l:"Vasoactivo",i:"💨"},
+  quim:{c:"#a78bfa",bg:"rgba(167,139,250,.08)",bd:"rgba(167,139,250,.25)",l:"Quimiotáctico",i:"🧭"}
+};
+
+var MED_FAMILIES=[
+  {id:"citok", n:"Citocinas & Interleucinas", i:"🧬", c:"#3b82f6",
+    d:"Proteínas de señalización entre células inmunitarias. IL=interleucinas (entre leucocitos), TNF=necrosis tumoral, IFN=interferones."},
+  {id:"eico", n:"Eicosanoides", i:"🔄", c:"#f472b6",
+    d:"Derivados del ácido araquidónico (AA). Vía COX → prostaglandinas/tromboxanos. Vía LOX → leucotrienos."},
+  {id:"comp", n:"Complemento", i:"💎", c:"#a78bfa",
+    d:"Cascada de ~30 proteínas plasmáticas. 3 vías: clásica (Ag-Ac), alternativa (patógenos), lectinas (manosa)."},
+  {id:"amin", n:"Aminas Vasoactivas", i:"💨", c:"#e879f9",
+    d:"Preformadas en gránulos. Liberación inmediata ante estímulo. Histamina y serotonina."},
+  {id:"pept", n:"Péptidos & Quininas", i:"🧩", c:"#fbbf24",
+    d:"Sistema calicreína-quinina. Bradicinina es el prototipo: dolor + vasodilatación + edema."},
+  {id:"nit",  n:"Radicales & Gases", i:"⚡", c:"#22d3ee",
+    d:"ROS, NO y gas H₂S. Mediadores difusibles con vida media muy corta."}
+];
+
+var MED_LIST=[
+  // ───────── CITOCINAS / INTERLEUCINAS ─────────
+  {id:"il1", fam:"citok", n:"IL-1 (α y β)", r:"pro", o:"Macrófagos, monocitos, células endoteliales",
+    f:"Pirógeno endógeno principal. Induce fiebre, activa linfocitos T, ↑ moléculas de adhesión endoteliales.",
+    k:["Junto con TNF-α y IL-6 = la TRIADA PROINFLAMATORIA","Induce fiebre actuando sobre el hipotálamo (vía PGE₂)","Activa COX-2 y iNOS","IL-1β requiere procesamiento por el inflamasoma (caspasa-1)"],
+    t:"Anakinra (antagonista del receptor), Canakinumab (anti-IL-1β). Usos: artritis reumatoide, Still, fiebres periódicas.",
+    p:"La fiebre de la gota, pseudogota y enfermedad de Still es mediada principalmente por IL-1."},
+
+  {id:"il2", fam:"citok", n:"IL-2", r:"pro", o:"Linfocitos T CD4+ (Th1)",
+    f:"Factor de crecimiento de linfocitos T. Expande clonalmente células T activadas y NK.",
+    k:["Clave en la respuesta adaptativa temprana","Diana del inmunosupresor ciclosporina y tacrolimus (bloquean calcineurina → ↓ IL-2)","Aldesleukin (IL-2 recombinante) se usó en melanoma y cáncer renal"],
+    t:"Basiliximab (anti-CD25/receptor de IL-2) para rechazo de trasplante.",
+    p:"Ciclosporina, tacrolimus y sirolimus → todos terminan bloqueando la vía de IL-2."},
+
+  {id:"il4", fam:"citok", n:"IL-4", r:"anti", o:"Linfocitos Th2, mastocitos, basófilos",
+    f:"Diferenciación a Th2. Switch de isotipo a IgE. INHIBE la respuesta Th1 y macrófagos M1.",
+    k:["⭐ SUPRIME IL-6 e IL-11 y otras citocinas proinflamatorias","Promueve alergia (IgE) y defensa antiparasitaria","Polariza macrófagos al fenotipo M2 (reparador)","Antagonista funcional de IFN-γ"],
+    t:"Dupilumab bloquea IL-4Rα (comparte con IL-13) — dermatitis atópica, asma eosinofílico.",
+    p:"IL-4/IL-13/IL-5 = eje Th2 (alergia). IL-4 es la 'pacificadora' que baja IL-6/11."},
+
+  {id:"il5", fam:"citok", n:"IL-5", r:"pro", o:"Th2, mastocitos",
+    f:"Diferenciación y activación de EOSINÓFILOS. Prolonga su supervivencia tisular.",
+    k:["Elevada en asma eosinofílico, poliangeítis eosinofílica con granulomatosis (EGPA)","También en parasitosis tisulares (helmintos)","Sin IL-5 → sin eosinofilia significativa"],
+    t:"Mepolizumab, Reslizumab (anti-IL-5). Benralizumab (anti-IL-5Rα, depleta eosinófilos)."},
+
+  {id:"il6", fam:"citok", n:"IL-6", r:"pro", o:"Macrófagos, fibroblastos, células T y endoteliales",
+    f:"Principal inductor de la respuesta de fase aguda hepática (PCR, fibrinógeno, hepcidina). Diferenciación de Th17.",
+    k:["⭐ PRINCIPAL inductor de PCR — por eso PCR es marcador indirecto de IL-6","Pirógeno (sube fiebre con IL-1 y TNF)","Hepcidina ↑ → secuestro de hierro → ANEMIA DE TRASTORNOS CRÓNICOS","Tormenta de citocinas (COVID grave, CAR-T): IL-6 es protagonista","IL-4 la BAJA"],
+    t:"Tocilizumab, Sarilumab (anti-IL-6R). AR, arteritis células gigantes, síndrome de liberación de citocinas.",
+    p:"Anemia en AR/LES crónico = hepcidina ↑ por IL-6. No dar hierro, tratar la inflamación."},
+
+  {id:"il8", fam:"citok", n:"IL-8 (CXCL8)", r:"quim", o:"Macrófagos, endotelio",
+    f:"Quimiocina prototipo: atrae y activa NEUTRÓFILOS al sitio de inflamación.",
+    k:["Es la quimiocina por excelencia para PMN","↑ en infecciones bacterianas, IAM, IBD","Induce degranulación y burst oxidativo"],
+    p:"Si hay pus (PMN), IL-8 estuvo en la escena."},
+
+  {id:"il10", fam:"citok", n:"IL-10", r:"anti", o:"Treg, macrófagos M2, Th2",
+    f:"Inmunosupresora potente. Apaga a los macrófagos y células dendríticas. Fin de la respuesta inflamatoria.",
+    k:["Junto con TGF-β = las principales ANTIINFLAMATORIAS","Su déficit → enfermedad inflamatoria intestinal grave pediátrica","Inhibe IL-1, IL-6, IL-12, TNF-α e IFN-γ"],
+    p:"IL-10 es el 'apaga-fuegos' del sistema. Déficit = inflamación descontrolada."},
+
+  {id:"il11", fam:"citok", n:"IL-11", r:"pro", o:"Estroma medular, fibroblastos",
+    f:"Familia de IL-6 (comparte receptor gp130). Trombopoyetina secundaria. Reparación tisular (pero puede inducir fibrosis).",
+    k:["⭐ Sube junto con IL-6, y IL-4 también la SUPRIME","Estimula plaquetas (oprelvekin para trombocitopenia por QT)","Crecientes datos en fibrosis cardíaca, renal y pulmonar"]},
+
+  {id:"il12", fam:"citok", n:"IL-12", r:"pro", o:"Células dendríticas, macrófagos",
+    f:"Polariza linfocitos T vírgenes hacia Th1 (defensa intracelular). Activa NK → IFN-γ.",
+    k:["Eje IL-12/IFN-γ = defensa contra micobacterias, Listeria, Leishmania","Déficit de receptor → susceptibilidad a micobacterias no tuberculosas"],
+    t:"Ustekinumab bloquea p40 (subunidad compartida con IL-23) — psoriasis, Crohn."},
+
+  {id:"il13", fam:"citok", n:"IL-13", r:"pro", o:"Th2, mastocitos",
+    f:"Hermana funcional de IL-4. Hiperreactividad bronquial, producción de moco, fibrosis.",
+    k:["Clave en el asma alérgico y la dermatitis atópica","Comparte receptor con IL-4 (IL-4Rα)"],
+    t:"Dupilumab (bloquea IL-4Rα → también bloquea IL-13). Tralokinumab (anti-IL-13)."},
+
+  {id:"il17", fam:"citok", n:"IL-17", r:"pro", o:"Linfocitos Th17",
+    f:"Reclutamiento de neutrófilos. Defensa antifúngica (Candida) y contra bacterias extracelulares.",
+    k:["Eje IL-23/IL-17 patogénico en psoriasis, espondilitis anquilosante, EII","Déficit (hiper-IgE / Job) → candidiasis mucocutánea crónica"],
+    t:"Secukinumab, Ixekizumab (anti-IL-17A). Brodalumab (anti-IL-17R)."},
+
+  {id:"il23", fam:"citok", n:"IL-23", r:"pro", o:"Células dendríticas",
+    f:"Mantiene y expande la línea Th17. Sin IL-23, Th17 no se perpetúa.",
+    k:["Diana moderna en psoriasis (más selectiva que anti-p40)","Comparte subunidad p40 con IL-12"],
+    t:"Guselkumab, Risankizumab, Tildrakizumab (anti-p19 específicos de IL-23)."},
+
+  {id:"tnfa", fam:"citok", n:"TNF-α", r:"pro", o:"Macrófagos activados, células T, NK",
+    f:"Master-regulator proinflamatorio. Activa endotelio, induce apoptosis, media shock séptico y caquexia.",
+    k:["⭐ Junto con IL-1 e IL-6 = triada proinflamatoria","Caquexia neoplásica y de infecciones crónicas","Induce ↑ moléculas de adhesión (ICAM, VCAM, E-selectina)","Granuloma se DESARMA sin TNF (riesgo de reactivar TBC con anti-TNF)"],
+    t:"Infliximab, Adalimumab, Etanercept, Golimumab, Certolizumab. AR, espondilitis, psoriasis, Crohn.",
+    p:"Antes de iniciar anti-TNF → PPD/IGRA obligatorio. Reactivación de TBC."},
+
+  {id:"tgfb", fam:"citok", n:"TGF-β", r:"dual", o:"Plaquetas, macrófagos, Treg",
+    f:"Antiinflamatorio e inmunosupresor, PERO también induce fibrosis y diferenciación a Th17/Treg según contexto.",
+    k:["Induce diferenciación de Treg (junto con IL-2) y Th17 (junto con IL-6)","Clave en fibrosis pulmonar idiopática, cirrosis, esclerodermia","Promueve cicatrización pero también cicatriz patológica"],
+    p:"TGF-β es ambiguo: apaga inflamación pero enciende fibrosis."},
+
+  {id:"ifng", fam:"citok", n:"IFN-γ", r:"pro", o:"Th1, NK, linfocitos T CD8",
+    f:"Activa macrófagos (M1), potencia MHC-I y MHC-II. Respuesta contra patógenos INTRACELULARES.",
+    k:["Activa el macrófago para fagocitar y formar granulomas","Quantiferon / IGRA se basa en la liberación de IFN-γ","Déficit del receptor → susceptibilidad a micobacterias"]},
+
+  {id:"ifnab", fam:"citok", n:"IFN-α / IFN-β", r:"pro", o:"Leucocitos (α), fibroblastos (β), cualquier célula infectada",
+    f:"Antivirales. Inducen estado antiviral celular y activación de NK.",
+    k:["Firma de interferones tipo I está elevada en LES","Usados en hepatitis B y C (histórico), esclerosis múltiple (IFN-β)"],
+    t:"Anifrolumab (anti-IFN-α/β receptor) aprobado para LES."},
+
+  // ───────── EICOSANOIDES ─────────
+  {id:"pge2", fam:"eico", n:"Prostaglandina E₂ (PGE₂)", r:"vaso", o:"COX-1 y COX-2 en casi todas las células",
+    f:"Vasodilatación, dolor (hiperalgesia), fiebre, protección gástrica, ovulación, contracción uterina.",
+    k:["PGE₂ hipotalámica = causa DIRECTA de fiebre (por eso AINEs bajan fiebre)","Protectora de mucosa gástrica (COX-1) → por eso AINEs producen úlceras","Misoprostol = análogo PGE₁ → úlcera por AINEs, aborto, hemorragia postparto"],
+    t:"AINEs bloquean COX-1 y COX-2. Coxibs selectivos COX-2 (celecoxib) respetan mucosa gástrica pero ↑ riesgo CV."},
+
+  {id:"pgi2", fam:"eico", n:"Prostaciclina (PGI₂)", r:"vaso", o:"Endotelio vascular (COX-2)",
+    f:"Potente VASODILATADOR e INHIBIDOR de la agregación plaquetaria. Antagonista funcional del TXA₂.",
+    k:["Producida por el endotelio sano","Balance PGI₂/TXA₂ = tono vascular y hemostasia","AAS a dosis baja mantiene PGI₂ (endotelio regenera COX) pero inhibe TXA₂ plaquetaria (irreversible)"],
+    t:"Epoprostenol, Iloprost, Treprostinil → hipertensión pulmonar."},
+
+  {id:"txa2", fam:"eico", n:"Tromboxano A₂ (TXA₂)", r:"pro", o:"Plaquetas (COX-1)",
+    f:"Vasoconstrictor y agregante plaquetario. Antagonista del PGI₂.",
+    k:["AAS → inhibición IRREVERSIBLE de COX-1 plaquetaria → efecto antiagregante por 7-10 días (vida plaquetaria)","Las plaquetas son anucleadas → no regeneran COX → por eso AAS basta dosis baja (100 mg)"],
+    p:"AAS 100 mg: suficiente para inhibir TXA₂ plaquetaria sin tocar mucho la PGI₂ endotelial."},
+
+  {id:"ltb4", fam:"eico", n:"Leucotrieno B₄ (LTB₄)", r:"quim", o:"Neutrófilos, macrófagos (vía LOX-5)",
+    f:"Potente QUIMIOTÁCTICO de neutrófilos. Favorece adhesión y degranulación.",
+    k:["Es el LT 'pro-neutrófilo'","Zileuton (inhibidor de 5-LOX) bloquea su síntesis"]},
+
+  {id:"ltcde", fam:"eico", n:"Leucotrienos C₄ / D₄ / E₄ (SRS-A)", r:"pro", o:"Mastocitos, basófilos, eosinófilos (LOX-5)",
+    f:"Antiguamente llamados 'sustancia de reacción lenta de la anafilaxia' (SRS-A). Broncoconstricción POTENTE, ↑ permeabilidad, secreción de moco.",
+    k:["Mediadores clave del ASMA, sobre todo en asma por AINEs (Samter)","Broncoconstricción 1000x más potente que la histamina","Sí, responden a antileucotrienos"],
+    t:"Montelukast, Zafirlukast = antagonistas del receptor CysLT1. Zileuton = inhibidor de síntesis."},
+
+  {id:"samter", fam:"eico", n:"⚠ Tríada de Samter (contexto)", r:"pro", o:"AINEs bloquean COX → acumula AA → se desvía a LOX → ↑ LTs",
+    f:"Asma + poliposis nasal + intolerancia a AAS/AINEs. Pseudoalergia mediada por leucotrienos.",
+    k:["Mecanismo: inhibición de COX redirige ácido araquidónico a producción de leucotrienos","Evitar TODOS los AINEs","Paracetamol en dosis < 1g suele ser tolerado"],
+    p:"Samter = el ejemplo clásico de por qué los leucotrienos importan clínicamente."},
+
+  // ───────── COMPLEMENTO ─────────
+  {id:"c3a_c5a", fam:"comp", n:"C3a / C5a (anafilotoxinas)", r:"pro", o:"Escisión de C3 y C5 en las 3 vías",
+    f:"Quimiotaxis de neutrófilos (C5a es el más potente), degranulación de mastocitos, ↑ permeabilidad, vasodilatación.",
+    k:["C5a = quimiotáctico MÁS potente del sistema","Anafilotoxina: imitan anafilaxia por liberación de histamina","C3a < C5a en potencia"]},
+
+  {id:"c3b", fam:"comp", n:"C3b (opsonina)", r:"pro", o:"Escisión de C3",
+    f:"Opsoniza patógenos para fagocitosis por macrófagos y neutrófilos (receptor CR1).",
+    k:["Opsonina PRINCIPAL del sistema inmune innato","Déficit de C3 → infecciones piógenas recurrentes (encapsulados)"]},
+
+  {id:"mac", fam:"comp", n:"C5b-9 (MAC)", r:"pro", o:"Ensamblaje terminal (C5b + C6-C9)",
+    f:"Complejo de Ataque a la Membrana. Poro transmembrana → lisis osmótica del patógeno (sobre todo Neisseria).",
+    k:["⭐ Déficit de C5-C9 → infecciones recurrentes por NEISSERIA (meningitis, gonococemia)","Eculizumab bloquea C5 → HPN y SHUa","Vacuna antimeningocócica obligatoria antes de eculizumab"]},
+
+  {id:"c1inh", fam:"comp", n:"C1-inhibidor (regulador)", r:"anti", o:"Hepático",
+    f:"Inhibe C1 (vía clásica), calicreína y factores XII/XI. Controla complemento y bradicinina.",
+    k:["⭐ Déficit = ANGIOEDEMA HEREDITARIO (no responde a antihistamínicos ni corticoides)","Icatibant (antagonista bradicinina), C1-INH concentrado, Ecallantide"],
+    p:"Angioedema que no cede con adrenalina/antihistamínicos → pensar en déficit de C1-inhibidor."},
+
+  // ───────── AMINAS VASOACTIVAS ─────────
+  {id:"hist", fam:"amin", n:"Histamina", r:"vaso", o:"Mastocitos, basófilos (gránulos preformados)",
+    f:"PRIMER mediador liberado. Vasodilatación arteriolar, ↑ permeabilidad venular, broncoconstricción, prurito.",
+    k:["Receptores: H1 (alergia/inflamación), H2 (ácido gástrico), H3/H4 (SNC/inmunidad)","H1: loratadina, cetirizina, difenhidramina","H2: ranitidina (retirada), famotidina","Liberación triple respuesta de Lewis: eritema, edema, halo"],
+    p:"Reacción aguda = histamina. Reacción tardía mantenida = leucotrienos + citocinas."},
+
+  {id:"sero", fam:"amin", n:"Serotonina (5-HT)", r:"vaso", o:"Plaquetas (97% del cuerpo en TGI)",
+    f:"Vasoconstricción, agregación plaquetaria secundaria, papel mínimo en inflamación cutánea humana.",
+    k:["Clínica inflamatoria menor que histamina en humanos","Clave en síndrome carcinoide (flush, diarrea, broncoespasmo)"]},
+
+  // ───────── PÉPTIDOS / QUININAS ─────────
+  {id:"brad", fam:"pept", n:"Bradicinina", r:"vaso", o:"Sistema calicreína-quinina (HMWK → bradicinina)",
+    f:"Vasodilatación, ↑ permeabilidad, DOLOR (activa nociceptores), broncoconstricción.",
+    k:["⭐ IECA inhiben degradación → acumulación → TOS y ANGIOEDEMA por IECA","Degradada por la ECA (kininasa II)","Los ARAII (losartán) NO causan este efecto"],
+    t:"Icatibant (antagonista B2) para angioedema por IECA o hereditario.",
+    p:"Paciente con tos seca al tomar enalapril = bradicinina acumulada. Cambiar a ARAII."},
+
+  {id:"sp", fam:"pept", n:"Sustancia P", r:"pro", o:"Fibras C nociceptivas, linfocitos",
+    f:"Neuropéptido pro-inflamatorio. Vasodilatación, degranulación mastocitaria, dolor neurogénico.",
+    k:["Inflamación neurogénica (migraña, dermatitis por contacto irritativa)","Aprepitant (antagonista NK1) para náuseas/vómitos por QT"]},
+
+  // ───────── RADICALES / GASES ─────────
+  {id:"no", fam:"nit", n:"Óxido Nítrico (NO)", r:"dual", o:"eNOS (endotelial), iNOS (inducible, inflamatoria), nNOS (neuronal)",
+    f:"Vasodilatador potente (eNOS). En inflamación (iNOS): microbicida, pero en exceso causa shock séptico.",
+    k:["Nitratos/nitritos (nitroglicerina) → liberan NO → vasodilatación","iNOS inducido por TNF-α, IL-1 y LPS","Shock séptico: NO masivo → vasoplejía refractaria"],
+    t:"Azul de metileno (inhibe guanilato ciclasa) en shock vasopléjico refractario."},
+
+  {id:"ros", fam:"nit", n:"ROS (especies reactivas de O₂)", r:"pro", o:"Neutrófilos (burst oxidativo), macrófagos, mitocondria",
+    f:"Microbicidas intracelulares: H₂O₂, OH·, O₂⁻, HOCl.",
+    k:["NADPH oxidasa: déficit → ENFERMEDAD GRANULOMATOSA CRÓNICA (Catalasa+: S.aureus, Aspergillus)","Mieloperoxidasa genera HOCl (hipoclorito = lejía biológica)","Daño colateral = lesión tisular inflamatoria"]}
+];
+
+var MED_RELATIONS=[
+  {from:"IL-4", to:["IL-6","IL-11"], label:"suprime", color:"#34d399"},
+  {from:"IL-10", to:["IL-1","IL-6","TNF-α","IFN-γ"], label:"apaga", color:"#34d399"},
+  {from:"TNF-α", to:["IL-1","IL-6"], label:"induce", color:"#ef4444"},
+  {from:"IL-6", to:["PCR","fibrinógeno","hepcidina"], label:"induce fase aguda", color:"#ef4444"}
 ];
 
 // ══════════════════════════════════════════════════════════════
@@ -2748,13 +3398,23 @@ function globalSearch(q){
     var txt=stripAccents([cf.num,cf.nombre,cf.alt||""].join(" ").toLowerCase());
     if(txt.indexOf(l)>-1) res.push({type:"coag",name:"🩸 Factor "+cf.num+" — "+cf.nombre,sub:"Generalidades — Coagulación",go:"general"});
   });
-  FISIO_RECEPTORS.forEach(function(r){
-    var txt=stripAccents([r.name,r.symbol,r.protein,r.clinical].concat(r.effects.map(function(ef){return ef.desc})).join(" ").toLowerCase());
-    if(txt.indexOf(l)>-1) res.push({type:"fisio",name:"🔬 "+r.symbol+" "+r.name,sub:"Fisiología — Receptores",go:"fisio"});
+  RECEPTOR_FAMILIES.forEach(function(fam){
+    fam.receptors.forEach(function(r){
+      var txt=stripAccents([r.name,r.symbol,r.protein,r.clinical,r.net].concat((r.effects||[]).map(function(ef){return ef.t+" "+ef.x})).concat((r.drugs||[]).map(function(d){return d.n+" "+d.u})).join(" ").toLowerCase());
+      if(txt.indexOf(l)>-1) res.push({type:"fisio",name:"🧬 "+r.symbol+" "+r.name,sub:"Fisiología — "+fam.name,go:"fisio"});
+    });
   });
-  FISIO_PERLAS.forEach(function(fp){
-    var txt=stripAccents([fp.t].concat(fp.items).join(" ").toLowerCase());
-    if(txt.indexOf(l)>-1) res.push({type:"fisio",name:"🔬 "+fp.t,sub:"Fisiología — Perlas",go:"fisio"});
+  Object.keys(RECEPTOR_PEARLS).forEach(function(famKey){
+    (RECEPTOR_PEARLS[famKey]||[]).forEach(function(p){
+      var txt=stripAccents([p.t].concat(p.i||[]).join(" ").toLowerCase());
+      if(txt.indexOf(l)>-1) res.push({type:"fisio",name:"🧬 "+p.t,sub:"Fisiología — Perlas",go:"fisio"});
+    });
+  });
+  MED_LIST.forEach(function(md){
+    var famObj=MED_FAMILIES.filter(function(fm){return fm.id===md.fam})[0];
+    var famName=famObj?famObj.n:"Mediadores";
+    var txt=stripAccents([md.n,md.f,md.o,md.t||"",md.p||""].concat(md.k||[]).join(" ").toLowerCase());
+    if(txt.indexOf(l)>-1) res.push({type:"med",name:"🔥 "+md.n,sub:"Generalidades — "+famName,go:"general"});
   });
   INT.s.forEach(function(s){
     var txt=stripAccents([s.t,s.x||""].concat(s.p).join(" ").toLowerCase());
@@ -2981,6 +3641,556 @@ attachHandlers();
   }, []);
 
   return e("div", {id: "ecm", dangerouslySetInnerHTML: {__html: CRANIAL_MAP_HTML}});
+}
+
+// ══════════════════════════════════════════════════════════════
+// COMPONENT: ReceptoresView — Fisiología receptor families view
+// ══════════════════════════════════════════════════════════════
+function ReceptoresView(){
+  var fs=useState('adr'),family=fs[0],setFamily=fs[1];
+  var rs=useState(0),recIdx=rs[0],setRecIdx=rs[1];
+  var ts=useState(0),mainTab=ts[0],setMainTab=ts[1];
+  var qs=useState({}),quizAns=qs[0],setQuizAns=qs[1];
+  var ss=useState(0),streak=ss[0],setStreak=ss[1];
+  var bss=useState(0),bestStreak=bss[0],setBestStreak=bss[1];
+
+  var currentFamily=null;
+  for(var fi=0;fi<RECEPTOR_FAMILIES.length;fi++){if(RECEPTOR_FAMILIES[fi].id===family){currentFamily=RECEPTOR_FAMILIES[fi];break;}}
+  if(!currentFamily) currentFamily=RECEPTOR_FAMILIES[0];
+
+  var currentRec=currentFamily.receptors[recIdx]||currentFamily.receptors[0];
+  var currentQuiz=RECEPTOR_QUIZZES[family]||[];
+  var currentPearls=RECEPTOR_PEARLS[family]||[];
+
+  function changeFamily(id){
+    setFamily(id);setRecIdx(0);setQuizAns({});setMainTab(0);
+    try{window.scrollTo({top:0,behavior:'smooth'})}catch(err){}
+  }
+
+  function answerQuiz(qi,oi){
+    if(quizAns[qi]!==undefined) return;
+    var newAns={};
+    for(var k in quizAns) newAns[k]=quizAns[k];
+    newAns[qi]=oi;
+    setQuizAns(newAns);
+    if(oi===currentQuiz[qi].r){
+      var ns=streak+1;setStreak(ns);
+      if(ns>bestStreak) setBestStreak(ns);
+    } else {setStreak(0)}
+  }
+
+  // ─── HEADER ───
+  var header=e('div',{style:{textAlign:'center',marginBottom:'24px'}},
+    e('span',{style:{display:'inline-block',fontSize:'10px',letterSpacing:'3px',textTransform:'uppercase',color:'#ec4899',background:'rgba(236,72,153,.12)',border:'1px solid rgba(236,72,153,.3)',padding:'5px 14px',borderRadius:'4px',marginBottom:'12px'}},'Fisiología · Receptores Celulares'),
+    e('h2',{style:{fontFamily:"'Playfair Display',serif",fontSize:'24px',fontWeight:900,background:'linear-gradient(135deg,#3b82f6,#8b5cf6,#f472b6,#fbbf24)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}},'Receptores Farmacológicos'),
+    e('p',{style:{color:C.dm,fontSize:'13px'}},RECEPTOR_FAMILIES.length+' familias · '+RECEPTOR_FAMILIES.reduce(function(a,f){return a+f.receptors.length},0)+' subtipos · Mecanismos, fármacos y clínica')
+  );
+
+  // ─── FAMILY SELECTOR ───
+  var familySelector=e('div',{style:{marginBottom:'20px'}},
+    e('div',{style:{fontSize:'11px',fontWeight:700,color:C.dm,textTransform:'uppercase',letterSpacing:'2px',marginBottom:'12px',paddingLeft:'4px'}},'📚 Elige una familia'),
+    e('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))',gap:'10px'}},
+      RECEPTOR_FAMILIES.map(function(fam){
+        var isActive=family===fam.id;
+        return e('button',{key:fam.id,onClick:function(){changeFamily(fam.id)},
+          style:{
+            background:isActive?'linear-gradient(135deg,'+fam.col+'22,'+fam.col+'08)':C.cd,
+            border:'1.5px solid '+(isActive?fam.col+'66':C.bd),
+            borderRadius:'14px',padding:'14px',cursor:'pointer',textAlign:'left',
+            color:C.tx,transition:'all .2s',
+            boxShadow:isActive?'0 4px 20px '+fam.col+'25':'none'
+          }},
+          e('div',{style:{display:'flex',alignItems:'center',gap:'8px',marginBottom:'6px'}},
+            e('span',{style:{fontSize:'22px'}},fam.icon),
+            e('div',{style:{fontWeight:800,fontSize:'14px',color:isActive?fam.col:C.tx}},fam.name)
+          ),
+          e('div',{style:{fontSize:'10px',color:C.dm,lineHeight:1.4}},fam.desc),
+          e('div',{style:{fontSize:'10px',color:fam.col,marginTop:'6px',fontWeight:600}},fam.receptors.length+' receptores')
+        )
+      })
+    )
+  );
+
+  // ─── FAMILY CARD ───
+  var familyCard=e('div',{style:{marginBottom:'20px',padding:'16px 18px',background:'linear-gradient(135deg,'+currentFamily.col+'10,rgba(13,18,36,.9))',border:'1.5px solid '+currentFamily.col+'40',borderRadius:'16px'}},
+    e('div',{style:{display:'flex',alignItems:'center',gap:'14px',flexWrap:'wrap'}},
+      e('span',{style:{fontSize:'36px'}},currentFamily.icon),
+      e('div',{style:{flex:1,minWidth:'200px'}},
+        e('h2',{style:{fontFamily:"'Playfair Display',serif",fontSize:'22px',fontWeight:800,color:currentFamily.col,marginBottom:'2px'}},currentFamily.name),
+        e('div',{style:{fontSize:'12px',color:C.mt}},'🧪 ',e('strong',{style:{color:C.tx}},currentFamily.nt))
+      )
+    )
+  );
+
+  // ─── MAIN TABS ───
+  var tabs=e('div',{style:{display:'flex',gap:'6px',overflowX:'auto',marginBottom:'20px',padding:'4px',background:'rgba(255,255,255,.02)',borderRadius:'12px'}},
+    [{l:'🧬 Receptores',i:0},{l:'📊 Proteínas G',i:1},{l:'🧠 Quiz',i:2},{l:'📌 Perlas',i:3}].map(function(tb){
+      var isAct=mainTab===tb.i;
+      return e('button',{key:tb.i,onClick:function(){setMainTab(tb.i)},
+        style:{flex:'1 1 auto',minWidth:'100px',padding:'10px 14px',
+          background:isAct?currentFamily.col:'transparent',
+          border:'none',borderRadius:'10px',
+          color:isAct?'#060a14':C.mt,
+          fontSize:'13px',fontWeight:isAct?700:500,cursor:'pointer',whiteSpace:'nowrap',
+          transition:'all .2s'
+        }},tb.l)
+    })
+  );
+
+  // ─── CONTENT ───
+  var content;
+
+  if(mainTab===0){
+    // RECEPTORS TAB
+    var subSelector=e('div',{style:{display:'flex',gap:'8px',overflowX:'auto',marginBottom:'20px',paddingBottom:'6px'}},
+      currentFamily.receptors.map(function(r,i){
+        var isAct=recIdx===i;
+        return e('button',{key:r.id,onClick:function(){setRecIdx(i)},
+          style:{
+            flexShrink:0,display:'flex',alignItems:'center',gap:'8px',
+            padding:'10px 18px',borderRadius:'100px',
+            border:'1.5px solid '+(isAct?r.color:r.color+'40'),
+            background:isAct?r.color:'transparent',
+            color:isAct?'#060a14':r.color,
+            fontSize:'14px',fontWeight:isAct?700:500,cursor:'pointer',whiteSpace:'nowrap'
+          }},
+          e('span',{style:{fontSize:'18px',fontWeight:800}},r.symbol)
+        )
+      })
+    );
+
+    var heroCard=e('div',{style:{borderRadius:'16px',padding:'24px',marginBottom:'20px',border:'1.5px solid '+currentRec.color+'40',background:currentRec.colorBg}},
+      e('div',{style:{display:'flex',alignItems:'flex-start',gap:'16px',marginBottom:'20px',flexWrap:'wrap'}},
+        e('span',{style:{fontFamily:"'Playfair Display',serif",fontSize:'64px',fontWeight:900,lineHeight:1,color:currentRec.color,textShadow:'0 0 30px '+currentRec.color+'40'}},currentRec.letter),
+        e('div',{style:{flex:1,minWidth:'200px'}},
+          e('h3',{style:{fontFamily:"'Playfair Display',serif",fontSize:'26px',fontWeight:800,marginBottom:'6px',color:C.tx}},currentRec.symbol+' — '+currentRec.name),
+          e('div',{style:{display:'flex',alignItems:'center',gap:'8px',flexWrap:'wrap'}},
+            e('span',{style:{background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.12)',padding:'4px 12px',borderRadius:'100px',fontSize:'12px',fontWeight:600,color:C.tx}},'🔗 '+currentRec.protein),
+            currentRec.messenger.map(function(m,mi){
+              return e('span',{key:mi,style:{fontSize:'12px',color:C.mt,padding:'4px 10px',background:'rgba(255,255,255,.03)',borderRadius:'100px'}},m)
+            })
+          ),
+          e('div',{style:{fontSize:'12px',color:C.mt,marginTop:'8px',fontFamily:"'Playfair Display',serif",fontStyle:'italic'}},'→ '+currentRec.net)
+        )
+      ),
+      e('div',{style:{padding:'16px',background:'rgba(0,0,0,.4)',borderRadius:'12px',marginBottom:'20px',border:'1px solid '+C.bd,overflowX:'auto'}},
+        e('div',{style:{fontSize:'10px',fontWeight:700,color:currentRec.color,textTransform:'uppercase',letterSpacing:'2px',marginBottom:'12px'}},'⚙️ Vía de señalización'),
+        e('div',{style:{display:'flex',alignItems:'center',gap:'8px',flexWrap:'wrap'}},
+          currentRec.pathway.map(function(p,pi){
+            return e(F,{key:pi},
+              pi>0&&e('span',{style:{color:currentRec.color,fontSize:'16px'}},'→'),
+              e('span',{style:{padding:'6px 12px',borderRadius:'8px',background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.12)',fontSize:'12px',fontWeight:600,whiteSpace:'nowrap',color:C.tx}},p)
+            )
+          })
+        )
+      ),
+      e('div',{style:{marginBottom:'20px'}},
+        e('div',{style:{fontSize:'11px',fontWeight:700,letterSpacing:'2px',textTransform:'uppercase',color:C.dm,marginBottom:'12px'}},'🎯 Efectos por tejido'),
+        currentRec.effects.map(function(ef,ei){
+          return e('div',{key:ei,style:{display:'flex',alignItems:'flex-start',gap:'12px',padding:'10px 0',borderBottom:ei<currentRec.effects.length-1?'1px solid rgba(255,255,255,.06)':'none'}},
+            e('span',{style:{fontSize:'18px',color:ef.d==='↑'?'#34d399':'#ef4444',fontWeight:800,flexShrink:0,width:'24px',textAlign:'center'}},ef.d),
+            e('div',{style:{flex:1}},
+              e('div',{style:{fontSize:'13px',fontWeight:600,color:C.tx,marginBottom:'2px'}},ef.t),
+              e('div',{style:{fontSize:'12px',color:C.mt,lineHeight:1.5}},ef.x)
+            )
+          )
+        })
+      ),
+      e('div',{style:{padding:'14px 16px',borderRadius:'12px',background:'rgba(0,0,0,.3)',borderLeft:'3px solid '+currentRec.color,marginBottom:'20px'}},
+        e('div',{style:{fontSize:'10px',fontWeight:700,color:currentRec.color,textTransform:'uppercase',letterSpacing:'1px',marginBottom:'6px'}},'🏥 Relevancia clínica'),
+        e('div',{style:{fontSize:'13px',color:C.tx,lineHeight:1.6}},currentRec.clinical)
+      ),
+      e('div',{style:{fontSize:'11px',fontWeight:700,letterSpacing:'2px',textTransform:'uppercase',color:C.dm,marginBottom:'12px'}},'💊 Fármacos clave'),
+      e('div',{style:{display:'flex',flexDirection:'column',gap:'8px'}},
+        currentRec.drugs.map(function(d,di){
+          return e('div',{key:di,style:{display:'flex',alignItems:'center',gap:'12px',padding:'12px 16px',borderRadius:'10px',background:'rgba(255,255,255,.03)',border:'1px solid rgba(255,255,255,.07)'}},
+            e('div',{style:{width:'10px',height:'10px',borderRadius:'50%',background:d.c,flexShrink:0,boxShadow:'0 0 10px '+d.c+'80'}}),
+            e('div',{style:{flex:1,minWidth:0}},
+              e('div',{style:{fontSize:'14px',fontWeight:700,color:d.c,marginBottom:'2px'}},d.n),
+              e('div',{style:{fontSize:'11px',color:C.dm,marginBottom:'2px'}},d.r),
+              e('div',{style:{fontSize:'12px',color:C.mt}},'📌 '+d.u)
+            )
+          )
+        })
+      )
+    );
+
+    var comparativeTable=e('div',{style:{marginTop:'24px'}},
+      e('h4',{style:{fontFamily:"'Playfair Display',serif",fontSize:'16px',fontWeight:700,marginBottom:'12px',color:currentFamily.col}},'📊 Comparativa — '+currentFamily.name),
+      e('div',{style:{overflowX:'auto',borderRadius:'12px',border:'1.5px solid '+C.bd}},
+        e('table',{style:{width:'100%',borderCollapse:'collapse',fontSize:'12px'}},
+          e('thead',null,e('tr',{style:{background:C.cd}},
+            e('th',{style:{padding:'10px 12px',textAlign:'left',color:C.dm,fontSize:'10px',fontWeight:600,textTransform:'uppercase'}},'Receptor'),
+            e('th',{style:{padding:'10px 12px',textAlign:'left',color:C.dm,fontSize:'10px',fontWeight:600,textTransform:'uppercase'}},'Prot'),
+            e('th',{style:{padding:'10px 12px',textAlign:'left',color:C.dm,fontSize:'10px',fontWeight:600,textTransform:'uppercase'}},'Efecto'),
+            e('th',{style:{padding:'10px 12px',textAlign:'left',color:C.dm,fontSize:'10px',fontWeight:600,textTransform:'uppercase'}},'Ejemplo')
+          )),
+          e('tbody',null,currentFamily.receptors.map(function(r,ri){
+            return e('tr',{key:r.id,style:{borderTop:'1px solid '+C.bd,cursor:'pointer',background:recIdx===ri?r.color+'10':'transparent'},onClick:function(){setRecIdx(ri)}},
+              e('td',{style:{padding:'10px 12px',fontWeight:700,color:r.color,fontSize:'14px'}},r.symbol),
+              e('td',{style:{padding:'10px 12px'}},e('span',{style:{display:'inline-block',padding:'2px 8px',borderRadius:'100px',fontSize:'10px',fontWeight:600,background:r.color+'15',color:r.color}},r.protein)),
+              e('td',{style:{padding:'10px 12px',color:C.mt,fontSize:'11px'}},r.net),
+              e('td',{style:{padding:'10px 12px',color:C.mt,fontSize:'11px'}},r.drugs[0]?r.drugs[0].n:'—')
+            )
+          }))
+        )
+      )
+    );
+
+    content=e(F,null,subSelector,heroCard,comparativeTable);
+
+  } else if(mainTab===1){
+    // PROTEIN G TAB
+    content=e(F,null,
+      e('h3',{style:{fontFamily:"'Playfair Display',serif",fontSize:'20px',fontWeight:700,marginBottom:'8px',color:currentFamily.col}},'🔬 Proteínas G — Transversal'),
+      e('p',{style:{fontSize:'13px',color:C.mt,marginBottom:'20px'}},'Sistema de señalización que conecta receptores con efectores intracelulares.'),
+      e('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(250px,1fr))',gap:'14px',marginBottom:'24px'}},
+        RECEPTOR_PROT_G.map(function(g,gi){
+          return e('div',{key:gi,style:{padding:'20px',borderRadius:'14px',background:'linear-gradient(135deg,'+g.color+'15,rgba(13,18,36,.8))',border:'1.5px solid '+g.color+'40'}},
+            e('div',{style:{fontSize:'32px',fontWeight:900,fontFamily:"'Playfair Display',serif",color:g.color,marginBottom:'4px'}},g.name),
+            e('div',{style:{fontSize:'12px',color:C.dm,marginBottom:'8px'}},g.desc),
+            e('div',{style:{fontSize:'14px',fontWeight:700,color:C.tx,marginBottom:'12px',fontFamily:"'JetBrains Mono',monospace"}},g.result),
+            e('div',{style:{fontSize:'11px',color:C.dm,borderTop:'1px solid rgba(255,255,255,.08)',paddingTop:'10px'}},
+              'Receptores: ',
+              e('span',{style:{color:g.color,fontWeight:600}},g.receptors)
+            )
+          )
+        })
+      ),
+      e('div',{style:{padding:'16px 18px',background:'rgba(251,191,36,.06)',border:'1.5px solid rgba(251,191,36,.25)',borderRadius:'12px'}},
+        e('div',{style:{fontSize:'12px',fontWeight:700,color:'#fbbf24',marginBottom:'10px',textTransform:'uppercase',letterSpacing:'1px'}},'💡 Reglas mnemotécnicas'),
+        e('div',{style:{fontSize:'13px',color:C.tx,lineHeight:1.8}},
+          e('div',null,e('strong',{style:{color:'#fbbf24'}},'Gq → "Q de Quema"'),' → Ca²⁺ → contracción'),
+          e('div',null,e('strong',{style:{color:'#fbbf24'}},'Gi → "i de inhibe"'),' → ↓AMPc'),
+          e('div',null,e('strong',{style:{color:'#fbbf24'}},'Gs → "s de Sube"'),' → ↑AMPc'),
+          e('div',null,e('strong',{style:{color:'#fbbf24'}},'Canal iónico'),' → Transmisión rápida')
+        )
+      )
+    );
+
+  } else if(mainTab===2){
+    // QUIZ TAB
+    content=e(F,null,
+      e('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'16px',flexWrap:'wrap',gap:'8px'}},
+        e('div',null,
+          e('h3',{style:{fontFamily:"'Playfair Display',serif",fontSize:'20px',fontWeight:700,color:currentFamily.col}},'🧠 Quiz — '+currentFamily.name),
+          e('p',{style:{fontSize:'12px',color:C.dm,marginTop:'2px'}},currentQuiz.length+' preguntas · '+Object.keys(quizAns).length+'/'+currentQuiz.length+' respondidas')
+        ),
+        streak>0&&e('div',{style:{display:'flex',alignItems:'center',gap:'6px',padding:'6px 14px',background:'rgba(52,211,153,.12)',borderRadius:'100px',border:'1px solid rgba(52,211,153,.3)'}},
+          e('span',{style:{fontSize:'16px'}},'🔥'),
+          e('span',{style:{fontSize:'13px',fontWeight:700,color:'#34d399'}},streak+' racha')
+        )
+      ),
+      currentQuiz.map(function(qq,qi){
+        var answered=quizAns[qi]!==undefined;
+        var isCorrect=answered&&quizAns[qi]===qq.r;
+        return e('div',{key:qi,style:{background:C.cd,border:'1.5px solid '+(answered?(isCorrect?'#34d39944':'#ef444444'):C.bd),borderRadius:'14px',padding:'20px',marginBottom:'14px'}},
+          e('div',{style:{fontSize:'11px',fontWeight:700,letterSpacing:'1px',textTransform:'uppercase',color:C.dm,marginBottom:'8px'}},'Pregunta '+(qi+1)+' de '+currentQuiz.length),
+          e('div',{style:{fontFamily:"'Playfair Display',serif",fontSize:'16px',fontWeight:600,marginBottom:'14px',lineHeight:1.5,color:C.tx}},qq.q),
+          e('div',{style:{display:'flex',flexDirection:'column',gap:'8px'}},
+            qq.opts.map(function(opt,oi){
+              var bg='rgba(255,255,255,.03)',bd=C.bd,col=C.mt;
+              if(answered&&oi===qq.r){bg='rgba(52,211,153,.12)';bd='#34d399';col='#34d399'}
+              if(answered&&oi===quizAns[qi]&&oi!==qq.r){bg='rgba(239,68,68,.12)';bd='#ef4444';col='#ef4444'}
+              return e('button',{key:oi,onClick:function(){answerQuiz(qi,oi)},
+                style:{padding:'12px 16px',borderRadius:'10px',cursor:answered?'default':'pointer',border:'1.5px solid '+bd,background:bg,color:col,textAlign:'left',width:'100%',fontSize:'14px',fontWeight:500,transition:'all .2s',fontFamily:'inherit'}},
+                String.fromCharCode(65+oi)+') '+opt,
+                answered&&oi===qq.r?' ✓':'',
+                answered&&oi===quizAns[qi]&&oi!==qq.r?' ✗':''
+              )
+            })
+          ),
+          answered&&e('div',{style:{marginTop:'14px',padding:'12px 14px',background:'rgba(255,255,255,.03)',borderRadius:'10px',borderLeft:'3px solid '+(isCorrect?'#34d399':'#ef4444'),fontSize:'13px',color:C.mt,lineHeight:1.6}},
+            e('span',{style:{color:isCorrect?'#34d399':'#ef4444',fontWeight:700}},isCorrect?'✓ Correcto — ':'✗ Incorrecto — '),
+            qq.x
+          )
+        )
+      }),
+      Object.keys(quizAns).length===currentQuiz.length&&currentQuiz.length>0&&e('div',{style:{textAlign:'center',marginTop:'20px',padding:'20px',background:'linear-gradient(135deg,'+currentFamily.col+'15,rgba(13,18,36,.8))',border:'1.5px solid '+currentFamily.col+'40',borderRadius:'14px'}},
+        e('div',{style:{fontSize:'32px',marginBottom:'8px'}},'🎉'),
+        e('div',{style:{fontSize:'16px',fontWeight:700,marginBottom:'4px',color:currentFamily.col}},'Quiz completado'),
+        e('div',{style:{fontSize:'13px',color:C.mt,marginBottom:'14px'}},'Aciertos: '+Object.keys(quizAns).filter(function(k){return quizAns[k]===currentQuiz[k].r}).length+'/'+currentQuiz.length+' · Mejor racha: '+bestStreak),
+        e('button',{onClick:function(){setQuizAns({})},style:{padding:'10px 24px',borderRadius:'100px',border:'1.5px solid '+currentFamily.col,background:'transparent',color:currentFamily.col,fontSize:'13px',fontWeight:600,cursor:'pointer'}},'↺ Repetir quiz')
+      )
+    );
+
+  } else {
+    // PEARLS TAB
+    content=e(F,null,
+      e('h3',{style:{fontFamily:"'Playfair Display',serif",fontSize:'20px',fontWeight:700,marginBottom:'16px',color:currentFamily.col}},'📌 Perlas Clínicas · '+currentFamily.name),
+      currentPearls.map(function(p,pi){
+        return e('div',{key:pi,style:{background:C.cd,border:'1.5px solid '+C.bd,borderRadius:'12px',padding:'18px 20px',marginBottom:'10px'}},
+          e('div',{style:{fontFamily:"'Playfair Display',serif",fontSize:'15px',fontWeight:700,marginBottom:'10px',color:currentFamily.col}},(p.ic||'')+' '+p.t),
+          e('div',{style:{display:'flex',flexDirection:'column',gap:'8px'}},
+            (p.items||[]).map(function(item,ii){
+              return e('div',{key:ii,style:{display:'flex',gap:'10px',alignItems:'flex-start',lineHeight:1.6}},
+                e('span',{style:{color:currentFamily.col,flexShrink:0,marginTop:'8px',width:'4px',height:'4px',borderRadius:'50%',background:currentFamily.col}}),
+                e('span',{style:{color:C.tx,fontSize:'13px'}},item)
+              )
+            })
+          )
+        )
+      })
+    );
+  }
+
+  return e('div',{style:{paddingBottom:'40px'}},
+    header,familySelector,familyCard,tabs,content
+  );
+}
+
+// ══════════════════════════════════════════════════════════════
+// COMPONENT: MediadoresView — Generalidades inflammation mediators
+// ══════════════════════════════════════════════════════════════
+
+function MediadoresHeader(){
+  return e("div",{style:{textAlign:"center",marginBottom:"22px"}},
+    e("div",{style:{fontSize:"44px",marginBottom:"4px"}},"🔥"),
+    e("h1",{style:{fontFamily:"'Playfair Display',serif",fontSize:"26px",fontWeight:900,
+      background:"linear-gradient(135deg,#ef4444 0%,#f472b6 50%,#a78bfa 100%)",
+      WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",letterSpacing:"-0.5px"}},
+      "Mediadores de la Inflamación"),
+    e("p",{style:{color:C.dm,fontSize:"12px",letterSpacing:"1px",textTransform:"uppercase",marginTop:"4px"}},
+      "Citocinas · Eicosanoides · Complemento · Quininas"),
+    e("div",{style:{marginTop:"10px",display:"inline-flex",gap:"6px",padding:"5px 14px",
+      background:"rgba(59,130,246,.08)",borderRadius:"20px",border:"1px solid rgba(59,130,246,.18)"}},
+      e("span",{style:{fontSize:"10px",color:C.ac,fontWeight:700,letterSpacing:"1.5px"}},
+        MED_LIST.length+" MEDIADORES · "+MED_FAMILIES.length+" FAMILIAS"))
+  );
+}
+
+function MediadoresLegend(){
+  return e("div",{style:{display:"flex",flexWrap:"wrap",gap:"6px",justifyContent:"center",marginBottom:"18px"}},
+    Object.keys(MED_ROLES).map(function(k){
+      var r=MED_ROLES[k];
+      return e("div",{key:k,style:{display:"inline-flex",alignItems:"center",gap:"5px",padding:"4px 10px",
+        background:r.bg,border:"1px solid "+r.bd,borderRadius:"12px",fontSize:"10px",fontWeight:600,color:r.c}},
+        e("span",null,r.i),
+        e("span",null,r.l))
+    })
+  );
+}
+
+function MediadoresFamilyTabs(props){
+  return e("div",{style:{display:"flex",gap:"6px",overflowX:"auto",paddingBottom:"8px",marginBottom:"14px",
+    scrollbarWidth:"thin"}},
+    [{id:"all",n:"Todos",i:"⚪",c:C.ac}].concat(MED_FAMILIES).map(function(f){
+      var active=props.active===f.id;
+      var count=f.id==="all"?MED_LIST.length:MED_LIST.filter(function(m){return m.fam===f.id}).length;
+      return e("button",{key:f.id,onClick:function(){props.set(f.id)},
+        style:{padding:"9px 14px",borderRadius:"11px",whiteSpace:"nowrap",
+          background:active?f.c+"18":C.cd,
+          border:"1px solid "+(active?f.c+"55":C.bd),
+          color:active?f.c:C.mt,fontSize:"12px",fontWeight:700,
+          display:"flex",alignItems:"center",gap:"6px",transition:"all .2s",flexShrink:0,
+          cursor:"pointer",fontFamily:"inherit"}},
+        e("span",{style:{fontSize:"14px"}},f.i),
+        e("span",null,f.n),
+        e("span",{style:{padding:"1px 6px",borderRadius:"6px",fontSize:"9px",fontWeight:800,
+          background:active?f.c+"25":"rgba(255,255,255,.04)",color:active?f.c:C.dm}},count))
+    })
+  );
+}
+
+function MediadoresRoleFilter(props){
+  var roleKeys=Object.keys(MED_ROLES);
+  var filters=[{id:"all",l:"Todos los roles",c:C.mt}];
+  for(var rk=0;rk<roleKeys.length;rk++){
+    var k=roleKeys[rk];
+    filters.push({id:k,l:MED_ROLES[k].l,c:MED_ROLES[k].c,i:MED_ROLES[k].i});
+  }
+  return e("div",{style:{display:"flex",gap:"5px",flexWrap:"wrap",marginBottom:"18px"}},
+    filters.map(function(rf){
+      var active=props.active===rf.id;
+      return e("button",{key:rf.id,onClick:function(){props.set(rf.id)},
+        style:{padding:"6px 10px",borderRadius:"8px",
+          background:active?rf.c+"15":"transparent",
+          border:"1px solid "+(active?rf.c+"40":C.bd),
+          color:active?rf.c:C.dm,fontSize:"10.5px",fontWeight:600,
+          display:"inline-flex",alignItems:"center",gap:"4px",transition:"all .15s",
+          cursor:"pointer",fontFamily:"inherit"}},
+        rf.i&&e("span",null,rf.i),
+        e("span",null,rf.l))
+    })
+  );
+}
+
+function MediadoresSearchBar(props){
+  return e("div",{style:{position:"relative",marginBottom:"14px"}},
+    e("input",{value:props.q,onChange:function(ev){props.set(ev.target.value)},
+      placeholder:"Buscar mediador, función, fármaco...",
+      style:{width:"100%",padding:"11px 14px 11px 38px",background:C.cd,border:"1px solid "+C.bd,
+        borderRadius:"11px",color:C.tx,fontSize:"13px",outline:"none",fontFamily:"inherit"}}),
+    e("span",{style:{position:"absolute",left:"13px",top:"50%",transform:"translateY(-50%)",
+      fontSize:"14px",opacity:.6}},"🔎")
+  );
+}
+
+function MediatorCard(props){
+  var m=props.m,role=MED_ROLES[m.r];
+  var fam=MED_FAMILIES.filter(function(f){return f.id===m.fam})[0];
+  var open=props.open;
+  return e("div",{onClick:props.toggle,
+    className:"fade",
+    style:{background:C.cd,border:"1px solid "+(open?role.bd.replace(".25",".5"):C.bd),
+      borderRadius:"14px",marginBottom:"10px",overflow:"hidden",cursor:"pointer",
+      borderLeft:"3px solid "+role.c,transition:"border-color .2s"}},
+    e("div",{style:{padding:"14px 16px",display:"flex",alignItems:"center",gap:"12px"}},
+      e("div",{style:{flexShrink:0,width:"38px",height:"38px",borderRadius:"10px",
+        background:role.bg,border:"1px solid "+role.bd,
+        display:"flex",alignItems:"center",justifyContent:"center",fontSize:"18px"}},role.i),
+      e("div",{style:{flex:1,minWidth:0}},
+        e("div",{style:{display:"flex",alignItems:"center",gap:"6px",flexWrap:"wrap",marginBottom:"2px"}},
+          e("h3",{style:{fontSize:"15px",fontWeight:700,color:C.tx,fontFamily:"'DM Sans',sans-serif"}},m.n),
+          e("span",{style:{fontSize:"9px",padding:"1px 6px",borderRadius:"5px",
+            background:fam.c+"15",color:fam.c,fontWeight:700,letterSpacing:".5px"}},fam.n.split(" ")[0].toUpperCase())
+        ),
+        e("p",{style:{fontSize:"11.5px",color:C.mt,lineHeight:1.4,
+          overflow:"hidden",textOverflow:"ellipsis",display:"-webkit-box",
+          WebkitLineClamp:open?10:2,WebkitBoxOrient:"vertical"}},m.f)
+      ),
+      e("span",{style:{fontSize:"11px",color:role.c,transform:open?"rotate(180deg)":"none",
+        transition:"transform .25s",flexShrink:0}},"▼")
+    ),
+    open&&e("div",{className:"fade",style:{borderTop:"1px solid "+C.bd,padding:"14px 16px",
+      background:"rgba(0,0,0,.15)"}},
+      e("div",{style:{marginBottom:"12px"}},
+        e("div",{style:{fontSize:"9px",fontWeight:800,color:C.dm,letterSpacing:"1.5px",
+          textTransform:"uppercase",marginBottom:"4px"}},"📍 Origen"),
+        e("p",{style:{fontSize:"12.5px",color:C.tx,lineHeight:1.5}},m.o)
+      ),
+      m.k&&m.k.length>0&&e("div",{style:{marginBottom:m.t||m.p?"12px":0}},
+        e("div",{style:{fontSize:"9px",fontWeight:800,color:C.dm,letterSpacing:"1.5px",
+          textTransform:"uppercase",marginBottom:"6px"}},"🎯 Puntos clave"),
+        e("div",{style:{display:"flex",flexDirection:"column",gap:"6px"}},
+          m.k.map(function(kp,ki){
+            return e("div",{key:ki,style:{display:"flex",gap:"8px",alignItems:"flex-start",
+              fontSize:"12.5px",color:C.tx,lineHeight:1.55,
+              animation:"slideRight .3s ease-out backwards",animationDelay:(ki*60)+"ms"}},
+              e("span",{style:{color:role.c,flexShrink:0,fontWeight:700,marginTop:"1px"}},"▸"),
+              e("span",{dangerouslySetInnerHTML:{__html:kp.replace(/\*\*(.+?)\*\*/g,'<strong style="color:'+role.c+'">$1</strong>')}}))
+          })
+        )
+      ),
+      m.t&&e("div",{style:{marginBottom:m.p?"12px":0,padding:"10px 12px",
+        background:"rgba(59,130,246,.06)",borderLeft:"2px solid "+C.ac,borderRadius:"0 8px 8px 0"}},
+        e("div",{style:{fontSize:"9px",fontWeight:800,color:C.ac,letterSpacing:"1.5px",
+          textTransform:"uppercase",marginBottom:"4px"}},"💊 Farmacología"),
+        e("p",{style:{fontSize:"12px",color:C.tx,lineHeight:1.55}},m.t)
+      ),
+      m.p&&e("div",{style:{padding:"10px 12px",background:"rgba(251,191,36,.06)",
+        borderLeft:"2px solid #fbbf24",borderRadius:"0 8px 8px 0"}},
+        e("div",{style:{fontSize:"9px",fontWeight:800,color:"#fbbf24",letterSpacing:"1.5px",
+          textTransform:"uppercase",marginBottom:"4px"}},"💎 Perla"),
+        e("p",{style:{fontSize:"12px",color:C.tx,lineHeight:1.55,fontStyle:"italic"}},m.p)
+      )
+    )
+  );
+}
+
+function MediadoresRelationsPanel(){
+  var _u=useState(false),show=_u[0],setShow=_u[1];
+  return e("div",{style:{marginBottom:"18px"}},
+    e("button",{onClick:function(){setShow(!show)},
+      style:{width:"100%",padding:"12px 14px",background:C.cd,border:"1px solid "+C.bd,
+        borderRadius:"11px",display:"flex",alignItems:"center",justifyContent:"space-between",
+        color:C.tx,fontWeight:600,fontSize:"13px",cursor:"pointer",fontFamily:"inherit"}},
+      e("span",{style:{display:"flex",alignItems:"center",gap:"8px"}},
+        e("span",{style:{fontSize:"16px"}},"🔗"),
+        e("span",null,"Red de interacciones clave")),
+      e("span",{style:{fontSize:"10px",color:C.dm,transform:show?"rotate(180deg)":"none",transition:"transform .2s"}},"▼")
+    ),
+    show&&e("div",{className:"fade",style:{marginTop:"8px",padding:"14px",background:C.cd,
+      border:"1px solid "+C.bd,borderRadius:"11px"}},
+      MED_RELATIONS.map(function(r,ri){
+        return e("div",{key:ri,style:{padding:"10px 0",borderBottom:ri<MED_RELATIONS.length-1?"1px dashed "+C.bd:"none"}},
+          e("div",{style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap",fontSize:"12px"}},
+            e("span",{style:{padding:"3px 8px",borderRadius:"6px",background:r.color+"15",
+              color:r.color,fontWeight:700,fontSize:"11px"}},r.from),
+            e("span",{style:{color:r.color,fontWeight:600,fontSize:"10.5px",fontStyle:"italic"}},
+              "— "+r.label+" →"),
+            r.to.map(function(t,ti){
+              return e("span",{key:ti,style:{padding:"3px 8px",borderRadius:"6px",
+                background:"rgba(255,255,255,.04)",color:C.mt,fontWeight:600,fontSize:"11px"}},t)
+            })
+          )
+        )
+      })
+    )
+  );
+}
+
+function MediadoresQuickFacts(){
+  var facts=[
+    {t:"Triada pirógena",v:"IL-1 + IL-6 + TNF-α",c:"#ef4444"},
+    {t:"PCR la induce",v:"IL-6 (por eso sube en inflamación)",c:"#f472b6"},
+    {t:"IL-4 suprime",v:"IL-6 e IL-11",c:"#34d399"},
+    {t:"Antiinflamatorias",v:"IL-4, IL-10, TGF-β",c:"#34d399"},
+    {t:"Asma — mediador clave",v:"Leucotrienos (LTC₄/D₄/E₄)",c:"#a78bfa"},
+    {t:"Angioedema hereditario",v:"Déficit de C1-inhibidor",c:"#22d3ee"},
+    {t:"MAC deficit → infección por",v:"Neisseria (meningitis, GC)",c:"#fbbf24"},
+    {t:"Tos por IECA",v:"Bradicinina acumulada",c:"#e879f9"}
+  ];
+  return e("div",{style:{marginBottom:"18px"}},
+    e("div",{style:{fontSize:"10px",fontWeight:800,color:C.dm,letterSpacing:"2px",
+      textTransform:"uppercase",marginBottom:"8px",paddingLeft:"4px"}},"⚡ Datos fulminantes"),
+    e("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"6px"}},
+      facts.map(function(f,fi){
+        return e("div",{key:fi,style:{padding:"10px 12px",background:C.cd,
+          border:"1px solid "+C.bd,borderRadius:"10px",borderLeft:"2px solid "+f.c}},
+          e("div",{style:{fontSize:"9px",color:f.c,fontWeight:700,letterSpacing:".5px",
+            textTransform:"uppercase",marginBottom:"3px"}},f.t),
+          e("div",{style:{fontSize:"11.5px",color:C.tx,fontWeight:600,lineHeight:1.3}},f.v)
+        )
+      })
+    )
+  );
+}
+
+function MediadoresView(){
+  var _f=useState("all"),fam=_f[0],setFam=_f[1];
+  var _r=useState("all"),rol=_r[0],setRol=_r[1];
+  var _q=useState(""),q=_q[0],setQ=_q[1];
+  var _o=useState(null),open=_o[0],setOpen=_o[1];
+
+  var filtered=useMemo(function(){
+    var l=q.toLowerCase();
+    return MED_LIST.filter(function(m){
+      if(fam!=="all"&&m.fam!==fam) return false;
+      if(rol!=="all"&&m.r!==rol) return false;
+      if(!l) return true;
+      var hay=(m.n+" "+m.f+" "+m.o+" "+(m.t||"")+" "+(m.p||"")+" "+(m.k||[]).join(" ")).toLowerCase();
+      return hay.indexOf(l)>-1;
+    });
+  },[fam,rol,q]);
+
+  var familyDesc=fam==="all"?null:MED_FAMILIES.filter(function(f){return f.id===fam})[0];
+
+  return e("div",{style:{maxWidth:"720px",margin:"0 auto",paddingBottom:"40px"}},
+    e(MediadoresHeader,null),
+    e(MediadoresLegend,null),
+    e(MediadoresSearchBar,{q:q,set:setQ}),
+    e(MediadoresFamilyTabs,{active:fam,set:function(x){setFam(x);setOpen(null)}}),
+    familyDesc&&e("div",{className:"fade",style:{padding:"11px 14px",marginBottom:"14px",
+      background:familyDesc.c+"0c",border:"1px solid "+familyDesc.c+"30",borderRadius:"10px",
+      display:"flex",gap:"10px",alignItems:"flex-start"}},
+      e("span",{style:{fontSize:"20px",flexShrink:0}},familyDesc.i),
+      e("p",{style:{fontSize:"12px",color:C.mt,lineHeight:1.5}},familyDesc.d)),
+    e(MediadoresRoleFilter,{active:rol,set:setRol}),
+    fam==="all"&&!q&&rol==="all"&&e(MediadoresQuickFacts,null),
+    fam==="all"&&!q&&rol==="all"&&e(MediadoresRelationsPanel,null),
+    e("div",{style:{fontSize:"10px",color:C.dm,fontWeight:700,letterSpacing:"1.5px",
+      textTransform:"uppercase",marginBottom:"10px",paddingLeft:"4px"}},
+      filtered.length+" "+(filtered.length===1?"resultado":"resultados")),
+    filtered.length===0?
+      e("div",{style:{textAlign:"center",padding:"40px 20px",color:C.dm}},
+        e("div",{style:{fontSize:"32px",marginBottom:"8px",opacity:.4}},"🔍"),
+        e("p",{style:{fontSize:"13px"}},"Sin resultados. Probá otro filtro o término.")):
+      filtered.map(function(m){
+        return e(MediatorCard,{key:m.id,m:m,open:open===m.id,
+          toggle:function(){setOpen(open===m.id?null:m.id)}})
+      })
+  );
 }
 
 /* GlasgowCalculator — interactive GCS scoring.
@@ -5270,7 +6480,6 @@ function App(){
   s=_(0);var ingTab=s[0],setIngTab=s[1];
   s=_(0);var calcPeso=s[0],setCalcPeso=s[1]; s=_(0);var calcSCQ=s[0],setCalcSCQ=s[1];
   s=_(0);var calcGotas=s[0],setCalcGotas=s[1]; s=_(null);var sbExp=s[0],setSbExp=s[1]; s=_(null);var sbSub=s[0],setSbSub=s[1];
-  s=_(0);var fisioTab=s[0],setFisioTab=s[1]; s=_(0);var fisioRec=s[0],setFisioRec=s[1]; s=_({});var fisioQa=s[0],setFisioQa=s[1];
   s=_([]);var favs=s[0],setFavs=s[1];
   s=_(0);var streak=s[0],setStreak=s[1]; s=_(0);var bestStreak=s[0],setBestStreak=s[1]; s=_(0);var calcHoras=s[0],setCalcHoras=s[1];
   s=_(function(){try{return JSON.parse(localStorage.getItem("ecept_v1")||"[]")}catch(e2){return[]}});
@@ -5388,7 +6597,7 @@ function App(){
         e("div",{style:{fontSize:"9px",fontWeight:700,color:C.dm,textTransform:"uppercase",letterSpacing:"2px",padding:"0 4px",marginBottom:"8px"}},"⚡ SECCIONES ESPECIALES"),
         [{ic:"🔺",n:"Tríadas y Síndromes",v:"triadas",col:"#e879f9",sub:[]},
          {ic:"📊",n:"Laboratorios",v:"labs",col:"#4caf82",sub:[]},
-         {ic:"📚",n:"Generalidades",v:"general",col:"#8b5cf6",sub:[{n:"🛡️ Bases Inmunológicas",v:"general"},{n:"🩸 Factores de Coagulación",v:"general"},{n:"📖 Vocabulario Médico",v:"vocabulario"}]},
+         {ic:"📚",n:"Generalidades",v:"general",col:"#8b5cf6",sub:[{n:"🛡️ Bases Inmunológicas",v:"general"},{n:"🩸 Factores de Coagulación",v:"general"},{n:"🔥 Mediadores de la Inflamación",v:"general"},{n:"📖 Vocabulario Médico",v:"vocabulario"}]},
          {ic:"📷",n:"Imágenes Diagnósticas",v:"imagenes",col:"#06b6d4",sub:[]}
         ].map(function(sec){
           var isExp=sbExp===sec.v;
@@ -5413,7 +6622,19 @@ function App(){
         e("div",{style:{fontSize:"9px",fontWeight:700,color:C.dm,textTransform:"uppercase",letterSpacing:"2px",padding:"0 4px",marginTop:"16px",marginBottom:"8px",paddingTop:"12px",borderTop:"1px solid "+C.bd}},"📋 MATERIAS"),
         [{ic:"🦴",n:"Reumatología",v:"reuma",col:"#60a5fa",act:true,sub:REUMA_SECS.map(function(s){return{n:s.i+" "+s.n,v:"reuma_sec",sec:s.id}})},
          {ic:"🔪",n:"Cirugía",v:"cir_menu",col:"#ef4444",act:true,sub:[{n:"🔴 Abdomen Agudo",v:"cir_abd"}]},
-         {ic:"🔬",n:"Fisiología",v:"fisio",col:"#ec4899",act:true,sub:[{n:"🧬 Receptores Adrenérgicos",v:"fisio"}]},
+         {ic:"🔬",n:"Fisiología",v:"fisio",col:"#ec4899",act:true,sub:[
+           {n:"🧬 Receptores Celulares",v:"fisio"},
+           {n:"⚡ Adrenérgicos",v:"fisio"},
+           {n:"🌿 Muscarínicos",v:"fisio"},
+           {n:"🧬 Nicotínicos",v:"fisio"},
+           {n:"🎯 Dopaminérgicos",v:"fisio"},
+           {n:"💫 Serotoninérgicos",v:"fisio"},
+           {n:"🔥 Histaminérgicos",v:"fisio"},
+           {n:"☯️ Opioides",v:"fisio"},
+           {n:"🧠 Glutamatérgicos",v:"fisio"},
+           {n:"😴 GABAérgicos",v:"fisio"},
+           {n:"🌱 Cannabinoides",v:"fisio"}
+         ]},
          {ic:"🚑",n:"Emergenciología",v:"emergen_menu",col:"#ef4444",act:true,sub:[{n:"🔥 Quemaduras + Calculadoras",v:"cir_quem"},{n:"🩸 Trauma — Unidad 1",v:"trauma-u1"}]},
          {ic:"🩻",n:"Anatomía",v:"anatomia",col:"#f59e0b",act:true,sub:[{n:"🧠 Pares Craneales",grp:true,items:[{n:"🗺️ Mapa Interactivo",v:"anatomia",openMap:true},{n:"📋 Lista de Pares",v:"anatomia"}]},{n:"🧱 Conducto Inguinal",v:"cir_ing"}]},
          {ic:"📊",n:"Epidemiología (Salud Pública)",v:"epid",col:"#00b4d8",act:true,sub:[{n:"🔺 Pirámide de Evidencia",v:"epid"},{n:"📋 Tipos de Estudio",v:"epid"},{n:"⚠️ Sesgos",v:"epid"},{n:"📐 Medidas",v:"epid"},{n:"✅ Lectura Crítica",v:"epid"}]},
@@ -5942,191 +7163,10 @@ function App(){
     ),
 
 
+
     // ════════════ FISIOLOGÍA ════════════
-    vista==="fisio"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"24px"}},
-        e("span",{style:{display:"inline-block",fontSize:"10px",letterSpacing:"3px",textTransform:"uppercase",color:"#ec4899",background:"rgba(236,72,153,.12)",border:"1px solid rgba(236,72,153,.3)",padding:"5px 14px",borderRadius:"4px",marginBottom:"12px"}},"Fisiología · SNA"),
-        e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"24px",fontWeight:900,background:"linear-gradient(135deg,#e2e8f0,#94a3b8)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}},"Receptores Adrenérgicos"),
-        e("p",{style:{color:C.dm,fontSize:"13px"}},"Sistema nervioso autónomo simpático · Receptores α y β · Proteínas G")
-      ),
-      // Main tabs
-      e("div",{style:{display:"flex",gap:"6px",marginBottom:"20px",flexWrap:"wrap"}},
-        [{l:"🧬 Receptores",i:0},{l:"📊 Comparación",i:1},{l:"🧠 Quiz",i:2},{l:"📌 Perlas",i:3}].map(function(tb){
-          var cols=["#ec4899","#60a5fa","#34d399","#fbbf24"];
-          return e("button",{key:tb.i,onClick:function(){setFisioTab(tb.i)},style:{
-            flex:"1 1 auto",minWidth:"80px",padding:"10px 14px",background:fisioTab===tb.i?"#e2e8f0":"transparent",
-            border:"1.5px solid "+(fisioTab===tb.i?"transparent":C.bd),borderRadius:"100px",
-            cursor:"pointer",fontSize:"13px",fontWeight:fisioTab===tb.i?600:500,
-            color:fisioTab===tb.i?"#060a14":C.mt
-          }},tb.l)
-        })
-      ),
+    vista==="fisio"&&e(F,null,e(ReceptoresView,null)),
 
-      // TAB 0: RECEPTORES
-      fisioTab===0&&e(F,null,
-        // Receptor sub-tabs
-        e("div",{style:{display:"flex",gap:"8px",overflowX:"auto",marginBottom:"20px",paddingBottom:"4px"}},
-          FISIO_RECEPTORS.map(function(r,i){
-            var isAct=fisioRec===i;
-            return e("button",{key:r.id,onClick:function(){setFisioRec(i)},style:{
-              flexShrink:0,display:"flex",alignItems:"center",gap:"8px",
-              padding:"10px 18px",borderRadius:"100px",border:"1.5px solid "+(isAct?r.color:r.color+"40"),
-              background:isAct?r.color:"transparent",color:isAct?"#060a14":r.color,
-              fontSize:"14px",fontWeight:isAct?600:500,cursor:"pointer",whiteSpace:"nowrap"
-            }},e("span",{style:{fontSize:"18px",fontWeight:700}},r.symbol)," ",r.name)
-          })
-        ),
-        // Receptor card
-        (function(){
-          var r=FISIO_RECEPTORS[fisioRec];if(!r)return null;
-          return e("div",{style:{animation:"fadeIn .3s ease"}},
-            // Hero card
-            e("div",{style:{borderRadius:"12px",padding:"24px",marginBottom:"20px",border:"1.5px solid "+r.color+"40",background:r.colorBg,position:"relative",overflow:"hidden"}},
-              e("div",{style:{display:"flex",alignItems:"flex-start",gap:"16px",marginBottom:"20px"}},
-                e("span",{style:{fontFamily:"'Playfair Display',serif",fontSize:"56px",fontWeight:900,lineHeight:1,color:r.color}},r.letter),
-                e("div",{style:{flex:1}},
-                  e("h3",{style:{fontFamily:"'Playfair Display',serif",fontSize:"22px",fontWeight:700,marginBottom:"4px"}},r.symbol+" — "+r.name),
-                  e("div",{style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap"}},
-                    e("span",{style:{display:"inline-flex",alignItems:"center",gap:"4px",background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.12)",padding:"3px 10px",borderRadius:"100px",fontSize:"12px",fontWeight:500}},"🔗 Proteína: "+r.protein),
-                    r.messenger.map(function(m,mi){return e("span",{key:mi,style:{fontSize:"12px",color:C.mt}},m)})
-                  )
-                )
-              ),
-              // Pathway
-              e("div",{style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap",marginBottom:"20px",padding:"14px",background:"rgba(0,0,0,.3)",borderRadius:"8px"}},
-                r.pathway.map(function(p,pi){
-                  return e(F,{key:pi},
-                    pi>0&&e("span",{style:{color:C.dm,fontSize:"14px"}},"→"),
-                    e("span",{style:{padding:"4px 10px",borderRadius:"6px",background:"rgba(255,255,255,.07)",border:"1px solid rgba(255,255,255,.1)",fontSize:"13px"}},p.label)
-                  )
-                })
-              ),
-              // Effects
-              e("div",{style:{fontSize:"12px",fontWeight:600,letterSpacing:".1em",textTransform:"uppercase",color:C.dm,marginBottom:"10px"}},"EFECTOS POR TEJIDO"),
-              r.effects.map(function(ef,ei){
-                return e("div",{key:ei,style:{display:"flex",alignItems:"flex-start",gap:"12px",padding:"10px 0",borderBottom:ei<r.effects.length-1?"1px solid rgba(255,255,255,.05)":"none"}},
-                  e("span",{style:{minWidth:"130px",fontSize:"13px",color:C.mt,flexShrink:0}},ef.tissue),
-                  e("span",{style:{fontSize:"14px",color:ef.dir==="↑"?"#34d399":"#60a5fa",flexShrink:0}},ef.dir),
-                  e("span",{style:{fontSize:"13px",color:C.tx,lineHeight:1.4,flex:1}},ef.desc)
-                )
-              }),
-              // Clinical pearl
-              e("div",{style:{display:"flex",gap:"12px",alignItems:"flex-start",padding:"14px 16px",borderRadius:"10px",background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.1)",marginTop:"16px"}},
-                e("span",{style:{fontSize:"20px",flexShrink:0}},"💊"),
-                e("span",{style:{fontSize:"14px",color:C.tx,lineHeight:1.6}},r.clinical)
-              ),
-              // Drugs
-              r.drugs&&r.drugs.length>0&&e("div",{style:{marginTop:"16px"}},
-                e("div",{style:{fontSize:"12px",fontWeight:600,letterSpacing:".1em",textTransform:"uppercase",color:C.dm,marginBottom:"10px"}},"FÁRMACOS CLAVE"),
-                e("div",{style:{display:"flex",flexDirection:"column",gap:"8px"}},
-                  r.drugs.map(function(d,di){
-                    return e("div",{key:di,style:{display:"flex",alignItems:"center",gap:"12px",padding:"12px 16px",borderRadius:"10px",background:"rgba(255,255,255,.03)",border:"1px solid rgba(255,255,255,.07)"}},
-                      e("div",{style:{width:"10px",height:"10px",borderRadius:"50%",background:d.color,flexShrink:0,boxShadow:"0 0 8px "+d.color+"80"}}),
-                      e("div",{style:{flex:1}},
-                        e("div",{style:{fontSize:"14px",fontWeight:600,color:d.color,marginBottom:"2px"}},d.name),
-                        e("div",{style:{fontSize:"12px",color:C.dm}},d.role),
-                        e("div",{style:{fontSize:"12px",color:C.mt,marginTop:"2px"}},"📌 "+d.use)
-                      )
-                    )
-                  })
-                )
-              )
-            )
-          )
-        })()
-      ),
-
-      // TAB 1: COMPARACIÓN
-      fisioTab===1&&e(F,null,
-        e("h3",{style:{fontFamily:"'Playfair Display',serif",fontSize:"18px",fontWeight:700,marginBottom:"16px"}},"📊 Tabla Comparativa"),
-        e("div",{style:{overflowX:"auto",borderRadius:"12px",border:"1.5px solid "+C.bd}},
-          e("table",{style:{width:"100%",borderCollapse:"collapse",fontSize:"13px"}},
-            e("thead",null,e("tr",{style:{background:C.cd}},
-              e("th",{style:{padding:"12px 14px",textAlign:"left",fontSize:"11px",fontWeight:600,letterSpacing:".08em",textTransform:"uppercase",color:C.dm}},"Receptor"),
-              e("th",{style:{padding:"12px 14px",textAlign:"left",fontSize:"11px",fontWeight:600,color:C.dm}},"Prot. G"),
-              e("th",{style:{padding:"12px 14px",textAlign:"left",fontSize:"11px",fontWeight:600,color:C.dm}},"2º Mensajero"),
-              e("th",{style:{padding:"12px 14px",textAlign:"left",fontSize:"11px",fontWeight:600,color:C.dm}},"Efecto principal"),
-              e("th",{style:{padding:"12px 14px",textAlign:"left",fontSize:"11px",fontWeight:600,color:C.dm}},"Fármacos")
-            )),
-            e("tbody",null,FISIO_COMPARISON.map(function(fc,i){
-              return e("tr",{key:i,style:{borderTop:"1px solid "+C.bd}},
-                e("td",{style:{padding:"11px 14px",fontWeight:700,color:fc.col,fontSize:"16px"}},fc.receptor),
-                e("td",{style:{padding:"11px 14px"}},e("span",{style:{display:"inline-block",padding:"2px 8px",borderRadius:"100px",fontSize:"11px",fontWeight:600,background:fc.col+"15",color:fc.col}},fc.prot)),
-                e("td",{style:{padding:"11px 14px",color:C.mt}},fc.msg),
-                e("td",{style:{padding:"11px 14px",color:C.mt}},fc.efecto),
-                e("td",{style:{padding:"11px 14px"}},fc.farmacos.map(function(f2,fi){return e("span",{key:fi,style:{display:"inline-block",padding:"2px 8px",borderRadius:"100px",fontSize:"11px",fontWeight:600,background:fc.col+"12",color:fc.col,margin:"1px"}},f2)}))
-              )
-            }))
-          )
-        ),
-        // Proteínas G resumen
-        e("h3",{style:{fontFamily:"'Playfair Display',serif",fontSize:"18px",fontWeight:700,marginTop:"24px",marginBottom:"16px"}},"🔬 Resumen Proteínas G"),
-        e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:"12px"}},
-          FISIO_PROTEINAS_G.map(function(g,i){
-            return e("div",{key:i,style:{padding:"16px",borderRadius:"10px",background:"linear-gradient(135deg,"+g.color+"10,rgba(13,18,36,.8))",border:"1.5px solid "+g.color+"30"}},
-              e("div",{style:{fontSize:"22px",fontWeight:800,fontFamily:"'Playfair Display',serif",color:g.color,marginBottom:"6px"}},g.name),
-              e("div",{style:{fontSize:"12px",color:C.mt,marginBottom:"4px"}},g.desc),
-              e("div",{style:{fontSize:"13px",fontWeight:600,color:C.tx,marginBottom:"8px"}},g.result),
-              e("div",{style:{fontSize:"11px",color:C.dm,borderTop:"1px solid rgba(255,255,255,.07)",paddingTop:"8px"}},"Receptores: ",e("span",{style:{color:g.color}},g.receptors))
-            )
-          })
-        )
-      ),
-
-      // TAB 2: QUIZ
-      fisioTab===2&&e(F,null,
-        e("h3",{style:{fontFamily:"'Playfair Display',serif",fontSize:"18px",fontWeight:700,marginBottom:"6px"}},"🧠 Quiz · Receptores Adrenérgicos"),
-        e("p",{style:{fontSize:"13px",color:C.dm,marginBottom:"20px"}},FISIO_QUIZ.length+" preguntas"),
-        FISIO_QUIZ.map(function(q,qi){
-          var answered=fisioQa[qi]!==undefined;var isCorrect=answered&&fisioQa[qi]===q.r;
-          return e("div",{key:qi,style:{background:C.cd,border:"1.5px solid "+C.bd,borderRadius:"12px",padding:"20px",marginBottom:"16px"}},
-            e("div",{style:{fontSize:"11px",fontWeight:600,letterSpacing:".1em",textTransform:"uppercase",color:C.dm,marginBottom:"8px"}},"Pregunta "+(qi+1)+" de "+FISIO_QUIZ.length),
-            e("div",{style:{fontFamily:"'Playfair Display',serif",fontSize:"16px",fontWeight:600,marginBottom:"16px",lineHeight:1.4}},q.q),
-            e("div",{style:{display:"flex",flexDirection:"column",gap:"8px"}},
-              q.opts.map(function(opt,oi){
-                var cls_bg="rgba(255,255,255,.03)";var cls_bd=C.bd;var cls_col=C.mt;
-                if(answered&&oi===q.r){cls_bg="rgba(52,211,153,.1)";cls_bd="#34d399";cls_col="#34d399"}
-                if(answered&&oi===fisioQa[qi]&&oi!==q.r){cls_bg="rgba(239,68,68,.1)";cls_bd="#ef4444";cls_col="#ef4444"}
-                return e("button",{key:oi,onClick:function(){
-                  if(!answered){
-                    var nw={};for(var k in fisioQa)nw[k]=fisioQa[k];nw[qi]=oi;setFisioQa(nw);
-                    if(oi===q.r){setStreak(function(s2){var ns=s2+1;if(ns>bestStreak)setBestStreak(ns);return ns})}else{setStreak(0)}
-                  }
-                },style:{padding:"11px 16px",borderRadius:"8px",cursor:answered?"default":"pointer",border:"1.5px solid "+cls_bd,background:cls_bg,color:cls_col,textAlign:"left",width:"100%",fontSize:"14px"}},opt)
-              })
-            ),
-            answered&&e("div",{style:{marginTop:"12px",padding:"12px 14px",background:"rgba(255,255,255,.04)",borderRadius:"8px",borderLeft:"3px solid "+(isCorrect?"#34d399":"#ef4444"),fontSize:"13px",color:C.mt,lineHeight:1.6}},
-              e("span",{style:{color:isCorrect?"#34d399":"#ef4444",fontWeight:600}},isCorrect?"✓ Correcto — ":"✗ Incorrecto — "),q.x
-            )
-          )
-        }),
-        Object.keys(fisioQa).length===FISIO_QUIZ.length&&e("div",{style:{textAlign:"center",marginTop:"16px"}},
-          e("button",{onClick:function(){setFisioQa({})},style:{padding:"12px 24px",borderRadius:"100px",border:"1.5px solid "+C.bd,background:"transparent",color:C.mt,fontSize:"14px",fontWeight:500,cursor:"pointer"}},"↺ Repetir quiz")
-        )
-      ),
-
-      // TAB 3: PERLAS
-      fisioTab===3&&e(F,null,
-        e("h3",{style:{fontFamily:"'Playfair Display',serif",fontSize:"18px",fontWeight:700,marginBottom:"16px"}},"📌 Perlas Clínicas para el Examen"),
-        FISIO_PERLAS.map(function(fp,i){
-          return e("div",{key:i,style:{background:C.cd,border:"1.5px solid "+C.bd,borderRadius:"12px",padding:"20px",marginBottom:"12px",animation:"slideUp .3s ease-out "+(i*0.06)+"s both"}},
-            e("div",{style:{fontFamily:"'Playfair Display',serif",fontSize:"16px",fontWeight:700,marginBottom:"10px",color:"#fbbf24"}},fp.ic+" "+fp.t),
-            e(Ls,{items:fp.items,color:"#fbbf24"})
-          )
-        }),
-        // Preguntas tipo examen
-        e("div",{style:{padding:"20px",borderRadius:"12px",background:"rgba(251,191,36,.06)",border:"1.5px solid rgba(251,191,36,.25)",marginTop:"16px"}},
-          e("div",{style:{fontSize:"12px",fontWeight:700,letterSpacing:".1em",textTransform:"uppercase",color:"#fbbf24",marginBottom:"12px"}},"🎯 Preguntas tipo examen docente"),
-          e(Ls,{items:[
-            "¿Qué proteína G usa el receptor α₁ y cuál es su segundo mensajero? → Gq → IP₃/DAG/Ca²⁺",
-            "¿Por qué se usa metildopa en embarazo y no propranolol? → Seguridad fetal + agonista α₂ central",
-            "¿Cuál es el mecanismo de hipokalemia del salbutamol? → β₂ → ↑Na/K-ATPasa → K⁺ entra a célula",
-            "¿Cuál β-bloqueador se usa en ICC y por qué carvedilol bloquea también α₁? → ↓ vasoconstricción, ↓ postcarga",
-            "¿Por qué el retiro abrupto de clonidina es peligroso? → HTA de rebote (dependencia neuroadaptativa)"
-          ],color:"#fbbf24"})
-        )
-      )
-    ),
 
     // ════════════ IMÁGENES DIAGNÓSTICAS (VACÍA) ════════════
     vista==="imagenes"&&e(F,null,
@@ -6202,21 +7242,30 @@ function App(){
         )
       ),
 
+      // Mediadores de la Inflamación
+      e("div",{style:{marginBottom:"24px"}},
+        e("div",{onClick:function(){setAbdOpen(abdOpen==="mediadores"?null:"mediadores")},
+          style:{background:C.cd,border:"1px solid "+(abdOpen==="mediadores"?"#ef444444":C.bd),
+            borderRadius:"14px",padding:"18px",cursor:"pointer",
+            display:"flex",alignItems:"center",justifyContent:"space-between"}},
+          e("div",{style:{display:"flex",alignItems:"center",gap:"12px"}},
+            e("span",{style:{fontSize:"24px"}},"🔥"),
+            e("div",null,
+              e("h3",{style:{fontSize:"16px",fontWeight:700,color:"#ef4444"}},"Mediadores de la Inflamación"),
+              e("p",{style:{fontSize:"11px",color:C.dm}},"Citocinas, eicosanoides, complemento, quininas"))),
+          e("span",{style:{color:C.dm,transform:abdOpen==="mediadores"?"rotate(180deg)":"none",transition:"transform .2s"}},"▼")
+        ),
+        abdOpen==="mediadores" && e("div",{style:{marginTop:"10px"}},
+          e(MediadoresView, null)
+        )
+      ),
+
       // Vocabulario Médico — active card
       e("div",{onClick:function(){go("vocabulario")},style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"16px",marginBottom:"10px",cursor:"pointer",display:"flex",alignItems:"center",gap:"14px"}},
         e("span",{style:{fontSize:"22px"}},"📖"),
         e("div",null,e("h3",{style:{fontSize:"14px",fontWeight:700}},"Vocabulario Médico"),e("p",{style:{fontSize:"11px",color:C.dm}},"270+ raíces · 13 categorías · Decodificador · Quiz · SVG")),
         e("span",{style:{color:C.dm,marginLeft:"auto"}},"›")
-      ),
-
-      // Remaining placeholders
-      [{ic:"🧬",n:"Citocinas e Interleucinas",d:"TNF, IL-1 a IL-38, Interferones — Próximamente"},{ic:"💎",n:"Complemento",d:"Vías clásica, alternativa y de lectinas — Próximamente"}].map(function(ph,i){
-        return e("div",{key:i,style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"16px",marginBottom:"10px",opacity:.45,display:"flex",alignItems:"center",gap:"14px"}},
-          e("span",{style:{fontSize:"22px"}},ph.ic),
-          e("div",null,e("h3",{style:{fontSize:"14px",fontWeight:700}},ph.n),e("p",{style:{fontSize:"11px",color:C.dm}},ph.d)),
-          e("span",{style:{fontSize:"9px",padding:"3px 8px",borderRadius:"6px",background:"rgba(255,255,255,.05)",color:C.dm,marginLeft:"auto"}},"Pronto")
-        )
-      })
+      )
     ),
 
     // ════════════ EPIDEMIOLOGÍA (SALUD PÚBLICA) ════════════
