@@ -277,7 +277,7 @@ function ReceptoresView(){
         return e('div',{key:pi,style:{background:C.cd,border:'1.5px solid '+C.bd,borderRadius:'12px',padding:'18px 20px',marginBottom:'10px'}},
           e('div',{style:{fontFamily:"'Playfair Display',serif",fontSize:'15px',fontWeight:700,marginBottom:'10px',color:currentFamily.col}},(p.ic||'')+' '+p.t),
           e('div',{style:{display:'flex',flexDirection:'column',gap:'8px'}},
-            (p.items||[]).map(function(item,ii){
+            (p.items||p.i||[]).map(function(item,ii){
               return e('div',{key:ii,style:{display:'flex',gap:'10px',alignItems:'flex-start',lineHeight:1.6}},
                 e('span',{style:{color:currentFamily.col,flexShrink:0,marginTop:'8px',width:'4px',height:'4px',borderRadius:'50%',background:currentFamily.col}}),
                 e('span',{style:{color:C.tx,fontSize:'13px'}},item)
