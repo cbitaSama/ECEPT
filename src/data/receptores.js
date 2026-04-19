@@ -177,3 +177,116 @@ var NIC=[
       {n:'Nicotina (parches)',r:'Agonista Nn',u:'TRN',c:'#a78bfa'}
     ]}
 ];
+
+var DOP=[
+  {id:'d1',symbol:'D₁',letter:'D',name:'Dopamina D₁ (D1-like: D₁, D₅)',color:'#fbbf24',colorBg:'rgba(251,191,36,.08)',
+    protein:'Gs',messenger:['↑ AMPc'],net:'Excitatorio postsináptico',
+    pathway:['Dopamina','Receptor D₁','Gs','↑ Adenilato ciclasa','↑ AMPc → PKA','EXCITACIÓN'],
+    effects:[
+      {t:'Estriado (vía directa)',d:'↑',x:'Facilita movimiento voluntario'},
+      {t:'Corteza prefrontal',d:'↑',x:'Memoria de trabajo, cognición'},
+      {t:'Vasos renales/mesentéricos',d:'↓',x:'Vasodilatación (dopamina dosis bajas)'},
+      {t:'Túbulo renal',d:'↑',x:'Natriuresis'}
+    ],
+    clinical:'Dopamina dosis bajas (1-3 μg/kg/min) activa D₁ → vasodilatación renal. Dosis β₁ (3-10) → inotrópico. Dosis α₁ (>10) → vasoconstrictor.',
+    drugs:[
+      {n:'Dopamina (dosis baja)',r:'Agonista D₁',u:'Vasodilatación renal',c:'#fbbf24'},
+      {n:'Fenoldopam',r:'Agonista D₁ selectivo',u:'Crisis hipertensiva',c:'#f59e0b'}
+    ]},
+  {id:'d2',symbol:'D₂',letter:'D',name:'Dopamina D₂ (D2-like: D₂, D₃, D₄)',color:'#f59e0b',colorBg:'rgba(245,158,11,.08)',
+    protein:'Gi',messenger:['↓ AMPc','↑ K⁺','↓ Ca²⁺'],net:'Inhibitorio / Autorreceptor',
+    pathway:['Dopamina','Receptor D₂','Gi','↓ AMPc','↑ K⁺ / ↓ Ca²⁺','INHIBICIÓN'],
+    effects:[
+      {t:'Vía mesolímbica',d:'↑',x:'Refuerzo, recompensa (exceso = psicosis)'},
+      {t:'Vía nigroestriada',d:'↑',x:'Control motor (déficit = Parkinson)'},
+      {t:'Vía tuberoinfundibular',d:'↓',x:'Inhibe prolactina'},
+      {t:'Área postrema (ZQT)',d:'↑',x:'Náuseas/vómitos'},
+      {t:'Terminales presinápticos',d:'↓',x:'Autorreceptor: ↓ liberación DA'}
+    ],
+    clinical:'Bloqueo D₂ = antipsicóticos + antieméticos. Adversos: SEP, hiperprolactinemia, disquinesia tardía. Agonistas D₂ = Parkinson (pramipexol) y prolactinoma (cabergolina).',
+    drugs:[
+      {n:'Haloperidol',r:'Antagonista D₂',u:'Psicosis (alto SEP)',c:'#f59e0b'},
+      {n:'Risperidona',r:'Antagonista D₂/5-HT₂',u:'Antipsicótico atípico',c:'#ea580c'},
+      {n:'Metoclopramida',r:'Antagonista D₂',u:'Antiemético / Procinético',c:'#fb923c'},
+      {n:'Domperidona',r:'Antagonista D₂ periférico',u:'Antiemético (no BHE)',c:'#f97316'},
+      {n:'Pramipexol',r:'Agonista D₂/D₃',u:'Parkinson / Piernas inquietas',c:'#fcd34d'},
+      {n:'Cabergolina',r:'Agonista D₂',u:'Prolactinoma',c:'#fde047'}
+    ]}
+];
+
+var SEROT=[
+  {id:'5ht1a',symbol:'5-HT₁ₐ',letter:'5-HT',name:'Serotonina 1A',color:'#f472b6',colorBg:'rgba(244,114,182,.08)',
+    protein:'Gi',messenger:['↓ AMPc'],net:'Ansiolítico / Antidepresivo',
+    pathway:['5-HT','Receptor 5-HT₁ₐ','Gi','↓ AMPc','Autorreceptor / Postsináptico'],
+    effects:[
+      {t:'Núcleos del rafe (pre)',d:'↓',x:'Autorreceptor: ↓ liberación 5-HT'},
+      {t:'Hipocampo, corteza (post)',d:'↑',x:'Efecto ansiolítico y antidepresivo'}
+    ],
+    clinical:'Buspirona = agonista parcial → ansiolítico sin dependencia. Vilazodona, vortioxetina = antidepresivos con actividad 5-HT₁ₐ.',
+    drugs:[
+      {n:'Buspirona',r:'Agonista parcial 5-HT₁ₐ',u:'Ansiedad (sin dependencia)',c:'#f472b6'},
+      {n:'Vilazodona',r:'ISRS + 5-HT₁ₐ',u:'Depresión mayor',c:'#ec4899'}
+    ]},
+  {id:'5ht1bd',symbol:'5-HT₁B/D',letter:'5-HT',name:'Serotonina 1B/1D',color:'#ec4899',colorBg:'rgba(236,72,153,.08)',
+    protein:'Gi',messenger:['↓ AMPc'],net:'Vasoconstricción trigeminal',
+    pathway:['5-HT','Receptor 5-HT₁B/D','Gi','↓ AMPc','Vasoconstricción + ↓ CGRP'],
+    effects:[
+      {t:'Vasos cerebrales',d:'↓',x:'Vasoconstricción (revierte la migraña)'},
+      {t:'Terminales trigeminales',d:'↓',x:'↓ Liberación CGRP y sustancia P'}
+    ],
+    clinical:'TRIPTANES = agonistas 5-HT₁B/D → tto agudo de migraña. Contraindicados en cardiopatía isquémica.',
+    drugs:[
+      {n:'Sumatriptán',r:'Agonista 5-HT₁B/D',u:'Crisis migraña',c:'#ec4899'},
+      {n:'Rizatriptán',r:'Agonista 5-HT₁B/D',u:'Migraña aguda',c:'#db2777'},
+      {n:'Eletriptán',r:'Agonista 5-HT₁B/D',u:'Migraña aguda',c:'#be185d'}
+    ]},
+  {id:'5ht2a',symbol:'5-HT₂ₐ',letter:'5-HT',name:'Serotonina 2A',color:'#e84a5f',colorBg:'rgba(232,74,95,.08)',
+    protein:'Gq',messenger:['↑ IP₃','↑ DAG','↑ Ca²⁺'],net:'Excitatorio / Psicomimético',
+    pathway:['5-HT / LSD','Receptor 5-HT₂ₐ','Gq','↑ IP₃/DAG','↑ Ca²⁺ → Excitación'],
+    effects:[
+      {t:'Corteza cerebral',d:'↑',x:'Efectos alucinógenos (LSD, psilocibina)'},
+      {t:'Plaquetas',d:'↑',x:'Agregación plaquetaria'},
+      {t:'Músculo liso vascular',d:'↑',x:'Vasoconstricción'}
+    ],
+    clinical:'Antagonistas 5-HT₂ₐ en antipsicóticos atípicos (↓SEP). Psilocibina en investigación para depresión resistente.',
+    drugs:[
+      {n:'Risperidona',r:'Antagonista 5-HT₂ₐ / D₂',u:'Antipsicótico atípico',c:'#e84a5f'},
+      {n:'Olanzapina',r:'Antagonista 5-HT₂ₐ / D₂',u:'Esquizofrenia / bipolar',c:'#dc2626'},
+      {n:'Trazodona',r:'Antagonista 5-HT₂ₐ + SARI',u:'Insomnio / Depresión',c:'#b91c1c'}
+    ]},
+  {id:'5ht2c',symbol:'5-HT₂c',letter:'5-HT',name:'Serotonina 2C',color:'#dc2626',colorBg:'rgba(220,38,38,.08)',
+    protein:'Gq',messenger:['↑ IP₃','↑ Ca²⁺'],net:'Saciedad / Apetito',
+    pathway:['5-HT','Receptor 5-HT₂c','Gq','↑ IP₃','↑ POMC hipotalámica'],
+    effects:[
+      {t:'Hipotálamo (POMC)',d:'↑',x:'Saciedad, ↓ apetito'},
+      {t:'Plexos coroideos',d:'↑',x:'Producción de LCR'}
+    ],
+    clinical:'Mirtazapina bloquea 5-HT₂c → ↑ apetito (útil en depresión con anorexia). Lorcaserina retirada por cáncer.',
+    drugs:[
+      {n:'Mirtazapina',r:'Antagonista 5-HT₂c/H₁',u:'Depresión + insomnio + ↑apetito',c:'#dc2626'}
+    ]},
+  {id:'5ht3',symbol:'5-HT₃',letter:'5-HT',name:'Serotonina 3',color:'#ea580c',colorBg:'rgba(234,88,12,.08)',
+    protein:'Canal iónico',messenger:['↑ Na⁺/Ca²⁺'],net:'Náusea / Vómito',
+    pathway:['5-HT','Receptor 5-HT₃ (ionotrópico)','Apertura canal','↑ Na⁺/Ca²⁺','DESPOLARIZACIÓN → VÓMITO'],
+    effects:[
+      {t:'Área postrema (ZQT)',d:'↑',x:'Náuseas y vómitos'},
+      {t:'Tracto GI (vago)',d:'↑',x:'Vómito post-quimio/RT'}
+    ],
+    clinical:'SETRONES = antagonistas 5-HT₃ → antieméticos de elección en NVPQ y postoperatorio.',
+    drugs:[
+      {n:'Ondansetrón',r:'Antagonista 5-HT₃',u:'NVPQ / postop',c:'#ea580c'},
+      {n:'Granisetrón',r:'Antagonista 5-HT₃',u:'Antiemético',c:'#c2410c'},
+      {n:'Palonosetrón',r:'Antagonista 5-HT₃ larga',u:'NVPQ retardada',c:'#9a3412'}
+    ]},
+  {id:'5ht4',symbol:'5-HT₄',letter:'5-HT',name:'Serotonina 4',color:'#f97316',colorBg:'rgba(249,115,22,.08)',
+    protein:'Gs',messenger:['↑ AMPc'],net:'Procinético GI',
+    pathway:['5-HT','Receptor 5-HT₄','Gs','↑ AMPc','↑ ACh mientérica','↑ MOTILIDAD'],
+    effects:[
+      {t:'Plexo mientérico GI',d:'↑',x:'↑ Motilidad gastrointestinal'},
+      {t:'Hipocampo',d:'↑',x:'Cognición (investigación)'}
+    ],
+    clinical:'Prucaloprida = agonista 5-HT₄ → constipación crónica. Cisaprida retirada (QT).',
+    drugs:[
+      {n:'Prucaloprida',r:'Agonista 5-HT₄ selectivo',u:'Constipación crónica',c:'#f97316'}
+    ]}
+];
