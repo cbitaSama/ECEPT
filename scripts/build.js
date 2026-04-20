@@ -63,6 +63,10 @@ var parts = [
   'src/components/vocab/TermCard.js',
   'src/components/vocab/DemoCard.js',
   'src/components/VocabularioView.js',
+  // salud mental II (IIFE-scoped: exposes window.SaludMentalView + SM_SEARCH_INDEX)
+  // must precede SearchEngine at runtime? No — SearchEngine checks typeof at call time,
+  // not at load time, so order is flexible. Placed here for cohesion with other views.
+  'src/components/SaludMentalView.js',
   // app
   'src/app.js'
 ];
@@ -103,7 +107,18 @@ var expectedGlobals = [
   'function NeckSVG', 'function HeartSVG', 'function AbdSVG', 'function WordSVG', 'function DemoSVG',
   'function VocabWordOfDay', 'function VocabSmartDecoder', 'function VocabQuiz',
   'function VocabCatCard', 'function VocabTermCard', 'function VocabDemoCard',
-  'function VocabularioView'
+  'function VocabularioView',
+  // salud mental II (IIFE-scoped — these substrings live inside the IIFE body)
+  'var DECKS=', 'var DECK_GROUPS=', 'var EXTRA_CARDS=', 'var EXTRA_QUIZ=',
+  'var SEARCH_INDEX=',
+  'function FlashDeck', 'function Quiz', 'function GlobalFlashDeck', 'function GlobalQuiz',
+  'function DzModal', 'function DzGrid', 'function DzCard',
+  'function getAllCards', 'function getAllQuiz',
+  'function AnxView', 'function PsicosisView', 'function OCDView',
+  'function SomView', 'function TCAView', 'function SueView',
+  'function PerView', 'function ImpView', 'function DprView',
+  'function IntroView', 'function RootHub', 'function NeurosisHub',
+  'window.SaludMentalView', 'window.SM_SEARCH_INDEX'
 ];
 expectedGlobals.forEach(function(g) {
   if (output.indexOf(g) === -1) errors.push('missing global: ' + g);

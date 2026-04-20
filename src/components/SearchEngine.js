@@ -155,6 +155,16 @@ function globalSearch(q){
     var txt=stripAccents([tt.name,tt.sub,tt.kw].join(" ").toLowerCase());
     if(txt.indexOf(l)>-1) res.push({type:"trauma",name:"🩸 "+tt.name,sub:tt.sub,go:"trauma-u1",secId:tt.secId});
   });
+  // ── Salud Mental II: SM_SEARCH_INDEX entries ──
+  // Each entry routes to "salud_mental" and carries smRoute so the click
+  // handler can deep-link into the right SM sub-view via window._smFocus(route)
+  // after vista flips to "salud_mental".
+  if(typeof SM_SEARCH_INDEX!=="undefined"){
+    SM_SEARCH_INDEX.forEach(function(it){
+      var txt=stripAccents([it.q,it.label,it.bloc].join(" ").toLowerCase());
+      if(txt.indexOf(l)>-1) res.push({type:"sm",name:(it.icon||"🧠")+" "+it.label,sub:"Salud Mental · "+it.bloc,go:"salud_mental",smRoute:it.route});
+    });
+  }
   // Remove duplicates by name
   var seen={};var unique=[];
   res.forEach(function(r){if(!seen[r.name]){seen[r.name]=true;unique.push(r)}});

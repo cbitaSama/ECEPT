@@ -157,12 +157,13 @@ function App(){
           vista==="coagulacion"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("fisio")},style:{color:C.dm,cursor:"pointer"}},"Fisiología"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Cascada de Coagulación")),
           vista==="general"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Generalidades")),
           vista==="triadas"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Tríadas")),
-          vista==="imagenes"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Imágenes"))
+          vista==="imagenes"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Imágenes")),
+          vista==="salud_mental"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Salud Mental II"))
         ),
         e("div",{style:{flex:1,position:"relative"}},
           e("span",{style:{position:"absolute",left:"10px",top:"50%",transform:"translateY(-50%)",color:C.dm,fontSize:"13px",pointerEvents:"none"}},"🔍"),
           e("input",{style:{width:"100%",background:"rgba(255,255,255,.04)",border:"1px solid "+C.bd,borderRadius:"12px",padding:"8px 12px 8px 34px",color:C.tx,fontSize:"14px",outline:"none"},placeholder:"Buscar todo...",value:sq,onChange:function(ev){setSq(ev.target.value);setSo(true)},onFocus:function(){setSo(true)},onBlur:function(){setTimeout(function(){setSo(false)},250)}}),
-          so&&sr.length>0&&e("div",{style:{position:"absolute",top:"100%",left:0,right:0,background:C.cd,border:"1px solid "+C.bd,borderRadius:"12px",marginTop:"4px",maxHeight:"350px",overflow:"auto",zIndex:200,boxShadow:"0 20px 40px rgba(0,0,0,.5)"}},sr.map(function(r,i){return e("div",{key:i,onMouseDown:function(){setSq("");setSo(false);go(r.go,r.sec||null,r.id||null);if(r.secId&&window._traumaFocus)setTimeout(function(){window._traumaFocus(r.secId)},200);if(r.vocTx&&window._vocabFocus)setTimeout(function(){window._vocabFocus(r.vocTx)},200)},style:{padding:"10px 16px",cursor:"pointer",borderBottom:"1px solid "+C.bd,fontSize:"13px"}},e("div",{style:{fontWeight:600}},r.name),e("div",{style:{fontSize:"11px",color:C.dm,marginTop:"2px"}},r.sub))}))
+          so&&sr.length>0&&e("div",{style:{position:"absolute",top:"100%",left:0,right:0,background:C.cd,border:"1px solid "+C.bd,borderRadius:"12px",marginTop:"4px",maxHeight:"350px",overflow:"auto",zIndex:200,boxShadow:"0 20px 40px rgba(0,0,0,.5)"}},sr.map(function(r,i){return e("div",{key:i,onMouseDown:function(){setSq("");setSo(false);go(r.go,r.sec||null,r.id||null);if(r.secId&&window._traumaFocus)setTimeout(function(){window._traumaFocus(r.secId)},200);if(r.vocTx&&window._vocabFocus)setTimeout(function(){window._vocabFocus(r.vocTx)},200);if(r.smRoute&&window._smFocus)setTimeout(function(){window._smFocus(r.smRoute)},200)},style:{padding:"10px 16px",cursor:"pointer",borderBottom:"1px solid "+C.bd,fontSize:"13px"}},e("div",{style:{fontWeight:600}},r.name),e("div",{style:{fontSize:"11px",color:C.dm,marginTop:"2px"}},r.sub))}))
         )
       )
     ),
@@ -485,6 +486,9 @@ function App(){
 
     // ════════════ MEDIADORES DE LA INFLAMACIÓN ════════════
     vista==="mediadores"&&e(MediadoresView),
+
+    // ════════════ SALUD MENTAL II (NATIVE · IIFE-scoped) ════════════
+    vista==="salud_mental"&&e(SaludMentalView),
 
     // ════════════ QUEMADURAS ════════════
     vista==="cir_quem"&&e(F,null,
