@@ -488,7 +488,10 @@ function App(){
     vista==="mediadores"&&e(MediadoresView),
 
     // ════════════ SALUD MENTAL II (NATIVE · IIFE-scoped) ════════════
-    vista==="salud_mental"&&e(SaludMentalView),
+    // onHome is called by SM's App when its internal history stack is empty
+    // (user is at SM root and taps "← Volver a ECEPT") or when the outer
+    // breadcrumb routing wants to exit the module.
+    vista==="salud_mental"&&e(SaludMentalView,{onHome:function(){go("home")}}),
 
     // ════════════ QUEMADURAS ════════════
     vista==="cir_quem"&&e(F,null,

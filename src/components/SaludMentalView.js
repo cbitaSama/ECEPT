@@ -6171,8 +6171,15 @@ function NeurosisHub(p){
 // APP SHELL — 3 niveles: root → neurosis → view
 // ══════════════════════════════════════════════════════════════
 
-function App(){
+function App(p){
+  // Host prop: onHome is ECEPT's go("home"). Falls back to a no-op if mounted
+  // standalone (e.g. artifacts/salud_mental.html).
+  var onHome=(p&&p.onHome)||function(){};
+
   var s1=useState("root");var view=s1[0],setView=s1[1];
+  // History stack: every forward navigation pushes the previous view id.
+  // back() pops it. When empty, we exit the module via onHome().
+  var s2b=useState([]);var smHist=s2b[0],setSmHist=s2b[1];
   var s2=useState(false);var showTop=s2[0],setShowTop=s2[1];
 
   useEffect(function(){
@@ -6183,23 +6190,33 @@ function App(){
 
   // Deep-link hook: ECEPT's globalSearch calls window._smFocus(route) after
   // navigating to the salud_mental view, to jump straight into a specific
-  // SM sub-view (e.g. "anx", "toc", "intro"). Cleared on unmount.
+  // SM sub-view (e.g. "anx", "toc", "intro"). The current view is pushed onto
+  // smHist so back() can unwind. Cleared on unmount.
   useEffect(function(){
-    window._smFocus=function(v){if(v)setView(v);};
+    window._smFocus=function(v){
+      if(!v)return;
+      setSmHist(function(h){return h.concat([view]);});
+      setView(v);
+    };
     return function(){window._smFocus=null;};
-  },[]);
+  },[view]);
 
   useEffect(function(){
     window.scrollTo({top:0,behavior:"instant"});
   },[view]);
 
-  function go(v){setView(v);}
+  function go(v){
+    setSmHist(function(h){return h.concat([view]);});
+    setView(v);
+  }
   function back(){
-    if(view==="neurosis"||view==="psicosis"||view==="intro")setView("root");
-    else if(view==="flash-psicosis"||view==="quiz-psicosis")setView("psicosis");
-    else if(view==="flash-neurosis"||view==="quiz-neurosis")setView("neurosis");
-    else if(view==="flash-all"||view==="quiz-all")setView("root");
-    else setView("neurosis");
+    if(smHist.length>0){
+      var prev=smHist[smHist.length-1];
+      setSmHist(smHist.slice(0,-1));
+      setView(prev);
+    } else {
+      onHome();
+    }
   }
   function top(){window.scrollTo({top:0,behavior:"smooth"});}
 
@@ -6208,7 +6225,17 @@ function App(){
   var colors={anx:C.anx,toc:C.toc,trm:C.trm,som:C.som,tca:C.tca,sue:C.sue,per:C.per,imp:C.imp,dpr:C.dpr};
 
   if(view==="root"){
-    return e("div",null,e(RootHub,{go:go}));
+    return e("div",null,
+      // Sticky header at SM root: explicit exit back to ECEPT. Distinct label
+      // ("Volver a ECEPT") avoids ambiguity with the sub-view "← Inicio"
+      // buttons (which navigate within SM).
+      e("div",{style:{position:"sticky",top:0,zIndex:50,padding:"10px 14px",background:"rgba(6,10,20,.92)",backdropFilter:"blur(10px)",borderBottom:"1px solid "+C.bd,display:"flex",alignItems:"center",gap:10}},
+        e("button",{onClick:onHome,style:{padding:"8px 12px",background:ax(C.anx,.15),border:"1px solid "+ax(C.anx,.35),color:C.anx,borderRadius:8,fontSize:12.5,fontWeight:700,cursor:"pointer"}},"← Volver a ECEPT"),
+        e("div",{style:{flex:1,fontSize:12.5,fontWeight:800,color:C.anx,letterSpacing:.5,textAlign:"center"}},"🧠 Salud Mental II")
+      ),
+      e(RootHub,{go:go}),
+      showTop?e("button",{onClick:top,style:{position:"fixed",bottom:22,right:18,width:46,height:46,borderRadius:"50%",background:C.anx,color:"#fff",border:"none",fontSize:18,cursor:"pointer",boxShadow:"0 8px 20px "+ax(C.anx,.45),zIndex:60}},"↑"):null
+    );
   }
 
   if(view==="intro"){
