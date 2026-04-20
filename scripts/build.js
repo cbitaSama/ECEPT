@@ -63,10 +63,40 @@ var parts = [
   'src/components/vocab/TermCard.js',
   'src/components/vocab/DemoCard.js',
   'src/components/VocabularioView.js',
-  // salud mental II (IIFE-scoped: exposes window.SaludMentalView + SM_SEARCH_INDEX)
-  // must precede SearchEngine at runtime? No — SearchEngine checks typeof at call time,
-  // not at load time, so order is flexible. Placed here for cohesion with other views.
-  'src/components/SaludMentalView.js',
+  // ─── Salud Mental II (IIFE-scoped · split into src/components/salud_mental/*) ───
+  // Files are concatenated in order into one IIFE body. _iife-open.js contains
+  // the `(function(){`, _iife-close.js the matching `})();`. _exposures.js is
+  // the `window.SaludMentalView = App; …` block. Between them, files are
+  // ordered so that data (DECKS, EXTRA_*) and primitives precede the views
+  // that use them — although hoisting makes most of this ordering cosmetic,
+  // it keeps the concatenated output grep-friendly and easy to audit.
+  'src/components/salud_mental/_iife-open.js',
+  'src/components/salud_mental/00-bindings.js',
+  'src/components/salud_mental/01-palette.js',
+  'src/components/salud_mental/02-primitives.js',
+  'src/components/salud_mental/10-decks.js',
+  'src/components/salud_mental/11-flash-quiz.js',
+  'src/components/salud_mental/12-globals.js',
+  'src/components/salud_mental/20-shared.js',
+  'src/components/salud_mental/21-dz.js',
+  'src/components/salud_mental/30-anx.js',
+  'src/components/salud_mental/31-psicosis.js',
+  'src/components/salud_mental/32-toc.js',
+  'src/components/salud_mental/33-trm.js',
+  'src/components/salud_mental/34-som.js',
+  'src/components/salud_mental/35-tca.js',
+  'src/components/salud_mental/36-sue.js',
+  'src/components/salud_mental/37-per.js',
+  'src/components/salud_mental/38-imp.js',
+  'src/components/salud_mental/39-dpr.js',
+  'src/components/salud_mental/40-extras.js',
+  'src/components/salud_mental/50-search.js',
+  'src/components/salud_mental/60-intro.js',
+  'src/components/salud_mental/61-root-hub.js',
+  'src/components/salud_mental/62-neurosis-hub.js',
+  'src/components/salud_mental/70-app.js',
+  'src/components/salud_mental/_exposures.js',
+  'src/components/salud_mental/_iife-close.js',
   // app
   'src/app.js'
 ];
