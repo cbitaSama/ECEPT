@@ -1306,7 +1306,7 @@ function DzModal(p){
     document.body.style.overflow="hidden";
     return function(){document.body.style.overflow="";};
   },[]);
-  return e("div",{style:{position:"fixed",top:0,left:0,right:0,bottom:0,background:C.bg,zIndex:100,overflowY:"auto",animation:"fadeIn .2s"}},
+  return e("div",{style:{position:"fixed",top:0,left:0,right:0,bottom:0,background:C.bg,zIndex:110,overflowY:"auto",animation:"fadeIn .2s"}},
     // Header sticky con botón cerrar
     e("div",{style:{position:"sticky",top:0,zIndex:10,background:"rgba(6,10,20,.94)",backdropFilter:"blur(12px)",borderBottom:"1px solid "+C.bd,padding:"10px 14px"}},
       e("div",{style:{display:"flex",alignItems:"center",gap:10,marginBottom:isSingle?0:10}},
@@ -6205,20 +6205,39 @@ function App(p){
     window.scrollTo({top:0,behavior:"instant"});
   },[view]);
 
-  function go(v){
-    setSmHist(function(h){return h.concat([view]);});
-    setView(v);
-  }
-  function back(){
+  function popStack(){
     if(smHist.length>0){
       var prev=smHist[smHist.length-1];
       setSmHist(smHist.slice(0,-1));
       setView(prev);
-    } else {
-      onHome();
+      return true;
     }
+    return false;
+  }
+
+  function go(v){
+    setSmHist(function(h){return h.concat([view]);});
+    setView(v);
+  }
+  // Internal "← Inicio" buttons in sub-views. Falls back to onHome if the
+  // stack is somehow empty (defensive — sub-views only show after navigation).
+  function back(){
+    if(!popStack()) onHome();
   }
   function top(){window.scrollTo({top:0,behavior:"smooth"});}
+
+  // Register FAB back handler with ECEPT. Returns true if SM consumed the
+  // back (popped its own stack); false lets ECEPT fall through to goBack(),
+  // which pops its own hist — so from SM root, FAB ← returns to wherever
+  // the user came from (home, or another ECEPT view if they chained).
+  useEffect(function(){
+    if(p&&p.onBackRef){
+      p.onBackRef.current=popStack;
+    }
+    return function(){
+      if(p&&p.onBackRef){p.onBackRef.current=null;}
+    };
+  },[smHist]);
 
   var views={anx:AnxView,toc:OCDView,trm:TraumaView,som:SomView,tca:TCAView,sue:SueView,per:PerView,imp:ImpView,dpr:DprView};
   var titles={anx:"Tema 1 · Ansiedad",toc:"Tema 2 · TOC",trm:"Tema 3 · Trauma",som:"Tema 4 · Somáticos / Disociativos",tca:"Tema 5 · Conducta alimentaria",sue:"Tema 6 · Sueño-vigilia",per:"Tema 7 · Personalidad",imp:"Tema 8 · Control de impulsos",dpr:"Tema 9 · Trastornos depresivos"};
@@ -6229,7 +6248,7 @@ function App(p){
       // Sticky header at SM root: explicit exit back to ECEPT. Distinct label
       // ("Volver a ECEPT") avoids ambiguity with the sub-view "← Inicio"
       // buttons (which navigate within SM).
-      e("div",{style:{position:"sticky",top:0,zIndex:50,padding:"10px 14px",background:"rgba(6,10,20,.92)",backdropFilter:"blur(10px)",borderBottom:"1px solid "+C.bd,display:"flex",alignItems:"center",gap:10}},
+      e("div",{style:{position:"sticky",top:62,zIndex:50,padding:"10px 14px",background:"rgba(6,10,20,.92)",backdropFilter:"blur(10px)",borderBottom:"1px solid "+C.bd,display:"flex",alignItems:"center",gap:10}},
         e("button",{onClick:onHome,style:{padding:"8px 12px",background:ax(C.anx,.15),border:"1px solid "+ax(C.anx,.35),color:C.anx,borderRadius:8,fontSize:12.5,fontWeight:700,cursor:"pointer"}},"← Volver a ECEPT"),
         e("div",{style:{flex:1,fontSize:12.5,fontWeight:800,color:C.anx,letterSpacing:.5,textAlign:"center"}},"🧠 Salud Mental II")
       ),
@@ -6240,7 +6259,7 @@ function App(p){
 
   if(view==="intro"){
     return e("div",null,
-      e("div",{style:{position:"sticky",top:0,zIndex:50,padding:"10px 14px",background:"rgba(6,10,20,.92)",backdropFilter:"blur(10px)",borderBottom:"1px solid "+C.bd,display:"flex",alignItems:"center",gap:10}},
+      e("div",{style:{position:"sticky",top:62,zIndex:50,padding:"10px 14px",background:"rgba(6,10,20,.92)",backdropFilter:"blur(10px)",borderBottom:"1px solid "+C.bd,display:"flex",alignItems:"center",gap:10}},
         e("button",{onClick:back,style:{padding:"8px 12px",background:ax(C.intro,.15),border:"1px solid "+ax(C.intro,.35),color:C.intro,borderRadius:8,fontSize:12.5,fontWeight:700,cursor:"pointer"}},"← Inicio"),
         e("div",{style:{flex:1,fontSize:12.5,fontWeight:800,color:C.intro,letterSpacing:.5,textAlign:"center"}},"📘 Psiquiatría")
       ),
@@ -6253,7 +6272,7 @@ function App(p){
 
   if(view==="neurosis"){
     return e("div",null,
-      e("div",{style:{position:"sticky",top:0,zIndex:50,padding:"10px 14px",background:"rgba(6,10,20,.92)",backdropFilter:"blur(10px)",borderBottom:"1px solid "+C.bd,display:"flex",alignItems:"center",gap:10}},
+      e("div",{style:{position:"sticky",top:62,zIndex:50,padding:"10px 14px",background:"rgba(6,10,20,.92)",backdropFilter:"blur(10px)",borderBottom:"1px solid "+C.bd,display:"flex",alignItems:"center",gap:10}},
         e("button",{onClick:back,style:{padding:"8px 12px",background:ax(C.anx,.15),border:"1px solid "+ax(C.anx,.35),color:C.anx,borderRadius:8,fontSize:12.5,fontWeight:700,cursor:"pointer"}},"← Inicio"),
         e("div",{style:{flex:1,fontSize:12.5,fontWeight:800,color:C.anx,letterSpacing:.5,textAlign:"center"}},"🌀 Neurosis")
       ),
@@ -6264,7 +6283,7 @@ function App(p){
 
   if(view==="psicosis"){
     return e("div",null,
-      e("div",{style:{position:"sticky",top:0,zIndex:50,padding:"10px 14px",background:"rgba(6,10,20,.92)",backdropFilter:"blur(10px)",borderBottom:"1px solid "+C.bd,display:"flex",alignItems:"center",gap:10}},
+      e("div",{style:{position:"sticky",top:62,zIndex:50,padding:"10px 14px",background:"rgba(6,10,20,.92)",backdropFilter:"blur(10px)",borderBottom:"1px solid "+C.bd,display:"flex",alignItems:"center",gap:10}},
         e("button",{onClick:back,style:{padding:"8px 12px",background:ax(C.psi,.15),border:"1px solid "+ax(C.psi,.35),color:C.psi,borderRadius:8,fontSize:12.5,fontWeight:700,cursor:"pointer"}},"← Inicio"),
         e("div",{style:{flex:1,fontSize:12.5,fontWeight:800,color:C.psi,letterSpacing:.5,textAlign:"center"}},"🔺 Psicosis")
       ),
@@ -6285,7 +6304,7 @@ function App(p){
     var groupLabel=group==="psicosis"?"Psicosis":(group==="all"?"toda Salud Mental":"Neurosis");
     var htitle=(isFlash?"🃏 Flashcards":"❓ Quiz")+" · "+(group==="all"?"Todo":groupLabel);
     return e("div",null,
-      e("div",{style:{position:"sticky",top:0,zIndex:50,padding:"10px 14px",background:"rgba(6,10,20,.92)",backdropFilter:"blur(10px)",borderBottom:"1px solid "+C.bd,display:"flex",alignItems:"center",gap:10}},
+      e("div",{style:{position:"sticky",top:62,zIndex:50,padding:"10px 14px",background:"rgba(6,10,20,.92)",backdropFilter:"blur(10px)",borderBottom:"1px solid "+C.bd,display:"flex",alignItems:"center",gap:10}},
         e("button",{onClick:back,style:{padding:"8px 12px",background:ax(hc,.15),border:"1px solid "+ax(hc,.35),color:hc,borderRadius:8,fontSize:12.5,fontWeight:700,cursor:"pointer"}},hbackLabel),
         e("div",{style:{flex:1,fontSize:12.5,fontWeight:800,color:hc,letterSpacing:.5,textAlign:"center"}},htitle)
       ),
@@ -6306,7 +6325,7 @@ function App(p){
   var V=views[view];
   var tc=colors[view];
   return e("div",null,
-    e("div",{style:{position:"sticky",top:0,zIndex:50,padding:"10px 14px",background:"rgba(6,10,20,.92)",backdropFilter:"blur(10px)",borderBottom:"1px solid "+C.bd,display:"flex",alignItems:"center",gap:10}},
+    e("div",{style:{position:"sticky",top:62,zIndex:50,padding:"10px 14px",background:"rgba(6,10,20,.92)",backdropFilter:"blur(10px)",borderBottom:"1px solid "+C.bd,display:"flex",alignItems:"center",gap:10}},
       e("button",{onClick:back,style:{padding:"8px 12px",background:ax(tc,.15),border:"1px solid "+ax(tc,.35),color:tc,borderRadius:8,fontSize:12.5,fontWeight:700,cursor:"pointer"}},"← Neurosis"),
       e("div",{style:{flex:1,fontSize:12.5,fontWeight:800,color:tc,letterSpacing:.5,textAlign:"center"}},titles[view])
     ),

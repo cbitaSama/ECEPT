@@ -31,6 +31,8 @@ function App(){
   // Native trauma view back-handler ref + widget registry
   var traumaBackRef=useRef(null);
   var traumaWidgets={glasgow:GlasgowCalculator,hemorrhage:HemorrhageCalculator,ett:ETTSelector,abcdefg:ABCDEFGAccordion,lethal:LethalLesionsGrid,anat_pts:PuntosAnatomicos};
+  // Salud Mental back-handler ref (FAB ← defers to SM's internal stack first).
+  var smBackRef=useRef(null);
 
   var go=useCallback(function(x,sc,dc){
     setAn(false);
@@ -57,6 +59,9 @@ function App(){
   var handleBack=useCallback(function(){
     if(vista==="trauma-u1"){
       if(traumaBackRef.current&&traumaBackRef.current()) return;
+    }
+    if(vista==="salud_mental"){
+      if(smBackRef.current&&smBackRef.current()) return;
     }
     goBack();
   },[vista,goBack]);
@@ -488,10 +493,10 @@ function App(){
     vista==="mediadores"&&e(MediadoresView),
 
     // ════════════ SALUD MENTAL II (NATIVE · IIFE-scoped) ════════════
-    // onHome is called by SM's App when its internal history stack is empty
-    // (user is at SM root and taps "← Volver a ECEPT") or when the outer
-    // breadcrumb routing wants to exit the module.
-    vista==="salud_mental"&&e(SaludMentalView,{onHome:function(){go("home")}}),
+    // onHome   — ECEPT's go("home"), called by SM's "Volver a ECEPT" button.
+    // onBackRef — registered by SM so the FAB ← defers to SM's internal stack.
+    // className "sm-root" scopes the SM-specific CSS (.prose + button resets).
+    vista==="salud_mental"&&e("div",{className:"sm-root"},e(SaludMentalView,{onHome:function(){go("home")},onBackRef:smBackRef})),
 
     // ════════════ QUEMADURAS ════════════
     vista==="cir_quem"&&e(F,null,
