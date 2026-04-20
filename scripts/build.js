@@ -37,6 +37,7 @@ var parts = [
   'src/components/NervesMap.js',
   'src/components/ReceptoresView.js',
   'src/components/MediadoresView.js',
+  'src/components/CoagulacionView.js',
   // trauma native widgets (must precede TraumaView + BloqueRenderer)
   'src/components/trauma/GlasgowCalculator.js',
   'src/components/trauma/HemorrhageCalculator.js',
@@ -89,7 +90,7 @@ var expectedGlobals = [
   'NERVES=',
   'COAG_', 'MODS=', 'LINKS=',
   'function globalSearch', 'function LinkBadge', 'function NervesMap',
-  'function ReceptoresView', 'function MediadoresView',
+  'function ReceptoresView', 'function MediadoresView', 'function CoagulacionView',
   'function App',
   // native trauma module
   'TRAUMA_TOPICS', 'TRAUMA_SECCIONES', 'TRAUMA_ETT', 'TRAUMA_ABCD', 'TRAUMA_LETHAL', 'TRAUMA_REPASO', 'TRAUMA_HUB',
