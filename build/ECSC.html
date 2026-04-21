@@ -7831,7 +7831,14 @@ function DzCard(p){
   );
 }
 
-// Modal pantalla completa para una enfermedad · usa tabs internos
+// Pantalla inline de una enfermedad · usa tabs internos.
+// Originalmente era un modal full-viewport (position:fixed) porque el
+// artefacto standalone tenía scroll propio. Dentro de ECEPT esa estrategia
+// peleaba con el contenedor de scroll del host en iPad Safari: el contenido
+// se renderizaba pero no podía desplazarse ni los tabs tocarse. Ahora es
+// una vista inline en el flujo normal del documento; el header queda sticky
+// debajo del top bar de ECEPT (top:62) para que "← Cerrar" y las pestañas
+// sigan accesibles mientras el usuario scrollea el contenido.
 function DzModal(p){
   var c=p.c||C.anx;
   var isSingle=!!p.single;
@@ -7842,13 +7849,14 @@ function DzModal(p){
     {k:"dx",l:"Diagnóstico",ic:"📋"},
     {k:"tx",l:"Tratamiento",ic:"💊"}
   ];
+  // Al abrir, saltar al tope de la página para que el usuario aterrice en el
+  // header de la enfermedad (no en medio de donde estaba el grid).
   useEffect(function(){
-    document.body.style.overflow="hidden";
-    return function(){document.body.style.overflow="";};
+    window.scrollTo({top:0,behavior:"instant"});
   },[]);
-  return e("div",{style:{position:"fixed",top:0,left:0,right:0,bottom:0,background:C.bg,zIndex:110,overflowY:"auto",animation:"fadeIn .2s"}},
-    // Header sticky con botón cerrar
-    e("div",{style:{position:"sticky",top:0,zIndex:10,background:"rgba(6,10,20,.94)",backdropFilter:"blur(12px)",borderBottom:"1px solid "+C.bd,padding:"10px 14px"}},
+  return e("div",{style:{background:C.bg,animation:"fadeIn .2s"}},
+    // Header sticky debajo del top bar de ECEPT (top:62) con "← Cerrar" + tabs.
+    e("div",{style:{position:"sticky",top:62,zIndex:10,background:"rgba(6,10,20,.94)",backdropFilter:"blur(12px)",borderBottom:"1px solid "+C.bd,padding:"10px 14px"}},
       e("div",{style:{display:"flex",alignItems:"center",gap:10,marginBottom:isSingle?0:10}},
         e("button",{onClick:p.onClose,style:{padding:"8px 12px",background:ax(c,.15),border:"1px solid "+ax(c,.35),color:c,borderRadius:8,fontSize:12.5,fontWeight:700,cursor:"pointer"}},"← Cerrar"),
         e("div",{style:{flex:1,minWidth:0}},
@@ -7874,10 +7882,16 @@ function DzModal(p){
   );
 }
 
-// Grid de tarjetas de enfermedades, cada una abre modal
+// Grid de tarjetas de enfermedades. Al abrir una, reemplaza el grid con la
+// vista de enfermedad inline (en lugar de overlay), matching ECEPT's "one
+// route at a time" pattern (reuma_dis).
 function DzGrid(p){
   var c=p.c||C.anx;
   var s1=useState(null);var open=s1[0],setOpen=s1[1];
+  if(open!==null){
+    var it=p.items[open];
+    return e(DzModal,{c:c,name:it.name,kicker:it.kicker||"Enfermedad",sections:it.sections,onClose:function(){setOpen(null);}});
+  }
   return e("div",null,
     e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))",gap:10,margin:"14px 0 10px"}},
       p.items.map(function(it,i){
@@ -7891,8 +7905,7 @@ function DzGrid(p){
           e("div",{style:{fontSize:10.5,fontWeight:700,color:c,marginTop:4,opacity:.8}},"Ver ficha →")
         );
       })
-    ),
-    open!==null?e(DzModal,{c:c,name:p.items[open].name,kicker:p.items[open].kicker||"Enfermedad",sections:p.items[open].sections,onClose:function(){setOpen(null);}}):null
+    )
   );
 }
 
