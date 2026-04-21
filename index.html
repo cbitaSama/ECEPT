@@ -7661,7 +7661,7 @@ function GlobalQuiz(p){
             var isPicked=i===pick;
             var bg=C.cd,bd=C.bd,color="#fff";
             if(pick!==null){
-              if(isCorrect){bg=ax(C.good,.15);bd=C.good;color=C.good;}
+              if(isCorrect){bg=ax(C.ok,.15);bd=C.ok;color=C.ok;}
               else if(isPicked){bg=ax(C.bad,.15);bd=C.bad;color=C.bad;}
             }
             return e("button",{key:i,onClick:function(){sel(i);},disabled:pick!==null,style:{padding:"10px 12px",background:bg,border:"1px solid "+bd,color:color,borderRadius:8,textAlign:"left",fontSize:13,fontWeight:isPicked||isCorrect?700:500,cursor:pick===null?"pointer":"default",lineHeight:1.45}},
@@ -7669,8 +7669,8 @@ function GlobalQuiz(p){
             );
           })
         ),
-        pick!==null?e("div",{style:{marginTop:12,padding:"11px 13px",background:ax(C.good,.1),border:"1px solid "+ax(C.good,.3),borderRadius:8}},
-          e("div",{style:{fontSize:10,fontWeight:800,color:C.good,letterSpacing:1.4,textTransform:"uppercase",marginBottom:5}},"💡 Explicación"),
+        pick!==null?e("div",{style:{marginTop:12,padding:"11px 13px",background:ax(C.ok,.1),border:"1px solid "+ax(C.ok,.3),borderRadius:8}},
+          e("div",{style:{fontSize:10,fontWeight:800,color:C.ok,letterSpacing:1.4,textTransform:"uppercase",marginBottom:5}},"💡 Explicación"),
           e("div",{style:{fontSize:12.5,color:C.tx,lineHeight:1.5}},q.x)
         ):null
       ),
@@ -7693,8 +7693,8 @@ function GlobalQuiz(p){
               e("div",{style:{fontSize:9.5,fontWeight:800,color:qq.meta.color,letterSpacing:1.4,textTransform:"uppercase",padding:"2px 7px",background:ax(qq.meta.color,.12),borderRadius:4}},qq.meta.icon+" "+qq.meta.label)
             ),
             e("div",{style:{fontSize:13.5,color:"#fff",fontWeight:600,lineHeight:1.5}},qq.p),
-            showAllAns?e("div",{style:{marginTop:9,padding:"8px 11px",background:ax(C.good,.1),border:"1px solid "+ax(C.good,.3),borderRadius:7}},
-              e("span",{style:{fontSize:9.5,fontWeight:800,color:C.good,letterSpacing:1.3,textTransform:"uppercase",marginRight:6}},"✓ Respuesta"),
+            showAllAns?e("div",{style:{marginTop:9,padding:"8px 11px",background:ax(C.ok,.1),border:"1px solid "+ax(C.ok,.3),borderRadius:7}},
+              e("span",{style:{fontSize:9.5,fontWeight:800,color:C.ok,letterSpacing:1.3,textTransform:"uppercase",marginRight:6}},"✓ Respuesta"),
               e("span",{style:{fontSize:12.5,color:C.tx,lineHeight:1.5}},correctAnswer)
             ):null
           );
@@ -12544,7 +12544,7 @@ function IntroView(){
            ]
          })
        ),
-       e(Alert,{c:C.good,label:"🔑 Principio terapéutico"},"Siempre ",e("b",null,"enfoque integral"),": combinar psicoterapia + farmacoterapia cuando sea necesario + intervención social (familia, red de apoyo, recursos). La monoterapia raramente es suficiente en cuadros moderados-severos.")
+       e(Alert,{c:C.ok,label:"🔑 Principio terapéutico"},"Siempre ",e("b",null,"enfoque integral"),": combinar psicoterapia + farmacoterapia cuando sea necesario + intervención social (familia, red de apoyo, recursos). La monoterapia raramente es suficiente en cuadros moderados-severos.")
      )},
     {id:"preliminar",ic:"🗺️",t:"Cómo usar este módulo",sub:"Guía rápida de navegación",c:c,
      content:e("div",null,

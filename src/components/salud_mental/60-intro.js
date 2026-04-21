@@ -137,7 +137,7 @@ function IntroView(){
            ]
          })
        ),
-       e(Alert,{c:C.good,label:"🔑 Principio terapéutico"},"Siempre ",e("b",null,"enfoque integral"),": combinar psicoterapia + farmacoterapia cuando sea necesario + intervención social (familia, red de apoyo, recursos). La monoterapia raramente es suficiente en cuadros moderados-severos.")
+       e(Alert,{c:C.ok,label:"🔑 Principio terapéutico"},"Siempre ",e("b",null,"enfoque integral"),": combinar psicoterapia + farmacoterapia cuando sea necesario + intervención social (familia, red de apoyo, recursos). La monoterapia raramente es suficiente en cuadros moderados-severos.")
      )},
     {id:"preliminar",ic:"🗺️",t:"Cómo usar este módulo",sub:"Guía rápida de navegación",c:c,
      content:e("div",null,
