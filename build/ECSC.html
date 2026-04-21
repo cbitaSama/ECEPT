@@ -12637,18 +12637,14 @@ function RootHub(p){
     {id:"psicosis",c:COLOR_PSI,ic:"🔺",t:"Psicosis y ánimo",n:"01",d:"Trastornos con prueba de realidad ALTERADA. Delirios, alucinaciones, cuadros afectivos graves.",sub:"Espectro esquizofrénico · Delirante · Bipolares (con depresión mayor como componente)",count:"8 enfermedades"},
     {id:"neurosis",c:COLOR_NEU,ic:"🌀",t:"Neurosis",n:"02",d:"Trastornos con prueba de realidad CONSERVADA. El paciente sabe que algo está mal.",sub:"9 temas completos",count:"60 enfermedades"}
   ];
+  // Sin header local (ni logo, ni título, ni buscador interno): el cromo
+  // de ECEPT (top bar + breadcrumb) provee la identidad y navegación.
+  // La búsqueda global de ECEPT ya indexa SM vía SM_SEARCH_INDEX.
   return e("div",{style:{padding:"16px 14px 90px",maxWidth:640,margin:"0 auto"}},
-    e("div",{style:{textAlign:"center",padding:"32px 10px 22px"}},
-      e("div",{style:{fontSize:46,marginBottom:8}},"🧠"),
-      e("div",{style:{fontSize:10.5,fontWeight:800,color:C.anx,letterSpacing:2.5,textTransform:"uppercase",marginBottom:4}},"ECEPT · El Conocimiento Es Para Todos"),
-      e("h1",{style:{fontSize:32,fontWeight:900,color:"#fff",letterSpacing:.2,lineHeight:1.1,marginBottom:8,fontFamily:"Playfair Display"}},"Salud Mental II"),
-      e("div",{style:{fontSize:13.5,color:C.mt,lineHeight:1.55,maxWidth:460,margin:"0 auto"}},"Apunte completo de psiquiatría. Organizado por la división clásica: ",e("b",{style:{color:"#fff"}},"psicosis vs neurosis"),".")
-    ),
     e("div",{style:{padding:"13px 15px",background:C.cd,border:"1px solid "+C.bd,borderRadius:12,marginBottom:16,fontSize:12.5,lineHeight:1.6,color:C.mt}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:C.pearl,letterSpacing:1.5,textTransform:"uppercase",marginBottom:6}},"🔑 Regla clínica clave"),
       "La ",e("b",{style:{color:"#fff"}},"prueba de realidad")," divide ambos grupos: si el paciente reconoce que sus síntomas son internos y patológicos → ",e("b",{style:{color:"#fff"}},"neurosis"),". Si cree que son reales y externos → ",e("b",{style:{color:"#fff"}},"psicosis"),"."
     ),
-    e(GlobalSearch,{go:p.go}),
     ramas.map(function(r,i){
       return e("button",{key:r.id,onClick:function(){p.go(r.id);},style:{width:"100%",padding:18,background:"linear-gradient(135deg,"+ax(r.c,.15)+" 0%,"+C.cd+" 85%)",border:"1px solid "+ax(r.c,.4),borderRadius:16,margin:"0 0 14px",cursor:"pointer",textAlign:"left",display:"block",animation:"fadeIn .3s "+(i*.08)+"s both"}},
         e("div",{style:{display:"flex",alignItems:"center",gap:14,marginBottom:12}},
@@ -12774,6 +12770,13 @@ function App(p){
     window.scrollTo({top:0,behavior:"instant"});
   },[view]);
 
+  // Notify host (ECEPT) on every view change so it can render a deeper
+  // breadcrumb ("Inicio › Salud Mental II › Neurosis › Ansiedad", etc.).
+  // No-op when mounted standalone.
+  useEffect(function(){
+    if(p&&typeof p.onViewChange==="function")p.onViewChange(view);
+  },[view]);
+
   function popStack(){
     if(smHist.length>0){
       var prev=smHist[smHist.length-1];
@@ -12812,54 +12815,44 @@ function App(p){
   var titles={anx:"Tema 1 · Ansiedad",toc:"Tema 2 · TOC",trm:"Tema 3 · Trauma",som:"Tema 4 · Somáticos / Disociativos",tca:"Tema 5 · Conducta alimentaria",sue:"Tema 6 · Sueño-vigilia",per:"Tema 7 · Personalidad",imp:"Tema 8 · Control de impulsos",dpr:"Tema 9 · Trastornos depresivos"};
   var colors={anx:C.anx,toc:C.toc,trm:C.trm,som:C.som,tca:C.tca,sue:C.sue,per:C.per,imp:C.imp,dpr:C.dpr};
 
+  // Cada branch de vista es sólo contenido + FAB scroll-to-top. SIN header
+  // local ni botón "← Inicio" interno: la navegación se maneja desde el
+  // cromo de ECEPT (top bar + breadcrumb + FAB ← que invoca onBackRef →
+  // popStack). Así sólo hay UN header visible (el de ECEPT) en cualquier
+  // profundidad del módulo.
+  function scrollTopBtn(color){
+    return showTop?e("button",{onClick:top,style:{position:"fixed",bottom:22,right:18,width:46,height:46,borderRadius:"50%",background:color,color:"#fff",border:"none",fontSize:18,cursor:"pointer",boxShadow:"0 8px 20px "+ax(color,.45),zIndex:60}},"↑"):null;
+  }
+
   if(view==="root"){
     return e("div",null,
-      // Sticky header at SM root: explicit exit back to ECEPT. Distinct label
-      // ("Volver a ECEPT") avoids ambiguity with the sub-view "← Inicio"
-      // buttons (which navigate within SM).
-      e("div",{style:{position:"sticky",top:62,zIndex:50,padding:"10px 14px",background:"rgba(6,10,20,.92)",backdropFilter:"blur(10px)",borderBottom:"1px solid "+C.bd,display:"flex",alignItems:"center",gap:10}},
-        e("button",{onClick:onHome,style:{padding:"8px 12px",background:ax(C.anx,.15),border:"1px solid "+ax(C.anx,.35),color:C.anx,borderRadius:8,fontSize:12.5,fontWeight:700,cursor:"pointer"}},"← Volver a ECEPT"),
-        e("div",{style:{flex:1,fontSize:12.5,fontWeight:800,color:C.anx,letterSpacing:.5,textAlign:"center"}},"🧠 Salud Mental II")
-      ),
       e(RootHub,{go:go}),
-      showTop?e("button",{onClick:top,style:{position:"fixed",bottom:22,right:18,width:46,height:46,borderRadius:"50%",background:C.anx,color:"#fff",border:"none",fontSize:18,cursor:"pointer",boxShadow:"0 8px 20px "+ax(C.anx,.45),zIndex:60}},"↑"):null
+      scrollTopBtn(C.anx)
     );
   }
 
   if(view==="intro"){
     return e("div",null,
-      e("div",{style:{position:"sticky",top:62,zIndex:50,padding:"10px 14px",background:"rgba(6,10,20,.92)",backdropFilter:"blur(10px)",borderBottom:"1px solid "+C.bd,display:"flex",alignItems:"center",gap:10}},
-        e("button",{onClick:back,style:{padding:"8px 12px",background:ax(C.intro,.15),border:"1px solid "+ax(C.intro,.35),color:C.intro,borderRadius:8,fontSize:12.5,fontWeight:700,cursor:"pointer"}},"← Inicio"),
-        e("div",{style:{flex:1,fontSize:12.5,fontWeight:800,color:C.intro,letterSpacing:.5,textAlign:"center"}},"📘 Psiquiatría")
-      ),
       e("div",{style:{padding:"14px 14px 90px",maxWidth:720,margin:"0 auto",animation:"fadeIn .3s"}},
         e(IntroView,null)
       ),
-      showTop?e("button",{onClick:top,style:{position:"fixed",bottom:22,right:18,width:46,height:46,borderRadius:"50%",background:C.intro,color:"#fff",border:"none",fontSize:18,cursor:"pointer",boxShadow:"0 8px 20px "+ax(C.intro,.45),zIndex:60}},"↑"):null
+      scrollTopBtn(C.intro)
     );
   }
 
   if(view==="neurosis"){
     return e("div",null,
-      e("div",{style:{position:"sticky",top:62,zIndex:50,padding:"10px 14px",background:"rgba(6,10,20,.92)",backdropFilter:"blur(10px)",borderBottom:"1px solid "+C.bd,display:"flex",alignItems:"center",gap:10}},
-        e("button",{onClick:back,style:{padding:"8px 12px",background:ax(C.anx,.15),border:"1px solid "+ax(C.anx,.35),color:C.anx,borderRadius:8,fontSize:12.5,fontWeight:700,cursor:"pointer"}},"← Inicio"),
-        e("div",{style:{flex:1,fontSize:12.5,fontWeight:800,color:C.anx,letterSpacing:.5,textAlign:"center"}},"🌀 Neurosis")
-      ),
       e(NeurosisHub,{go:go}),
-      showTop?e("button",{onClick:top,style:{position:"fixed",bottom:22,right:18,width:46,height:46,borderRadius:"50%",background:C.anx,color:"#fff",border:"none",fontSize:18,cursor:"pointer",boxShadow:"0 8px 20px "+ax(C.anx,.45),zIndex:60}},"↑"):null
+      scrollTopBtn(C.anx)
     );
   }
 
   if(view==="psicosis"){
     return e("div",null,
-      e("div",{style:{position:"sticky",top:62,zIndex:50,padding:"10px 14px",background:"rgba(6,10,20,.92)",backdropFilter:"blur(10px)",borderBottom:"1px solid "+C.bd,display:"flex",alignItems:"center",gap:10}},
-        e("button",{onClick:back,style:{padding:"8px 12px",background:ax(C.psi,.15),border:"1px solid "+ax(C.psi,.35),color:C.psi,borderRadius:8,fontSize:12.5,fontWeight:700,cursor:"pointer"}},"← Inicio"),
-        e("div",{style:{flex:1,fontSize:12.5,fontWeight:800,color:C.psi,letterSpacing:.5,textAlign:"center"}},"🔺 Psicosis")
-      ),
       e("div",{style:{padding:"14px 14px 90px",maxWidth:720,margin:"0 auto",animation:"fadeIn .3s"}},
         e(PsicosisView,{go:go})
       ),
-      showTop?e("button",{onClick:top,style:{position:"fixed",bottom:22,right:18,width:46,height:46,borderRadius:"50%",background:C.psi,color:"#fff",border:"none",fontSize:18,cursor:"pointer",boxShadow:"0 8px 20px "+ax(C.psi,.45),zIndex:60}},"↑"):null
+      scrollTopBtn(C.psi)
     );
   }
 
@@ -12868,15 +12861,8 @@ function App(p){
     var isFlash=view.indexOf("flash-")===0;
     var group=view.indexOf("psicosis")>=0?"psicosis":(view.indexOf("all")>=0?"all":"neurosis");
     var hc=group==="psicosis"?C.psi:(group==="all"?C.pearl:C.anx);
-    var hicon=group==="psicosis"?"🔺":(group==="all"?"🧠":"🌀");
-    var hbackLabel=group==="psicosis"?"← Psicosis":(group==="all"?"← Inicio":"← Neurosis");
     var groupLabel=group==="psicosis"?"Psicosis":(group==="all"?"toda Salud Mental":"Neurosis");
-    var htitle=(isFlash?"🃏 Flashcards":"❓ Quiz")+" · "+(group==="all"?"Todo":groupLabel);
     return e("div",null,
-      e("div",{style:{position:"sticky",top:62,zIndex:50,padding:"10px 14px",background:"rgba(6,10,20,.92)",backdropFilter:"blur(10px)",borderBottom:"1px solid "+C.bd,display:"flex",alignItems:"center",gap:10}},
-        e("button",{onClick:back,style:{padding:"8px 12px",background:ax(hc,.15),border:"1px solid "+ax(hc,.35),color:hc,borderRadius:8,fontSize:12.5,fontWeight:700,cursor:"pointer"}},hbackLabel),
-        e("div",{style:{flex:1,fontSize:12.5,fontWeight:800,color:hc,letterSpacing:.5,textAlign:"center"}},htitle)
-      ),
       e("div",{style:{padding:"16px 14px 90px",maxWidth:720,margin:"0 auto",animation:"fadeIn .3s"}},
         e("div",{style:{padding:"18px 18px",background:"linear-gradient(135deg,"+ax(hc,.15)+","+C.cd+" 85%)",border:"1px solid "+ax(hc,.35),borderLeft:"4px solid "+hc,borderRadius:14,marginBottom:18}},
           e("div",{style:{fontSize:10.5,fontWeight:800,color:hc,letterSpacing:2,textTransform:"uppercase",marginBottom:4}},isFlash?"Flashcards globales":"Quiz global"),
@@ -12887,21 +12873,17 @@ function App(p){
         ),
         isFlash?e(GlobalFlashDeck,{group:group}):e(GlobalQuiz,{group:group})
       ),
-      showTop?e("button",{onClick:top,style:{position:"fixed",bottom:22,right:18,width:46,height:46,borderRadius:"50%",background:hc,color:"#fff",border:"none",fontSize:18,cursor:"pointer",boxShadow:"0 8px 20px "+ax(hc,.45),zIndex:60}},"↑"):null
+      scrollTopBtn(hc)
     );
   }
 
   var V=views[view];
   var tc=colors[view];
   return e("div",null,
-    e("div",{style:{position:"sticky",top:62,zIndex:50,padding:"10px 14px",background:"rgba(6,10,20,.92)",backdropFilter:"blur(10px)",borderBottom:"1px solid "+C.bd,display:"flex",alignItems:"center",gap:10}},
-      e("button",{onClick:back,style:{padding:"8px 12px",background:ax(tc,.15),border:"1px solid "+ax(tc,.35),color:tc,borderRadius:8,fontSize:12.5,fontWeight:700,cursor:"pointer"}},"← Neurosis"),
-      e("div",{style:{flex:1,fontSize:12.5,fontWeight:800,color:tc,letterSpacing:.5,textAlign:"center"}},titles[view])
-    ),
     e("div",{style:{padding:"14px 14px 90px",maxWidth:720,margin:"0 auto",animation:"fadeIn .3s"}},
       e(V,null)
     ),
-    showTop?e("button",{onClick:top,style:{position:"fixed",bottom:22,right:18,width:46,height:46,borderRadius:"50%",background:tc,color:"#fff",border:"none",fontSize:18,cursor:"pointer",boxShadow:"0 8px 20px "+ax(tc,.45),zIndex:60}},"↑"):null
+    scrollTopBtn(tc)
   );
 }
 
@@ -12943,6 +12925,11 @@ function App(){
 
   // ─── NAVIGATION ─── back-button history stack
   s=_([]); var hist=s[0],setHist=s[1];
+  // Salud Mental internal-view mirror: SaludMentalView calls setSmView via
+  // its onViewChange prop every time its internal view changes. ECEPT uses
+  // this string ("root"|"intro"|"psicosis"|"neurosis"|"anx"|... ) to render
+  // the deeper breadcrumb so the module can stay chrome-free internally.
+  s=_("root"); var smView=s[0],setSmView=s[1];
 
   // Native trauma view back-handler ref + widget registry
   var traumaBackRef=useRef(null);
@@ -13079,7 +13066,23 @@ function App(){
           vista==="general"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Generalidades")),
           vista==="triadas"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Tríadas")),
           vista==="imagenes"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Imágenes")),
-          vista==="salud_mental"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Salud Mental II"))
+          vista==="salud_mental"&&(function(){
+            // Deeper SM breadcrumb driven by smView (updated via onViewChange).
+            // Each label maps to a single crumb; neurosis themes stack under "Neurosis",
+            // per-group flash/quiz hubs stack under their group.
+            var SM_LABELS={intro:"Psiquiatría",psicosis:"Psicosis",neurosis:"Neurosis","flash-all":"Flashcards globales","quiz-all":"Quiz global","flash-psicosis":"Flashcards","quiz-psicosis":"Quiz","flash-neurosis":"Flashcards","quiz-neurosis":"Quiz",anx:"Ansiedad",toc:"TOC",trm:"Trauma",som:"Somáticos",tca:"TCA",sue:"Sueño",per:"Personalidad",imp:"Impulsos",dpr:"Depresivos"};
+            var isNeurosisTheme=["anx","toc","trm","som","tca","sue","per","imp","dpr"].indexOf(smView)>=0;
+            var isPsicoSub=smView==="flash-psicosis"||smView==="quiz-psicosis";
+            var isNeuroSub=smView==="flash-neurosis"||smView==="quiz-neurosis";
+            var sep=e("span",{style:{color:"rgba(255,255,255,.15)"}}," › ");
+            var smLabel=e("span",{style:{color:smView==="root"?C.mt:C.dm,cursor:smView==="root"?"default":"pointer"},onClick:smView==="root"?null:function(){if(window._smFocus)window._smFocus("root")}},"Salud Mental II");
+            return e(F,null,sep,smLabel,
+              isNeurosisTheme?e(F,null,sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus("neurosis")}},"Neurosis"),sep,e("span",{style:{color:C.mt}},SM_LABELS[smView])):null,
+              isPsicoSub?e(F,null,sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus("psicosis")}},"Psicosis"),sep,e("span",{style:{color:C.mt}},SM_LABELS[smView])):null,
+              isNeuroSub?e(F,null,sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus("neurosis")}},"Neurosis"),sep,e("span",{style:{color:C.mt}},SM_LABELS[smView])):null,
+              (smView!=="root" && !isNeurosisTheme && !isPsicoSub && !isNeuroSub)?e(F,null,sep,e("span",{style:{color:C.mt}},SM_LABELS[smView]||smView)):null
+            );
+          })()
         ),
         e("div",{style:{flex:1,position:"relative"}},
           e("span",{style:{position:"absolute",left:"10px",top:"50%",transform:"translateY(-50%)",color:C.dm,fontSize:"13px",pointerEvents:"none"}},"🔍"),
@@ -13409,10 +13412,12 @@ function App(){
     vista==="mediadores"&&e(MediadoresView),
 
     // ════════════ SALUD MENTAL II (NATIVE · IIFE-scoped) ════════════
-    // onHome   — ECEPT's go("home"), called by SM's "Volver a ECEPT" button.
-    // onBackRef — registered by SM so the FAB ← defers to SM's internal stack.
+    // onHome       — ECEPT's go("home"), kept for completeness.
+    // onBackRef    — registered by SM so the FAB ← defers to SM's internal stack.
+    // onViewChange — SM calls this on every internal view change so ECEPT can
+    //                render the deeper breadcrumb. Module itself is headless.
     // className "sm-root" scopes the SM-specific CSS (.prose + button resets).
-    vista==="salud_mental"&&e("div",{className:"sm-root"},e(SaludMentalView,{onHome:function(){go("home")},onBackRef:smBackRef})),
+    vista==="salud_mental"&&e("div",{className:"sm-root"},e(SaludMentalView,{onHome:function(){go("home")},onBackRef:smBackRef,onViewChange:setSmView})),
 
     // ════════════ QUEMADURAS ════════════
     vista==="cir_quem"&&e(F,null,

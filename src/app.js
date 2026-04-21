@@ -27,6 +27,11 @@ function App(){
 
   // ─── NAVIGATION ─── back-button history stack
   s=_([]); var hist=s[0],setHist=s[1];
+  // Salud Mental internal-view mirror: SaludMentalView calls setSmView via
+  // its onViewChange prop every time its internal view changes. ECEPT uses
+  // this string ("root"|"intro"|"psicosis"|"neurosis"|"anx"|... ) to render
+  // the deeper breadcrumb so the module can stay chrome-free internally.
+  s=_("root"); var smView=s[0],setSmView=s[1];
 
   // Native trauma view back-handler ref + widget registry
   var traumaBackRef=useRef(null);
@@ -163,7 +168,23 @@ function App(){
           vista==="general"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Generalidades")),
           vista==="triadas"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Tríadas")),
           vista==="imagenes"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Imágenes")),
-          vista==="salud_mental"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Salud Mental II"))
+          vista==="salud_mental"&&(function(){
+            // Deeper SM breadcrumb driven by smView (updated via onViewChange).
+            // Each label maps to a single crumb; neurosis themes stack under "Neurosis",
+            // per-group flash/quiz hubs stack under their group.
+            var SM_LABELS={intro:"Psiquiatría",psicosis:"Psicosis",neurosis:"Neurosis","flash-all":"Flashcards globales","quiz-all":"Quiz global","flash-psicosis":"Flashcards","quiz-psicosis":"Quiz","flash-neurosis":"Flashcards","quiz-neurosis":"Quiz",anx:"Ansiedad",toc:"TOC",trm:"Trauma",som:"Somáticos",tca:"TCA",sue:"Sueño",per:"Personalidad",imp:"Impulsos",dpr:"Depresivos"};
+            var isNeurosisTheme=["anx","toc","trm","som","tca","sue","per","imp","dpr"].indexOf(smView)>=0;
+            var isPsicoSub=smView==="flash-psicosis"||smView==="quiz-psicosis";
+            var isNeuroSub=smView==="flash-neurosis"||smView==="quiz-neurosis";
+            var sep=e("span",{style:{color:"rgba(255,255,255,.15)"}}," › ");
+            var smLabel=e("span",{style:{color:smView==="root"?C.mt:C.dm,cursor:smView==="root"?"default":"pointer"},onClick:smView==="root"?null:function(){if(window._smFocus)window._smFocus("root")}},"Salud Mental II");
+            return e(F,null,sep,smLabel,
+              isNeurosisTheme?e(F,null,sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus("neurosis")}},"Neurosis"),sep,e("span",{style:{color:C.mt}},SM_LABELS[smView])):null,
+              isPsicoSub?e(F,null,sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus("psicosis")}},"Psicosis"),sep,e("span",{style:{color:C.mt}},SM_LABELS[smView])):null,
+              isNeuroSub?e(F,null,sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus("neurosis")}},"Neurosis"),sep,e("span",{style:{color:C.mt}},SM_LABELS[smView])):null,
+              (smView!=="root" && !isNeurosisTheme && !isPsicoSub && !isNeuroSub)?e(F,null,sep,e("span",{style:{color:C.mt}},SM_LABELS[smView]||smView)):null
+            );
+          })()
         ),
         e("div",{style:{flex:1,position:"relative"}},
           e("span",{style:{position:"absolute",left:"10px",top:"50%",transform:"translateY(-50%)",color:C.dm,fontSize:"13px",pointerEvents:"none"}},"🔍"),
@@ -493,10 +514,12 @@ function App(){
     vista==="mediadores"&&e(MediadoresView),
 
     // ════════════ SALUD MENTAL II (NATIVE · IIFE-scoped) ════════════
-    // onHome   — ECEPT's go("home"), called by SM's "Volver a ECEPT" button.
-    // onBackRef — registered by SM so the FAB ← defers to SM's internal stack.
+    // onHome       — ECEPT's go("home"), kept for completeness.
+    // onBackRef    — registered by SM so the FAB ← defers to SM's internal stack.
+    // onViewChange — SM calls this on every internal view change so ECEPT can
+    //                render the deeper breadcrumb. Module itself is headless.
     // className "sm-root" scopes the SM-specific CSS (.prose + button resets).
-    vista==="salud_mental"&&e("div",{className:"sm-root"},e(SaludMentalView,{onHome:function(){go("home")},onBackRef:smBackRef})),
+    vista==="salud_mental"&&e("div",{className:"sm-root"},e(SaludMentalView,{onHome:function(){go("home")},onBackRef:smBackRef,onViewChange:setSmView})),
 
     // ════════════ QUEMADURAS ════════════
     vista==="cir_quem"&&e(F,null,

@@ -7,18 +7,14 @@ function RootHub(p){
     {id:"psicosis",c:COLOR_PSI,ic:"🔺",t:"Psicosis y ánimo",n:"01",d:"Trastornos con prueba de realidad ALTERADA. Delirios, alucinaciones, cuadros afectivos graves.",sub:"Espectro esquizofrénico · Delirante · Bipolares (con depresión mayor como componente)",count:"8 enfermedades"},
     {id:"neurosis",c:COLOR_NEU,ic:"🌀",t:"Neurosis",n:"02",d:"Trastornos con prueba de realidad CONSERVADA. El paciente sabe que algo está mal.",sub:"9 temas completos",count:"60 enfermedades"}
   ];
+  // Sin header local (ni logo, ni título, ni buscador interno): el cromo
+  // de ECEPT (top bar + breadcrumb) provee la identidad y navegación.
+  // La búsqueda global de ECEPT ya indexa SM vía SM_SEARCH_INDEX.
   return e("div",{style:{padding:"16px 14px 90px",maxWidth:640,margin:"0 auto"}},
-    e("div",{style:{textAlign:"center",padding:"32px 10px 22px"}},
-      e("div",{style:{fontSize:46,marginBottom:8}},"🧠"),
-      e("div",{style:{fontSize:10.5,fontWeight:800,color:C.anx,letterSpacing:2.5,textTransform:"uppercase",marginBottom:4}},"ECEPT · El Conocimiento Es Para Todos"),
-      e("h1",{style:{fontSize:32,fontWeight:900,color:"#fff",letterSpacing:.2,lineHeight:1.1,marginBottom:8,fontFamily:"Playfair Display"}},"Salud Mental II"),
-      e("div",{style:{fontSize:13.5,color:C.mt,lineHeight:1.55,maxWidth:460,margin:"0 auto"}},"Apunte completo de psiquiatría. Organizado por la división clásica: ",e("b",{style:{color:"#fff"}},"psicosis vs neurosis"),".")
-    ),
     e("div",{style:{padding:"13px 15px",background:C.cd,border:"1px solid "+C.bd,borderRadius:12,marginBottom:16,fontSize:12.5,lineHeight:1.6,color:C.mt}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:C.pearl,letterSpacing:1.5,textTransform:"uppercase",marginBottom:6}},"🔑 Regla clínica clave"),
       "La ",e("b",{style:{color:"#fff"}},"prueba de realidad")," divide ambos grupos: si el paciente reconoce que sus síntomas son internos y patológicos → ",e("b",{style:{color:"#fff"}},"neurosis"),". Si cree que son reales y externos → ",e("b",{style:{color:"#fff"}},"psicosis"),"."
     ),
-    e(GlobalSearch,{go:p.go}),
     ramas.map(function(r,i){
       return e("button",{key:r.id,onClick:function(){p.go(r.id);},style:{width:"100%",padding:18,background:"linear-gradient(135deg,"+ax(r.c,.15)+" 0%,"+C.cd+" 85%)",border:"1px solid "+ax(r.c,.4),borderRadius:16,margin:"0 0 14px",cursor:"pointer",textAlign:"left",display:"block",animation:"fadeIn .3s "+(i*.08)+"s both"}},
         e("div",{style:{display:"flex",alignItems:"center",gap:14,marginBottom:12}},
