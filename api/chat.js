@@ -69,21 +69,29 @@ module.exports = async function handler(req, res) {
       };
     });
 
-    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + encodeURIComponent(apiKey);
-
-    var geminiResp = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: systemText }] },
-        contents: contents,
-        generationConfig: {
-          maxOutputTokens: 300,
-          temperature: 0.7,
-          responseMimeType: 'application/json'
-        }
-      })
+    var geminiBody = JSON.stringify({
+      systemInstruction: { parts: [{ text: systemText }] },
+      contents: contents,
+      generationConfig: {
+        maxOutputTokens: 300,
+        temperature: 0.7,
+        responseMimeType: 'application/json'
+      }
     });
+
+    // Fallback: try 2.5-flash first; on 503 (overloaded) retry once with 1.5-flash.
+    var GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-1.5-flash'];
+    var geminiResp, modelUsed;
+    for (var mi = 0; mi < GEMINI_MODELS.length; mi++) {
+      modelUsed = GEMINI_MODELS[mi];
+      var geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/' + modelUsed + ':generateContent?key=' + encodeURIComponent(apiKey);
+      geminiResp = await fetch(geminiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: geminiBody
+      });
+      if (geminiResp.status !== 503) break;
+    }
 
     if (!geminiResp.ok) {
       var errText = await geminiResp.text();
