@@ -79,7 +79,8 @@ module.exports = async function handler(req, res) {
       }
     });
 
-    // Fallback: try 2.5-flash first; on 503 (overloaded) retry once with 1.5-flash.
+    // Fallback: try 2.5-flash first; on 503 (overloaded) or 429 (rate limit)
+    // retry once with 1.5-flash, which usually has a separate quota bucket.
     var GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-1.5-flash'];
     var geminiResp, modelUsed;
     for (var mi = 0; mi < GEMINI_MODELS.length; mi++) {
@@ -90,7 +91,7 @@ module.exports = async function handler(req, res) {
         headers: { 'Content-Type': 'application/json' },
         body: geminiBody
       });
-      if (geminiResp.status !== 503) break;
+      if (geminiResp.status !== 503 && geminiResp.status !== 429) break;
     }
 
     if (!geminiResp.ok) {
