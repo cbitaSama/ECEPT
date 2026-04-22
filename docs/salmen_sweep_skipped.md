@@ -29,6 +29,39 @@ Reasons are drawn from a small vocabulary:
 
 ---
 
+## Psicosis · Trastorno bipolar I
+- Especificador "con características mixtas" (DSM-5 reemplazo al antiguo episodio mixto) — skipped: borderline basic (cambio DSM-IV→5; "episodio mixto" ya aparece en tx Table por nombre)
+- Mnemotecnia DIGFAST para episodio maníaco — skipped: teacher-specific phrasing (regional; los 7 síntomas ya están listados)
+- Especificador "con características psicóticas" — skipped: already-covered (la Alert "Regla dura" ya indica que psicosis → manía, no hipomanía)
+- Dosis específicas de litio (inicio / mantenimiento) — skipped: dosing detail
+- Contraindicaciones adicionales de valproato (embarazo · teratogenicidad en tubo neural) — skipped: borderline basic (paralelo a litio/Ebstein; puede añadirse si Sebas lo pide)
+- EEG / estudios complementarios en primer episodio — skipped: borderline basic
+- Escalas (YMRS, MADRS, HAM-D) — skipped: borderline basic (investigación)
+
+## Psicosis · Trastorno delirante
+- Tipos "mixto" y "no especificado" (especificadores DSM-5-TR además de los 5 clásicos) — skipped: borderline basic (completan DSM-5-TR pero los 5 clásicos son los exam-relevantes)
+- Especificador "con contenido extraño" (DSM-5-TR refina "generalmente no bizarros") — skipped: borderline basic (matiz DSM, no siempre enseñado)
+- Trastorno psicótico compartido (folie à deux) — skipped: borderline basic (entidad histórica reubicada en DSM-5)
+— no adds committed
+
+## Psicosis · Trastorno psicótico breve
+- Trastornos de personalidad cluster A como factor de riesgo — skipped: borderline basic (asociación conocida pero no siempre destacada en exámenes)
+- Culture-bound syndromes como variantes regionales — skipped: borderline basic (regional, no DSM-central)
+- DDx con delirium médico — skipped: already-implicit ("no atribuible a afección médica" en criterio C)
+— no adds committed
+
+## Psicosis · Trastorno esquizoafectivo
+- Epidemiología específica (prevalencia 0.3%, mujeres > hombres para subtipo depresivo) — skipped: borderline basic (cifras variables según fuente)
+- Nota sobre riesgo suicida elevado — skipped: already-covered (esquizofrenia lista los factores; riesgo comparable)
+- Edad de inicio típica (20-30 años, bimodal para subtipo depresivo) — skipped: borderline basic
+— no adds committed
+
+## Psicosis · Trastorno esquizofreniforme
+- Epidemiología específica (prevalencia, distribución por sexo) — skipped: borderline basic (poco estudiada aparte de esquizofrenia; cifras varían)
+- Vínculo genético familiar vs esquizofrenia — skipped: already-covered (esquizofrenia card lo detalla; duplicación)
+- Biomarcadores diferenciadores — skipped: borderline basic (investigación, no clínica diaria)
+— no adds committed
+
 ## Psicosis · Esquizofrenia
 - Bleuler's 4/5 A's (asociaciones laxas, autismo, ambivalencia, afecto aplanado, + alucinaciones modernamente) — skipped: borderline basic (historical, not DSM; regional teaching variation)
 - Síntomas de primer rango de Schneider — skipped: borderline basic (historical, not DSM; Latin American programs emphasize differently)
