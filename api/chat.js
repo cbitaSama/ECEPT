@@ -101,8 +101,9 @@ module.exports = async function handler(req, res) {
 
     // Fallback chain: on 429 (rate limit) or 503 (overload), retry the
     // same or next model. 2.5-flash appears twice so a transient 503
-    // gets a second shot before falling back to 1.5-flash.
-    var GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash', 'gemini-1.5-flash'];
+    // gets a second shot before falling back to 2.0-flash (different
+    // quota bucket, so a 429 on 2.5 won't propagate).
+    var GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash', 'gemini-2.0-flash'];
     var geminiResp, modelUsed, lastStatus;
     for (var mi = 0; mi < GEMINI_MODELS.length; mi++) {
       modelUsed = GEMINI_MODELS[mi];
