@@ -43,7 +43,8 @@ function IntroView(p){
          "Estado de ánimo (predominante y sostenido)",
          "Comportamiento (conducta observable)"
        ]}),
-       e(Note,{c:c,t:"Criterios transversales"},"Para considerar algo un trastorno mental se requiere: (1) ",e("b",null,"disfunción")," en uno o más de los 4 ejes, (2) ",e("b",null,"malestar")," o ",e("b",null,"deterioro")," en la vida social, laboral u otras áreas, (3) ",e("b",null,"no atribuible")," a efectos de sustancias ni otra afección médica.")
+       e(Note,{c:c,t:"Criterios transversales"},"Para considerar algo un trastorno mental se requiere: (1) ",e("b",null,"disfunción")," en uno o más de los 4 ejes, (2) ",e("b",null,"malestar")," o ",e("b",null,"deterioro")," en la vida social, laboral u otras áreas, (3) ",e("b",null,"no atribuible")," a efectos de sustancias ni otra afección médica."),
+       e(Note,{c:c,t:"Sistemas de clasificación"},"La psiquiatría actual se apoya en dos manuales principales: ",e("b",null,"DSM-5-TR")," (Asociación Psiquiátrica Americana · 2022), de referencia clínica e investigadora; y ",e("b",null,"CIE-11")," (Organización Mundial de la Salud · vigente desde 2022), usado con fines estadísticos y administrativos a nivel mundial. En Latinoamérica la ",e("b",null,"CIE-10")," sigue en uso amplio durante la transición. Los dos manuales comparten la mayoría de las categorías diagnósticas, con pequeñas diferencias de umbral y nomenclatura.")
      )},
     {id:"psi_neu",ic:"⚖️",t:"Psicosis vs Neurosis",sub:"Tabla fundamental · Dra. Justiniano",c:c,
      content:e("div",null,
