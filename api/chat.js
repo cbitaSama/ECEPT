@@ -93,8 +93,8 @@ module.exports = async function handler(req, res) {
       systemInstruction: { parts: [{ text: systemText }] },
       contents: contents,
       generationConfig: {
-        maxOutputTokens: 300,
-        temperature: 0.7,
+        maxOutputTokens: 400,
+        temperature: 0.4,
         responseMimeType: 'application/json'
       }
     });
