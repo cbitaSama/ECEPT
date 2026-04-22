@@ -12,6 +12,12 @@ module.exports = async function handler(req, res) {
     return;
   }
 
+  if (req.method === 'GET') {
+    var hasKey = !!process.env.ANTHROPIC_API_KEY;
+    res.status(200).json({ hasKey: hasKey, keyPrefix: hasKey ? process.env.ANTHROPIC_API_KEY.slice(0,10) : 'missing' });
+    return;
+  }
+
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
