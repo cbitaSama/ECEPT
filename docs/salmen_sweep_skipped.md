@@ -29,6 +29,18 @@ Reasons are drawn from a small vocabulary:
 
 ---
 
+## Psicosis · Trastorno ciclotímico
+- Prevalencia específica (~0.4–1% lifetime) — skipped: borderline basic
+- Vínculo familiar con bipolar I/II (heredabilidad compartida) — skipped: borderline basic
+- Frecuencia en pacientes con familiares bipolares — skipped: borderline basic
+— no adds committed
+
+## Psicosis · Trastorno bipolar II
+- Pearl "bipolar II ≠ trastorno menor" con énfasis en alto riesgo suicida — skipped: already-covered (def ya dice "paradójicamente MÁS depresivo"; ↓ suicidio con litio documentado en bipolar I)
+- Debate sobre ISRS como monoterapia en BP II — skipped: borderline basic (tema controvertido, evitar por regla de "skip if in doubt")
+- Comorbilidad con trastornos de ansiedad — skipped: borderline basic (relacionado pero no definitorio)
+— no adds committed
+
 ## Psicosis · Trastorno bipolar I
 - Especificador "con características mixtas" (DSM-5 reemplazo al antiguo episodio mixto) — skipped: borderline basic (cambio DSM-IV→5; "episodio mixto" ya aparece en tx Table por nombre)
 - Mnemotecnia DIGFAST para episodio maníaco — skipped: teacher-specific phrasing (regional; los 7 síntomas ya están listados)
