@@ -29,6 +29,40 @@ Reasons are drawn from a small vocabulary:
 
 ---
 
+## Neurosis · TCA
+- AN restrictiva vs purgativa side-by-side Pearl — skipped: already-covered (subtipos Table dentro del AN card)
+- BN vs AN subtipo purgativo — skipped: already-covered (jerarquía Note en Conceptos; criterio E BN excluye AN coexistente)
+- Amenorrea eliminada en DSM-5 (era criterio en DSM-IV) — skipped: borderline basic (histórico DSM; no afecta criterios actuales)
+- SCOFF / EDE-Q / otras escalas de screening — skipped: borderline basic (investigación/atención primaria más que clínica especializada)
+- Pica / rumiación side-by-side — skipped: already-implicit (ambas en 6-entidades Table con núcleo contrastado)
+- Dismorfia muscular como subtipo de AN — skipped: placement ambiguity (pertenece a TDC · capítulo TOC-espectro)
+- Indicaciones de ingreso hospitalario en AN — skipped: already-covered (SxList en tx de AN lista los criterios: IMC <15, bradicardia <40, hipotensión, alteración electrolítica, síncope)
+- Cirugía bariátrica y TpA — skipped: already-covered (Pearl "Manejo de la obesidad" en TpA card)
+— adds committed: 1 Pearl en Perlas section (atracón subjetivo vs objetivo)
+
+## Neurosis · Somáticos y disociativos
+- Def formal de "disociación" como concepto — skipped: already-implicit (conceptos section y Despersonalización Note contrastan suficientemente)
+- TSS vs trastorno delirante somático — skipped: already-covered (criterio F de IAD menciona delirante somático)
+- TID vs esquizofrenia (alters vs alucinaciones auditivas) — skipped: borderline basic (confusión rara en clínica real)
+- Espectro de disociación (normal daydreaming → TID) — skipped: already-covered (Pearl en despersonalización sobre 50% adultos sanos)
+- "Somatización" como término legacy DSM-IV — skipped: borderline basic (ya no oficial)
+- "Síndrome de Briquet" como antecedente histórico — skipped: borderline basic (histórico)
+- Idea sobrevalorada en IAD vs obsesión TOC — skipped: cross-theme (capítulo TOC ya diferencia los pensamientos)
+- Conversión y signo de Babinski / otros negativos clásicos — skipped: already-covered (Signo de Hoover ya es el ancla del card)
+- Trastorno de dolor (chronic pain disorder) como entidad separada — skipped: borderline basic (ya no independiente en DSM-5; es un especificador de TSS con dolor predominante)
+— no adds committed
+
+## Neurosis · Trauma y estrés
+- TEPT vs TEA side-by-side table — skipped: already-covered (DDx table + Perla "TEPT vs TEA · regla temporal" ya lo explican)
+- Trauma tipo I vs tipo II (Terr classification) — skipped: borderline basic (clásico textbook pero no DSM; podría añadirse si Sebas lo pide)
+- Criterios separados para niños ≤6 años en TEPT (DSM-5-TR) — skipped: borderline basic (detalle DSM-TR-específico)
+- Definición formal de "estrés" como concepto distinto de "trauma" — skipped: already-implicit (sección "El criterio A" contrasta qué sí y qué no cuenta como trauma)
+- Prevención primaria post-trauma (crisis intervention, psicoeducación) — skipped: borderline basic
+- Complex PTSD / DESNOS (CIE-11) — skipped: fuera de DSM-5-TR
+- Debriefing psicológico — skipped: tema controvertido (evidencia mixta, no siempre recomendado)
+- Apego reactivo vs relación social desinhibida as distinction-pair table — skipped: already-covered (Perla "Apego reactivo vs desinhibida" ya lo explica)
+— no adds committed
+
 ## Neurosis · TOC y relacionados
 - Tabla conceptual "obsesión vs rumiación vs preocupación vs idea sobrevalorada vs delirio" en Conceptos generales — skipped: already-covered en distinta framing (la DDx table en sección ddx ya diferencia TOC de depresión/TAG/TDC/TEPT/trastorno delirante clínicamente)
 - Obsesiones somáticas como 5ª dimensión — skipped: already-covered (el DSM-5 no las categoriza como dimensión independiente; caen bajo Daño o IAD)
