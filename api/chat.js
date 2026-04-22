@@ -1,5 +1,5 @@
 // Vercel serverless function — ECEPT AI assistant proxy (Gemini 2.5 Flash).
-// Recibe {messages, searchIndex} y devuelve {answer, go} con go = {vista, sec} o null.
+// Recibe {messages, searchIndex} y devuelve {answer, links} con links = array de {vista, sec, label}.
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -37,7 +37,28 @@ module.exports = async function handler(req, res) {
     var messages = Array.isArray(body.messages) ? body.messages : [];
     var searchIndex = Array.isArray(body.searchIndex) ? body.searchIndex : [];
 
-    var systemText = "Eres el asistente de ECEPT, una app de estudio médico para estudiantes de medicina latinoamericanos. Responde SIEMPRE en español latinoamericano, de forma concisa (máximo 3 oraciones). Solo responde sobre medicina y sobre el contenido de ECEPT. Si el usuario pregunta por un tema específico que existe en ECEPT, incluye el campo go con vista y sec para navegar. El índice de búsqueda de ECEPT es: " + JSON.stringify(searchIndex.slice(0, 150)) + " Responde SIEMPRE con JSON puro, sin markdown, en este formato exacto: {\"answer\": \"tu respuesta aquí\", \"go\": null} o {\"answer\": \"tu respuesta\", \"go\": {\"vista\": \"reuma\", \"sec\": \"vasculitis\"}}";
+    var systemText =
+      "Eres el asistente de ECEPT, una app de estudio médico para estudiantes de medicina latinoamericanos. " +
+      "Responde SIEMPRE en español latinoamericano. Sé conciso y directo (pero la suficiente informacion el punto esta en que sepan pero ahorrar tokens). " +
+      "Solo responde sobre medicina y sobre el contenido de ECEPT.\n\n" +
+      "MÓDULOS DISPONIBLES EN ECEPT (solo estos existen, no inventes otros):\n" +
+      "- reuma → Reumatología (AR, LES, Sjögren, Esclerodermia, SAF, Vasculitis, Fibromialgia)\n" +
+      "- general → Generalidades (Inmunología, Pares Craneales, Cascada de Coagulación, Mediadores, Receptores)\n" +
+      "- epid → Epidemiología (Tipos de estudio, Sesgos, Medidas, Lectura crítica)\n" +
+      "- triadas → Tríadas y Síndromes clásicos\n" +
+      "- labs → Valores de Laboratorio (Hemograma, Coagulación, Hepáticas, Renal, Ionograma, Tiroides)\n" +
+      "- fisio → Fisiología (Receptores adrenérgicos, SNA, Proteínas G)\n" +
+      "- emergen → Emergenciología (Quemaduras, ATLS, RCP, Shock)\n" +
+      "- trauma → Trauma (ATLS completo)\n" +
+      "- salud_mental → Salud Mental (Esquizofrenia, Trastorno Bipolar, Trastorno Delirante, Depresión, Ansiedad, TOC)\n" +
+      "- cirugia → Cirugía (Abdomen agudo, Hernias)\n" +
+      "- anatomia → Anatomía (Conducto inguinal)\n" +
+      "- vocab → Vocabulario médico\n\n" +
+      "Cuando el usuario pregunte algo relacionado con uno o más módulos, incluye links de navegación en el campo 'links' (array). Cada link tiene {vista, sec, label}.\n\n" +
+      "Responde SIEMPRE con JSON puro, sin markdown, en este formato exacto:\n" +
+      "{\"answer\": \"tu respuesta aquí\", \"links\": []}\n" +
+      "o con links:\n" +
+      "{\"answer\": \"tu respuesta\", \"links\": [{\"vista\": \"general\", \"sec\": \"coag\", \"label\": \"Cascada de Coagulación\"}, {\"vista\": \"labs\", \"sec\": null, \"label\": \"Laboratorio de Coagulación\"}]}";
 
     // Gemini: "assistant" → "model", últimos 3 turnos.
     var contents = messages.slice(-3).map(function (m) {
@@ -79,7 +100,7 @@ module.exports = async function handler(req, res) {
     rawText = rawText.trim();
 
     var answer = rawText;
-    var go = null;
+    var links = [];
 
     // Tolerate markdown code fences just in case.
     var jsonCandidate = rawText;
@@ -90,15 +111,23 @@ module.exports = async function handler(req, res) {
       var parsed = JSON.parse(jsonCandidate);
       if (parsed && typeof parsed === 'object') {
         if (typeof parsed.answer === 'string') answer = parsed.answer;
-        if (parsed.go && typeof parsed.go === 'object' && typeof parsed.go.vista === 'string') {
-          go = { vista: parsed.go.vista, sec: parsed.go.sec == null ? null : parsed.go.sec };
+        if (Array.isArray(parsed.links)) {
+          links = parsed.links
+            .filter(function (l) { return l && typeof l === 'object' && typeof l.vista === 'string'; })
+            .map(function (l) {
+              return {
+                vista: l.vista,
+                sec: l.sec == null ? null : l.sec,
+                label: typeof l.label === 'string' ? l.label : l.vista
+              };
+            });
         }
       }
     } catch (e) {
-      // Not JSON — treat whole text as answer, go stays null.
+      // Not JSON — treat whole text as answer, links stays [].
     }
 
-    res.status(200).json({ answer: answer, go: go });
+    res.status(200).json({ answer: answer, links: links });
   } catch (err) {
     res.status(500).json({ error: (err && err.message) ? err.message : 'Unknown error', stack: err ? String(err) : 'none' });
   }

@@ -69,7 +69,7 @@ function ChatBot(){
         CB_setLoading(false);
         if(data && typeof data.answer==="string"){
           CB_setMsgs(function(prev){
-            var arr=prev.concat([{role:"assistant",text:data.answer,go:data.go||null}]);
+            var arr=prev.concat([{role:"assistant",text:data.answer,links:Array.isArray(data.links)?data.links:[]}]);
             if(arr.length>CB_MAX_MSGS) arr=arr.slice(arr.length-CB_MAX_MSGS);
             return arr;
           });
@@ -205,21 +205,26 @@ function ChatBot(){
                   wordBreak:"break-word",
                   whiteSpace:"pre-wrap"
                 }}, m.text),
-                !isUser && m.go && e("button",{
-                  onClick:function(){ CB_onGo(m.go); },
-                  style:{
-                    minHeight:"44px",
-                    padding:"8px 14px",
-                    borderRadius:"999px",
-                    background:"rgba(59,130,246,.12)",
-                    border:"1px solid rgba(59,130,246,.35)",
-                    color:"#60a5fa",
-                    fontSize:"12px",
-                    fontWeight:700,
-                    cursor:"pointer",
-                    alignSelf:"flex-start"
-                  }
-                },"→ Ir a sección")
+                !isUser && Array.isArray(m.links) && m.links.length>0 && e("div",{style:{display:"flex", flexWrap:"wrap", gap:"6px", alignSelf:"flex-start", maxWidth:"100%"}},
+                  m.links.map(function(lk,li){
+                    return e("button",{
+                      key:li,
+                      onClick:function(){ CB_onGo({vista:lk.vista, sec:lk.sec||null}); },
+                      style:{
+                        minHeight:"44px",
+                        padding:"8px 14px",
+                        borderRadius:"999px",
+                        background:"rgba(59,130,246,.12)",
+                        border:"1px solid rgba(59,130,246,.35)",
+                        color:"#60a5fa",
+                        fontSize:"12px",
+                        fontWeight:700,
+                        cursor:"pointer",
+                        textAlign:"left"
+                      }
+                    }, "→ "+(lk.label||lk.vista));
+                  })
+                )
               );
             }),
             CB_loading && e("div",{style:{color:C.dm, fontSize:"12px", fontStyle:"italic"}},"escribiendo..."),
