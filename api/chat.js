@@ -99,14 +99,10 @@ module.exports = async function handler(req, res) {
       }
     });
 
-    // Fallback chain: on 429 (rate limit) or 503 (overload), retry on the
-    // next model. Lite variants generally have a separate quota bucket.
-    var GEMINI_MODELS = [
-      'gemini-2.5-flash',
-      'gemini-2.5-flash-lite',
-      'gemini-2.0-flash',
-      'gemini-2.0-flash-lite'
-    ];
+    // Fallback chain: on 429 (rate limit) or 503 (overload), retry the
+    // same or next model. 2.5-flash appears twice so a transient 503
+    // gets a second shot before falling back to 1.5-flash.
+    var GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash', 'gemini-1.5-flash'];
     var geminiResp, modelUsed, lastStatus;
     for (var mi = 0; mi < GEMINI_MODELS.length; mi++) {
       modelUsed = GEMINI_MODELS[mi];
@@ -117,7 +113,10 @@ module.exports = async function handler(req, res) {
         body: geminiBody
       });
       lastStatus = geminiResp.status;
-      if (lastStatus !== 503 && lastStatus !== 429) break;
+      if (geminiResp.status !== 503 && geminiResp.status !== 429) break;
+      if (geminiResp.status === 503) {
+        await new Promise(function(resolve) { setTimeout(resolve, 1000); });
+      }
     }
 
     // If every model in the chain returned 429, surface a friendly
