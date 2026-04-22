@@ -29,6 +29,18 @@ Reasons are drawn from a small vocabulary:
 
 ---
 
+## Neurosis · Depresivos
+- Tríada cognitiva de Beck (yo · mundo · futuro negativos) — skipped: borderline basic (clásico psicodinámico/TCC; no es criterio DSM)
+- Pseudodemencia depresiva en adulto mayor — skipped: borderline basic (DDx clásico importante; pendiente si Sebas lo pide como cruce con Neuro/geriatría)
+- Anhedonia anticipatoria vs consumatoria — skipped: borderline basic (matiz investigación)
+- Screening PHQ-9 / PHQ-2 / Hamilton-D / MADRS — skipped: borderline basic (atención primaria/investigación)
+- Epidemiología global OMS — skipped: borderline basic (cifras varían por fuente)
+- Duelo complicado vs duelo prolongado — skipped: cross-theme (duelo prolongado en Trauma)
+- Estacional y hemisferio sur — skipped: borderline basic (variante cultural/geográfica)
+- Neuroquímica serotonina/NE/dopamina explicada en detalle — skipped: borderline basic (psicofarmacología general)
+- Sd de discontinuación de ISRS detalle clínico — skipped: already-covered (reglas de oro Alert menciona titulación)
+— no adds committed
+
 ## Neurosis · Control de impulsos
 - Def formal de "impulsividad" como concepto — skipped: already-implicit (conceptos y cada card lo describen funcionalmente)
 - Trastorno de desregulación disruptiva del estado de ánimo (TDDD) — skipped: cross-theme (pertenece a Depresivos)
