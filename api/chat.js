@@ -66,7 +66,7 @@ module.exports = async function handler(req, res) {
 
     if (!anthropicResp.ok) {
       var errText = await anthropicResp.text();
-      res.status(500).json({ error: 'Anthropic API error: ' + anthropicResp.status + ' ' + errText.slice(0, 500) });
+      res.status(500).json({ error: 'Anthropic API error: ' + anthropicResp.status + ' ' + errText });
       return;
     }
 
@@ -104,6 +104,6 @@ module.exports = async function handler(req, res) {
 
     res.status(200).json({ answer: answer, go: go });
   } catch (err) {
-    res.status(500).json({ error: (err && err.message) ? err.message : 'Unknown error' });
+    res.status(500).json({ error: (err && err.message) ? err.message : 'Unknown error', stack: err ? String(err) : 'none' });
   }
 };
