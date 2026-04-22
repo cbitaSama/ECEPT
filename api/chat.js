@@ -47,7 +47,7 @@ module.exports = async function handler(req, res) {
       };
     });
 
-    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + encodeURIComponent(apiKey);
+    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + encodeURIComponent(apiKey);
 
     var geminiResp = await fetch(url, {
       method: 'POST',
