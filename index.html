@@ -7831,76 +7831,17 @@ function DzCard(p){
   );
 }
 
-// Pantalla inline de una enfermedad · usa tabs internos.
-// Originalmente era un modal full-viewport (position:fixed) porque el
-// artefacto standalone tenía scroll propio. Dentro de ECEPT esa estrategia
-// peleaba con el contenedor de scroll del host en iPad Safari: el contenido
-// se renderizaba pero no podía desplazarse ni los tabs tocarse. Ahora es
-// una vista inline en el flujo normal del documento; el header queda sticky
-// debajo del top bar de ECEPT (top:62) para que "← Cerrar" y las pestañas
-// sigan accesibles mientras el usuario scrollea el contenido.
-function DzModal(p){
-  var c=p.c||C.anx;
-  var isSingle=!!p.single;
-  var s1=useState("def");var tab=s1[0],setTab=s1[1];
-  var tabs=[
-    {k:"def",l:"Definición",ic:"📖"},
-    {k:"cli",l:"Clínica",ic:"🩺"},
-    {k:"dx",l:"Diagnóstico",ic:"📋"},
-    {k:"tx",l:"Tratamiento",ic:"💊"}
-  ];
-  // Al abrir, saltar al tope de la página para que el usuario aterrice en el
-  // header de la enfermedad (no en medio de donde estaba el grid).
-  useEffect(function(){
-    window.scrollTo({top:0,behavior:"instant"});
-  },[]);
-  return e("div",{style:{background:C.bg,animation:"fadeIn .2s"}},
-    // Header sticky debajo del top bar de ECEPT (top:62) con "← Cerrar" + tabs.
-    e("div",{style:{position:"sticky",top:62,zIndex:10,background:"rgba(6,10,20,.94)",backdropFilter:"blur(12px)",borderBottom:"1px solid "+C.bd,padding:"10px 14px"}},
-      e("div",{style:{display:"flex",alignItems:"center",gap:10,marginBottom:isSingle?0:10}},
-        e("button",{onClick:p.onClose,style:{padding:"8px 12px",background:ax(c,.15),border:"1px solid "+ax(c,.35),color:c,borderRadius:8,fontSize:12.5,fontWeight:700,cursor:"pointer"}},"← Cerrar"),
-        e("div",{style:{flex:1,minWidth:0}},
-          e("div",{style:{fontSize:9.5,fontWeight:800,color:c,letterSpacing:1.8,textTransform:"uppercase",marginBottom:1,opacity:.85}},p.kicker||"Enfermedad"),
-          e("div",{style:{fontSize:15,fontWeight:800,color:"#fff",lineHeight:1.2,fontFamily:"Playfair Display",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}},p.name)
-        )
-      ),
-      // Tabs (solo si no es single)
-      isSingle?null:e("div",{style:{display:"flex",gap:6,overflowX:"auto",paddingBottom:2}},
-        tabs.map(function(t){
-          var active=tab===t.k;
-          return e("button",{key:t.k,onClick:function(){setTab(t.k);window.scrollTo({top:0,behavior:"instant"});},style:{padding:"7px 12px",background:active?c:ax(c,.1),border:"1px solid "+(active?c:ax(c,.3)),color:active?"#fff":c,borderRadius:8,fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5,whiteSpace:"nowrap",flexShrink:0}},
-            e("span",null,t.ic),
-            e("span",null,t.l)
-          );
-        })
-      )
-    ),
-    // Content
-    e("div",{style:{padding:"14px 14px 40px",maxWidth:720,margin:"0 auto",animation:"fadeIn .2s"}},
-      isSingle?p.single:(p.sections&&p.sections[tab]?p.sections[tab]:e(P,null,"(sin contenido)"))
-    )
-  );
-}
-
-// Grid de tarjetas de enfermedades. Al host (SM App) le pasamos onOpen, y al
-// tocar una tarjeta delegamos — la App promueve la enfermedad a ruta de
-// primer nivel (view="disease") y la vista del hub es reemplazada por
-// DzDetail. Esto replica el patrón reuma_dis de ECEPT: una sola vista
-// activa a la vez, sin acordeón ni modal anidado, sin botón "Cerrar".
-// Si onOpen no está presente (mount standalone del artefacto original),
-// caemos al comportamiento legacy inline con DzModal como fallback.
+// Grid de tarjetas de enfermedades. El host (SM App) provee onOpen; al tocar
+// una tarjeta delegamos — la App promueve la enfermedad a ruta de primer
+// nivel (view="disease") y la vista del hub es reemplazada por DzDetail.
+// Mismo patrón que reuma_dis en ECEPT: una sola vista activa a la vez, sin
+// acordeón ni modal anidado, sin botón "Cerrar".
 function DzGrid(p){
   var c=p.c||C.anx;
-  var s1=useState(null);var open=s1[0],setOpen=s1[1];
-  var hasHost=!!p.onOpen;
-  if(!hasHost && open!==null){
-    var it=p.items[open];
-    return e(DzModal,{c:c,name:it.name,kicker:it.kicker||"Enfermedad",sections:it.sections,onClose:function(){setOpen(null);}});
-  }
   return e("div",null,
     e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))",gap:10,margin:"14px 0 10px"}},
       p.items.map(function(it,i){
-        return e("button",{key:i,onClick:function(){if(hasHost){p.onOpen(it);}else{setOpen(i);}},style:{padding:"14px 12px",background:"linear-gradient(135deg,"+ax(c,.15)+","+ax(c,.04)+" 85%)",border:"1px solid "+ax(c,.35),borderRadius:12,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:110,transition:"transform .15s"}},
+        return e("button",{key:i,onClick:function(){if(p&&p.onOpen)p.onOpen(it);},style:{padding:"14px 12px",background:"linear-gradient(135deg,"+ax(c,.15)+","+ax(c,.04)+" 85%)",border:"1px solid "+ax(c,.35),borderRadius:12,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:110,transition:"transform .15s"}},
           e("div",{style:{display:"flex",alignItems:"center",gap:8,marginBottom:5}},
             e("div",{style:{minWidth:28,height:28,borderRadius:7,background:ax(c,.25),color:c,fontSize:13,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Playfair Display",border:"1px solid "+ax(c,.4)}},it.n),
             e("div",{style:{fontSize:9,fontWeight:800,color:c,letterSpacing:1.3,textTransform:"uppercase"}},it.kicker||"Enfermedad")
@@ -7910,6 +7851,26 @@ function DzGrid(p){
           e("div",{style:{fontSize:10.5,fontWeight:700,color:c,marginTop:4,opacity:.8}},"Ver ficha →")
         );
       })
+    )
+  );
+}
+
+// Vista inline de una "sección general" de un hub (perlas, resumen,
+// flashcards, quiz, conceptos del tema 0, etc.) — ruta de primer nivel
+// en SM. Sin tabs (el contenido es un bloque único) y sin botón "Cerrar":
+// volver al hub es responsabilidad del FAB ← de ECEPT vía smBackRef.
+function DzSectionView(p){
+  var c=p.c||C.anx;
+  useEffect(function(){
+    window.scrollTo({top:0,behavior:"instant"});
+  },[p.name]);
+  return e("div",{style:{background:C.bg,animation:"fadeIn .2s"}},
+    e("div",{style:{position:"sticky",top:62,zIndex:10,background:"rgba(6,10,20,.94)",backdropFilter:"blur(12px)",borderBottom:"1px solid "+C.bd,padding:"10px 14px"}},
+      e("div",{style:{fontSize:9.5,fontWeight:800,color:c,letterSpacing:1.8,textTransform:"uppercase",marginBottom:1,opacity:.85}},p.kicker||"Sección del tema"),
+      e("div",{style:{fontSize:15,fontWeight:800,color:"#fff",lineHeight:1.2,fontFamily:"Playfair Display"}},p.name)
+    ),
+    e("div",{style:{padding:"14px 14px 40px",maxWidth:720,margin:"0 auto",animation:"fadeIn .2s"}},
+      p.content
     )
   );
 }
@@ -8227,7 +8188,8 @@ function AnxView(p){
   ];
 
   // Secciones generales del tema (cada una también modal)
-  var s1=useState(null);var openGen=s1[0],setOpenGen=s1[1];
+  // Section tiles delegate to p.onOpenSection (SM App promotes them to
+  // view="section" as a full inline page — no inline DzModal here).
   var general=[
     {id:"conceptos",ic:"🧭",t:"Conceptos generales",sub:"Ansiedad normal vs trastorno",c:c,
      content:e("div",null,
@@ -8384,14 +8346,13 @@ function AnxView(p){
     ),
     e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:10,marginTop:10}},
       general.map(function(g,i){
-        return e("button",{key:g.id,onClick:function(){setOpenGen(i);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:90}},
+        return e("button",{key:g.id,onClick:function(){if(p&&p.onOpenSection)p.onOpenSection(g);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:90}},
           e("div",{style:{fontSize:22,marginBottom:4}},g.ic),
           e("div",{style:{fontSize:13,fontWeight:800,color:"#fff",lineHeight:1.25,fontFamily:"Playfair Display"}},g.t),
           e("div",{style:{fontSize:11,color:C.mt,lineHeight:1.4,marginTop:2}},g.sub)
         );
       })
     ),
-    openGen!==null?e(DzModal,{c:general[openGen].c,name:general[openGen].t,kicker:"Sección del tema",single:general[openGen].content,onClose:function(){setOpenGen(null);}}):null,
 
     // === SECCIONES GENERALES DEL TEMA ===
     e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.15)+","+ax(c,.04)+" 90%)",border:"1px solid "+ax(c,.35),borderRadius:14,margin:"18px 0 4px",textAlign:"center"}},
@@ -8854,7 +8815,8 @@ function PsicosisView(p){
     }
   ];
 
-  var s1=useState(null);var openGen=s1[0],setOpenGen=s1[1];
+  // Section tiles delegate to p.onOpenSection (SM App promotes them to
+  // view="section" as a full inline page — no inline DzModal here).
   var general=[
     {id:"conceptos",ic:"🧭",t:"Conceptos generales",sub:"SM · Psiquiatría · Tratamientos",c:c,
      content:e("div",null,
@@ -9006,14 +8968,13 @@ function PsicosisView(p){
     ),
     e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:10,marginTop:10}},
       general.map(function(g,i){
-        return e("button",{key:g.id,onClick:function(){setOpenGen(i);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:90}},
+        return e("button",{key:g.id,onClick:function(){if(p&&p.onOpenSection)p.onOpenSection(g);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:90}},
           e("div",{style:{fontSize:22,marginBottom:4}},g.ic),
           e("div",{style:{fontSize:13,fontWeight:800,color:"#fff",lineHeight:1.25,fontFamily:"Playfair Display"}},g.t),
           e("div",{style:{fontSize:11,color:C.mt,lineHeight:1.4,marginTop:2}},g.sub)
         );
       })
     ),
-    openGen!==null?e(DzModal,{c:general[openGen].c,name:general[openGen].t,kicker:"Sección del tema",single:general[openGen].content,onClose:function(){setOpenGen(null);}}):null,
 
     // Línea de tiempo del espectro psicótico (clave anti-confusión)
     e("div",{style:{padding:"16px 14px",background:"linear-gradient(135deg,"+ax(C.esq,.12)+","+C.cd+" 90%)",border:"1px solid "+ax(C.esq,.3),borderRadius:12,margin:"14px 0 4px"}},
@@ -9263,7 +9224,8 @@ function OCDView(p){
     }
   ];
 
-  var s1=useState(null);var openGen=s1[0],setOpenGen=s1[1];
+  // Section tiles delegate to p.onOpenSection (SM App promotes them to
+  // view="section" as a full inline page — no inline DzModal here).
   var general=[
     {id:"conceptos",ic:"🧭",t:"Conceptos generales",sub:"Del capítulo TOC y espectro",c:c,
      content:e("div",null,
@@ -9368,14 +9330,13 @@ function OCDView(p){
     ),
     e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:10,marginTop:10}},
       general.map(function(g,i){
-        return e("button",{key:g.id,onClick:function(){setOpenGen(i);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:90}},
+        return e("button",{key:g.id,onClick:function(){if(p&&p.onOpenSection)p.onOpenSection(g);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:90}},
           e("div",{style:{fontSize:22,marginBottom:4}},g.ic),
           e("div",{style:{fontSize:13,fontWeight:800,color:"#fff",lineHeight:1.25,fontFamily:"Playfair Display"}},g.t),
           e("div",{style:{fontSize:11,color:C.mt,lineHeight:1.4,marginTop:2}},g.sub)
         );
       })
     ),
-    openGen!==null?e(DzModal,{c:general[openGen].c,name:general[openGen].t,kicker:"Sección del tema",single:general[openGen].content,onClose:function(){setOpenGen(null);}}):null,
 
     e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.15)+","+ax(c,.04)+" 90%)",border:"1px solid "+ax(c,.35),borderRadius:14,margin:"18px 0 4px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Las 7 enfermedades"),
@@ -9612,7 +9573,8 @@ function TraumaView(p){
     }
   ];
 
-  var s1=useState(null);var openGen=s1[0],setOpenGen=s1[1];
+  // Section tiles delegate to p.onOpenSection (SM App promotes them to
+  // view="section" as a full inline page — no inline DzModal here).
   var general=[
     {id:"conceptos",ic:"🧭",t:"Conceptos generales",sub:"Organización del capítulo",c:c,
      content:e("div",null,
@@ -9724,14 +9686,13 @@ function TraumaView(p){
     ),
     e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:10,marginTop:10}},
       general.map(function(g,i){
-        return e("button",{key:g.id,onClick:function(){setOpenGen(i);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:90}},
+        return e("button",{key:g.id,onClick:function(){if(p&&p.onOpenSection)p.onOpenSection(g);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:90}},
           e("div",{style:{fontSize:22,marginBottom:4}},g.ic),
           e("div",{style:{fontSize:13,fontWeight:800,color:"#fff",lineHeight:1.25,fontFamily:"Playfair Display"}},g.t),
           e("div",{style:{fontSize:11,color:C.mt,lineHeight:1.4,marginTop:2}},g.sub)
         );
       })
     ),
-    openGen!==null?e(DzModal,{c:general[openGen].c,name:general[openGen].t,kicker:"Sección del tema",single:general[openGen].content,onClose:function(){setOpenGen(null);}}):null,
 
     e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.15)+","+ax(c,.04)+" 90%)",border:"1px solid "+ax(c,.35),borderRadius:14,margin:"18px 0 4px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Las 6 enfermedades"),
@@ -9957,7 +9918,8 @@ function SomView(p){
     }
   ];
 
-  var s1=useState(null);var openGen=s1[0],setOpenGen=s1[1];
+  // Section tiles delegate to p.onOpenSection (SM App promotes them to
+  // view="section" as a full inline page — no inline DzModal here).
   var general=[
     {id:"conceptos",ic:"🧭",t:"Conceptos generales",sub:"Somáticos · Disociativos",c:c,
      content:e("div",null,
@@ -10066,14 +10028,13 @@ function SomView(p){
     ),
     e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:10,marginTop:10}},
       general.map(function(g,i){
-        return e("button",{key:g.id,onClick:function(){setOpenGen(i);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:90}},
+        return e("button",{key:g.id,onClick:function(){if(p&&p.onOpenSection)p.onOpenSection(g);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:90}},
           e("div",{style:{fontSize:22,marginBottom:4}},g.ic),
           e("div",{style:{fontSize:13,fontWeight:800,color:"#fff",lineHeight:1.25,fontFamily:"Playfair Display"}},g.t),
           e("div",{style:{fontSize:11,color:C.mt,lineHeight:1.4,marginTop:2}},g.sub)
         );
       })
     ),
-    openGen!==null?e(DzModal,{c:general[openGen].c,name:general[openGen].t,kicker:"Sección del tema",single:general[openGen].content,onClose:function(){setOpenGen(null);}}):null,
 
     e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.15)+","+ax(c,.04)+" 90%)",border:"1px solid "+ax(c,.35),borderRadius:14,margin:"18px 0 4px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Las 8 enfermedades"),
@@ -10372,7 +10333,8 @@ function TCAView(p){
     }
   ];
 
-  var s1=useState(null);var openGen=s1[0],setOpenGen=s1[1];
+  // Section tiles delegate to p.onOpenSection (SM App promotes them to
+  // view="section" as a full inline page — no inline DzModal here).
   var general=[
     {id:"conceptos",ic:"🧭",t:"Conceptos generales",sub:"Del capítulo TCA",c:c,
      content:e("div",null,
@@ -10511,14 +10473,13 @@ function TCAView(p){
     ),
     e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:10,marginTop:10}},
       general.map(function(g,i){
-        return e("button",{key:g.id,onClick:function(){setOpenGen(i);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:90}},
+        return e("button",{key:g.id,onClick:function(){if(p&&p.onOpenSection)p.onOpenSection(g);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:90}},
           e("div",{style:{fontSize:22,marginBottom:4}},g.ic),
           e("div",{style:{fontSize:13,fontWeight:800,color:"#fff",lineHeight:1.25,fontFamily:"Playfair Display"}},g.t),
           e("div",{style:{fontSize:11,color:C.mt,lineHeight:1.4,marginTop:2}},g.sub)
         );
       })
     ),
-    openGen!==null?e(DzModal,{c:general[openGen].c,name:general[openGen].t,kicker:"Sección del tema",single:general[openGen].content,onClose:function(){setOpenGen(null);}}):null,
 
     e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.15)+","+ax(c,.04)+" 90%)",border:"1px solid "+ax(c,.35),borderRadius:14,margin:"18px 0 4px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Las 6 enfermedades"),
@@ -10900,7 +10861,8 @@ function SueView(p){
     }
   ];
 
-  var s1=useState(null);var openGen=s1[0],setOpenGen=s1[1];
+  // Section tiles delegate to p.onOpenSection (SM App promotes them to
+  // view="section" as a full inline page — no inline DzModal here).
   var general=[
     {id:"conceptos",ic:"🧭",t:"Conceptos generales",sub:"Arquitectura del sueño",c:c,
      content:e("div",null,
@@ -11023,14 +10985,13 @@ function SueView(p){
     ),
     e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:10,marginTop:10}},
       general.map(function(g,i){
-        return e("button",{key:g.id,onClick:function(){setOpenGen(i);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:90}},
+        return e("button",{key:g.id,onClick:function(){if(p&&p.onOpenSection)p.onOpenSection(g);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:90}},
           e("div",{style:{fontSize:22,marginBottom:4}},g.ic),
           e("div",{style:{fontSize:13,fontWeight:800,color:"#fff",lineHeight:1.25,fontFamily:"Playfair Display"}},g.t),
           e("div",{style:{fontSize:11,color:C.mt,lineHeight:1.4,marginTop:2}},g.sub)
         );
       })
     ),
-    openGen!==null?e(DzModal,{c:general[openGen].c,name:general[openGen].t,kicker:"Sección del tema",single:general[openGen].content,onClose:function(){setOpenGen(null);}}):null,
 
     e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.15)+","+ax(c,.04)+" 90%)",border:"1px solid "+ax(c,.35),borderRadius:14,margin:"18px 0 4px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Las 9 enfermedades"),
@@ -11306,7 +11267,8 @@ function PerView(p){
     }
   ];
 
-  var s1=useState(null);var openGen=s1[0],setOpenGen=s1[1];
+  // Section tiles delegate to p.onOpenSection (SM App promotes them to
+  // view="section" as a full inline page — no inline DzModal here).
   var general=[
     {id:"conceptos",ic:"🧭",t:"Conceptos generales",sub:"Definición y organización",c:c,
      content:e("div",null,
@@ -11427,14 +11389,13 @@ function PerView(p){
     ),
     e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:10,marginTop:10}},
       general.map(function(g,i){
-        return e("button",{key:g.id,onClick:function(){setOpenGen(i);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:90}},
+        return e("button",{key:g.id,onClick:function(){if(p&&p.onOpenSection)p.onOpenSection(g);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:90}},
           e("div",{style:{fontSize:22,marginBottom:4}},g.ic),
           e("div",{style:{fontSize:13,fontWeight:800,color:"#fff",lineHeight:1.25,fontFamily:"Playfair Display"}},g.t),
           e("div",{style:{fontSize:11,color:C.mt,lineHeight:1.4,marginTop:2}},g.sub)
         );
       })
     ),
-    openGen!==null?e(DzModal,{c:general[openGen].c,name:general[openGen].t,kicker:"Sección del tema",single:general[openGen].content,onClose:function(){setOpenGen(null);}}):null,
 
     e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.15)+","+ax(c,.04)+" 90%)",border:"1px solid "+ax(c,.35),borderRadius:14,margin:"18px 0 4px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Los 10 trastornos"),
@@ -11591,7 +11552,8 @@ function ImpView(p){
     }
   ];
 
-  var s1=useState(null);var openGen=s1[0],setOpenGen=s1[1];
+  // Section tiles delegate to p.onOpenSection (SM App promotes them to
+  // view="section" as a full inline page — no inline DzModal here).
   var general=[
     {id:"conceptos",ic:"🧭",t:"Conceptos generales",sub:"Organización del capítulo",c:c,
      content:e("div",null,
@@ -11679,14 +11641,13 @@ function ImpView(p){
     ),
     e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:10,marginTop:10}},
       general.map(function(g,i){
-        return e("button",{key:g.id,onClick:function(){setOpenGen(i);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:90}},
+        return e("button",{key:g.id,onClick:function(){if(p&&p.onOpenSection)p.onOpenSection(g);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:90}},
           e("div",{style:{fontSize:22,marginBottom:4}},g.ic),
           e("div",{style:{fontSize:13,fontWeight:800,color:"#fff",lineHeight:1.25,fontFamily:"Playfair Display"}},g.t),
           e("div",{style:{fontSize:11,color:C.mt,lineHeight:1.4,marginTop:2}},g.sub)
         );
       })
     ),
-    openGen!==null?e(DzModal,{c:general[openGen].c,name:general[openGen].t,kicker:"Sección del tema",single:general[openGen].content,onClose:function(){setOpenGen(null);}}):null,
 
     e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.15)+","+ax(c,.04)+" 90%)",border:"1px solid "+ax(c,.35),borderRadius:14,margin:"18px 0 4px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Las 5 entidades"),
@@ -11926,7 +11887,8 @@ function DprView(p){
     }
   ];
 
-  var s1=useState(null);var openGen=s1[0],setOpenGen=s1[1];
+  // Section tiles delegate to p.onOpenSection (SM App promotes them to
+  // view="section" as a full inline page — no inline DzModal here).
   var general=[
     {id:"conceptos",ic:"🧭",t:"Conceptos generales",sub:"Del capítulo depresivos",c:c,
      content:e("div",null,
@@ -12052,14 +12014,13 @@ function DprView(p){
     ),
     e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:10,marginTop:10}},
       general.map(function(g,i){
-        return e("button",{key:g.id,onClick:function(){setOpenGen(i);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:90}},
+        return e("button",{key:g.id,onClick:function(){if(p&&p.onOpenSection)p.onOpenSection(g);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:90}},
           e("div",{style:{fontSize:22,marginBottom:4}},g.ic),
           e("div",{style:{fontSize:13,fontWeight:800,color:"#fff",lineHeight:1.25,fontFamily:"Playfair Display"}},g.t),
           e("div",{style:{fontSize:11,color:C.mt,lineHeight:1.4,marginTop:2}},g.sub)
         );
       })
     ),
-    openGen!==null?e(DzModal,{c:general[openGen].c,name:general[openGen].t,kicker:"Sección del tema",single:general[openGen].content,onClose:function(){setOpenGen(null);}}):null,
 
     e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.15)+","+ax(c,.04)+" 90%)",border:"1px solid "+ax(c,.35),borderRadius:14,margin:"18px 0 4px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Las 4 entidades"),
@@ -12467,10 +12428,10 @@ function GlobalSearch(p){
 
 
 
-function IntroView(){
+function IntroView(p){
   var c=C.intro;
-
-  var s1=useState(null);var openGen=s1[0],setOpenGen=s1[1];
+  // onOpenSection: provided by SM App. Delega el tap de cada tile a la
+  // ruta de primer nivel view="section" en lugar de abrir un modal inline.
   var secciones=[
     {id:"oms",ic:"🏥",t:"Definiciones de la OMS",sub:"Salud · Salud mental · Psiquiatría",c:c,
      content:e("div",null,
@@ -12652,14 +12613,13 @@ function IntroView(){
     ),
     e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:10,marginTop:10}},
       secciones.map(function(g,i){
-        return e("button",{key:g.id,onClick:function(){setOpenGen(i);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:100}},
+        return e("button",{key:g.id,onClick:function(){if(p&&p.onOpenSection)p.onOpenSection(g);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:100}},
           e("div",{style:{fontSize:22,marginBottom:4}},g.ic),
           e("div",{style:{fontSize:13,fontWeight:800,color:"#fff",lineHeight:1.25,fontFamily:"Playfair Display"}},g.t),
           e("div",{style:{fontSize:11,color:C.mt,lineHeight:1.4,marginTop:2}},g.sub)
         );
       })
     ),
-    openGen!==null?e(DzModal,{c:secciones[openGen].c,name:secciones[openGen].t,kicker:"Sección del tema",single:secciones[openGen].content,onClose:function(){setOpenGen(null);}}):null,
 
     e(Abbrev,{c:c,items:[
       {a:"OMS",d:"Organización Mundial de la Salud"},
@@ -12799,6 +12759,11 @@ function App(p){
   // came from (so back goes there via popStack and the breadcrumb renders
   // the parent crumb correctly).
   var s2d=useState(null);var diseaseCtx=s2d[0],setDiseaseCtx=s2d[1];
+  // Section route context: populated when view==="section". Carries the
+  // section object ({id,t,sub,c,content}) from a theme/intro hub's
+  // "general" grid (Perlas, Resumen, Flashcards, Quiz, Conceptos…) plus
+  // the id of the hub we came from (for back + breadcrumb).
+  var s2s=useState(null);var sectionCtx=s2s[0],setSectionCtx=s2s[1];
   var s2=useState(false);var showTop=s2[0],setShowTop=s2[1];
 
   useEffect(function(){
@@ -12826,17 +12791,19 @@ function App(p){
 
   // Notify host (ECEPT) on every view change so it can render a deeper
   // breadcrumb ("Inicio › Salud Mental II › Neurosis › Ansiedad", etc.).
-  // When on a disease route we also pass {name, parent} so ECEPT can append
-  // the disease name as the last crumb. No-op when mounted standalone.
+  // When on disease/section routes we also pass {name, parent} so ECEPT
+  // can append the leaf name as the last crumb. No-op when standalone.
   useEffect(function(){
     if(p&&typeof p.onViewChange==="function"){
       if(view==="disease" && diseaseCtx){
         p.onViewChange(view,{name:diseaseCtx.item.name,parent:diseaseCtx.parent});
+      } else if(view==="section" && sectionCtx){
+        p.onViewChange(view,{name:sectionCtx.section.t,parent:sectionCtx.parent});
       } else {
         p.onViewChange(view,null);
       }
     }
-  },[view,diseaseCtx]);
+  },[view,diseaseCtx,sectionCtx]);
 
   function popStack(){
     if(smHist.length>0){
@@ -12860,6 +12827,15 @@ function App(p){
     setSmHist(function(h){return h.concat([view]);});
     setDiseaseCtx({item:item,color:color,parent:view});
     setView("disease");
+  }
+  // Igual que openDisease pero para las "secciones generales" de cada hub
+  // (Perlas, Resumen, Flashcards del tema, Quiz del tema, Conceptos del
+  // tema 0, etc.). La sección ya trae su propio color en section.c.
+  function openSection(section){
+    if(!section)return;
+    setSmHist(function(h){return h.concat([view]);});
+    setSectionCtx({section:section,parent:view});
+    setView("section");
   }
   // Internal "← Inicio" buttons in sub-views. Falls back to onHome if the
   // stack is somehow empty (defensive — sub-views only show after navigation).
@@ -12904,7 +12880,7 @@ function App(p){
   if(view==="intro"){
     return e("div",null,
       e("div",{style:{padding:"14px 14px 90px",maxWidth:720,margin:"0 auto",animation:"fadeIn .3s"}},
-        e(IntroView,null)
+        e(IntroView,{onOpenSection:openSection})
       ),
       scrollTopBtn(C.intro)
     );
@@ -12920,9 +12896,25 @@ function App(p){
   if(view==="psicosis"){
     return e("div",null,
       e("div",{style:{padding:"14px 14px 90px",maxWidth:720,margin:"0 auto",animation:"fadeIn .3s"}},
-        e(PsicosisView,{go:go,onOpen:function(item){openDisease(item,C.psi);}})
+        e(PsicosisView,{go:go,onOpen:function(item){openDisease(item,C.psi);},onOpenSection:openSection})
       ),
       scrollTopBtn(C.psi)
+    );
+  }
+
+  // Section route: renderiza DzSectionView como página completa (sección
+  // general de un hub: perlas, resumen, flashcards del tema, quiz del
+  // tema, conceptos del tema 0, etc.). El hub padre desaparece del árbol.
+  if(view==="section" && sectionCtx){
+    var secColor=sectionCtx.section.c||C.anx;
+    return e("div",null,
+      e(DzSectionView,{
+        c:secColor,
+        name:sectionCtx.section.t,
+        kicker:"Sección del tema",
+        content:sectionCtx.section.content
+      }),
+      scrollTopBtn(secColor)
     );
   }
 
@@ -12966,7 +12958,7 @@ function App(p){
   var tc=colors[view];
   return e("div",null,
     e("div",{style:{padding:"14px 14px 90px",maxWidth:720,margin:"0 auto",animation:"fadeIn .3s"}},
-      e(V,{onOpen:function(item){openDisease(item,tc);}})
+      e(V,{onOpen:function(item){openDisease(item,tc);},onOpenSection:openSection})
     ),
     scrollTopBtn(tc)
   );
@@ -13013,13 +13005,14 @@ function App(){
   // Salud Mental internal-view mirror: SaludMentalView calls onViewChange(v,extra)
   // every time its internal view changes. ECEPT uses smView (string id) to
   // render the deeper breadcrumb so the module can stay chrome-free internally.
-  // When v==="disease", extra = {name, parent} so the crumb shows the parent
-  // theme + disease name (e.g. "Neurosis › Ansiedad › Trastorno de pánico").
+  // When v is a leaf route ("disease" or "section"), extra = {name, parent}
+  // so the crumb shows the parent hub + the leaf name (e.g.
+  // "Neurosis › Ansiedad › Trastorno de pánico" or "Psiquiatría › Flashcards").
   s=_("root"); var smView=s[0],setSmView=s[1];
-  s=_(null); var smDisease=s[0],setSmDisease=s[1];
+  s=_(null); var smLeaf=s[0],setSmLeaf=s[1];
   var onSmViewChange=useCallback(function(v,extra){
     setSmView(v);
-    setSmDisease(extra&&extra.name?{name:extra.name,parent:extra.parent}:null);
+    setSmLeaf(extra&&extra.name?{name:extra.name,parent:extra.parent}:null);
   },[]);
 
   // Native trauma view back-handler ref + widget registry
@@ -13167,31 +13160,36 @@ function App(){
             var isNeurosisTheme=NEURO_THEMES.indexOf(smView)>=0;
             var isPsicoSub=smView==="flash-psicosis"||smView==="quiz-psicosis";
             var isNeuroSub=smView==="flash-neurosis"||smView==="quiz-neurosis";
-            var isDisease=smView==="disease"&&smDisease;
+            var isDisease=smView==="disease"&&smLeaf;
+            var isSection=smView==="section"&&smLeaf;
             var sep=e("span",{style:{color:"rgba(255,255,255,.15)"}}," › ");
             var smLabel=e("span",{style:{color:smView==="root"?C.mt:C.dm,cursor:smView==="root"?"default":"pointer"},onClick:smView==="root"?null:function(){if(window._smFocus)window._smFocus("root")}},"Salud Mental II");
-            // Disease crumbs: Psicosis disease → "Psicosis › <name>"; Neurosis theme
-            // disease → "Neurosis › <theme> › <name>". Truncate name to keep top bar
-            // from wrapping on narrow viewports.
-            var diseaseCrumbs=null;
-            if(isDisease){
-              var parent=smDisease.parent;
+            // Leaf crumbs (disease + section share the same shape {name, parent}).
+            // Parent in ["psicosis"] → "Psicosis › <name>"; parent ∈ neurosis themes
+            // → "Neurosis › <theme> › <name>"; parent "intro" → "Psiquiatría › <name>";
+            // anything else falls back to just "<name>". Name truncated to keep top
+            // bar from wrapping on narrow viewports.
+            var leafCrumbs=null;
+            if(isDisease||isSection){
+              var parent=smLeaf.parent;
               var parentIsNeuro=NEURO_THEMES.indexOf(parent)>=0;
-              var nameSpan=e("span",{style:{color:C.mt,maxWidth:"160px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",display:"inline-block",verticalAlign:"bottom"}},smDisease.name);
+              var nameSpan=e("span",{style:{color:C.mt,maxWidth:"160px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",display:"inline-block",verticalAlign:"bottom"}},smLeaf.name);
               if(parent==="psicosis"){
-                diseaseCrumbs=e(F,null,sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus("psicosis")}},"Psicosis"),sep,nameSpan);
+                leafCrumbs=e(F,null,sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus("psicosis")}},"Psicosis"),sep,nameSpan);
               } else if(parentIsNeuro){
-                diseaseCrumbs=e(F,null,sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus("neurosis")}},"Neurosis"),sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus(parent)}},SM_LABELS[parent]),sep,nameSpan);
+                leafCrumbs=e(F,null,sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus("neurosis")}},"Neurosis"),sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus(parent)}},SM_LABELS[parent]),sep,nameSpan);
+              } else if(parent==="intro"){
+                leafCrumbs=e(F,null,sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus("intro")}},"Psiquiatría"),sep,nameSpan);
               } else {
-                diseaseCrumbs=e(F,null,sep,nameSpan);
+                leafCrumbs=e(F,null,sep,nameSpan);
               }
             }
             return e(F,null,sep,smLabel,
               isNeurosisTheme?e(F,null,sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus("neurosis")}},"Neurosis"),sep,e("span",{style:{color:C.mt}},SM_LABELS[smView])):null,
               isPsicoSub?e(F,null,sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus("psicosis")}},"Psicosis"),sep,e("span",{style:{color:C.mt}},SM_LABELS[smView])):null,
               isNeuroSub?e(F,null,sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus("neurosis")}},"Neurosis"),sep,e("span",{style:{color:C.mt}},SM_LABELS[smView])):null,
-              isDisease?diseaseCrumbs:null,
-              (smView!=="root" && !isNeurosisTheme && !isPsicoSub && !isNeuroSub && !isDisease)?e(F,null,sep,e("span",{style:{color:C.mt}},SM_LABELS[smView]||smView)):null
+              (isDisease||isSection)?leafCrumbs:null,
+              (smView!=="root" && !isNeurosisTheme && !isPsicoSub && !isNeuroSub && !isDisease && !isSection)?e(F,null,sep,e("span",{style:{color:C.mt}},SM_LABELS[smView]||smView)):null
             );
           })()
         ),

@@ -433,7 +433,8 @@ function PsicosisView(p){
     }
   ];
 
-  var s1=useState(null);var openGen=s1[0],setOpenGen=s1[1];
+  // Section tiles delegate to p.onOpenSection (SM App promotes them to
+  // view="section" as a full inline page — no inline DzModal here).
   var general=[
     {id:"conceptos",ic:"🧭",t:"Conceptos generales",sub:"SM · Psiquiatría · Tratamientos",c:c,
      content:e("div",null,
@@ -585,14 +586,13 @@ function PsicosisView(p){
     ),
     e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:10,marginTop:10}},
       general.map(function(g,i){
-        return e("button",{key:g.id,onClick:function(){setOpenGen(i);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:90}},
+        return e("button",{key:g.id,onClick:function(){if(p&&p.onOpenSection)p.onOpenSection(g);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:90}},
           e("div",{style:{fontSize:22,marginBottom:4}},g.ic),
           e("div",{style:{fontSize:13,fontWeight:800,color:"#fff",lineHeight:1.25,fontFamily:"Playfair Display"}},g.t),
           e("div",{style:{fontSize:11,color:C.mt,lineHeight:1.4,marginTop:2}},g.sub)
         );
       })
     ),
-    openGen!==null?e(DzModal,{c:general[openGen].c,name:general[openGen].t,kicker:"Sección del tema",single:general[openGen].content,onClose:function(){setOpenGen(null);}}):null,
 
     // Línea de tiempo del espectro psicótico (clave anti-confusión)
     e("div",{style:{padding:"16px 14px",background:"linear-gradient(135deg,"+ax(C.esq,.12)+","+C.cd+" 90%)",border:"1px solid "+ax(C.esq,.3),borderRadius:12,margin:"14px 0 4px"}},

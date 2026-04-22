@@ -30,13 +30,14 @@ function App(){
   // Salud Mental internal-view mirror: SaludMentalView calls onViewChange(v,extra)
   // every time its internal view changes. ECEPT uses smView (string id) to
   // render the deeper breadcrumb so the module can stay chrome-free internally.
-  // When v==="disease", extra = {name, parent} so the crumb shows the parent
-  // theme + disease name (e.g. "Neurosis › Ansiedad › Trastorno de pánico").
+  // When v is a leaf route ("disease" or "section"), extra = {name, parent}
+  // so the crumb shows the parent hub + the leaf name (e.g.
+  // "Neurosis › Ansiedad › Trastorno de pánico" or "Psiquiatría › Flashcards").
   s=_("root"); var smView=s[0],setSmView=s[1];
-  s=_(null); var smDisease=s[0],setSmDisease=s[1];
+  s=_(null); var smLeaf=s[0],setSmLeaf=s[1];
   var onSmViewChange=useCallback(function(v,extra){
     setSmView(v);
-    setSmDisease(extra&&extra.name?{name:extra.name,parent:extra.parent}:null);
+    setSmLeaf(extra&&extra.name?{name:extra.name,parent:extra.parent}:null);
   },[]);
 
   // Native trauma view back-handler ref + widget registry
@@ -184,31 +185,36 @@ function App(){
             var isNeurosisTheme=NEURO_THEMES.indexOf(smView)>=0;
             var isPsicoSub=smView==="flash-psicosis"||smView==="quiz-psicosis";
             var isNeuroSub=smView==="flash-neurosis"||smView==="quiz-neurosis";
-            var isDisease=smView==="disease"&&smDisease;
+            var isDisease=smView==="disease"&&smLeaf;
+            var isSection=smView==="section"&&smLeaf;
             var sep=e("span",{style:{color:"rgba(255,255,255,.15)"}}," › ");
             var smLabel=e("span",{style:{color:smView==="root"?C.mt:C.dm,cursor:smView==="root"?"default":"pointer"},onClick:smView==="root"?null:function(){if(window._smFocus)window._smFocus("root")}},"Salud Mental II");
-            // Disease crumbs: Psicosis disease → "Psicosis › <name>"; Neurosis theme
-            // disease → "Neurosis › <theme> › <name>". Truncate name to keep top bar
-            // from wrapping on narrow viewports.
-            var diseaseCrumbs=null;
-            if(isDisease){
-              var parent=smDisease.parent;
+            // Leaf crumbs (disease + section share the same shape {name, parent}).
+            // Parent in ["psicosis"] → "Psicosis › <name>"; parent ∈ neurosis themes
+            // → "Neurosis › <theme> › <name>"; parent "intro" → "Psiquiatría › <name>";
+            // anything else falls back to just "<name>". Name truncated to keep top
+            // bar from wrapping on narrow viewports.
+            var leafCrumbs=null;
+            if(isDisease||isSection){
+              var parent=smLeaf.parent;
               var parentIsNeuro=NEURO_THEMES.indexOf(parent)>=0;
-              var nameSpan=e("span",{style:{color:C.mt,maxWidth:"160px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",display:"inline-block",verticalAlign:"bottom"}},smDisease.name);
+              var nameSpan=e("span",{style:{color:C.mt,maxWidth:"160px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",display:"inline-block",verticalAlign:"bottom"}},smLeaf.name);
               if(parent==="psicosis"){
-                diseaseCrumbs=e(F,null,sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus("psicosis")}},"Psicosis"),sep,nameSpan);
+                leafCrumbs=e(F,null,sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus("psicosis")}},"Psicosis"),sep,nameSpan);
               } else if(parentIsNeuro){
-                diseaseCrumbs=e(F,null,sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus("neurosis")}},"Neurosis"),sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus(parent)}},SM_LABELS[parent]),sep,nameSpan);
+                leafCrumbs=e(F,null,sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus("neurosis")}},"Neurosis"),sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus(parent)}},SM_LABELS[parent]),sep,nameSpan);
+              } else if(parent==="intro"){
+                leafCrumbs=e(F,null,sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus("intro")}},"Psiquiatría"),sep,nameSpan);
               } else {
-                diseaseCrumbs=e(F,null,sep,nameSpan);
+                leafCrumbs=e(F,null,sep,nameSpan);
               }
             }
             return e(F,null,sep,smLabel,
               isNeurosisTheme?e(F,null,sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus("neurosis")}},"Neurosis"),sep,e("span",{style:{color:C.mt}},SM_LABELS[smView])):null,
               isPsicoSub?e(F,null,sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus("psicosis")}},"Psicosis"),sep,e("span",{style:{color:C.mt}},SM_LABELS[smView])):null,
               isNeuroSub?e(F,null,sep,e("span",{style:{color:C.dm,cursor:"pointer"},onClick:function(){if(window._smFocus)window._smFocus("neurosis")}},"Neurosis"),sep,e("span",{style:{color:C.mt}},SM_LABELS[smView])):null,
-              isDisease?diseaseCrumbs:null,
-              (smView!=="root" && !isNeurosisTheme && !isPsicoSub && !isNeuroSub && !isDisease)?e(F,null,sep,e("span",{style:{color:C.mt}},SM_LABELS[smView]||smView)):null
+              (isDisease||isSection)?leafCrumbs:null,
+              (smView!=="root" && !isNeurosisTheme && !isPsicoSub && !isNeuroSub && !isDisease && !isSection)?e(F,null,sep,e("span",{style:{color:C.mt}},SM_LABELS[smView]||smView)):null
             );
           })()
         ),

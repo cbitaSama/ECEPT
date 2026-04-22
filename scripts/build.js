@@ -142,7 +142,7 @@ var expectedGlobals = [
   'var DECKS=', 'var DECK_GROUPS=', 'var EXTRA_CARDS=', 'var EXTRA_QUIZ=',
   'var SEARCH_INDEX=',
   'function FlashDeck', 'function Quiz', 'function GlobalFlashDeck', 'function GlobalQuiz',
-  'function DzModal', 'function DzGrid', 'function DzCard',
+  'function DzDetail', 'function DzSectionView', 'function DzGrid', 'function DzCard',
   'function getAllCards', 'function getAllQuiz',
   'function AnxView', 'function PsicosisView', 'function OCDView',
   'function SomView', 'function TCAView', 'function SueView',

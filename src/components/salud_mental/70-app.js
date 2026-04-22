@@ -17,6 +17,11 @@ function App(p){
   // came from (so back goes there via popStack and the breadcrumb renders
   // the parent crumb correctly).
   var s2d=useState(null);var diseaseCtx=s2d[0],setDiseaseCtx=s2d[1];
+  // Section route context: populated when view==="section". Carries the
+  // section object ({id,t,sub,c,content}) from a theme/intro hub's
+  // "general" grid (Perlas, Resumen, Flashcards, Quiz, Conceptos…) plus
+  // the id of the hub we came from (for back + breadcrumb).
+  var s2s=useState(null);var sectionCtx=s2s[0],setSectionCtx=s2s[1];
   var s2=useState(false);var showTop=s2[0],setShowTop=s2[1];
 
   useEffect(function(){
@@ -44,17 +49,19 @@ function App(p){
 
   // Notify host (ECEPT) on every view change so it can render a deeper
   // breadcrumb ("Inicio › Salud Mental II › Neurosis › Ansiedad", etc.).
-  // When on a disease route we also pass {name, parent} so ECEPT can append
-  // the disease name as the last crumb. No-op when mounted standalone.
+  // When on disease/section routes we also pass {name, parent} so ECEPT
+  // can append the leaf name as the last crumb. No-op when standalone.
   useEffect(function(){
     if(p&&typeof p.onViewChange==="function"){
       if(view==="disease" && diseaseCtx){
         p.onViewChange(view,{name:diseaseCtx.item.name,parent:diseaseCtx.parent});
+      } else if(view==="section" && sectionCtx){
+        p.onViewChange(view,{name:sectionCtx.section.t,parent:sectionCtx.parent});
       } else {
         p.onViewChange(view,null);
       }
     }
-  },[view,diseaseCtx]);
+  },[view,diseaseCtx,sectionCtx]);
 
   function popStack(){
     if(smHist.length>0){
@@ -78,6 +85,15 @@ function App(p){
     setSmHist(function(h){return h.concat([view]);});
     setDiseaseCtx({item:item,color:color,parent:view});
     setView("disease");
+  }
+  // Igual que openDisease pero para las "secciones generales" de cada hub
+  // (Perlas, Resumen, Flashcards del tema, Quiz del tema, Conceptos del
+  // tema 0, etc.). La sección ya trae su propio color en section.c.
+  function openSection(section){
+    if(!section)return;
+    setSmHist(function(h){return h.concat([view]);});
+    setSectionCtx({section:section,parent:view});
+    setView("section");
   }
   // Internal "← Inicio" buttons in sub-views. Falls back to onHome if the
   // stack is somehow empty (defensive — sub-views only show after navigation).
@@ -122,7 +138,7 @@ function App(p){
   if(view==="intro"){
     return e("div",null,
       e("div",{style:{padding:"14px 14px 90px",maxWidth:720,margin:"0 auto",animation:"fadeIn .3s"}},
-        e(IntroView,null)
+        e(IntroView,{onOpenSection:openSection})
       ),
       scrollTopBtn(C.intro)
     );
@@ -138,9 +154,25 @@ function App(p){
   if(view==="psicosis"){
     return e("div",null,
       e("div",{style:{padding:"14px 14px 90px",maxWidth:720,margin:"0 auto",animation:"fadeIn .3s"}},
-        e(PsicosisView,{go:go,onOpen:function(item){openDisease(item,C.psi);}})
+        e(PsicosisView,{go:go,onOpen:function(item){openDisease(item,C.psi);},onOpenSection:openSection})
       ),
       scrollTopBtn(C.psi)
+    );
+  }
+
+  // Section route: renderiza DzSectionView como página completa (sección
+  // general de un hub: perlas, resumen, flashcards del tema, quiz del
+  // tema, conceptos del tema 0, etc.). El hub padre desaparece del árbol.
+  if(view==="section" && sectionCtx){
+    var secColor=sectionCtx.section.c||C.anx;
+    return e("div",null,
+      e(DzSectionView,{
+        c:secColor,
+        name:sectionCtx.section.t,
+        kicker:"Sección del tema",
+        content:sectionCtx.section.content
+      }),
+      scrollTopBtn(secColor)
     );
   }
 
@@ -184,7 +216,7 @@ function App(p){
   var tc=colors[view];
   return e("div",null,
     e("div",{style:{padding:"14px 14px 90px",maxWidth:720,margin:"0 auto",animation:"fadeIn .3s"}},
-      e(V,{onOpen:function(item){openDisease(item,tc);}})
+      e(V,{onOpen:function(item){openDisease(item,tc);},onOpenSection:openSection})
     ),
     scrollTopBtn(tc)
   );
