@@ -11,6 +11,12 @@ function App(p){
   // History stack: every forward navigation pushes the previous view id.
   // back() pops it. When empty, we exit the module via onHome().
   var s2b=useState([]);var smHist=s2b[0],setSmHist=s2b[1];
+  // Disease route context: populated when view==="disease". Carries the
+  // disease item (name, kicker, sections), the color of the parent theme
+  // (so DzDetail paints in the right palette), and the id of the hub we
+  // came from (so back goes there via popStack and the breadcrumb renders
+  // the parent crumb correctly).
+  var s2d=useState(null);var diseaseCtx=s2d[0],setDiseaseCtx=s2d[1];
   var s2=useState(false);var showTop=s2[0],setShowTop=s2[1];
 
   useEffect(function(){
@@ -38,10 +44,17 @@ function App(p){
 
   // Notify host (ECEPT) on every view change so it can render a deeper
   // breadcrumb ("Inicio › Salud Mental II › Neurosis › Ansiedad", etc.).
-  // No-op when mounted standalone.
+  // When on a disease route we also pass {name, parent} so ECEPT can append
+  // the disease name as the last crumb. No-op when mounted standalone.
   useEffect(function(){
-    if(p&&typeof p.onViewChange==="function")p.onViewChange(view);
-  },[view]);
+    if(p&&typeof p.onViewChange==="function"){
+      if(view==="disease" && diseaseCtx){
+        p.onViewChange(view,{name:diseaseCtx.item.name,parent:diseaseCtx.parent});
+      } else {
+        p.onViewChange(view,null);
+      }
+    }
+  },[view,diseaseCtx]);
 
   function popStack(){
     if(smHist.length>0){
@@ -56,6 +69,15 @@ function App(p){
   function go(v){
     setSmHist(function(h){return h.concat([view]);});
     setView(v);
+  }
+  // Promover una enfermedad (desde un theme hub o Psicosis hub) a ruta de
+  // primer nivel: empuja la vista actual al stack, guarda el contexto de
+  // la enfermedad y cambia la vista a "disease". DzDetail la pinta como
+  // página inline reemplazando el hub. Back via FAB ← → popStack → hub.
+  function openDisease(item,color){
+    setSmHist(function(h){return h.concat([view]);});
+    setDiseaseCtx({item:item,color:color,parent:view});
+    setView("disease");
   }
   // Internal "← Inicio" buttons in sub-views. Falls back to onHome if the
   // stack is somehow empty (defensive — sub-views only show after navigation).
@@ -116,9 +138,24 @@ function App(p){
   if(view==="psicosis"){
     return e("div",null,
       e("div",{style:{padding:"14px 14px 90px",maxWidth:720,margin:"0 auto",animation:"fadeIn .3s"}},
-        e(PsicosisView,{go:go})
+        e(PsicosisView,{go:go,onOpen:function(item){openDisease(item,C.psi);}})
       ),
       scrollTopBtn(C.psi)
+    );
+  }
+
+  // Disease route: renderiza DzDetail como página completa (reemplaza al
+  // hub). Sin chrome propio; el FAB ← de ECEPT vuelve al hub padre vía
+  // smBackRef → popStack.
+  if(view==="disease" && diseaseCtx){
+    return e("div",null,
+      e(DzDetail,{
+        c:diseaseCtx.color,
+        name:diseaseCtx.item.name,
+        kicker:diseaseCtx.item.kicker||"Enfermedad",
+        sections:diseaseCtx.item.sections
+      }),
+      scrollTopBtn(diseaseCtx.color)
     );
   }
 
@@ -147,7 +184,7 @@ function App(p){
   var tc=colors[view];
   return e("div",null,
     e("div",{style:{padding:"14px 14px 90px",maxWidth:720,margin:"0 auto",animation:"fadeIn .3s"}},
-      e(V,null)
+      e(V,{onOpen:function(item){openDisease(item,tc);}})
     ),
     scrollTopBtn(tc)
   );

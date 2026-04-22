@@ -2,7 +2,7 @@
 // PSICOSIS · Esquizofrenia, T. delirante, Bipolar, Depresión mayor
 // ══════════════════════════════════════════════════════════════
 
-function PsicosisView(){
+function PsicosisView(p){
   var c=C.psi;
   var diseases=[
     {
@@ -614,7 +614,7 @@ function PsicosisView(){
       e("div",{style:{fontSize:17,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Playfair Display"}},"Toca cualquier enfermedad para abrir su ficha"),
       e("div",{style:{fontSize:12,color:C.mt,marginTop:4,lineHeight:1.45}},"Cada ficha tiene tabs: Definición · Clínica · Diagnóstico · Tratamiento")
     ),
-    e(DzGrid,{c:c,items:diseases}),
+    e(DzGrid,{c:c,items:diseases,onOpen:p&&p.onOpen}),
 
     // Aclaración sobre depresión mayor en este bloque
     e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(C.dep,.08)+","+C.cd+" 90%)",border:"1px solid "+ax(C.dep,.3),borderLeft:"4px solid "+C.dep,borderRadius:12,margin:"18px 0 10px"}},

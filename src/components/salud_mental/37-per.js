@@ -2,7 +2,7 @@
 // TEMA 7 · TRASTORNOS DE LA PERSONALIDAD
 // ══════════════════════════════════════════════════════════════
 
-function PerView(){
+function PerView(p){
   var c=C.per;
   var diseases=[
     // ═══ CLUSTER A · Raros/excéntricos ═══
@@ -378,7 +378,7 @@ function PerView(){
       e("div",{style:{fontSize:17,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Playfair Display"}},"Toca cualquier trastorno para abrir su ficha"),
       e("div",{style:{fontSize:12,color:C.mt,marginTop:4,lineHeight:1.45}},"Prefijo A/B/C indica el cluster · cada ficha tiene tabs: Definición · Clínica · Diagnóstico · Tratamiento")
     ),
-    e(DzGrid,{c:c,items:diseases}),
+    e(DzGrid,{c:c,items:diseases,onOpen:p&&p.onOpen}),
 
     e(Abbrev,{c:c,items:[
       {a:"TP",d:"Trastorno de Personalidad"},

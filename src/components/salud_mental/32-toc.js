@@ -1,4 +1,4 @@
-function OCDView(){
+function OCDView(p){
   var c=C.toc;
   var diseases=[
     {
@@ -318,7 +318,7 @@ function OCDView(){
       e("div",{style:{fontSize:17,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Playfair Display"}},"Toca cualquier enfermedad para abrir su ficha"),
       e("div",{style:{fontSize:12,color:C.mt,marginTop:4,lineHeight:1.45}},"Cada ficha tiene tabs: Definición · Clínica · Diagnóstico · Tratamiento")
     ),
-    e(DzGrid,{c:c,items:diseases}),
+    e(DzGrid,{c:c,items:diseases,onOpen:p&&p.onOpen}),
 
     e(Abbrev,{c:c,items:[
       {a:"TOC",d:"Trastorno Obsesivo-Compulsivo"},

@@ -1,4 +1,4 @@
-function SomView(){
+function SomView(p){
   var c=C.som;
   var cd=C.dis;
   var diseases=[
@@ -325,7 +325,7 @@ function SomView(){
       e("div",{style:{fontSize:17,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Playfair Display"}},"Toca cualquier enfermedad para abrir su ficha"),
       e("div",{style:{fontSize:12,color:C.mt,marginTop:4,lineHeight:1.45}},"Las primeras 5 son somáticas (verde) · las últimas 3 disociativas (rosa)")
     ),
-    e(DzGrid,{c:c,items:diseases}),
+    e(DzGrid,{c:c,items:diseases,onOpen:p&&p.onOpen}),
 
     e(Abbrev,{c:c,items:[
       {a:"TSS",d:"Trastorno de Síntomas Somáticos"},

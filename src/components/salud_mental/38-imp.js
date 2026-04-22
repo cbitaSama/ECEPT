@@ -2,7 +2,7 @@
 // TEMA 8 · TRASTORNOS DISRUPTIVOS, DEL CONTROL DE IMPULSOS Y DE LA CONDUCTA
 // ══════════════════════════════════════════════════════════════
 
-function ImpView(){
+function ImpView(p){
   var c=C.imp;
   var diseases=[
     {
@@ -231,7 +231,7 @@ function ImpView(){
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Las 5 entidades"),
       e("div",{style:{fontSize:17,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Playfair Display"}},"Toca cualquier entidad para abrir su ficha")
     ),
-    e(DzGrid,{c:c,items:diseases}),
+    e(DzGrid,{c:c,items:diseases,onOpen:p&&p.onOpen}),
 
     e(Abbrev,{c:c,items:[
       {a:"CC",d:"Conduct Disorder (trastorno de la conducta)"},
