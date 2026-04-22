@@ -97,6 +97,8 @@ var parts = [
   'src/components/salud_mental/70-app.js',
   'src/components/salud_mental/_exposures.js',
   'src/components/salud_mental/_iife-close.js',
+  // chatbot (must come after App? no — function hoisted; keep with components)
+  'src/components/ChatBot.js',
   // app
   'src/app.js'
 ];
@@ -148,7 +150,9 @@ var expectedGlobals = [
   'function SomView', 'function TCAView', 'function SueView',
   'function PerView', 'function ImpView', 'function DprView',
   'function IntroView', 'function RootHub', 'function NeurosisHub',
-  'window.SaludMentalView', 'window.SM_SEARCH_INDEX'
+  'window.SaludMentalView', 'window.SM_SEARCH_INDEX',
+  // chatbot
+  'function ChatBot', 'window.ChatBot'
 ];
 expectedGlobals.forEach(function(g) {
   if (output.indexOf(g) === -1) errors.push('missing global: ' + g);
