@@ -13057,7 +13057,7 @@ function ChatBot(){
     var apiMsgs=next.map(function(m){ return {role:m.role,content:m.text}; });
     var idx=(typeof window!=="undefined" && window.SEARCH_INDEX) || [];
 
-    fetch("/api/chat",{
+    fetch("https://ecept.vercel.app/api/chat",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({messages:apiMsgs, searchIndex:idx})
