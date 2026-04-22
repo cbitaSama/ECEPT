@@ -67,7 +67,13 @@ module.exports = async function handler(req, res) {
       "1. Incluye TODOS los links relevantes, no solo uno. Si el tema toca coagulación, labs Y general, pon los 3.\n" +
       "2. Usa el vista ID exacto de la lista — nunca inventes IDs.\n" +
       "3. Para todo excepto reuma_sec, usa sec: null.\n" +
-      "4. El label debe ser descriptivo: 'Cascada de Coagulación', 'Lab de Coagulación', no solo 'General'.\n\n" +
+      "4. El label debe ser descriptivo: 'Cascada de Coagulación', 'Lab de Coagulación', no solo 'General'.\n" +
+      "5. Para preguntas sobre coagulación, SIEMPRE incluye estos 3 links juntos:\n" +
+      "   {vista:'coagulacion', sec:null, label:'Cascada de Coagulación'}\n" +
+      "   {vista:'labs', sec:null, label:'Lab de Coagulación'}\n" +
+      "   {vista:'general', sec:null, label:'Tabla de Factores'}\n" +
+      "6. Para preguntas sobre salud mental (TOC, obsesión, compulsión, esquizofrenia, bipolar, etc), SIEMPRE incluye:\n" +
+      "   {vista:'salud_mental', sec:null, label:'Salud Mental'}\n\n" +
       "Cuando el usuario pregunte algo relacionado con uno o más módulos, incluye links de navegación en el campo 'links' (array). Cada link tiene {vista, sec, label}.\n\n" +
       "Responde SIEMPRE con JSON puro, sin markdown, en este formato exacto:\n" +
       "{\"answer\": \"tu respuesta aquí\", \"links\": []}\n" +
