@@ -13009,6 +13009,11 @@ window.SM_SEARCH_INDEX = SEARCH_INDEX;
 // ══════════════════════════════════════════════════════════════
 var CB_CODE="210419";
 var CB_MAX_MSGS=4;
+// API endpoint: relativa cuando la app se sirve desde Vercel (mismo host),
+// absoluta cuando se sirve desde GitHub Pages u otro host.
+var CB_API=(typeof window!=="undefined" && window.location.hostname.indexOf("vercel.app")!==-1)
+  ? "/api/chat"
+  : "https://ecept-bigiqy5tg-cbitasamas-projects.vercel.app/api/chat";
 
 function ChatBot(){
   var s;
@@ -13057,7 +13062,7 @@ function ChatBot(){
     var apiMsgs=next.map(function(m){ return {role:m.role,content:m.text}; });
     var idx=(typeof window!=="undefined" && window.SEARCH_INDEX) || [];
 
-    fetch("/api/chat",{
+    fetch(CB_API,{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({messages:apiMsgs, searchIndex:idx})
