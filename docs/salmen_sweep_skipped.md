@@ -29,6 +29,14 @@ Reasons are drawn from a small vocabulary:
 
 ---
 
+## Neurosis · TOC y relacionados
+- Tabla conceptual "obsesión vs rumiación vs preocupación vs idea sobrevalorada vs delirio" en Conceptos generales — skipped: already-covered en distinta framing (la DDx table en sección ddx ya diferencia TOC de depresión/TAG/TDC/TEPT/trastorno delirante clínicamente)
+- Obsesiones somáticas como 5ª dimensión — skipped: already-covered (el DSM-5 no las categoriza como dimensión independiente; caen bajo Daño o IAD)
+- Distinction compulsión vs impulso (cleptomanía, piromanía) — skipped: cross-theme (Impulsos tiene su capítulo)
+- Distinction compulsión vs tic — skipped: borderline basic (el specifier "relacionado con tics" ya aparece)
+- Tricotilomanía vs excoriación side-by-side — skipped: already-covered (ambas están en la 7-entidades Table como entidades hermanas con patrón similar)
+- Criterio Y-BOCS (escala) — skipped: borderline basic (investigación más que clínica)
+
 ## Neurosis · Trastornos de ansiedad
 - Ansiedad social vs timidez distinction explícita — skipped: already-implicit (criterios de intensidad + deterioro + ≥6 meses descartan timidez; Mutismo selectivo ya tiene un Note equivalente)
 - Crisis esperada vs inesperada side-by-side table — skipped: already-covered (Note "Tipos de crisis" lo explica)
