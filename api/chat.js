@@ -154,6 +154,16 @@ module.exports = async function handler(req, res) {
       jsonCandidate = jsonCandidate.slice(firstBrace, lastBrace + 1);
     }
 
+    // If there are two JSON objects concatenated, take only the first complete one
+    var braceCount = 0;
+    var firstObjEnd = -1;
+    for (var ci = 0; ci < jsonCandidate.length; ci++) {
+      if (jsonCandidate[ci] === '{') braceCount++;
+      if (jsonCandidate[ci] === '}') braceCount--;
+      if (braceCount === 0 && ci > 0) { firstObjEnd = ci; break; }
+    }
+    if (firstObjEnd !== -1) jsonCandidate = jsonCandidate.slice(0, firstObjEnd + 1);
+
     var parsedOk = false;
     try {
       var parsed = JSON.parse(jsonCandidate);
