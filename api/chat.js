@@ -1,6 +1,5 @@
-// Vercel serverless function — ECEPT AI assistant proxy.
-// Receives {messages, searchIndex} and calls Anthropic Messages API.
-// Returns {answer, go} (go = {vista, sec} or null).
+// Vercel serverless function — ECEPT AI assistant proxy (Gemini 2.5 Flash).
+// Recibe {messages, searchIndex} y devuelve {answer, go} con go = {vista, sec} o null.
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -13,8 +12,8 @@ module.exports = async function handler(req, res) {
   }
 
   if (req.method === 'GET') {
-    var hasKey = !!process.env.ANTHROPIC_API_KEY;
-    res.status(200).json({ hasKey: hasKey, keyPrefix: hasKey ? process.env.ANTHROPIC_API_KEY.slice(0,10) : 'missing' });
+    var hasKey = !!process.env.GEMINI_API_KEY;
+    res.status(200).json({ hasKey: hasKey, keyPrefix: hasKey ? process.env.GEMINI_API_KEY.slice(0, 10) : 'missing' });
     return;
   }
 
@@ -24,15 +23,13 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    var apiKey = process.env.ANTHROPIC_API_KEY;
+    var apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
+      res.status(500).json({ error: 'GEMINI_API_KEY not configured' });
       return;
     }
 
     var body = req.body || {};
-    // Vercel auto-parses JSON bodies when content-type is application/json,
-    // but fall back to manual parsing if we got a string.
     if (typeof body === 'string') {
       try { body = JSON.parse(body); } catch (e) { body = {}; }
     }
@@ -40,43 +37,43 @@ module.exports = async function handler(req, res) {
     var messages = Array.isArray(body.messages) ? body.messages : [];
     var searchIndex = Array.isArray(body.searchIndex) ? body.searchIndex : [];
 
-    var system = "Eres el asistente de ECEPT, una app de estudio médico para estudiantes de medicina latinoamericanos. Responde SIEMPRE en español latinoamericano, de forma concisa (máximo 3 oraciones). Solo responde sobre medicina y sobre el contenido de ECEPT. Si el usuario pregunta por un tema específico que existe en ECEPT, incluye el campo go con vista y sec para navegar. El índice de búsqueda de ECEPT es: " + JSON.stringify(searchIndex.slice(0, 150)) + " Responde SIEMPRE con JSON puro, sin markdown, en este formato exacto: {\"answer\": \"tu respuesta aquí\", \"go\": null} o {\"answer\": \"tu respuesta\", \"go\": {\"vista\": \"reuma\", \"sec\": \"vasculitis\"}}";
+    var systemText = "Eres el asistente de ECEPT, una app de estudio médico para estudiantes de medicina latinoamericanos. Responde SIEMPRE en español latinoamericano, de forma concisa (máximo 3 oraciones). Solo responde sobre medicina y sobre el contenido de ECEPT. Si el usuario pregunta por un tema específico que existe en ECEPT, incluye el campo go con vista y sec para navegar. El índice de búsqueda de ECEPT es: " + JSON.stringify(searchIndex.slice(0, 150)) + " Responde SIEMPRE con JSON puro, sin markdown, en este formato exacto: {\"answer\": \"tu respuesta aquí\", \"go\": null} o {\"answer\": \"tu respuesta\", \"go\": {\"vista\": \"reuma\", \"sec\": \"vasculitis\"}}";
 
-    var lastThree = messages.slice(-3).map(function (m) {
+    // Gemini: "assistant" → "model", últimos 3 turnos.
+    var contents = messages.slice(-3).map(function (m) {
       return {
-        role: m.role === 'assistant' ? 'assistant' : 'user',
-        content: String(m.content == null ? '' : m.content)
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: String(m.content == null ? '' : m.content) }]
       };
     });
 
-    var anthropicResp = await fetch('https://api.anthropic.com/v1/messages', {
+    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + encodeURIComponent(apiKey);
+
+    var geminiResp = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 300,
-        system: system,
-        messages: lastThree
+        systemInstruction: { parts: [{ text: systemText }] },
+        contents: contents,
+        generationConfig: {
+          maxOutputTokens: 300,
+          temperature: 0.7,
+          responseMimeType: 'application/json'
+        }
       })
     });
 
-    if (!anthropicResp.ok) {
-      var errText = await anthropicResp.text();
-      res.status(500).json({ error: 'Anthropic API error: ' + anthropicResp.status + ' ' + errText });
+    if (!geminiResp.ok) {
+      var errText = await geminiResp.text();
+      res.status(500).json({ error: 'Gemini API error: ' + geminiResp.status + ' ' + errText });
       return;
     }
 
-    var data = await anthropicResp.json();
+    var data = await geminiResp.json();
     var rawText = '';
-    if (data && Array.isArray(data.content)) {
-      data.content.forEach(function (block) {
-        if (block && block.type === 'text' && typeof block.text === 'string') {
-          rawText += block.text;
-        }
+    if (data && Array.isArray(data.candidates) && data.candidates[0] && data.candidates[0].content && Array.isArray(data.candidates[0].content.parts)) {
+      data.candidates[0].content.parts.forEach(function (p) {
+        if (p && typeof p.text === 'string') rawText += p.text;
       });
     }
     rawText = rawText.trim();
@@ -84,8 +81,7 @@ module.exports = async function handler(req, res) {
     var answer = rawText;
     var go = null;
 
-    // Try to parse as JSON {answer, go}. Also tolerate answers wrapped in
-    // markdown code fences (```json ... ```).
+    // Tolerate markdown code fences just in case.
     var jsonCandidate = rawText;
     var fence = jsonCandidate.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (fence && fence[1]) jsonCandidate = fence[1].trim();
