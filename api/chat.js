@@ -58,7 +58,8 @@ module.exports = async function handler(req, res) {
       "Responde SIEMPRE con JSON puro, sin markdown, en este formato exacto:\n" +
       "{\"answer\": \"tu respuesta aquí\", \"links\": []}\n" +
       "o con links:\n" +
-      "{\"answer\": \"tu respuesta\", \"links\": [{\"vista\": \"general\", \"sec\": \"coag\", \"label\": \"Cascada de Coagulación\"}, {\"vista\": \"labs\", \"sec\": null, \"label\": \"Laboratorio de Coagulación\"}]}";
+      "{\"answer\": \"tu respuesta\", \"links\": [{\"vista\": \"general\", \"sec\": \"coag\", \"label\": \"Cascada de Coagulación\"}, {\"vista\": \"labs\", \"sec\": null, \"label\": \"Laboratorio de Coagulación\"}]}\n\n" +
+      "CRÍTICO: responde ÚNICAMENTE con el objeto JSON. Sin texto antes, sin texto después, sin explicaciones, sin markdown.";
 
     // Gemini: "assistant" → "model", últimos 3 turnos.
     var contents = messages.slice(-3).map(function (m) {
@@ -106,6 +107,8 @@ module.exports = async function handler(req, res) {
     var jsonCandidate = rawText;
     var fence = jsonCandidate.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (fence && fence[1]) jsonCandidate = fence[1].trim();
+    var braceIdx = jsonCandidate.indexOf('{');
+    if (braceIdx > 0) jsonCandidate = jsonCandidate.slice(braceIdx);
 
     try {
       var parsed = JSON.parse(jsonCandidate);
