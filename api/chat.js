@@ -111,16 +111,23 @@ module.exports = async function handler(req, res) {
     var answer = rawText;
     var links = [];
 
-    // Tolerate markdown code fences just in case.
+    // Extract the JSON object — strip markdown fences and any prefix/suffix
+    // text around the outermost { … } so Gemini preambles like
+    // "Here is the JSON requested" don't leak into answer.
     var jsonCandidate = rawText;
     var fence = jsonCandidate.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (fence && fence[1]) jsonCandidate = fence[1].trim();
-    var braceIdx = jsonCandidate.indexOf('{');
-    if (braceIdx > 0) jsonCandidate = jsonCandidate.slice(braceIdx);
+    var firstBrace = jsonCandidate.indexOf('{');
+    var lastBrace = jsonCandidate.lastIndexOf('}');
+    if (firstBrace >= 0 && lastBrace > firstBrace) {
+      jsonCandidate = jsonCandidate.slice(firstBrace, lastBrace + 1);
+    }
 
+    var parsedOk = false;
     try {
       var parsed = JSON.parse(jsonCandidate);
       if (parsed && typeof parsed === 'object') {
+        parsedOk = true;
         if (typeof parsed.answer === 'string') answer = parsed.answer;
         if (Array.isArray(parsed.links)) {
           links = parsed.links
@@ -135,7 +142,17 @@ module.exports = async function handler(req, res) {
         }
       }
     } catch (e) {
-      // Not JSON — treat whole text as answer, links stays [].
+      // JSON parse failed — handled below.
+    }
+
+    // If parsing failed, scrub common English/Spanish preambles so the user
+    // doesn't see "Here is the JSON requested" as the assistant's reply.
+    if (!parsedOk) {
+      answer = rawText
+        .replace(/^\s*(here('?s| is)|aqu[ií]( (est[aá]|tienes))?|claro[:,]?)[^\n]*\n+/i, '')
+        .replace(/^\s*\{[\s\S]*$/, '')
+        .trim();
+      if (!answer) answer = 'No pude generar una respuesta válida. Intenta reformular tu pregunta.';
     }
 
     res.status(200).json({ answer: answer, links: links });
