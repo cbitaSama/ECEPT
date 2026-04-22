@@ -29,6 +29,15 @@ Reasons are drawn from a small vocabulary:
 
 ---
 
+## Psicosis · Esquizofrenia
+- Bleuler's 4/5 A's (asociaciones laxas, autismo, ambivalencia, afecto aplanado, + alucinaciones modernamente) — skipped: borderline basic (historical, not DSM; regional teaching variation)
+- Síntomas de primer rango de Schneider — skipped: borderline basic (historical, not DSM; Latin American programs emphasize differently)
+- Categoría cognitiva y afectiva como "3ª y 4ª dimensiones" — skipped: placement ambiguity (current 2-category split mirrors DSM criterion A; adding more could conflict with teacher's phrasing)
+- Factores de mal pronóstico consolidados (inicio precoz, insidioso, sexo masculino, síntomas negativos prominentes, familia con alta expresividad emocional) — skipped: already-covered partial (subtypes Table already lists pronóstico per subtype)
+- PANSS / BPRS escalas — skipped: borderline basic (investigación más que clínica diaria)
+- Expresividad emocional familiar (EE alta ↑ recaída) — skipped: borderline basic (psicosocial específico; más ligado a psicoeducación familiar)
+- Síndrome metabólico / ganancia de peso por atípicos (olanzapina, clozapina) — skipped: borderline basic (monitoreo importante pero suele ser pharma-specific, no esquizofrenia core)
+
 ## Generales / Intro (Tema 0)
 - Hospitalización involuntaria · criterios de internación (peligro para sí / terceros, incapacidad de autocuidado) — skipped: borderline basic (legal-clinical workflow more than psychiatric definition; teacher-specific phrasing likely)
 - Alianza terapéutica — skipped: borderline basic (universal concept but feels abstract without clinical anchor; better introduced via specific psychotherapy content)

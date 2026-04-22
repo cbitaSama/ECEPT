@@ -157,7 +157,19 @@ function PsicosisView(p){
           }),
           e(H3,{c:C.esq,mt:14},"Psicosocial"),
           e(P,null,"Psicoeducación familiar, rehabilitación cognitiva, TCC para psicosis, empleo protegido, manejo de casos asertivo."),
-          e(Alert,{c:C.bad,label:"⚠️ Trampa"},"La ",e("b",null,"clozapina")," es el único antipsicótico eficaz en esquizofrenia resistente pero tiene riesgo de ",e("b",null,"agranulocitosis fatal"),". Requiere hemograma semanal inicial luego mensual.")
+          e(H3,{c:C.esq,mt:14},"Efectos extrapiramidales (EPS) · efectos adversos clase"),
+          e(Table,{
+            headers:[{t:"Síndrome",c:C.esq},{t:"Inicio típico",c:C.esq},{t:"Clínica",c:C.esq}],
+            rows:[
+              ["Distonía aguda","Horas – días","Espasmos musculares sostenidos: tortícolis, crisis oculógira, opistótonos, laringoespasmo"],
+              ["Acatisia","Días – semanas","Inquietud motora subjetiva y objetiva; necesidad imperiosa de moverse"],
+              ["Parkinsonismo","Semanas – meses","Rigidez, bradicinesia, temblor, facies inexpresiva, sialorrea"],
+              ["Discinesia tardía","Meses – años","Movimientos coreoatetósicos involuntarios (orofaciales más frecuentes); puede ser irreversible"]
+            ]
+          }),
+          e(Note,{c:C.esq,t:"Atípicos vs típicos"},"Los antipsicóticos ",e("b",null,"típicos")," (haloperidol, flufenazina) dan más EPS por bloqueo dopaminérgico intenso. Los ",e("b",null,"atípicos")," (risperidona, olanzapina, quetiapina, aripiprazol) los dan con menor frecuencia por su perfil serotoninérgico adicional."),
+          e(Alert,{c:C.bad,label:"⚠️ Trampa"},"La ",e("b",null,"clozapina")," es el único antipsicótico eficaz en esquizofrenia resistente pero tiene riesgo de ",e("b",null,"agranulocitosis fatal"),". Requiere hemograma semanal inicial luego mensual."),
+          e(Alert,{c:C.bad,label:"⚠️ Síndrome neuroléptico maligno (SNM)"},"Emergencia asociada a antipsicóticos (más frecuente con típicos, pero posible con cualquiera). Tetrada clásica: ",e("b",null,"hipertermia + rigidez muscular tipo \"tubo de plomo\" + inestabilidad autonómica + alteración del nivel de conciencia"),". ",e("b",null,"CPK muy elevada"),". Mortalidad 10–20% si no se reconoce. Conducta: ",e("b",null,"suspender el antipsicótico"),", medidas de soporte (hidratación, control térmico, UCI) y considerar dantroleno o bromocriptina.")
         )
       }
     },
