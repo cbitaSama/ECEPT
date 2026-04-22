@@ -176,14 +176,12 @@ module.exports = async function handler(req, res) {
       // JSON parse failed — handled below.
     }
 
-    // If parsing failed, scrub common English/Spanish preambles so the user
-    // doesn't see "Here is the JSON requested" as the assistant's reply.
+    // If parsing failed, surface the raw Gemini text so the user at least
+    // sees the real response instead of an opaque error message.
     if (!parsedOk) {
-      answer = rawText
-        .replace(/^\s*(here('?s| is)|aqu[ií]( (est[aá]|tienes))?|claro[:,]?)[^\n]*\n+/i, '')
-        .replace(/^\s*\{[\s\S]*$/, '')
-        .trim();
-      if (!answer) answer = 'No pude generar una respuesta válida. Intenta reformular tu pregunta.';
+      console.log('JSON parse failed, raw:', rawText.slice(0, 200));
+      res.status(200).json({ answer: rawText, links: [] });
+      return;
     }
 
     res.status(200).json({ answer: answer, links: links });
