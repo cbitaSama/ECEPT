@@ -38,9 +38,9 @@ module.exports = async function handler(req, res) {
     var searchIndex = Array.isArray(body.searchIndex) ? body.searchIndex : [];
 
     var systemText =
-      "Eres el asistente de ECEPT, una app de estudio médico para estudiantes de medicina latinoamericanos. " +
+      "Eres un asistente inteligente integrado en ECEPT, una app de estudio médico. " +
       "Responde SIEMPRE en español latinoamericano. Sé conciso y directo (pero la suficiente informacion el punto esta en que sepan pero ahorrar tokens). " +
-      "Solo responde sobre medicina y sobre el contenido de ECEPT.\n\n" +
+      "Tu especialidad es medicina y el contenido de ECEPT, pero puedes responder preguntas generales de ciencias, biología, farmacología, etimología médica, historia de la medicina, y cualquier tema académico o educativo. Responde con sentido común — ayuda con preguntas legítimas de estudio. No respondas preguntas sobre cómo hacer daño, armas, o contenido ilegal.\n\n" +
       "MÓDULOS DISPONIBLES EN ECEPT (solo estos existen, no inventes otros):\n" +
       "- reuma → Reumatología (AR, LES, Sjögren, Esclerodermia, SAF, Vasculitis, Fibromialgia)\n" +
       "- general → Generalidades (Inmunología, Pares Craneales, Cascada de Coagulación, Mediadores, Receptores)\n" +
