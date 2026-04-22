@@ -29,6 +29,38 @@ Reasons are drawn from a small vocabulary:
 
 ---
 
+## Neurosis · Control de impulsos
+- Def formal de "impulsividad" como concepto — skipped: already-implicit (conceptos y cada card lo describen funcionalmente)
+- Trastorno de desregulación disruptiva del estado de ánimo (TDDD) — skipped: cross-theme (pertenece a Depresivos)
+- Cleptomanía + comorbilidad TCA — skipped: borderline basic
+- TEI criterios A1 vs A2 explicados side-by-side — skipped: already-covered (resumen Table distingue 'A1 ≥2/sem × 3 m' vs 'A2 ≥3 graves/año')
+- Ciclo "tensión → acto → alivio → culpa" en impulsividad — skipped: already-covered (nueva Pearl "Impulso vs compulsión" lo introduce)
+— adds committed: 1 Pearl (impulso vs compulsión)
+
+## Neurosis · Personalidad
+- Escala PCL-R de Hare (psicopatía vs antisocial) — skipped: borderline basic (investigación/forense más que clínica estándar)
+- Alternative Model for Personality Disorders (AMPD · Sección III DSM-5) — skipped: borderline basic (propuesta, no criterio principal)
+- Criterio edad ≥18 años para diagnóstico TP — skipped: already-covered (presente en múltiples lugares del card Antisocial y en Pearls)
+- Mecanismos de defensa clásicos por cluster — skipped: borderline basic (psicodinámico; varía por programa)
+- Trastorno explosivo intermitente vs TLP — skipped: cross-theme (Impulsos tiene su card)
+- Cluster A + esquizofrenia riesgo familiar — skipped: borderline basic (genética)
+- Personalidad premorbida vs trastorno de personalidad — skipped: borderline basic (sutileza clínica)
+- Histriónica vs TLP distinction — skipped: borderline basic (nuance; el TLP Pearl de escisión diferencia suficiente)
+- Personalidad depresiva/pasivo-agresiva como entidades propuestas — skipped: fuera de DSM-5
+— no adds committed
+
+## Neurosis · Sueño-vigilia
+- Hipnagogia vs hipnopompia formal Def — skipped: already-covered (aparecen en tétrada de narcolepsia con descripción suficiente)
+- Disomnia vs parasomnia vs ritmo circadiano taxonomía — skipped: borderline basic (organización DSM reorganizó el campo; el capítulo ya se organiza por entidades concretas)
+- Polisomnografía como gold standard dx — skipped: already-implicit (referenciada en AOS y narcolepsia MSLT)
+- Latencia de sueño y eficiencia de sueño definiciones — skipped: borderline basic (conceptos PSG; mencionados en narcolepsia)
+- Jet-lag como trastorno diferenciable — skipped: already-covered (tabla tx incluye "Jet-lag · melatonina 0.5–3 mg")
+- Shift work disorder como entidad — skipped: already-covered (subsumido en trastornos del ritmo circadiano)
+- Higiene del sueño lista extendida — skipped: already-covered (múltiples menciones por cuadro)
+- TCSR y sinucleopatías (Parkinson, Lewy, atrofia multisistémica) asociadas — skipped: borderline basic (Nota en tx: "seguimiento neurológico" lo sugiere)
+- Terapia ensayo por imágenes (imagery rehearsal) mecanismo — skipped: borderline basic (ya nombrada en tx de pesadillas)
+— no adds committed
+
 ## Neurosis · TCA
 - AN restrictiva vs purgativa side-by-side Pearl — skipped: already-covered (subtipos Table dentro del AN card)
 - BN vs AN subtipo purgativo — skipped: already-covered (jerarquía Note en Conceptos; criterio E BN excluye AN coexistente)
