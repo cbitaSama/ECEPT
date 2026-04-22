@@ -11,7 +11,7 @@ var CB_MAX_MSGS=4;
 // absoluta cuando se sirve desde GitHub Pages u otro host.
 var CB_API=(typeof window!=="undefined" && window.location.hostname.indexOf("vercel.app")!==-1)
   ? "/api/chat"
-  : "https://ecept-bigiqy5tg-cbitasamas-projects.vercel.app/api/chat";
+  : "https://ecept.vercel.app/api/chat";
 
 function ChatBot(){
   var s;
