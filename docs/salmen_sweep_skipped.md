@@ -29,6 +29,15 @@ Reasons are drawn from a small vocabulary:
 
 ---
 
+## Neurosis · Trastornos de ansiedad
+- Ansiedad social vs timidez distinction explícita — skipped: already-implicit (criterios de intensidad + deterioro + ≥6 meses descartan timidez; Mutismo selectivo ya tiene un Note equivalente)
+- Crisis esperada vs inesperada side-by-side table — skipped: already-covered (Note "Tipos de crisis" lo explica)
+- "Angustia" como matiz/sinónimo de ansiedad en tradición LATAM — skipped: teacher-specific phrasing (uso terminológico varía por facultad)
+- Ansiedad fisiológica normal por edad (escolar, puberal) — skipped: borderline basic (desarrollo más que psiquiatría)
+- 3-way DDx TEPT vs TAG vs pánico — skipped: cross-theme (TEPT está en su capítulo)
+- Fobia específica: subtipo "situacional" vs "agorafobia" sutileza — skipped: borderline basic (ambas cubiertas por separado)
+- Agorafobia: "triada/tétrada" clásica — skipped: already-covered (las 5 situaciones son la enumeración DSM; tríadas no son oficiales)
+
 ## Psicosis · Trastorno ciclotímico
 - Prevalencia específica (~0.4–1% lifetime) — skipped: borderline basic
 - Vínculo familiar con bipolar I/II (heredabilidad compartida) — skipped: borderline basic
