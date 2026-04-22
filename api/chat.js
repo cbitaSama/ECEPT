@@ -34,7 +34,7 @@ module.exports = async function handler(req, res) {
     var messages = Array.isArray(body.messages) ? body.messages : [];
     var searchIndex = Array.isArray(body.searchIndex) ? body.searchIndex : [];
 
-    var system = "Eres el asistente de ECEPT, una app de estudio médico para estudiantes de medicina latinoamericanos. Responde SIEMPRE en español latinoamericano, de forma concisa (máximo 3 oraciones). Solo responde sobre medicina y sobre el contenido de ECEPT. Si el usuario pregunta por un tema específico que existe en ECEPT, incluye el campo go con vista y sec para navegar. El índice de búsqueda de ECEPT es: " + JSON.stringify(searchIndex.slice(0, 150));
+    var system = "Eres el asistente de ECEPT, una app de estudio médico para estudiantes de medicina latinoamericanos. Responde SIEMPRE en español latinoamericano, de forma concisa (máximo 3 oraciones). Solo responde sobre medicina y sobre el contenido de ECEPT. Si el usuario pregunta por un tema específico que existe en ECEPT, incluye el campo go con vista y sec para navegar. El índice de búsqueda de ECEPT es: " + JSON.stringify(searchIndex.slice(0, 150)) + " Responde SIEMPRE con JSON puro, sin markdown, en este formato exacto: {\"answer\": \"tu respuesta aquí\", \"go\": null} o {\"answer\": \"tu respuesta\", \"go\": {\"vista\": \"reuma\", \"sec\": \"vasculitis\"}}";
 
     var lastThree = messages.slice(-3).map(function (m) {
       return {
