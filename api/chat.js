@@ -80,10 +80,14 @@ module.exports = async function handler(req, res) {
     });
 
     // Fallback chain: on 429 (rate limit) or 503 (overload), retry on the
-    // next model. 2.0-flash is kept as a last resort because it has a
-    // separate quota bucket from 2.5-flash.
-    var GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash'];
-    var geminiResp, modelUsed;
+    // next model. Lite variants generally have a separate quota bucket.
+    var GEMINI_MODELS = [
+      'gemini-2.5-flash',
+      'gemini-2.5-flash-lite',
+      'gemini-2.0-flash',
+      'gemini-2.0-flash-lite'
+    ];
+    var geminiResp, modelUsed, lastStatus;
     for (var mi = 0; mi < GEMINI_MODELS.length; mi++) {
       modelUsed = GEMINI_MODELS[mi];
       var geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/' + modelUsed + ':generateContent?key=' + encodeURIComponent(apiKey);
@@ -92,7 +96,18 @@ module.exports = async function handler(req, res) {
         headers: { 'Content-Type': 'application/json' },
         body: geminiBody
       });
-      if (geminiResp.status !== 503 && geminiResp.status !== 429) break;
+      lastStatus = geminiResp.status;
+      if (lastStatus !== 503 && lastStatus !== 429) break;
+    }
+
+    // If every model in the chain returned 429, surface a friendly
+    // message instead of a 500 so the UI doesn't flash "Error de conexión".
+    if (lastStatus === 429) {
+      res.status(200).json({
+        answer: 'El servicio de IA está saturado en este momento. Por favor intenta de nuevo en un minuto.',
+        links: []
+      });
+      return;
     }
 
     if (!geminiResp.ok) {
