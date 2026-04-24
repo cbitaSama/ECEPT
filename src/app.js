@@ -55,6 +55,8 @@ function App(){
       window.scrollTo(0,0);
     },120);
   },[vista,cs,cd,vi]);
+  // Expose go() to ChatBot (and any other window-scoped caller).
+  useEffect(function(){ window.CB_go=go; },[go]);
 
   var goBack=useCallback(function(){
     if(hist.length>0){
@@ -1033,7 +1035,9 @@ function App(){
 
     )),
     // ════════════ BACK BUTTON (floating, hidden on home only) ════════════
-    vista!=="home"&&e("button",{onClick:handleBack,style:{position:"fixed",bottom:"20px",left:"20px",background:C.ac,color:"#fff",border:"none",borderRadius:"50%",width:"48px",height:"48px",fontSize:"20px",cursor:"pointer",boxShadow:"0 4px 20px "+C.gl,zIndex:90,display:"flex",alignItems:"center",justifyContent:"center"}},"←")
+    vista!=="home"&&e("button",{onClick:handleBack,style:{position:"fixed",bottom:"20px",left:"20px",background:C.ac,color:"#fff",border:"none",borderRadius:"50%",width:"48px",height:"48px",fontSize:"20px",cursor:"pointer",boxShadow:"0 4px 20px "+C.gl,zIndex:90,display:"flex",alignItems:"center",justifyContent:"center"}},"←"),
+    // ════════════ CHATBOT (floating bottom-right) ════════════
+    e(ChatBot,null)
   );
 }
 
