@@ -738,10 +738,10 @@ function App(){
             e("div",{style:{fontSize:"11px",color:C.dm,marginTop:"4px",lineHeight:1.5}},el.d)
           )})
         ),
-        e("div",{style:{padding:"14px",background:"rgba(16,185,129,.07)",border:"1px solid rgba(16,185,129,.2)",borderRadius:"12px"}},e("div",{style:{fontSize:"11px",fontWeight:700,color:"#10b981",marginBottom:"4px"}},"♀ EN LA MUJER"),e("p",{style:{fontSize:"12px",lineHeight:1.6}},ING_CORDON.nota_mujer))
+        e("div",{style:{padding:"14px",background:"rgba(16,185,129,.07)",border:"1px solid rgba(16,185,129,.2)",borderRadius:"12px"}},e("div",{style:{fontSize:"11px",fontWeight:700,color:"#b00ebc",marginBottom:"4px"}},"♀ en mujeres"),e("p",{style:{fontSize:"12px",lineHeight:1.6}},ING_CORDON.nota_mujer))
       )
     ),
-
+    
     // ════════════ ANATOMÍA (PARES CRANEALES) ════════════
     vista==="anatomia"&&e(F,null,
       e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🩻"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"22px",fontWeight:800,color:"#f59e0b"}},"Anatomía"),e("p",{style:{color:C.dm,fontSize:"13px"}},"Pares Craneales · Origen, función y clínica")),
