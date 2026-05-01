@@ -89,6 +89,14 @@ function DeckDetailView(props){
 
   useEffect(function(){ DD_loadCards(); },[]);
 
+  // ── Close menu on click-outside (document listener, avoids stacking-context race) ──
+  useEffect(function(){
+    if(!DD_menuOpenId) return;
+    function DD_docClose(){ DD_setMenuOpenId(null); }
+    document.addEventListener("click", DD_docClose);
+    return function(){ document.removeEventListener("click", DD_docClose); };
+  },[DD_menuOpenId]);
+
   function DD_handleDelete(cardId){
     if(!user||!window.ECEPT_SUPABASE) return;
     window.ECEPT_SUPABASE.from("flashcards").delete().eq("id",cardId).then(function(){
@@ -306,7 +314,6 @@ function DeckDetailView(props){
       },
         e("button",{
           onClick:function(ev){
-            console.log("clicked editar", c.id);
             ev.stopPropagation();
             DD_setMenuOpenId(null);
             setTimeout(function(){ DD_setEditCard(c); DD_setShowEditor(true); },0);
@@ -321,7 +328,6 @@ function DeckDetailView(props){
         e("div",{style:{height:"1px",background:C.bd}}),
         e("button",{
           onClick:function(ev){
-            console.log("clicked eliminar", c.id);
             ev.stopPropagation();
             DD_setMenuOpenId(null);
             setTimeout(function(){ DD_setDeleteConfirmId(c.id); },0);
@@ -339,12 +345,6 @@ function DeckDetailView(props){
 
   return e(F,null,
     e("div",{style:{maxWidth:"760px",margin:"0 auto",padding:"20px 16px 80px",position:"relative"}},
-
-    // ── Click-outside backdrop ──
-    DD_menuOpenId && e("div",{
-      onClick:function(){ DD_setMenuOpenId(null); },
-      style:{position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:4}
-    }),
 
     // ── Header ──
     e("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"14px"}},
