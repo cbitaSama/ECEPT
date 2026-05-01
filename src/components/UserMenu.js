@@ -3,7 +3,7 @@
 // ──────────────────────────────────────────────────────────────
 // ES5 estricto: solo declaraciones var y function. Nada de ES6+.
 // React.createElement vía el alias global `e`. Sin JSX.
-// Props: user (null | Supabase user), onLoginClick, onLogout
+// Props: user (null | Supabase user), onLoginClick, onProfileClick, onLogout
 // ══════════════════════════════════════════════════════════════
 function UserMenu(props){
   var user=props.user;
@@ -33,40 +33,56 @@ function UserMenu(props){
     }
   },
     user
-      ? e("div",{style:{display:"flex",alignItems:"center",gap:"10px"}},
-          // Avatar circle
-          e("div",{style:{
-            width:"34px",height:"34px",flexShrink:0,
-            borderRadius:"50%",
-            background:"linear-gradient(135deg,"+C.ac+","+C.tt+")",
-            display:"flex",alignItems:"center",justifyContent:"center",
-            fontSize:"14px",fontWeight:700,color:"#fff"
-          }},initial),
-          // Name + status
-          e("div",{style:{flex:1,overflow:"hidden"}},
+      ? e("div",{style:{display:"flex",flexDirection:"column",gap:"8px"}},
+          // Top row: avatar + name/status
+          e("div",{style:{display:"flex",alignItems:"center",gap:"10px"}},
             e("div",{style:{
-              fontSize:"13px",fontWeight:600,color:C.tx,
-              overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"
-            }},name),
-            e("div",{style:{fontSize:"10px",color:C.dm,marginTop:"1px"}},"Conectado")
+              width:"34px",height:"34px",flexShrink:0,
+              borderRadius:"50%",
+              background:"linear-gradient(135deg,"+C.ac+","+C.tt+")",
+              display:"flex",alignItems:"center",justifyContent:"center",
+              fontSize:"14px",fontWeight:700,color:"#fff"
+            }},initial),
+            e("div",{style:{flex:1,overflow:"hidden"}},
+              e("div",{style:{
+                fontSize:"13px",fontWeight:600,color:C.tx,
+                overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"
+              }},name),
+              e("div",{style:{fontSize:"10px",color:C.dm,marginTop:"1px"}},"Conectado")
+            )
           ),
-          // Logout button
-          e("button",{
-            onClick:UM_handleLogout,
-            title:"Cerrar sesión",
-            style:{
-              background:"none",
-              border:"1px solid "+C.bd,
-              borderRadius:"8px",
-              color:C.mt,
-              fontSize:"11px",fontWeight:600,
-              cursor:"pointer",
-              minWidth:"44px",minHeight:"44px",
-              padding:"6px 10px",
-              flexShrink:0,
-              whiteSpace:"nowrap"
-            }
-          },"Salir")
+          // Bottom row: Mi perfil + Salir
+          e("div",{style:{display:"flex",gap:"6px"}},
+            e("button",{
+              onClick:props.onProfileClick,
+              title:"Ver mi perfil",
+              style:{
+                flex:1,
+                minHeight:"44px",
+                padding:"6px 10px",
+                borderRadius:"8px",
+                background:"none",
+                border:"1px solid "+C.bd,
+                color:C.ac2,
+                fontSize:"11px",fontWeight:600,
+                cursor:"pointer"
+              }
+            },"Mi perfil"),
+            e("button",{
+              onClick:UM_handleLogout,
+              title:"Cerrar sesión",
+              style:{
+                minHeight:"44px",
+                padding:"6px 10px",
+                borderRadius:"8px",
+                background:"none",
+                border:"1px solid "+C.bd,
+                color:C.mt,
+                fontSize:"11px",fontWeight:600,
+                cursor:"pointer"
+              }
+            },"Salir")
+          )
         )
       : e("button",{
           onClick:props.onLoginClick,
