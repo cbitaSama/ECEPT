@@ -222,3 +222,8 @@ console.log('  build/ECSC.html   ' + (outBytes / 1024).toFixed(1) + ' KB   ' + o
 console.log('  index.html        ' + (outBytes / 1024).toFixed(1) + ' KB   (GitHub Pages root)');
 console.log('');
 console.log('✓ build OK (' + expectedGlobals.length + ' integrity checks passed)');
+
+// ─── placeholder verification ───
+var check = fs.readFileSync('index.html', 'utf8');
+var hasPlaceholder = check.indexOf('__SUPABASE_URL__') !== -1;
+console.log('[build] placeholder check:', hasPlaceholder ? 'STILL PRESENT (bad)' : 'SUBSTITUTED (good)');
