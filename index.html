@@ -36,6 +36,8 @@ input,button{font-family:inherit;-webkit-appearance:none}
 <div id="root"></div>
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>window.__ECEPT_ENV={SUPABASE_URL:'',SUPABASE_ANON_KEY:''};</script>
 <script>
 var e=React.createElement,F=React.Fragment;
 var useState=React.useState,useEffect=React.useEffect,useCallback=React.useCallback,useMemo=React.useMemo,useRef=React.useRef;
@@ -13282,6 +13284,14 @@ function ChatBot(){
   );
 }
 window.ChatBot = ChatBot;
+
+'use strict';
+(function () {
+  var env = window.__ECEPT_ENV || {};
+  var url = env.SUPABASE_URL || '';
+  var key = env.SUPABASE_ANON_KEY || '';
+  window.ECEPT_SUPABASE = supabase.createClient(url, key);
+}());
 
 // ══════════════════════════════════════════════════════════════
 // APP PRINCIPAL
