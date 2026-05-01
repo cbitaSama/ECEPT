@@ -20,10 +20,32 @@ function App(){
   s=_(0);var calcPeso=s[0],setCalcPeso=s[1]; s=_(0);var calcSCQ=s[0],setCalcSCQ=s[1];
   s=_(0);var calcGotas=s[0],setCalcGotas=s[1]; s=_(null);var sbExp=s[0],setSbExp=s[1]; s=_(null);var sbSub=s[0],setSbSub=s[1];
   s=_([]);var favs=s[0],setFavs=s[1];
+  s=_(null);var ecuUser=s[0],setEcuUser=s[1];
+  s=_(false);var ecuShowAuth=s[0],setEcuShowAuth=s[1];
   s=_(0);var streak=s[0],setStreak=s[1]; s=_(0);var bestStreak=s[0],setBestStreak=s[1]; s=_(0);var calcHoras=s[0],setCalcHoras=s[1];
   s=_(function(){try{return JSON.parse(localStorage.getItem("ecept_v1")||"[]")}catch(e2){return[]}});
   var vi=s[0],setVi=s[1];
   useEffect(function(){try{localStorage.setItem("ecept_v1",JSON.stringify(vi))}catch(e2){}},[vi]);
+
+  // ─── AUTH SESSION ─── restore on mount + keep in sync via onAuthStateChange
+  useEffect(function(){
+    if(!window.ECEPT_SUPABASE) return;
+    try{
+      window.ECEPT_SUPABASE.auth.getSession().then(function(res){
+        if(res&&res.data&&res.data.session) setEcuUser(res.data.session.user||null);
+      }).catch(function(){});
+      var authListener=window.ECEPT_SUPABASE.auth.onAuthStateChange(function(event,session){
+        setEcuUser(session&&session.user?session.user:null);
+      });
+      return function(){
+        try{
+          if(authListener&&authListener.data&&authListener.data.subscription){
+            authListener.data.subscription.unsubscribe();
+          }
+        }catch(e3){}
+      };
+    }catch(e2){ console.error('[ECEPT] auth session hook failed:',e2); }
+  },[]);
 
   // ─── NAVIGATION ─── back-button history stack
   s=_([]); var hist=s[0],setHist=s[1];
@@ -238,6 +260,12 @@ function App(){
           ),
           e("button",{onClick:function(){setSb(false)},style:{background:"none",border:"none",color:C.mt,fontSize:"20px",cursor:"pointer"}},"✕")
         ),
+        // UserMenu — session state at top of sidebar
+        e(UserMenu,{
+          user:ecuUser,
+          onLoginClick:function(){setEcuShowAuth(true);setSb(false);},
+          onLogout:function(){}
+        }),
         // Home
         e("div",{onClick:function(){go("home");setSb(false)},style:{padding:"10px 14px",borderRadius:"10px",cursor:"pointer",marginBottom:"16px",background:vista==="home"?"rgba(59,130,246,.1)":"rgba(255,255,255,.03)",color:vista==="home"?C.ac:C.mt,fontWeight:700,fontSize:"13px",display:"flex",alignItems:"center",gap:"8px",border:"1px solid "+(vista==="home"?C.ac+"30":"transparent")}},"🏠 Inicio"),
 
@@ -1037,7 +1065,9 @@ function App(){
     // ════════════ BACK BUTTON (floating, hidden on home only) ════════════
     vista!=="home"&&e("button",{onClick:handleBack,style:{position:"fixed",bottom:"20px",left:"20px",background:C.ac,color:"#fff",border:"none",borderRadius:"50%",width:"48px",height:"48px",fontSize:"20px",cursor:"pointer",boxShadow:"0 4px 20px "+C.gl,zIndex:90,display:"flex",alignItems:"center",justifyContent:"center"}},"←"),
     // ════════════ CHATBOT (floating bottom-right) ════════════
-    e(ChatBot,null)
+    e(ChatBot,null),
+    // ════════════ AUTH MODAL ════════════
+    ecuShowAuth&&e(AuthModal,{onSuccess:function(){setEcuShowAuth(false);},onClose:function(){setEcuShowAuth(false);}})
   );
 }
 

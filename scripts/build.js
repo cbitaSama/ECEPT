@@ -103,6 +103,8 @@ var parts = [
   'src/components/SupabaseClient.js',
   // auth modal (uses ECEPT_SUPABASE; exposes window.AuthModal)
   'src/components/Auth.js',
+  // user menu (sidebar session widget; exposes window.UserMenu)
+  'src/components/UserMenu.js',
   // app
   'src/app.js'
 ];
@@ -160,7 +162,9 @@ var expectedGlobals = [
   // supabase client
   'window.ECEPT_SUPABASE',
   // auth modal
-  'function AuthModal', 'window.AuthModal'
+  'function AuthModal', 'window.AuthModal',
+  // user menu
+  'function UserMenu', 'window.UserMenu'
 ];
 expectedGlobals.forEach(function(g) {
   if (output.indexOf(g) === -1) errors.push('missing global: ' + g);

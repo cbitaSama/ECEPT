@@ -13555,6 +13555,97 @@ function AuthModal(props){
 window.AuthModal = AuthModal;
 
 // ══════════════════════════════════════════════════════════════
+// USER MENU — sidebar session widget
+// ──────────────────────────────────────────────────────────────
+// ES5 estricto: solo declaraciones var y function. Nada de ES6+.
+// React.createElement vía el alias global `e`. Sin JSX.
+// Props: user (null | Supabase user), onLoginClick, onLogout
+// ══════════════════════════════════════════════════════════════
+function UserMenu(props){
+  var user=props.user;
+
+  function UM_displayName(){
+    if(!user) return "";
+    if(user.user_metadata&&user.user_metadata.display_name) return user.user_metadata.display_name;
+    if(user.email) return user.email.split("@")[0];
+    return "Usuario";
+  }
+
+  function UM_handleLogout(){
+    if(window.ECEPT_SUPABASE){
+      try{ window.ECEPT_SUPABASE.auth.signOut(); }catch(e2){ console.error('[ECEPT] signOut failed:',e2); }
+    }
+    if(typeof props.onLogout==="function") props.onLogout();
+  }
+
+  var name=UM_displayName();
+  var initial=name?name.charAt(0).toUpperCase():"?";
+
+  return e("div",{
+    style:{
+      marginBottom:"16px",
+      paddingBottom:"14px",
+      borderBottom:"1px solid "+C.bd
+    }
+  },
+    user
+      ? e("div",{style:{display:"flex",alignItems:"center",gap:"10px"}},
+          // Avatar circle
+          e("div",{style:{
+            width:"34px",height:"34px",flexShrink:0,
+            borderRadius:"50%",
+            background:"linear-gradient(135deg,"+C.ac+","+C.tt+")",
+            display:"flex",alignItems:"center",justifyContent:"center",
+            fontSize:"14px",fontWeight:700,color:"#fff"
+          }},initial),
+          // Name + status
+          e("div",{style:{flex:1,overflow:"hidden"}},
+            e("div",{style:{
+              fontSize:"13px",fontWeight:600,color:C.tx,
+              overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"
+            }},name),
+            e("div",{style:{fontSize:"10px",color:C.dm,marginTop:"1px"}},"Conectado")
+          ),
+          // Logout button
+          e("button",{
+            onClick:UM_handleLogout,
+            title:"Cerrar sesión",
+            style:{
+              background:"none",
+              border:"1px solid "+C.bd,
+              borderRadius:"8px",
+              color:C.mt,
+              fontSize:"11px",fontWeight:600,
+              cursor:"pointer",
+              minWidth:"44px",minHeight:"44px",
+              padding:"6px 10px",
+              flexShrink:0,
+              whiteSpace:"nowrap"
+            }
+          },"Salir")
+        )
+      : e("button",{
+          onClick:props.onLoginClick,
+          style:{
+            width:"100%",
+            minHeight:"44px",
+            padding:"10px 14px",
+            borderRadius:"10px",
+            background:"rgba(59,130,246,.1)",
+            border:"1px solid rgba(59,130,246,.25)",
+            color:C.ac2,
+            fontSize:"13px",fontWeight:700,
+            cursor:"pointer",
+            textAlign:"center",
+            boxSizing:"border-box"
+          }
+        },"Iniciar sesión")
+  );
+}
+
+window.UserMenu = UserMenu;
+
+// ══════════════════════════════════════════════════════════════
 // APP PRINCIPAL
 // ══════════════════════════════════════════════════════════════
 function App(){
@@ -13576,10 +13667,32 @@ function App(){
   s=_(0);var calcPeso=s[0],setCalcPeso=s[1]; s=_(0);var calcSCQ=s[0],setCalcSCQ=s[1];
   s=_(0);var calcGotas=s[0],setCalcGotas=s[1]; s=_(null);var sbExp=s[0],setSbExp=s[1]; s=_(null);var sbSub=s[0],setSbSub=s[1];
   s=_([]);var favs=s[0],setFavs=s[1];
+  s=_(null);var ecuUser=s[0],setEcuUser=s[1];
+  s=_(false);var ecuShowAuth=s[0],setEcuShowAuth=s[1];
   s=_(0);var streak=s[0],setStreak=s[1]; s=_(0);var bestStreak=s[0],setBestStreak=s[1]; s=_(0);var calcHoras=s[0],setCalcHoras=s[1];
   s=_(function(){try{return JSON.parse(localStorage.getItem("ecept_v1")||"[]")}catch(e2){return[]}});
   var vi=s[0],setVi=s[1];
   useEffect(function(){try{localStorage.setItem("ecept_v1",JSON.stringify(vi))}catch(e2){}},[vi]);
+
+  // ─── AUTH SESSION ─── restore on mount + keep in sync via onAuthStateChange
+  useEffect(function(){
+    if(!window.ECEPT_SUPABASE) return;
+    try{
+      window.ECEPT_SUPABASE.auth.getSession().then(function(res){
+        if(res&&res.data&&res.data.session) setEcuUser(res.data.session.user||null);
+      }).catch(function(){});
+      var authListener=window.ECEPT_SUPABASE.auth.onAuthStateChange(function(event,session){
+        setEcuUser(session&&session.user?session.user:null);
+      });
+      return function(){
+        try{
+          if(authListener&&authListener.data&&authListener.data.subscription){
+            authListener.data.subscription.unsubscribe();
+          }
+        }catch(e3){}
+      };
+    }catch(e2){ console.error('[ECEPT] auth session hook failed:',e2); }
+  },[]);
 
   // ─── NAVIGATION ─── back-button history stack
   s=_([]); var hist=s[0],setHist=s[1];
@@ -13794,6 +13907,12 @@ function App(){
           ),
           e("button",{onClick:function(){setSb(false)},style:{background:"none",border:"none",color:C.mt,fontSize:"20px",cursor:"pointer"}},"✕")
         ),
+        // UserMenu — session state at top of sidebar
+        e(UserMenu,{
+          user:ecuUser,
+          onLoginClick:function(){setEcuShowAuth(true);setSb(false);},
+          onLogout:function(){}
+        }),
         // Home
         e("div",{onClick:function(){go("home");setSb(false)},style:{padding:"10px 14px",borderRadius:"10px",cursor:"pointer",marginBottom:"16px",background:vista==="home"?"rgba(59,130,246,.1)":"rgba(255,255,255,.03)",color:vista==="home"?C.ac:C.mt,fontWeight:700,fontSize:"13px",display:"flex",alignItems:"center",gap:"8px",border:"1px solid "+(vista==="home"?C.ac+"30":"transparent")}},"🏠 Inicio"),
 
@@ -14593,7 +14712,9 @@ function App(){
     // ════════════ BACK BUTTON (floating, hidden on home only) ════════════
     vista!=="home"&&e("button",{onClick:handleBack,style:{position:"fixed",bottom:"20px",left:"20px",background:C.ac,color:"#fff",border:"none",borderRadius:"50%",width:"48px",height:"48px",fontSize:"20px",cursor:"pointer",boxShadow:"0 4px 20px "+C.gl,zIndex:90,display:"flex",alignItems:"center",justifyContent:"center"}},"←"),
     // ════════════ CHATBOT (floating bottom-right) ════════════
-    e(ChatBot,null)
+    e(ChatBot,null),
+    // ════════════ AUTH MODAL ════════════
+    ecuShowAuth&&e(AuthModal,{onSuccess:function(){setEcuShowAuth(false);},onClose:function(){setEcuShowAuth(false);}})
   );
 }
 
