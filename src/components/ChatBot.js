@@ -34,6 +34,19 @@ function ChatBot(){
     }
   },[CB_msgs,CB_loading]);
 
+  // Grant access if an active Supabase session exists on mount.
+  // Gate passes if EITHER localStorage "CB_auth"==="1" OR active session.
+  // TODO: retire shared password gate in Update 18
+  useEffect(function(){
+    if(CB_authed) return;
+    if(!window.ECEPT_SUPABASE) return;
+    try{
+      window.ECEPT_SUPABASE.auth.getSession().then(function(res){
+        if(res&&res.data&&res.data.session) CB_setAuthed(true);
+      }).catch(function(){});
+    }catch(e2){}
+  },[]);
+
   function CB_submitCode(){
     if(CB_code===CB_CODE){
       try{ localStorage.setItem("CB_auth","1"); }catch(e2){}
