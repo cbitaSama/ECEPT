@@ -11,6 +11,8 @@ var CB_MAX_MSGS=4;
 var CB_API=(typeof window!=="undefined" && window.location.hostname.indexOf("vercel.app")!==-1)
   ? "/api/chat"
   : "https://ecept.vercel.app/api/chat";
+var CB_LIMITS={student:20,premium:999,admin:999};
+var CB_MODEL_BY_ROLE={student:"gemini-2.0-flash",premium:"gemini-2.5-pro-exp-03-25",admin:"gemini-2.5-pro-exp-03-25"};
 
 function ChatBot(props){
   var s;
@@ -21,6 +23,7 @@ function ChatBot(props){
   s=useState(""); var CB_input=s[0], CB_setInput=s[1];
   s=useState(false); var CB_loading=s[0], CB_setLoading=s[1];
   s=useState(false); var CB_connErr=s[0], CB_setConnErr=s[1];
+  s=useState(0); var CB_msgCount=s[0], CB_setMsgCount=s[1];
 
   var CB_scrollRef=useRef(null);
   useEffect(function(){
@@ -56,6 +59,8 @@ function ChatBot(props){
   function CB_send(){
     var txt=CB_input.trim();
     if(!txt||CB_loading) return;
+    var CB_limit=CB_LIMITS[CB_role]!==undefined?CB_LIMITS[CB_role]:20;
+    if(CB_role==="student"&&CB_msgCount>=CB_limit) return;
     CB_setInput("");
     CB_setConnErr(false);
     var userMsg={role:"user",text:txt};
@@ -63,14 +68,16 @@ function ChatBot(props){
     if(next.length>CB_MAX_MSGS) next=next.slice(next.length-CB_MAX_MSGS);
     CB_setMsgs(next);
     CB_setLoading(true);
+    CB_setMsgCount(function(n){ return n+1; });
 
     var apiMsgs=next.map(function(m){ return {role:m.role,content:m.text}; });
     var idx=(typeof window!=="undefined" && window.SEARCH_INDEX) || [];
+    var CB_model=CB_MODEL_BY_ROLE[CB_role]||"gemini-2.0-flash";
 
     fetch(CB_API,{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({messages:apiMsgs, searchIndex:idx})
+      body:JSON.stringify({messages:apiMsgs,searchIndex:idx,model:CB_model})
     }).then(function(r){ return r.json(); })
       .then(function(data){
         CB_setLoading(false);
@@ -142,7 +149,12 @@ function ChatBot(props){
       e("div",{style:{padding:"10px 12px 10px 16px", borderBottom:"1px solid "+C.bd, display:"flex", alignItems:"center", justifyContent:"space-between", background:C.bg}},
         e("div",{style:{display:"flex",alignItems:"center",gap:"8px"}},
           e("span",{style:{fontSize:"18px"}},"🤖"),
-          e("div",{style:{fontWeight:700, color:C.tx, fontSize:"14px"}},"Asistente ECEPT")
+          e("div",{style:{fontWeight:700, color:C.tx, fontSize:"14px"}},"Asistente ECEPT"),
+          CB_session===true&&e("span",{style:{
+            fontSize:"10px",fontWeight:700,padding:"2px 7px",borderRadius:"6px",
+            background:CB_role==="admin"?"rgba(59,130,246,.18)":CB_role==="premium"?"rgba(251,191,36,.18)":"rgba(100,116,139,.18)",
+            color:CB_role==="admin"?"#60a5fa":CB_role==="premium"?"#fbbf24":"#94a3b8"
+          }},CB_role==="admin"?"Admin 🔧":CB_role==="premium"?"Premium ⭐":"Plan Gratuito")
         ),
         e("button",{
           onClick:function(){ CB_setOpen(false); },
@@ -213,7 +225,8 @@ function ChatBot(props){
               );
             }),
             CB_loading && e("div",{style:{color:C.dm, fontSize:"12px", fontStyle:"italic"}},"escribiendo..."),
-            CB_connErr && e("div",{style:{color:"#ef4444", fontSize:"12px", padding:"8px 10px", background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:"8px"}},"Error de conexión. Intenta de nuevo.")
+            CB_connErr && e("div",{style:{color:"#ef4444", fontSize:"12px", padding:"8px 10px", background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:"8px"}},"Error de conexión. Intenta de nuevo."),
+            CB_role==="student"&&CB_msgCount>=(CB_LIMITS.student||20)&&e("div",{style:{color:"#fbbf24",fontSize:"12px",padding:"8px 10px",background:"rgba(251,191,36,.08)",border:"1px solid rgba(251,191,36,.25)",borderRadius:"8px"}},"Alcanzaste el límite de 20 mensajes diarios del plan gratuito. Próximamente podrás actualizar tu plan.")
           ),
           // input bar
           e("div",{style:{padding:"10px 12px", borderTop:"1px solid "+C.bd, display:"flex", gap:"8px", background:C.bg}},
@@ -223,7 +236,7 @@ function ChatBot(props){
               onChange:function(ev){ CB_setInput(ev.target.value); },
               onKeyDown:function(ev){ if(ev.key==="Enter" && !ev.shiftKey){ ev.preventDefault(); CB_send(); } },
               placeholder:"Escribe tu mensaje...",
-              disabled: CB_loading,
+              disabled: CB_loading||(CB_role==="student"&&CB_msgCount>=(CB_LIMITS.student||20)),
               "aria-label":"Mensaje",
               style:{
                 flex:1,
@@ -239,17 +252,17 @@ function ChatBot(props){
             }),
             e("button",{
               onClick:CB_send,
-              disabled: CB_loading || !CB_input.trim(),
+              disabled: CB_loading||!CB_input.trim()||(CB_role==="student"&&CB_msgCount>=(CB_LIMITS.student||20)),
               "aria-label":"Enviar",
               style:{
                 minWidth:"44px",
                 minHeight:"44px",
                 padding:"0 14px",
                 borderRadius:"10px",
-                background: (CB_loading||!CB_input.trim()) ? C.dm : "#3b82f6",
+                background:(CB_loading||!CB_input.trim()||(CB_role==="student"&&CB_msgCount>=(CB_LIMITS.student||20)))?C.dm:"#3b82f6",
                 color:"#fff",
                 border:"none",
-                cursor: (CB_loading||!CB_input.trim()) ? "default" : "pointer",
+                cursor:(CB_loading||!CB_input.trim()||(CB_role==="student"&&CB_msgCount>=(CB_LIMITS.student||20)))?"default":"pointer",
                 fontSize:"16px",
                 fontWeight:700
               }
