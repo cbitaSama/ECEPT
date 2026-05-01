@@ -286,7 +286,7 @@ function AuthModal(props){
                 value:AU_email,
                 onChange:function(ev){ AU_setEmail(ev.target.value); },
                 onKeyDown:AU_onKeyDown,
-                placeholder:isSignup?"tu@correo.com":"tucorreo@email.com o tu_usuario",
+                placeholder:isSignup?"tu@correo.com":"correo o usuario",
                 autoComplete:isSignup?"email":"username",
                 autoCapitalize:"none",
                 spellCheck:false,
