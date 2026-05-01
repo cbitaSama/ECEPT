@@ -83,7 +83,7 @@ function UserMenu(props){
             textAlign:"center",
             boxSizing:"border-box"
           }
-        },"Iniciar sesión")
+        },"Iniciar sesión / Registrarse")
   );
 }
 

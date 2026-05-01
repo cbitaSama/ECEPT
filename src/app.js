@@ -1065,7 +1065,7 @@ function App(){
     // ════════════ BACK BUTTON (floating, hidden on home only) ════════════
     vista!=="home"&&e("button",{onClick:handleBack,style:{position:"fixed",bottom:"20px",left:"20px",background:C.ac,color:"#fff",border:"none",borderRadius:"50%",width:"48px",height:"48px",fontSize:"20px",cursor:"pointer",boxShadow:"0 4px 20px "+C.gl,zIndex:90,display:"flex",alignItems:"center",justifyContent:"center"}},"←"),
     // ════════════ CHATBOT (floating bottom-right) ════════════
-    e(ChatBot,null),
+    e(ChatBot,{onLoginRequest:function(){setEcuShowAuth(true);}}),
     // ════════════ AUTH MODAL ════════════
     ecuShowAuth&&e(AuthModal,{onSuccess:function(){setEcuShowAuth(false);},onClose:function(){setEcuShowAuth(false);}})
   );
