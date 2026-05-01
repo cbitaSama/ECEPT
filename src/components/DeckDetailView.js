@@ -29,6 +29,8 @@ function DeckDetailView(props){
   s=useState([]);    var DD_selectedTags=s[0],DD_setSelectedTags=s[1];
   s=useState(null);  var DD_menuOpenId=s[0],  DD_setMenuOpenId=s[1];
   s=useState(null);  var DD_deleteConfirmId=s[0], DD_setDeleteConfirmId=s[1];
+  s=useState(false); var DD_showEditor=s[0],  DD_setShowEditor=s[1];
+  s=useState(null);  var DD_editCard=s[0],    DD_setEditCard=s[1];
 
   // ── Inject CSS once ──
   useEffect(function(){
@@ -116,8 +118,8 @@ function DeckDetailView(props){
   }
 
   function DD_handleNewCard(){
-    // Fase 3 implementará el editor. Por ahora: log.
-    if(typeof console!=="undefined") console.log("[ECEPT] FlashcardEditor pendiente Fase 3");
+    DD_setEditCard(null);
+    DD_setShowEditor(true);
   }
 
   function DD_handleStudy(){
@@ -305,8 +307,8 @@ function DeckDetailView(props){
         e("button",{
           onClick:function(){
             DD_setMenuOpenId(null);
-            // Fase 3: editor inline
-            if(typeof console!=="undefined") console.log("[ECEPT] Editar tarjeta — Fase 3 pendiente",c.id);
+            DD_setEditCard(c);
+            DD_setShowEditor(true);
           },
           style:{
             display:"block",width:"100%",minHeight:"44px",
@@ -329,7 +331,8 @@ function DeckDetailView(props){
     );
   }
 
-  return e("div",{style:{maxWidth:"760px",margin:"0 auto",padding:"20px 16px 80px",position:"relative"}},
+  return e(F,null,
+    e("div",{style:{maxWidth:"760px",margin:"0 auto",padding:"20px 16px 80px",position:"relative"}},
 
     // ── Click-outside backdrop ──
     DD_menuOpenId && e("div",{
@@ -574,7 +577,14 @@ function DeckDetailView(props){
           },"Eliminar")
         )
       )
-    )
+    ),
+    DD_showEditor && e(FlashcardEditor,{
+      user:user,
+      deck:deck,
+      card:DD_editCard,
+      onSaved:function(){ DD_setShowEditor(false); DD_setEditCard(null); DD_loadCards(); },
+      onClose:function(){ DD_setShowEditor(false); DD_setEditCard(null); }
+    })
   );
 }
 

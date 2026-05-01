@@ -109,6 +109,8 @@ var parts = [
   'src/components/ProfileView.js',
   // decks view (flashcards deck list; exposes window.DecksView)
   'src/components/DecksView.js',
+  // flashcard editor (create/edit flashcards; exposes window.FlashcardEditor)
+  'src/components/FlashcardEditor.js',
   // deck detail view (flashcards inside a deck; exposes window.DeckDetailView)
   'src/components/DeckDetailView.js',
   // app
@@ -175,6 +177,8 @@ var expectedGlobals = [
   'function ProfileView', 'window.ProfileView',
   // decks view
   'function DecksView', 'window.DecksView',
+  // flashcard editor
+  'function FlashcardEditor', 'window.FlashcardEditor',
   // deck detail view
   'function DeckDetailView', 'window.DeckDetailView'
 ];
