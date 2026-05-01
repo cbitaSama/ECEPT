@@ -99,6 +99,12 @@ var parts = [
   'src/components/salud_mental/_iife-close.js',
   // chatbot (must come after App? no — function hoisted; keep with components)
   'src/components/ChatBot.js',
+  // supabase client (reads window.__ECEPT_ENV; exposes window.ECEPT_SUPABASE)
+  'src/components/SupabaseClient.js',
+  // auth modal (uses ECEPT_SUPABASE; exposes window.AuthModal)
+  'src/components/Auth.js',
+  // user menu (sidebar session widget; exposes window.UserMenu)
+  'src/components/UserMenu.js',
   // app
   'src/app.js'
 ];
@@ -152,13 +158,20 @@ var expectedGlobals = [
   'function IntroView', 'function RootHub', 'function NeurosisHub',
   'window.SaludMentalView', 'window.SM_SEARCH_INDEX',
   // chatbot
-  'function ChatBot', 'window.ChatBot'
+  'function ChatBot', 'window.ChatBot',
+  // supabase client
+  'window.ECEPT_SUPABASE',
+  // auth modal
+  'function AuthModal', 'window.AuthModal',
+  // user menu
+  'function UserMenu', 'window.UserMenu'
 ];
 expectedGlobals.forEach(function(g) {
   if (output.indexOf(g) === -1) errors.push('missing global: ' + g);
 });
 
-// The shell contains 3 legitimate </script> tags: react CDN, react-dom CDN, main bundle.
+// The shell contains 5 legitimate </script> tags: vercel×2, react CDN, react-dom CDN, main bundle.
+// (supabase CDN + __ECEPT_ENV inline were added in Alpha17)
 var shellClosingScripts = (shell.match(/<\/script>/g) || []).length;
 var outputClosingScripts = (output.match(/<\/script>/g) || []).length;
 if (outputClosingScripts !== shellClosingScripts) {
@@ -179,6 +192,19 @@ fs.mkdirSync('build', { recursive: true });
 fs.writeFileSync('build/ECSC.html', output);
 fs.writeFileSync('index.html', output);
 
+// ─── env var substitution (only when vars are actually set) ───
+console.log('[build] env substitution: SUPABASE_URL=' + (process.env.SUPABASE_URL ? 'SET' : 'MISSING'));
+console.log('[build] env substitution: SUPABASE_ANON_KEY=' + (process.env.SUPABASE_ANON_KEY ? 'SET' : 'MISSING'));
+if (process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY) {
+  var outputFinal = output
+    .replace(/__SUPABASE_URL__/g, process.env.SUPABASE_URL)
+    .replace(/__SUPABASE_ANON_KEY__/g, process.env.SUPABASE_ANON_KEY);
+  fs.writeFileSync('build/ECSC.html', outputFinal);
+  fs.writeFileSync('index.html', outputFinal);
+} else {
+  console.log('[build] env vars not set — placeholders left intact in output files');
+}
+
 // ─── manifest ───
 var totalBytes = manifest.reduce(function(a, m) { return a + m.bytes; }, 0);
 var totalLines = manifest.reduce(function(a, m) { return a + m.lines; }, 0);
@@ -196,3 +222,8 @@ console.log('  build/ECSC.html   ' + (outBytes / 1024).toFixed(1) + ' KB   ' + o
 console.log('  index.html        ' + (outBytes / 1024).toFixed(1) + ' KB   (GitHub Pages root)');
 console.log('');
 console.log('✓ build OK (' + expectedGlobals.length + ' integrity checks passed)');
+
+// ─── placeholder verification ───
+var check = fs.readFileSync('index.html', 'utf8');
+var hasPlaceholder = check.indexOf('__SUPABASE_URL__') !== -1;
+console.log('[build] placeholder check:', hasPlaceholder ? 'STILL PRESENT (bad)' : 'SUBSTITUTED (good)');
