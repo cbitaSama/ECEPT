@@ -418,7 +418,7 @@ function FlashcardEditor(props){
             ),
             e("div",{className:"fe-face",style:{
               transform:"rotateY(180deg)",
-              background:C.cd2,border:"1px solid "+C.bd,borderRadius:"14px",
+              background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",
               display:"flex",alignItems:"center",justifyContent:"center",
               padding:"20px",boxSizing:"border-box"
             }},

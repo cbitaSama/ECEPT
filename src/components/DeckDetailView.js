@@ -585,7 +585,7 @@ function DeckDetailView(props){
       onSaved:function(){ DD_setShowEditor(false); DD_setEditCard(null); DD_loadCards(); },
       onClose:function(){ DD_setShowEditor(false); DD_setEditCard(null); }
     })
-  );
+  ));
 }
 
 window.DeckDetailView = DeckDetailView;
