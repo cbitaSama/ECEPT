@@ -306,6 +306,7 @@ function DeckDetailView(props){
       },
         e("button",{
           onClick:function(ev){
+            console.log("clicked editar", c.id);
             ev.stopPropagation();
             DD_setMenuOpenId(null);
             setTimeout(function(){ DD_setEditCard(c); DD_setShowEditor(true); },0);
@@ -320,6 +321,7 @@ function DeckDetailView(props){
         e("div",{style:{height:"1px",background:C.bd}}),
         e("button",{
           onClick:function(ev){
+            console.log("clicked eliminar", c.id);
             ev.stopPropagation();
             DD_setMenuOpenId(null);
             setTimeout(function(){ DD_setDeleteConfirmId(c.id); },0);
