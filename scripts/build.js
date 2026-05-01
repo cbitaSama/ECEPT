@@ -99,6 +99,8 @@ var parts = [
   'src/components/salud_mental/_iife-close.js',
   // chatbot (must come after App? no — function hoisted; keep with components)
   'src/components/ChatBot.js',
+  // supabase client (reads window.__ECEPT_ENV; exposes window.ECEPT_SUPABASE)
+  'src/components/SupabaseClient.js',
   // app
   'src/app.js'
 ];
@@ -152,13 +154,16 @@ var expectedGlobals = [
   'function IntroView', 'function RootHub', 'function NeurosisHub',
   'window.SaludMentalView', 'window.SM_SEARCH_INDEX',
   // chatbot
-  'function ChatBot', 'window.ChatBot'
+  'function ChatBot', 'window.ChatBot',
+  // supabase client
+  'window.ECEPT_SUPABASE'
 ];
 expectedGlobals.forEach(function(g) {
   if (output.indexOf(g) === -1) errors.push('missing global: ' + g);
 });
 
-// The shell contains 3 legitimate </script> tags: react CDN, react-dom CDN, main bundle.
+// The shell contains 5 legitimate </script> tags: vercel×2, react CDN, react-dom CDN, main bundle.
+// (supabase CDN + __ECEPT_ENV inline were added in Alpha17)
 var shellClosingScripts = (shell.match(/<\/script>/g) || []).length;
 var outputClosingScripts = (output.match(/<\/script>/g) || []).length;
 if (outputClosingScripts !== shellClosingScripts) {
@@ -178,6 +183,13 @@ if (errors.length) {
 fs.mkdirSync('build', { recursive: true });
 fs.writeFileSync('build/ECSC.html', output);
 fs.writeFileSync('index.html', output);
+
+// ─── env var substitution ───
+var outputFinal = output
+  .replace(/__SUPABASE_URL__/g, process.env.SUPABASE_URL || '')
+  .replace(/__SUPABASE_ANON_KEY__/g, process.env.SUPABASE_ANON_KEY || '');
+fs.writeFileSync('build/ECSC.html', outputFinal);
+fs.writeFileSync('index.html', outputFinal);
 
 // ─── manifest ───
 var totalBytes = manifest.reduce(function(a, m) { return a + m.bytes; }, 0);
