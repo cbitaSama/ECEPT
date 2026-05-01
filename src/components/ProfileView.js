@@ -22,6 +22,7 @@ function ProfileView(props){
   s=useState(false); var PV_pwLoading=s[0],  PV_setPwLoading=s[1];
   s=useState(false); var PV_pwOk=s[0],       PV_setPwOk=s[1];
   s=useState("");    var PV_pwErr=s[0],       PV_setPwErr=s[1];
+  s=useState(0);     var PV_credits=s[0],     PV_setCredits=s[1];
 
   // Fetch profile from public.profiles on mount
   useEffect(function(){
@@ -37,6 +38,7 @@ function ProfileView(props){
           PV_setProfile(res.data);
           PV_setDn(res.data.display_name||"");
           PV_setUn(res.data.username||"");
+          PV_setCredits(typeof res.data.credits==="number"?res.data.credits:0);
         } else {
           var meta=user.user_metadata||{};
           PV_setDn(meta.display_name||"");
@@ -249,7 +251,17 @@ function ProfileView(props){
           ),
           role==="student"
             ? e("div",{style:{fontSize:"12px",color:C.dm,lineHeight:1.5}},"Próximamente podrás actualizar a Premium")
-            : e("div",{style:{fontSize:"12px",color:"#34d399"}},"Plan activo ✓")
+            : e("div",{style:{fontSize:"12px",color:"#34d399"}},"Plan activo ✓"),
+          e("div",{style:{
+            display:"inline-block",
+            marginTop:"8px",
+            padding:"3px 10px",
+            borderRadius:"999px",
+            background:"rgba(96,165,250,.12)",
+            color:"#60a5fa",
+            fontSize:"11px",
+            fontWeight:700
+          }},"Créditos disponibles: "+PV_credits)
         )
       )
     )
