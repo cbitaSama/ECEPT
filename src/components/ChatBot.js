@@ -1,11 +1,10 @@
 // ══════════════════════════════════════════════════════════════
-// CHATBOT — Asistente IA con gate de acceso
+// CHATBOT — Asistente IA con acceso por cuenta
 // ──────────────────────────────────────────────────────────────
 // ES5 estricto: solo declaraciones var y function. Nada de ES6+.
 // React.createElement vía el alias global `e`. Sin JSX.
 // Todos los globales nuevos van con prefijo CB_ para evitar colisiones.
 // ══════════════════════════════════════════════════════════════
-var CB_CODE="210419";
 var CB_MAX_MSGS=4;
 // API endpoint: relativa cuando la app se sirve desde Vercel (mismo host),
 // absoluta cuando se sirve desde GitHub Pages u otro host.
@@ -13,15 +12,11 @@ var CB_API=(typeof window!=="undefined" && window.location.hostname.indexOf("ver
   ? "/api/chat"
   : "https://ecept.vercel.app/api/chat";
 
-function ChatBot(){
+function ChatBot(props){
   var s;
   s=useState(false); var CB_open=s[0], CB_setOpen=s[1];
-  s=useState(function(){
-    try{ return localStorage.getItem("CB_auth")==="1"; }catch(e2){ return false; }
-  });
-  var CB_authed=s[0], CB_setAuthed=s[1];
-  s=useState(""); var CB_code=s[0], CB_setCode=s[1];
-  s=useState(false); var CB_codeErr=s[0], CB_setCodeErr=s[1];
+  s=useState(null); var CB_session=s[0], CB_setSession=s[1];
+  s=useState(null); var CB_role=s[0], CB_setRole=s[1];
   s=useState([]); var CB_msgs=s[0], CB_setMsgs=s[1];
   s=useState(""); var CB_input=s[0], CB_setInput=s[1];
   s=useState(false); var CB_loading=s[0], CB_setLoading=s[1];
@@ -34,30 +29,29 @@ function ChatBot(){
     }
   },[CB_msgs,CB_loading]);
 
-  // Grant access if an active Supabase session exists on mount.
-  // Gate passes if EITHER localStorage "CB_auth"==="1" OR active session.
-  // TODO: retire shared password gate in Update 18
+  // On mount: check session; if active, fetch role from profiles.
   useEffect(function(){
-    if(CB_authed) return;
-    if(!window.ECEPT_SUPABASE) return;
+    if(!window.ECEPT_SUPABASE){ CB_setSession(false); return; }
     try{
       window.ECEPT_SUPABASE.auth.getSession().then(function(res){
-        if(res&&res.data&&res.data.session) CB_setAuthed(true);
-      }).catch(function(){});
-    }catch(e2){}
+        if(res&&res.data&&res.data.session){
+          CB_setSession(true);
+          var uid=res.data.session.user.id;
+          window.ECEPT_SUPABASE
+            .from("profiles")
+            .select("role")
+            .eq("id",uid)
+            .single()
+            .then(function(prof){
+              CB_setRole((prof&&prof.data&&prof.data.role)?prof.data.role:"student");
+            })
+            .catch(function(){ CB_setRole("student"); });
+        } else {
+          CB_setSession(false);
+        }
+      }).catch(function(){ CB_setSession(false); });
+    }catch(e2){ CB_setSession(false); }
   },[]);
-
-  function CB_submitCode(){
-    if(CB_code===CB_CODE){
-      try{ localStorage.setItem("CB_auth","1"); }catch(e2){}
-      CB_setAuthed(true);
-      CB_setCodeErr(false);
-      CB_setCode("");
-    } else {
-      CB_setCodeErr(true);
-      CB_setCode("");
-    }
-  }
 
   function CB_send(){
     var txt=CB_input.trim();
@@ -157,46 +151,24 @@ function ChatBot(){
         },"×")
       ),
 
-      !CB_authed ?
-        // ── Gate de acceso ──
-        e("div",{style:{flex:1, display:"flex", flexDirection:"column", alignItems:"stretch", justifyContent:"center", padding:"20px", gap:"12px"}},
-          e("div",{style:{color:C.tx, fontSize:"13px", textAlign:"center", lineHeight:1.5, fontWeight:600}},"Acceso restringido"),
-          e("div",{style:{color:C.mt, fontSize:"12px", textAlign:"center", lineHeight:1.5}},"Ingresa el código para usar el asistente."),
-          e("input",{
-            type:"password",
-            value:CB_code,
-            onChange:function(ev){ CB_setCode(ev.target.value); if(CB_codeErr) CB_setCodeErr(false); },
-            onKeyDown:function(ev){ if(ev.key==="Enter") CB_submitCode(); },
-            placeholder:"Código",
-            "aria-label":"Código de acceso",
-            style:{
-              padding:"12px 14px",
-              minHeight:"44px",
-              borderRadius:"10px",
-              border:"1px solid "+(CB_codeErr?"#ef4444":C.bd),
-              background:C.bg,
-              color:C.tx,
-              fontSize:"14px",
-              outline:"none",
-              textAlign:"center",
-              letterSpacing:"4px"
-            }
-          }),
-          CB_codeErr && e("div",{style:{color:"#ef4444", fontSize:"12px", textAlign:"center"}},"Código incorrecto"),
+      CB_session===null ?
+        // ── Verificando sesión ──
+        e("div",{style:{flex:1,display:"flex",alignItems:"center",justifyContent:"center"}},
+          e("div",{style:{color:C.dm,fontSize:"13px"}},"Verificando sesión...")
+        )
+      : CB_session===false ?
+        // ── Sin sesión — pedir cuenta ──
+        e("div",{style:{flex:1,display:"flex",flexDirection:"column",alignItems:"stretch",justifyContent:"center",padding:"20px",gap:"12px"}},
+          e("div",{style:{textAlign:"center",fontSize:"28px",marginBottom:"4px"}},"🔒"),
+          e("div",{style:{color:C.tx,fontSize:"13px",textAlign:"center",lineHeight:1.5,fontWeight:600}},"Necesitás una cuenta"),
+          e("div",{style:{color:C.mt,fontSize:"12px",textAlign:"center",lineHeight:1.5}},"El asistente está disponible para usuarios registrados."),
           e("button",{
-            onClick:CB_submitCode,
-            style:{
-              minHeight:"44px",
-              padding:"12px 14px",
-              borderRadius:"10px",
-              background:"#3b82f6",
-              color:"#fff",
-              border:"none",
-              cursor:"pointer",
-              fontSize:"14px",
-              fontWeight:700
-            }
-          },"Entrar")
+            onClick:function(){
+              CB_setOpen(false);
+              if(typeof props.onLoginRequest==="function") props.onLoginRequest();
+            },
+            style:{minHeight:"44px",padding:"12px 14px",borderRadius:"10px",background:"#3b82f6",color:"#fff",border:"none",cursor:"pointer",fontSize:"14px",fontWeight:700}
+          },"Crear cuenta / Iniciar sesión")
         )
       :
         // ── Chat ──
