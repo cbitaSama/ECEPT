@@ -189,6 +189,8 @@ fs.writeFileSync('build/ECSC.html', output);
 fs.writeFileSync('index.html', output);
 
 // ─── env var substitution ───
+console.log('[build] env substitution: SUPABASE_URL=' + (process.env.SUPABASE_URL ? 'SET' : 'MISSING'));
+console.log('[build] env substitution: SUPABASE_ANON_KEY=' + (process.env.SUPABASE_ANON_KEY ? 'SET' : 'MISSING'));
 var outputFinal = output
   .replace(/__SUPABASE_URL__/g, process.env.SUPABASE_URL || '')
   .replace(/__SUPABASE_ANON_KEY__/g, process.env.SUPABASE_ANON_KEY || '');
