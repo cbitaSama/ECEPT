@@ -192,14 +192,18 @@ fs.mkdirSync('build', { recursive: true });
 fs.writeFileSync('build/ECSC.html', output);
 fs.writeFileSync('index.html', output);
 
-// ─── env var substitution ───
+// ─── env var substitution (only when vars are actually set) ───
 console.log('[build] env substitution: SUPABASE_URL=' + (process.env.SUPABASE_URL ? 'SET' : 'MISSING'));
 console.log('[build] env substitution: SUPABASE_ANON_KEY=' + (process.env.SUPABASE_ANON_KEY ? 'SET' : 'MISSING'));
-var outputFinal = output
-  .replace(/__SUPABASE_URL__/g, process.env.SUPABASE_URL || '')
-  .replace(/__SUPABASE_ANON_KEY__/g, process.env.SUPABASE_ANON_KEY || '');
-fs.writeFileSync('build/ECSC.html', outputFinal);
-fs.writeFileSync('index.html', outputFinal);
+if (process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY) {
+  var outputFinal = output
+    .replace(/__SUPABASE_URL__/g, process.env.SUPABASE_URL)
+    .replace(/__SUPABASE_ANON_KEY__/g, process.env.SUPABASE_ANON_KEY);
+  fs.writeFileSync('build/ECSC.html', outputFinal);
+  fs.writeFileSync('index.html', outputFinal);
+} else {
+  console.log('[build] env vars not set — placeholders left intact in output files');
+}
 
 // ─── manifest ───
 var totalBytes = manifest.reduce(function(a, m) { return a + m.bytes; }, 0);
