@@ -80,10 +80,25 @@ function AuthModal(props){
         options:{ data:{ display_name:AU_displayName.trim(), username:username } }
       }).then(AU_handleResult, AU_handleReject);
     } else {
-      window.ECEPT_SUPABASE.auth.signInWithPassword({
-        email:emailTrim,
-        password:AU_password
-      }).then(AU_handleResult, AU_handleReject);
+      if(emailTrim.indexOf("@")!==-1){
+        window.ECEPT_SUPABASE.auth.signInWithPassword({
+          email:emailTrim,
+          password:AU_password
+        }).then(AU_handleResult, AU_handleReject);
+      } else {
+        window.ECEPT_SUPABASE.rpc("get_email_by_username",{p_username:emailTrim.toLowerCase()})
+          .then(function(res){
+            if(res.error||!res.data){
+              AU_setLoading(false);
+              AU_setError("No encontramos una cuenta con ese usuario.");
+              return;
+            }
+            window.ECEPT_SUPABASE.auth.signInWithPassword({
+              email:res.data,
+              password:AU_password
+            }).then(AU_handleResult, AU_handleReject);
+          }, AU_handleReject);
+      }
     }
   }
 
@@ -262,17 +277,17 @@ function AuthModal(props){
               })
             ),
 
-            // ── email ──
+            // ── email / username ──
             e("div",{style:{marginBottom:"12px"}},
-              e("label",{style:labelStyle, htmlFor:"AU_email"},"Correo electrónico"),
+              e("label",{style:labelStyle, htmlFor:"AU_email"},isSignup?"Correo electrónico":"Email o usuario"),
               e("input",{
                 id:"AU_email",
-                type:"email",
+                type:isSignup?"email":"text",
                 value:AU_email,
                 onChange:function(ev){ AU_setEmail(ev.target.value); },
                 onKeyDown:AU_onKeyDown,
-                placeholder:"tu@correo.com",
-                autoComplete:"email",
+                placeholder:isSignup?"tu@correo.com":"tucorreo@email.com o tu_usuario",
+                autoComplete:isSignup?"email":"username",
                 autoCapitalize:"none",
                 spellCheck:false,
                 disabled:AU_busy,
