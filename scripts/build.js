@@ -109,6 +109,8 @@ var parts = [
   'src/components/ProfileView.js',
   // decks view (flashcards deck list; exposes window.DecksView)
   'src/components/DecksView.js',
+  // deck detail view (flashcards inside a deck; exposes window.DeckDetailView)
+  'src/components/DeckDetailView.js',
   // app
   'src/app.js'
 ];
@@ -172,7 +174,9 @@ var expectedGlobals = [
   // profile view
   'function ProfileView', 'window.ProfileView',
   // decks view
-  'function DecksView', 'window.DecksView'
+  'function DecksView', 'window.DecksView',
+  // deck detail view
+  'function DeckDetailView', 'window.DeckDetailView'
 ];
 expectedGlobals.forEach(function(g) {
   if (output.indexOf(g) === -1) errors.push('missing global: ' + g);
