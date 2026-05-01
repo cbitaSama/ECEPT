@@ -314,7 +314,6 @@ function DeckDetailView(props){
       },
         e("button",{
           onClick:function(ev){
-            console.log("clicked editar", c.id);
             ev.stopPropagation();
             DD_setMenuOpenId(null);
             setTimeout(function(){ DD_setEditCard(c); DD_setShowEditor(true); },0);
@@ -329,7 +328,6 @@ function DeckDetailView(props){
         e("div",{style:{height:"1px",background:C.bd}}),
         e("button",{
           onClick:function(ev){
-            console.log("clicked eliminar", c.id);
             ev.stopPropagation();
             DD_setMenuOpenId(null);
             setTimeout(function(){ DD_setDeleteConfirmId(c.id); },0);
@@ -346,10 +344,6 @@ function DeckDetailView(props){
   }
 
   return e(F,null,
-    e("div",{style:{position:"fixed",top:0,left:0,zIndex:9999,background:"red",
-      color:"white",padding:"4px",fontSize:"10px"}},
-      "DEBUG: menuId="+String(DD_menuOpenId)+" editCard="+(DD_editCard?DD_editCard.id:"null")+" showEditor="+String(DD_showEditor)+" deleteId="+String(DD_deleteConfirmId)
-    ),
     e("div",{style:{maxWidth:"760px",margin:"0 auto",padding:"20px 16px 80px",position:"relative"}},
 
     // ── Header ──

@@ -109,6 +109,14 @@ function DecksView(props){
   useEffect(function(){ DV_loadData(); },[]);
   useEffect(function(){ if(DV_guestMode) DV_loadData(); },[DV_guestMode]);
 
+  // ── Close deck menu on click-outside (avoids stacking-context bug with animated card) ──
+  useEffect(function(){
+    if(!DV_menuOpenId) return;
+    function DV_docClose(){ DV_setMenuOpenId(null); }
+    document.addEventListener("click", DV_docClose);
+    return function(){ document.removeEventListener("click", DV_docClose); };
+  },[DV_menuOpenId]);
+
   function DV_openCreate(){
     DV_setMName(""); DV_setMDesc("");
     DV_setMIcon("🎴"); DV_setMColor("#a78bfa");
@@ -294,7 +302,11 @@ function DecksView(props){
         }
       },
         e("button",{
-          onClick:function(){ DV_openEdit(deck); },
+          onClick:function(ev){
+            ev.stopPropagation();
+            DV_setMenuOpenId(null);
+            setTimeout(function(){ DV_openEdit(deck); },0);
+          },
           style:{
             display:"block",width:"100%",minHeight:"44px",
             padding:"10px 14px",textAlign:"left",
@@ -304,7 +316,11 @@ function DecksView(props){
         },"✏️  Editar"),
         e("div",{style:{height:"1px",background:C.bd}}),
         e("button",{
-          onClick:function(){ DV_setMenuOpenId(null); DV_setDeleteConfirmId(deck.id); },
+          onClick:function(ev){
+            ev.stopPropagation();
+            DV_setMenuOpenId(null);
+            setTimeout(function(){ DV_setDeleteConfirmId(deck.id); },0);
+          },
           style:{
             display:"block",width:"100%",minHeight:"44px",
             padding:"10px 14px",textAlign:"left",
@@ -321,12 +337,6 @@ function DecksView(props){
   var userDecks=DV_decks.filter(function(d){ return !d.is_official; });
 
   return e("div",{style:{maxWidth:"960px",margin:"0 auto",padding:"20px 16px 80px",position:"relative"}},
-
-    // ── Click-outside backdrop for card menu ──
-    DV_menuOpenId && e("div",{
-      onClick:function(){ DV_setMenuOpenId(null); },
-      style:{position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:4}
-    }),
 
     // ── Header ──
     e("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"4px"}},
