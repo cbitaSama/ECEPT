@@ -13168,11 +13168,12 @@ function ChatBot(props){
     CB_open && e("div",{
       style: CB_fullscreen ? {
         position:"fixed",
-        top:0, left:0,
+        top:0, left:0, right:0, bottom:0,
         width:"100vw", height:"100vh",
-        background:C.cd,
+        background:C.bg,
         border:"none",
         borderRadius:0,
+        margin:0,
         boxShadow:"none",
         zIndex:300,
         display:"flex", flexDirection:"column",
@@ -13206,7 +13207,7 @@ function ChatBot(props){
                   fontSize:"11px",fontWeight:700,
                   color:CB_usageCount<=30?"#34d399":CB_usageCount<=38?"#fbbf24":"#ef4444",
                   flexShrink:0
-                }},CB_usageCount+" / "+CB_LIMITS.student+" mens.")
+                }},CB_usageCount+" / "+CB_LIMITS.student)
               : e("div",{style:{display:"flex",alignItems:"center",gap:"4px",flexShrink:0}},
                   e("span",{style:{
                     fontSize:"13px",fontWeight:800,
