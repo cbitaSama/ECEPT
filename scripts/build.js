@@ -105,6 +105,8 @@ var parts = [
   'src/components/Auth.js',
   // user menu (sidebar session widget; exposes window.UserMenu)
   'src/components/UserMenu.js',
+  // profile view (editable user profile screen; exposes window.ProfileView)
+  'src/components/ProfileView.js',
   // app
   'src/app.js'
 ];
@@ -164,7 +166,9 @@ var expectedGlobals = [
   // auth modal
   'function AuthModal', 'window.AuthModal',
   // user menu
-  'function UserMenu', 'window.UserMenu'
+  'function UserMenu', 'window.UserMenu',
+  // profile view
+  'function ProfileView', 'window.ProfileView'
 ];
 expectedGlobals.forEach(function(g) {
   if (output.indexOf(g) === -1) errors.push('missing global: ' + g);

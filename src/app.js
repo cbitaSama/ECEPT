@@ -264,6 +264,7 @@ function App(){
         e(UserMenu,{
           user:ecuUser,
           onLoginClick:function(){setEcuShowAuth(true);setSb(false);},
+          onProfileClick:function(){go("profile");setSb(false);},
           onLogout:function(){}
         }),
         // Home
@@ -1061,6 +1062,7 @@ function App(){
       )
     )
 
+    ,vista==="profile"&&e(ProfileView,{user:ecuUser,onBack:function(){go("home");}})
     )),
     // ════════════ BACK BUTTON (floating, hidden on home only) ════════════
     vista!=="home"&&e("button",{onClick:handleBack,style:{position:"fixed",bottom:"20px",left:"20px",background:C.ac,color:"#fff",border:"none",borderRadius:"50%",width:"48px",height:"48px",fontSize:"20px",cursor:"pointer",boxShadow:"0 4px 20px "+C.gl,zIndex:90,display:"flex",alignItems:"center",justifyContent:"center"}},"←"),
