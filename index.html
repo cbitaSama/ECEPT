@@ -13022,6 +13022,17 @@ var CB_API=(typeof window!=="undefined" && window.location.hostname.indexOf("ver
   : "https://ecept.vercel.app/api/chat";
 var CB_LIMITS={student:40,premium:999,admin:999};
 var CB_MODEL_BY_ROLE={student:"gemini-2.0-flash",premium:"gemini-2.5-pro-exp-03-25",admin:"gemini-2.5-pro-exp-03-25"};
+var CB_styleInjected=false;
+
+function CB_elionAvatar(sz){
+  return e("div",{style:{
+    width:sz+"px",height:sz+"px",flexShrink:0,
+    borderRadius:"50%",
+    background:"linear-gradient(135deg,#60a5fa,#a78bfa)",
+    display:"flex",alignItems:"center",justifyContent:"center",
+    fontSize:Math.round(sz*0.48)+"px",fontWeight:700,color:"#fff"
+  }},"E");
+}
 
 function ChatBot(props){
   var s;
@@ -13037,6 +13048,19 @@ function ChatBot(props){
   s=useState(false); var CB_connErr=s[0], CB_setConnErr=s[1];
 
   var CB_scrollRef=useRef(null);
+
+  // Inject CSS keyframes once on mount
+  useEffect(function(){
+    if(!CB_styleInjected){
+      var st=document.createElement("style");
+      st.textContent=
+        "@keyframes CB_expandIn{from{opacity:.7;transform:scale(.97)}to{opacity:1;transform:scale(1)}}" +
+        "@keyframes CB_dotBounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}";
+      document.head.appendChild(st);
+      CB_styleInjected=true;
+    }
+  },[]);
+
   useEffect(function(){
     if(CB_scrollRef.current){
       CB_scrollRef.current.scrollTop=CB_scrollRef.current.scrollHeight;
@@ -13150,19 +13174,19 @@ function ChatBot(props){
     // ── Botón flotante ──
     !CB_open && e("button",{
       onClick:function(){ CB_setOpen(true); CB_setConnErr(false); },
-      "aria-label":"Abrir asistente",
+      "aria-label":"Abrir asistente Elion",
       style:{
         position:"fixed", bottom:"20px", right:"20px",
         width:"52px", height:"52px",
         minWidth:"44px", minHeight:"44px",
         borderRadius:"50%",
-        background:"#3b82f6", border:"none", color:"#fff",
-        fontSize:"24px", cursor:"pointer",
-        boxShadow:"0 4px 20px rgba(59,130,246,.4)",
+        background:"linear-gradient(135deg,#60a5fa,#a78bfa)", border:"none", color:"#fff",
+        fontSize:"18px", fontWeight:700, cursor:"pointer",
+        boxShadow:"0 4px 20px rgba(96,165,250,.45)",
         zIndex:95,
         display:"flex", alignItems:"center", justifyContent:"center"
       }
-    },"🤖"),
+    },"E"),
 
     // ── Panel ──
     CB_open && e("div",{
@@ -13177,7 +13201,8 @@ function ChatBot(props){
         boxShadow:"none",
         zIndex:300,
         display:"flex", flexDirection:"column",
-        overflow:"hidden"
+        overflow:"hidden",
+        animation:"CB_expandIn 250ms ease-out"
       } : {
         position:"fixed",
         bottom:"20px",
@@ -13196,19 +13221,22 @@ function ChatBot(props){
         animation:"slideUp .25s ease-out"
       }
     },
-      // header
+      // ── Header ──
       e("div",{style:{padding:"10px 12px 10px 16px", borderBottom:"1px solid "+C.bd, display:"flex", alignItems:"center", justifyContent:"space-between", background:C.bg}},
-        e("div",{style:{display:"flex",alignItems:"center",gap:"8px",overflow:"hidden"}},
-          e("span",{style:{fontSize:"18px",flexShrink:0}},"🤖"),
-          e("div",{style:{fontWeight:700, color:C.tx, fontSize:"14px",flexShrink:0}},"Asistente ECEPT"),
+        e("div",{style:{display:"flex",alignItems:"center",gap:"8px",overflow:"hidden",minWidth:0}},
+          CB_elionAvatar(24),
+          e("div",{style:{display:"flex",flexDirection:"column",gap:"1px",overflow:"hidden",minWidth:0}},
+            e("div",{style:{fontWeight:700,color:C.tx,fontSize:"14px",lineHeight:"1.2",flexShrink:0}},"Elion"),
+            e("div",{style:{fontSize:"10px",color:C.dm,lineHeight:"1.2",whiteSpace:"nowrap"}},"Asistente de estudio · ECEPT")
+          ),
           CB_session===true&&(
             CB_role==="student"
               ? e("span",{style:{
                   fontSize:"11px",fontWeight:700,
                   color:CB_usageCount<=30?"#34d399":CB_usageCount<=38?"#fbbf24":"#ef4444",
-                  flexShrink:0
+                  flexShrink:0,marginLeft:"4px"
                 }},CB_usageCount+" / "+CB_LIMITS.student)
-              : e("div",{style:{display:"flex",alignItems:"center",gap:"4px",flexShrink:0}},
+              : e("div",{style:{display:"flex",alignItems:"center",gap:"4px",flexShrink:0,marginLeft:"4px"}},
                   e("span",{style:{
                     fontSize:"13px",fontWeight:800,
                     color:CB_role==="admin"?"#60a5fa":"#fbbf24"
@@ -13262,19 +13290,33 @@ function ChatBot(props){
             CB_msgs.map(function(m,i){
               var isUser = m.role==="user";
               return e("div",{key:i, style:{display:"flex", flexDirection:"column", alignItems:(isUser?"flex-end":"flex-start"), gap:"6px"}},
-                e("div",{style:{
-                  maxWidth:"85%",
-                  padding:"10px 12px",
-                  borderRadius:"12px",
-                  background: isUser ? "#3b82f6" : C.bg,
-                  color: isUser ? "#fff" : C.tx,
-                  fontSize:"13px",
-                  lineHeight:1.5,
-                  border: isUser ? "none" : ("1px solid "+C.bd),
-                  wordBreak:"break-word",
-                  whiteSpace:"pre-wrap"
-                }}, m.text),
-                !isUser && Array.isArray(m.links) && m.links.length>0 && e("div",{style:{display:"flex", flexWrap:"wrap", gap:"6px", alignSelf:"flex-start", maxWidth:"100%"}},
+                isUser
+                  ? e("div",{style:{
+                      maxWidth:"85%",
+                      padding:"10px 12px",
+                      borderRadius:"12px",
+                      background:"#3b82f6",
+                      color:"#fff",
+                      fontSize:"13px",
+                      lineHeight:1.5,
+                      wordBreak:"break-word",
+                      whiteSpace:"pre-wrap"
+                    }}, m.text)
+                  : e("div",{style:{display:"flex",alignItems:"flex-start",gap:"6px",maxWidth:"92%"}},
+                      CB_elionAvatar(28),
+                      e("div",{style:{
+                        padding:"10px 12px",
+                        borderRadius:"12px",
+                        background:C.bg,
+                        color:C.tx,
+                        fontSize:"13px",
+                        lineHeight:1.5,
+                        border:"1px solid "+C.bd,
+                        wordBreak:"break-word",
+                        whiteSpace:"pre-wrap"
+                      }}, m.text)
+                    ),
+                !isUser && Array.isArray(m.links) && m.links.length>0 && e("div",{style:{display:"flex", flexWrap:"wrap", gap:"6px", alignSelf:"flex-start", maxWidth:"100%", paddingLeft:"34px"}},
                   m.links.map(function(lk,li){
                     return e("button",{
                       key:li,
@@ -13296,11 +13338,25 @@ function ChatBot(props){
                 )
               );
             }),
-            CB_loading && e("div",{style:{color:C.dm, fontSize:"12px", fontStyle:"italic"}},"escribiendo..."),
+            // ── Typing indicator ──
+            CB_loading && e("div",{style:{display:"flex",alignItems:"flex-start",gap:"6px"}},
+              CB_elionAvatar(28),
+              e("div",{style:{
+                padding:"10px 14px",
+                borderRadius:"12px",
+                background:C.bg,
+                border:"1px solid "+C.bd,
+                display:"flex",alignItems:"center",gap:"5px"
+              }},
+                e("span",{style:{display:"inline-block",fontSize:"8px",color:C.dm,animation:"CB_dotBounce .8s ease-in-out infinite",animationDelay:"0s"}},"●"),
+                e("span",{style:{display:"inline-block",fontSize:"8px",color:C.dm,animation:"CB_dotBounce .8s ease-in-out infinite",animationDelay:"0.15s"}},"●"),
+                e("span",{style:{display:"inline-block",fontSize:"8px",color:C.dm,animation:"CB_dotBounce .8s ease-in-out infinite",animationDelay:"0.3s"}},"●")
+              )
+            ),
             CB_connErr && e("div",{style:{color:"#ef4444", fontSize:"12px", padding:"8px 10px", background:"rgba(239,68,68,.08)", border:"1px solid rgba(239,68,68,.25)", borderRadius:"8px"}},"Error de conexión. Intenta de nuevo."),
             CB_role==="student"&&CB_usageCount>=CB_LIMITS.student&&e("div",{style:{color:"#fbbf24",fontSize:"12px",padding:"8px 10px",background:"rgba(251,191,36,.08)",border:"1px solid rgba(251,191,36,.25)",borderRadius:"8px"}},"Alcanzaste el límite de 40 mensajes diarios del plan gratuito. Próximamente podrás actualizar tu plan.")
           ),
-          // input bar
+          // ── Input bar ──
           e("div",{style:{padding:"10px 12px", borderTop:"1px solid "+C.bd, display:"flex", gap:"8px", background:C.bg}},
             e("input",{
               type:"text",
