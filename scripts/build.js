@@ -101,6 +101,8 @@ var parts = [
   'src/components/ChatBot.js',
   // supabase client (reads window.__ECEPT_ENV; exposes window.ECEPT_SUPABASE)
   'src/components/SupabaseClient.js',
+  // auth modal (uses ECEPT_SUPABASE; exposes window.AuthModal)
+  'src/components/Auth.js',
   // app
   'src/app.js'
 ];
@@ -156,7 +158,9 @@ var expectedGlobals = [
   // chatbot
   'function ChatBot', 'window.ChatBot',
   // supabase client
-  'window.ECEPT_SUPABASE'
+  'window.ECEPT_SUPABASE',
+  // auth modal
+  'function AuthModal', 'window.AuthModal'
 ];
 expectedGlobals.forEach(function(g) {
   if (output.indexOf(g) === -1) errors.push('missing global: ' + g);
