@@ -13,6 +13,7 @@ function AU_translateError(err){
   if(lower.indexOf("already registered")!==-1||lower.indexOf("already exists")!==-1||lower.indexOf("user already")!==-1) return "Ese correo ya está registrado.";
   if(lower.indexOf("password")!==-1 && (lower.indexOf("short")!==-1||lower.indexOf("characters")!==-1||lower.indexOf("6")!==-1)) return "La contraseña debe tener al menos 6 caracteres.";
   if(lower.indexOf("email")!==-1 && (lower.indexOf("invalid")!==-1||lower.indexOf("valid")!==-1)) return "Correo electrónico inválido.";
+  if(lower.indexOf("email not confirmed")!==-1) return "Confirmá tu correo antes de iniciar sesión. Revisá tu bandeja de entrada.";
   if(lower.indexOf("network")!==-1||lower.indexOf("fetch")!==-1||lower.indexOf("failed to")!==-1) return "Error de conexión. Intenta de nuevo.";
   if(lower.indexOf("rate")!==-1||lower.indexOf("too many")!==-1) return "Demasiados intentos. Espera un momento.";
   return "No pudimos completar la solicitud. Intenta de nuevo.";
@@ -26,6 +27,7 @@ function AuthModal(props){
   s=useState(""); var AU_displayName=s[0], AU_setDisplayName=s[1];
   s=useState(false); var AU_loading=s[0], AU_setLoading=s[1];
   s=useState(""); var AU_error=s[0], AU_setError=s[1];
+  s=useState(false); var AU_signupDone=s[0], AU_setSignupDone=s[1];
 
   function AU_toggleMode(){
     if(AU_loading) return;
@@ -36,6 +38,7 @@ function AuthModal(props){
   function AU_handleResult(res){
     AU_setLoading(false);
     if(res && res.error){ AU_setError(AU_translateError(res.error)); return; }
+    if(AU_mode==="signup"){ AU_setSignupDone(true); return; }
     if(typeof props.onSuccess==="function") props.onSuccess();
   }
 
@@ -130,7 +133,7 @@ function AuthModal(props){
     },
       // header
       e("div",{style:{display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:"14px"}},
-        e("div",{style:{fontSize:"16px", fontWeight:700, color:C.tx}}, isSignup?"Crear cuenta":"Iniciar sesión"),
+        e("div",{style:{fontSize:"16px", fontWeight:700, color:C.tx}}, AU_signupDone?"¡Cuenta creada!":isSignup?"Crear cuenta":"Iniciar sesión"),
         e("button",{
           onClick:AU_onClose,
           "aria-label":"Cerrar",
@@ -147,107 +150,125 @@ function AuthModal(props){
         },"×")
       ),
 
-      // display_name (signup only)
-      isSignup && e("div",{style:{marginBottom:"12px"}},
-        e("label",{style:labelStyle, htmlFor:"AU_dn"},"¿Cómo te llamamos?"),
-        e("input",{
-          id:"AU_dn",
-          type:"text",
-          value:AU_displayName,
-          onChange:function(ev){ AU_setDisplayName(ev.target.value); },
-          onKeyDown:AU_onKeyDown,
-          placeholder:"Tu nombre",
-          autoComplete:"name",
-          disabled:AU_loading,
-          style:inputStyle
-        })
-      ),
+      // post-signup confirmation screen OR login/signup form
+      AU_signupDone
+        ? e("div",{style:{textAlign:"center",padding:"8px 0 4px"}},
+            e("div",{style:{fontSize:"40px",marginBottom:"14px"}},"✉️"),
+            e("p",{style:{color:C.tx,fontSize:"14px",lineHeight:1.6,marginBottom:"20px"}},
+              "¡Cuenta creada! Te enviamos un correo de confirmación. Revisá tu bandeja de entrada y luego iniciá sesión."
+            ),
+            e("button",{
+              onClick:AU_onClose,
+              style:{
+                width:"100%",minHeight:"44px",padding:"12px 14px",
+                borderRadius:"10px",background:C.ac,color:"#fff",
+                border:"none",cursor:"pointer",fontSize:"14px",fontWeight:700
+              }
+            },"Entendido")
+          )
+        : e(F,null,
+            // display_name (signup only)
+            isSignup && e("div",{style:{marginBottom:"12px"}},
+              e("label",{style:labelStyle, htmlFor:"AU_dn"},"¿Cómo te llamamos?"),
+              e("input",{
+                id:"AU_dn",
+                type:"text",
+                value:AU_displayName,
+                onChange:function(ev){ AU_setDisplayName(ev.target.value); },
+                onKeyDown:AU_onKeyDown,
+                placeholder:"Tu nombre",
+                autoComplete:"name",
+                disabled:AU_loading,
+                style:inputStyle
+              })
+            ),
 
-      // email
-      e("div",{style:{marginBottom:"12px"}},
-        e("label",{style:labelStyle, htmlFor:"AU_email"},"Correo electrónico"),
-        e("input",{
-          id:"AU_email",
-          type:"email",
-          value:AU_email,
-          onChange:function(ev){ AU_setEmail(ev.target.value); },
-          onKeyDown:AU_onKeyDown,
-          placeholder:"tu@correo.com",
-          autoComplete:"email",
-          autoCapitalize:"none",
-          spellCheck:false,
-          disabled:AU_loading,
-          style:inputStyle
-        })
-      ),
+            // email
+            e("div",{style:{marginBottom:"12px"}},
+              e("label",{style:labelStyle, htmlFor:"AU_email"},"Correo electrónico"),
+              e("input",{
+                id:"AU_email",
+                type:"email",
+                value:AU_email,
+                onChange:function(ev){ AU_setEmail(ev.target.value); },
+                onKeyDown:AU_onKeyDown,
+                placeholder:"tu@correo.com",
+                autoComplete:"email",
+                autoCapitalize:"none",
+                spellCheck:false,
+                disabled:AU_loading,
+                style:inputStyle
+              })
+            ),
 
-      // password
-      e("div",{style:{marginBottom:"14px"}},
-        e("label",{style:labelStyle, htmlFor:"AU_pw"},"Contraseña"),
-        e("input",{
-          id:"AU_pw",
-          type:"password",
-          value:AU_password,
-          onChange:function(ev){ AU_setPassword(ev.target.value); },
-          onKeyDown:AU_onKeyDown,
-          placeholder:isSignup?"Mínimo 6 caracteres":"Tu contraseña",
-          autoComplete:isSignup?"new-password":"current-password",
-          disabled:AU_loading,
-          style:inputStyle
-        })
-      ),
+            // password
+            e("div",{style:{marginBottom:"14px"}},
+              e("label",{style:labelStyle, htmlFor:"AU_pw"},"Contraseña"),
+              e("input",{
+                id:"AU_pw",
+                type:"password",
+                value:AU_password,
+                onChange:function(ev){ AU_setPassword(ev.target.value); },
+                onKeyDown:AU_onKeyDown,
+                placeholder:isSignup?"Mínimo 6 caracteres":"Tu contraseña",
+                autoComplete:isSignup?"new-password":"current-password",
+                disabled:AU_loading,
+                style:inputStyle
+              })
+            ),
 
-      // error
-      AU_error && e("div",{
-        role:"alert",
-        style:{
-          color:"#fca5a5",
-          background:"rgba(239,68,68,.12)",
-          border:"1px solid rgba(239,68,68,.35)",
-          borderRadius:"10px",
-          padding:"10px 12px",
-          fontSize:"13px",
-          lineHeight:1.4,
-          marginBottom:"12px"
-        }
-      }, AU_error),
+            // error
+            AU_error && e("div",{
+              role:"alert",
+              style:{
+                color:"#fca5a5",
+                background:"rgba(239,68,68,.12)",
+                border:"1px solid rgba(239,68,68,.35)",
+                borderRadius:"10px",
+                padding:"10px 12px",
+                fontSize:"13px",
+                lineHeight:1.4,
+                marginBottom:"12px"
+              }
+            }, AU_error),
 
-      // submit
-      e("button",{
-        onClick:AU_submit,
-        disabled:AU_loading,
-        style:{
-          width:"100%",
-          minHeight:"44px",
-          padding:"12px 14px",
-          borderRadius:"10px",
-          background:AU_loading?C.bd:C.ac,
-          color:"#fff",
-          border:"none",
-          cursor:AU_loading?"default":"pointer",
-          fontSize:"14px",
-          fontWeight:700,
-          marginBottom:"12px"
-        }
-      }, AU_loading?"Cargando...":(isSignup?"Crear cuenta":"Entrar")),
+            // submit
+            e("button",{
+              onClick:AU_submit,
+              disabled:AU_loading,
+              style:{
+                width:"100%",
+                minHeight:"44px",
+                padding:"12px 14px",
+                borderRadius:"10px",
+                background:AU_loading?C.bd:C.ac,
+                color:"#fff",
+                border:"none",
+                cursor:AU_loading?"default":"pointer",
+                fontSize:"14px",
+                fontWeight:700,
+                marginBottom:"12px"
+              }
+            }, AU_loading?"Cargando...":(isSignup?"Crear cuenta":"Entrar")),
 
-      // toggle link
-      e("div",{style:{textAlign:"center", fontSize:"13px", color:C.mt}},
-        isSignup?"¿Ya tienes cuenta? ":"¿No tienes cuenta? ",
-        e("button",{
-          onClick:AU_toggleMode,
-          disabled:AU_loading,
-          style:{
-            background:"none", border:"none",
-            color:C.ac2,
-            cursor:AU_loading?"default":"pointer",
-            fontSize:"13px", fontWeight:600,
-            padding:"4px 6px",
-            textDecoration:"underline",
-            opacity:AU_loading?0.5:1
-          }
-        }, isSignup?"Inicia sesión":"Regístrate")
-      )
+            // toggle link
+            e("div",{style:{textAlign:"center", fontSize:"13px", color:C.mt}},
+              isSignup?"¿Ya tienes cuenta? ":"¿No tienes cuenta? ",
+              e("button",{
+                onClick:AU_toggleMode,
+                disabled:AU_loading,
+                style:{
+                  background:"none", border:"none",
+                  color:C.ac2,
+                  cursor:AU_loading?"default":"pointer",
+                  fontSize:"13px", fontWeight:600,
+                  padding:"4px 6px",
+                  textDecoration:"underline",
+                  opacity:AU_loading?0.5:1
+                }
+              }, isSignup?"Inicia sesión":"Regístrate")
+            )
+          )
     )
   );
 }
