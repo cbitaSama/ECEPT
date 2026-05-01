@@ -4,7 +4,7 @@
 // ES5 estricto: solo declaraciones var y function. Nada de ES6+.
 // React.createElement vía el alias global `e`. Sin JSX.
 // Globales internos con prefijo DV_ para evitar colisiones.
-// Props: user, onBack, go
+// Props: user, onBack, go, onLoginRequest
 // ══════════════════════════════════════════════════════════════
 var DV_styleInjected=false;
 var DV_ICON_OPTS=["🎴","🩺","🧠","❤️","🫁","🦴","💊","🧬","📚","🔬","🩻","⚗️"];
@@ -20,6 +20,7 @@ function DecksView(props){
   s=useState({});    var DV_counts=s[0],      DV_setCounts=s[1];
   s=useState(0);     var DV_dueToday=s[0],    DV_setDueToday=s[1];
   s=useState("");    var DV_loadErr=s[0],     DV_setLoadErr=s[1];
+  s=useState(false); var DV_guestMode=s[0],   DV_setGuestMode=s[1];
 
   // Modal state: null | "create" | {mode:"edit", deck:...}
   s=useState(null);    var DV_modalMode=s[0], DV_setModalMode=s[1];
@@ -49,26 +50,37 @@ function DecksView(props){
   },[]);
 
   function DV_loadData(){
-    if(!user||!window.ECEPT_SUPABASE){ DV_setLoading(false); return; }
+    if((!user&&!DV_guestMode)||!window.ECEPT_SUPABASE){ DV_setLoading(false); return; }
     DV_setLoading(true); DV_setLoadErr("");
 
-    var deckPromise=window.ECEPT_SUPABASE
-      .from("decks")
-      .select("id,name,description,color,icon,is_official,user_id,created_at")
-      .or("is_official.eq.true,user_id.eq."+user.id)
-      .order("is_official",{ascending:false})
-      .order("created_at",{ascending:false});
+    var deckPromise;
+    if(user&&!DV_guestMode){
+      deckPromise=window.ECEPT_SUPABASE
+        .from("decks")
+        .select("id,name,description,color,icon,is_official,user_id,created_at")
+        .or("is_official.eq.true,user_id.eq."+user.id)
+        .order("is_official",{ascending:false})
+        .order("created_at",{ascending:false});
+    } else {
+      deckPromise=window.ECEPT_SUPABASE
+        .from("decks")
+        .select("id,name,description,color,icon,is_official,user_id,created_at")
+        .eq("is_official",true)
+        .order("created_at",{ascending:false});
+    }
 
     var cardsPromise=window.ECEPT_SUPABASE
       .from("flashcards")
       .select("deck_id");
 
     var nowIso=new Date().toISOString();
-    var duePromise=window.ECEPT_SUPABASE
-      .from("flashcard_progress")
-      .select("flashcard_id",{count:"exact",head:true})
-      .eq("user_id",user.id)
-      .lte("next_review",nowIso);
+    var duePromise=user
+      ? window.ECEPT_SUPABASE
+          .from("flashcard_progress")
+          .select("flashcard_id",{count:"exact",head:true})
+          .eq("user_id",user.id)
+          .lte("next_review",nowIso)
+      : Promise.resolve({data:null,count:0,error:null});
 
     Promise.all([deckPromise,cardsPromise,duePromise]).then(function(results){
       var deckRes=results[0], cardRes=results[1], dueRes=results[2];
@@ -95,6 +107,7 @@ function DecksView(props){
   }
 
   useEffect(function(){ DV_loadData(); },[]);
+  useEffect(function(){ if(DV_guestMode) DV_loadData(); },[DV_guestMode]);
 
   function DV_openCreate(){
     DV_setMName(""); DV_setMDesc("");
@@ -164,6 +177,39 @@ function DecksView(props){
   function DV_openDeck(deck){
     window.ECEPT_DECK_SELECTED=deck;
     if(typeof go==="function") go("flashcards_deck");
+  }
+
+  // ── Gate: sin sesión activa ──
+  if(!user&&!DV_guestMode){
+    return e("div",{style:{maxWidth:"540px",margin:"0 auto",padding:"20px 20px 60px"}},
+      e("div",{style:{marginBottom:"32px"}},
+        e("button",{onClick:props.onBack,"aria-label":"Volver",style:{
+          background:"none",border:"none",color:C.mt,fontSize:"20px",cursor:"pointer",
+          minWidth:"44px",minHeight:"44px",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"10px"
+        }},"←")
+      ),
+      e("div",{style:{textAlign:"center",padding:"20px 0"}},
+        e("div",{style:{fontSize:"56px",marginBottom:"16px"}},"🎴"),
+        e("h2",{style:{fontSize:"22px",fontWeight:800,color:C.tx,fontFamily:"'Playfair Display',serif",marginBottom:"12px"}},"Flashcards"),
+        e("p",{style:{fontSize:"14px",color:C.dm,lineHeight:1.6,maxWidth:"300px",margin:"0 auto 28px"}},"Iniciá sesión para crear tus barajas personales, guardar tu progreso y acceder a todas las funciones."),
+        e("button",{
+          onClick:function(){ if(typeof props.onLoginRequest==="function") props.onLoginRequest(); },
+          style:{
+            display:"block",width:"100%",maxWidth:"300px",minHeight:"52px",padding:"14px 20px",
+            borderRadius:"14px",background:"linear-gradient(135deg,#a78bfa,#60a5fa)",
+            color:"#fff",border:"none",fontSize:"15px",fontWeight:700,cursor:"pointer",
+            margin:"0 auto 14px",boxShadow:"0 4px 18px rgba(167,139,250,.35)"
+          }
+        },"Iniciar sesión / Registrarse"),
+        e("button",{
+          onClick:function(){ DV_setGuestMode(true); },
+          style:{
+            background:"none",border:"none",color:C.mt,fontSize:"13px",cursor:"pointer",
+            textDecoration:"underline",minHeight:"44px",padding:"8px 12px"
+          }
+        },"Ver de todos modos")
+      )
+    );
   }
 
   // ── Helpers / shared styles ──
@@ -297,7 +343,7 @@ function DecksView(props){
       },"←"),
       e("div",{style:{fontSize:"22px",fontWeight:800,color:C.tx,fontFamily:"'Playfair Display',serif"}},"🎴 Flashcards")
     ),
-    e("div",{style:{fontSize:"13px",color:C.dm,marginLeft:"54px",marginBottom:"22px"}},"Tus barajas de estudio"),
+    e("div",{style:{fontSize:"13px",color:C.dm,marginLeft:"54px",marginBottom:"22px"}},DV_guestMode?"Barajas oficiales":"Tus barajas de estudio"),
 
     // ── Stats bar ──
     e("div",{style:{
@@ -332,7 +378,7 @@ function DecksView(props){
     ),
 
     // ── Create button ──
-    e("button",{
+    user&&e("button",{
       onClick:DV_openCreate,
       style:{
         width:"100%",minHeight:"52px",padding:"14px 20px",
@@ -371,17 +417,35 @@ function DecksView(props){
     // ── User decks section ──
     !DV_loading && e("div",{style:{marginBottom:"24px"}},
       e("h2",{style:sectionTitleStyle},"Tus barajas"),
-      userDecks.length===0
+      DV_guestMode
         ? e("div",{style:{
             background:C.cd,border:"1px dashed "+C.bd,
             borderRadius:"14px",padding:"32px 20px",textAlign:"center"
           }},
-            e("div",{style:{fontSize:"40px",marginBottom:"10px"}},"📋"),
-            e("p",{style:{fontSize:"14px",color:C.tx,fontWeight:600,marginBottom:"4px"}},"Aún no creaste ninguna baraja."),
-            e("p",{style:{fontSize:"12px",color:C.dm,lineHeight:1.5}},"¡Empezá ahora! Tocá «+ Crear baraja» arriba.")
+            e("div",{style:{fontSize:"40px",marginBottom:"10px"}},"🔐"),
+            e("p",{style:{fontSize:"14px",color:C.tx,fontWeight:600,marginBottom:"6px"}},"Iniciá sesión para ver tus barajas."),
+            e("button",{
+              onClick:function(){ if(typeof props.onLoginRequest==="function") props.onLoginRequest(); },
+              style:{
+                marginTop:"8px",padding:"10px 20px",borderRadius:"10px",
+                background:"linear-gradient(135deg,#a78bfa,#60a5fa)",
+                color:"#fff",border:"none",fontSize:"13px",fontWeight:700,
+                cursor:"pointer",minHeight:"44px"
+              }
+            },"Iniciar sesión / Registrarse")
           )
-        : e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:"12px"}},
-            userDecks.map(function(d,i){ return DV_deckCard(d,officialDecks.length+i); })
+        : (userDecks.length===0
+            ? e("div",{style:{
+                background:C.cd,border:"1px dashed "+C.bd,
+                borderRadius:"14px",padding:"32px 20px",textAlign:"center"
+              }},
+                e("div",{style:{fontSize:"40px",marginBottom:"10px"}},"📋"),
+                e("p",{style:{fontSize:"14px",color:C.tx,fontWeight:600,marginBottom:"4px"}},"Aún no creaste ninguna baraja."),
+                e("p",{style:{fontSize:"12px",color:C.dm,lineHeight:1.5}},"¡Empezá ahora! Tocá «+ Crear baraja» arriba.")
+              )
+            : e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:"12px"}},
+                userDecks.map(function(d,i){ return DV_deckCard(d,officialDecks.length+i); })
+              )
           )
     ),
 

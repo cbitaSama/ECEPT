@@ -1065,7 +1065,7 @@ function App(){
     )
 
     ,vista==="profile"&&e(ProfileView,{user:ecuUser,onBack:function(){go("home");}})
-    ,vista==="flashcards"&&e(DecksView,{user:ecuUser,onBack:function(){go("home");},go:go})
+    ,vista==="flashcards"&&e(DecksView,{user:ecuUser,onBack:function(){go("home");},go:go,onLoginRequest:function(){setEcuShowAuth(true);}})
     ,vista==="flashcards_deck"&&e(DeckDetailView,{user:ecuUser,deck:window.ECEPT_DECK_SELECTED,onBack:function(){go("flashcards");},go:go})
     )),
     // ════════════ BACK BUTTON (floating, hidden on home only) ════════════

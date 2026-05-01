@@ -144,6 +144,28 @@ function DeckDetailView(props){
     );
   }
 
+  // ── Baraja privada sin sesión ──
+  if(!user&&!deck.is_official){
+    return e("div",{style:{maxWidth:"540px",margin:"0 auto",padding:"20px 20px 60px"}},
+      e("div",{style:{marginBottom:"32px"}},
+        e("button",{onClick:props.onBack,"aria-label":"Volver",style:{
+          background:"none",border:"none",color:C.mt,fontSize:"20px",cursor:"pointer",
+          minWidth:"44px",minHeight:"44px",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"10px"
+        }},"←")
+      ),
+      e("div",{style:{textAlign:"center",padding:"20px 0"}},
+        e("div",{style:{fontSize:"48px",marginBottom:"12px"}},"🔒"),
+        e("p",{style:{fontSize:"15px",color:C.tx,fontWeight:700,marginBottom:"8px"}},"Esta baraja requiere cuenta"),
+        e("p",{style:{fontSize:"13px",color:C.dm,lineHeight:1.5,marginBottom:"22px"}},"Iniciá sesión para ver y crear tus barajas personales."),
+        e("button",{onClick:props.onBack,style:{
+          padding:"10px 20px",borderRadius:"10px",background:"none",
+          border:"1px solid "+C.bd,color:C.tx,fontSize:"13px",fontWeight:600,
+          cursor:"pointer",minHeight:"44px"
+        }},"← Volver a Flashcards")
+      )
+    );
+  }
+
   // ── Derived ──
   var deckCol=deck.color||"#a78bfa";
   var deckIcon=deck.icon||"🎴";
@@ -379,6 +401,18 @@ function DeckDetailView(props){
         e("span",{style:{color:newCount>0?"#a78bfa":C.dm,fontWeight:500}},"Nuevas: "),
         DD_loading?"—":String(newCount)
       )
+    ),
+
+    // ── Guest banner (oficial, sin sesión) ──
+    !user&&isOfficial&&e("div",{style:{
+      display:"flex",alignItems:"center",gap:"10px",
+      padding:"10px 14px",borderRadius:"10px",
+      background:"rgba(167,139,250,.10)",
+      border:"1px solid rgba(167,139,250,.30)",
+      marginBottom:"16px"
+    }},
+      e("span",{style:{fontSize:"15px",flexShrink:0}},"ℹ️"),
+      e("span",{style:{fontSize:"12px",color:"#c4b5fd",lineHeight:1.5}},"Tu progreso no se guarda sin cuenta.")
     ),
 
     // ── Action bar ──
