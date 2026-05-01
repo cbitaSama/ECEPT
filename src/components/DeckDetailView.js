@@ -305,10 +305,10 @@ function DeckDetailView(props){
         }
       },
         e("button",{
-          onClick:function(){
+          onClick:function(ev){
+            ev.stopPropagation();
             DD_setMenuOpenId(null);
-            DD_setEditCard(c);
-            DD_setShowEditor(true);
+            setTimeout(function(){ DD_setEditCard(c); DD_setShowEditor(true); },0);
           },
           style:{
             display:"block",width:"100%",minHeight:"44px",
@@ -319,7 +319,11 @@ function DeckDetailView(props){
         },"✏️  Editar"),
         e("div",{style:{height:"1px",background:C.bd}}),
         e("button",{
-          onClick:function(){ DD_setMenuOpenId(null); DD_setDeleteConfirmId(c.id); },
+          onClick:function(ev){
+            ev.stopPropagation();
+            DD_setMenuOpenId(null);
+            setTimeout(function(){ DD_setDeleteConfirmId(c.id); },0);
+          },
           style:{
             display:"block",width:"100%",minHeight:"44px",
             padding:"10px 14px",textAlign:"left",
