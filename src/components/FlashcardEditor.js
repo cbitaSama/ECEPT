@@ -228,9 +228,13 @@ function FlashcardEditor(props){
         }
       }
       if(newTagRows.length>0){
-        window.ECEPT_SUPABASE.from("user_tags")
-          .upsert(newTagRows,{onConflict:"user_id,name",ignoreDuplicates:true})
-          .catch(function(){});
+        try{
+          window.ECEPT_SUPABASE.from("user_tags")
+            .upsert(newTagRows,{onConflict:"user_id,name",ignoreDuplicates:true})
+            .catch(function(e){ console.warn("user_tags upsert:",e); });
+        }catch(e){
+          console.warn("user_tags upsert sync error:",e);
+        }
       }
       setTimeout(function(){
         if(typeof props.onSaved==="function") props.onSaved();
