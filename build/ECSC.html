@@ -16312,9 +16312,14 @@ function StudyView(props){
   for(var k in SV_selIds){ if(SV_selIds.hasOwnProperty(k)) selDeckSet[k]=true; }
 
   var tagMap={};
+  var SV_deckOfficial={};
+  for(var di3=0;di3<SV_decks.length;di3++){
+    SV_deckOfficial[SV_decks[di3].id]=!!SV_decks[di3].is_official;
+  }
   for(var ci=0;ci<SV_allCards.length;ci++){
     var _c=SV_allCards[ci];
     if(!selDeckSet[_c.deck_id]) continue;
+    if(SV_deckOfficial[_c.deck_id]) continue;
     var _ts=Array.isArray(_c.tags)?_c.tags:[];
     for(var ti=0;ti<_ts.length;ti++){ if(_ts[ti]) tagMap[_ts[ti]]=true; }
   }
