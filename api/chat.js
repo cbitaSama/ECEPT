@@ -94,12 +94,13 @@ async function verifyConvOwnership(convId, uid) {
   return Array.isArray(rows) && rows.length > 0;
 }
 
-async function insertMessage(convId, role, content, attachments, model, paidWith, creditsSpent) {
-  await fetch(`${SUPABASE_URL}/rest/v1/chat_messages`, {
+async function insertMessage(convId, uid, role, content, attachments, model, paidWith, creditsSpent) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/chat_messages`, {
     method: 'POST',
     headers: { ...SVC_HEADERS, 'Prefer': 'return=minimal' },
     body: JSON.stringify({
       conversation_id: convId,
+      user_id: uid,
       role,
       content: String(content || '').slice(0, 32000),
       attachments: attachments || null,
@@ -108,6 +109,10 @@ async function insertMessage(convId, role, content, attachments, model, paidWith
       credits_spent: creditsSpent || 0
     })
   });
+  if (!r.ok) {
+    const errBody = await r.text().catch(() => '');
+    console.error(`insertMessage failed ${r.status} [${role}]:`, errBody.slice(0, 200));
+  }
 }
 
 async function patchConvTitle(convId, title) {
@@ -274,9 +279,17 @@ module.exports = async function handler(req, res) {
 
   // ── 7. User context (memory) ──
   const userNotes = await getUserContext(uid);
-  const systemPromptFull = userNotes
-    ? SYSTEM_PROMPT + '\n\nCONTEXTO DEL USUARIO:\n' + userNotes
-    : SYSTEM_PROMPT;
+  console.log('[chat] user notes length:', userNotes ? userNotes.length : 0);
+  let systemPromptFull = SYSTEM_PROMPT;
+  if (userNotes && userNotes.trim()) {
+    systemPromptFull +=
+      '\n\n=== INSTRUCCIONES PERSONALIZADAS DEL USUARIO ===\n' +
+      'El usuario ha configurado las siguientes preferencias y contexto. ' +
+      'Respetalas estrictamente mientras no violen las reglas anteriores ' +
+      '(seguridad, ética, calidad médica):\n\n' +
+      userNotes.trim() +
+      '\n\n=== FIN INSTRUCCIONES PERSONALIZADAS ===';
+  }
 
   // ── 8. Build Gemini contents ──
   const recent = messages.slice(-10);
@@ -340,8 +353,8 @@ module.exports = async function handler(req, res) {
       ? validAttachments.map(a => ({ name: a.name, mimeType: a.mimeType }))
       : null;
     try {
-      await insertMessage(conversationId, 'user', userMsg.content, attachSummary, null, null, 0);
-      await insertMessage(conversationId, 'assistant', reply, null, model, paidWith, spent);
+      await insertMessage(conversationId, uid, 'user', userMsg.content, attachSummary, null, null, 0);
+      await insertMessage(conversationId, uid, 'assistant', reply, null, model, paidWith, spent);
     } catch (err) {
       console.error('insertMessage error:', err.message);
     }

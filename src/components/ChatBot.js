@@ -257,6 +257,7 @@ function ChatBot(props) {
   var CB_inputRef  = useRef(null);
   var CB_longPressRef = useRef(null);
   var CB_convLoadedRef = useRef(false);
+  var CB_skipNextConvLoad = useRef(false);
 
   // ── Inject CSS animations once ──
   useEffect(function() {
@@ -364,8 +365,10 @@ function ChatBot(props) {
   // ── Load messages when active conv changes ──
   useEffect(function() {
     if (!CB_activeConvId) return;
-    CB_loadConvMessages(CB_activeConvId);
     try { localStorage.setItem('ECEPT_CHAT_LAST_CONV', CB_activeConvId); } catch(e) {}
+    // Skip when CB_send just set the ID — messages already in state from optimistic update
+    if (CB_skipNextConvLoad.current) { CB_skipNextConvLoad.current = false; return; }
+    CB_loadConvMessages(CB_activeConvId);
   }, [CB_activeConvId]);
 
   // ── Auto-scroll ──
@@ -563,12 +566,12 @@ function ChatBot(props) {
 
       // Handle new conversation created by backend
       if (data.conversationId && data.conversationId !== CB_activeConvId) {
+        // Flag prevents the loadConvMessages useEffect from overwriting optimistic messages
+        CB_skipNextConvLoad.current = true;
         CB_setActiveConvId(data.conversationId);
         try { localStorage.setItem('ECEPT_CHAT_LAST_CONV', data.conversationId); } catch(e) {}
-        // Refresh list after title auto-generation (~1.5s)
-        setTimeout(function() {
-          CB_loadConversations();
-        }, 1500);
+        // Refresh sidebar after title auto-generation (~1.5s)
+        setTimeout(function() { CB_loadConversations(); }, 1500);
       }
     } catch(err) {
       CB_setMsgs(function(prev) { return prev.concat([{ role:'assistant', text:'Error de conexión. Intentá de nuevo.', error:true, ts:Date.now() }]); });
@@ -638,35 +641,22 @@ function ChatBot(props) {
           var isRenaming = CB_renamingId === conv.id;
           var isMenuOpen = CB_convMenuId === conv.id;
 
-          return e('div', { key:conv.id, style:{ marginBottom:2 } },
+          return e('div', { key:conv.id, style:{ marginBottom:2, position:'relative' } },
+            // Row
             e('div', {
               className:'CB_convItem',
               style:{
-                padding:'10px 10px', borderRadius:10, cursor:'pointer',
+                padding:'9px 32px 9px 10px', borderRadius:10, cursor:'pointer',
                 background: isActive ? 'rgba(96,165,250,0.18)' : 'transparent',
                 borderLeft: isActive ? '3px solid '+C.ac : '3px solid transparent',
-                transition:'background .15s'
+                transition:'background .15s', position:'relative'
               },
               onClick: function() {
                 if (CB_renamingId === conv.id) return;
                 CB_setActiveConvId(conv.id);
                 CB_setConvMenuId(null);
                 if (!permanent) CB_setSidebarOpen(false);
-              },
-              onMouseDown: function() {
-                if (CB_longPressRef.current) clearTimeout(CB_longPressRef.current);
-                CB_longPressRef.current = setTimeout(function() {
-                  CB_setConvMenuId(conv.id);
-                }, 500);
-              },
-              onMouseUp: function() { if (CB_longPressRef.current) clearTimeout(CB_longPressRef.current); },
-              onTouchStart: function() {
-                if (CB_longPressRef.current) clearTimeout(CB_longPressRef.current);
-                CB_longPressRef.current = setTimeout(function() {
-                  CB_setConvMenuId(conv.id);
-                }, 500);
-              },
-              onTouchEnd: function() { if (CB_longPressRef.current) clearTimeout(CB_longPressRef.current); }
+              }
             },
               isRenaming
                 ? e('input', {
@@ -689,8 +679,32 @@ function ChatBot(props) {
                 : e('div', { style:{ fontSize:12, color: isActive ? C.tx : C.mt, fontWeight: isActive ? 600 : 400, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', lineHeight:1.4 } }, conv.title || 'Nueva conversación')
             ),
 
-            // Context menu
-            isMenuOpen && e('div', { style:{ display:'flex', gap:4, padding:'4px 10px 6px' } },
+            // ⋮ button (always visible)
+            !isRenaming && e('button', {
+              onClick:function(ev) {
+                ev.stopPropagation();
+                CB_setConvMenuId(isMenuOpen ? null : conv.id);
+              },
+              style:{
+                position:'absolute', right:4, top:'50%', transform:'translateY(-50%)',
+                width:24, height:24, borderRadius:6, border:'none',
+                background: isMenuOpen ? 'rgba(96,165,250,0.15)' : 'transparent',
+                color: isMenuOpen ? C.ac : '#64748b',
+                cursor:'pointer', fontSize:16, lineHeight:1, padding:0,
+                display:'flex', alignItems:'center', justifyContent:'center'
+              }
+            }, '⋮'),
+
+            // Dropdown menu
+            isMenuOpen && e('div', {
+              onClick:function(ev) { ev.stopPropagation(); },
+              style:{
+                position:'absolute', top:'100%', right:4, zIndex:30,
+                background:'#0d1224', border:'1px solid #1a2040',
+                borderRadius:8, padding:4, minWidth:140,
+                boxShadow:'0 4px 16px rgba(0,0,0,.5)'
+              }
+            },
               e('button', {
                 onClick:function(ev) {
                   ev.stopPropagation();
@@ -698,7 +712,7 @@ function ChatBot(props) {
                   CB_setRenamingId(conv.id);
                   CB_setConvMenuId(null);
                 },
-                style:{ flex:1, padding:'5px 8px', borderRadius:7, border:'1px solid '+C.bd, background:'none', color:C.mt, fontSize:11, cursor:'pointer', fontWeight:600 }
+                style:{ display:'block', width:'100%', padding:'8px 10px', background:'none', border:'none', color:C.mt, fontSize:12, cursor:'pointer', textAlign:'left', borderRadius:6, fontFamily:'inherit' }
               }, '✎ Renombrar'),
               e('button', {
                 onClick:function(ev) {
@@ -706,7 +720,7 @@ function ChatBot(props) {
                   CB_archiveConv(conv.id);
                   CB_setConvMenuId(null);
                 },
-                style:{ flex:1, padding:'5px 8px', borderRadius:7, border:'1px solid rgba(239,68,68,.3)', background:'none', color:'#ef4444', fontSize:11, cursor:'pointer', fontWeight:600 }
+                style:{ display:'block', width:'100%', padding:'8px 10px', background:'none', border:'none', color:'#ef4444', fontSize:12, cursor:'pointer', textAlign:'left', borderRadius:6, fontFamily:'inherit' }
               }, '🗑 Archivar')
             )
           );
@@ -912,7 +926,8 @@ function ChatBot(props) {
                 e('span', { style:{ color:C.bd } }, '·'),
                 e('span', null, quotaStr+' hoy'),
                 e('span', { style:{ color:C.bd } }, '·'),
-                e('span', null, '🪙'+CB_credits)
+                e('span', null, '🪙'+CB_credits),
+                CB_userNotes && CB_userNotes.trim() && e('span', { title:'Memoria activa', style:{ fontSize:11, color:'#a78bfa', marginLeft:2 } }, '🧠')
               )
             )
           ),
