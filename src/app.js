@@ -418,7 +418,9 @@ function App(){
       e("div",{onClick:function(){setSb(false)},style:{flex:1,background:"rgba(0,0,0,.6)"}})
     ),
     // ════════════ MAIN (content wrapper — Trauma + Vocab now render natively inside) ════════════
-    e("div",{style:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
+    // El home gestiona su propio ancho hasta 1400px. Las vistas internas
+    // siguen con wrapper 900px para mantener legibilidad de prosa larga.
+    e("div",{style:vista==="home"?{width:"100%",margin:0,padding:"0 0 80px"}:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
 
     // ════════════ HOME ════════════
     vista==="home"&&e(HomeView,{user:ecuUser,vi:vi,favs:favs,bestStreak:bestStreak,go:go}),

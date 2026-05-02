@@ -50,10 +50,9 @@ function HomeView(props) {
   var hero = e('div', {
     style: {
       textAlign: 'center',
-      padding: isDesktop ? (p.space.xxxl + ' ' + p.space.xl + ' ' + p.space.xxl) : (p.space.xxl + ' ' + p.space.lg + ' ' + p.space.xl),
-      marginBottom: p.space.xxl,
-      background: 'radial-gradient(ellipse at center top, rgba(96,165,250,0.08) 0%, transparent 60%)',
-      borderRadius: p.radius.xxl,
+      padding: isDesktop ? '64px 16px 48px' : '40px 8px 32px',
+      marginBottom: 0,
+      background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(96,165,250,0.10) 0%, rgba(167,139,250,0.04) 35%, transparent 70%)',
       animation: 'ecept_fadeSlideUp 480ms ' + p.ease.out
     }
   },
@@ -193,15 +192,19 @@ function HomeView(props) {
       onClick: function(){ if (lleno) go(target); },
       style: {
         background: p.color.gradSurface,
-        border: '1px solid ' + (lleno ? col + '30' : p.color.bg4),
-        borderRadius: p.radius.xl,
-        padding: opts.compact ? (p.space.lg + ' ' + p.space.xl) : (p.space.xl + ' ' + p.space.xl),
+        border: '1px solid ' + (lleno ? col + '33' : p.color.bg4),
+        borderRadius: p.radius.lg,
+        padding: '20px 22px',
+        minHeight: 150,
         cursor: lleno ? 'pointer' : 'default',
         opacity: lleno ? 1 : 0.45,
-        transition: 'all 240ms ' + p.ease.out,
+        transition: 'transform 240ms ' + p.ease.standard + ', border-color 240ms ' + p.ease.standard + ', box-shadow 240ms ease-out',
         animation: 'ecept_fadeSlideUp 480ms ' + p.ease.out + ' ' + (i * 40 + 120) + 'ms both',
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        boxSizing: 'border-box'
       },
       onMouseEnter: function(ev){
         if (!lleno) return;
@@ -247,42 +250,56 @@ function HomeView(props) {
         fontSize: p.font.caption.size,
         fontWeight: 700,
         color: p.color.textMuted,
-        marginBottom: p.space.lg,
+        margin: (isDesktop ? '48px' : '32px') + ' 0 20px',
         textTransform: 'uppercase',
-        letterSpacing: '0.12em',
+        letterSpacing: '0.14em',
         display: 'flex',
         alignItems: 'center',
-        gap: p.space.sm
+        gap: p.space.md
       }
     },
-      e('span', { style: { width: 4, height: 14, borderRadius: p.radius.pill, background: accent } }),
+      e('span', { style: { width: 4, height: 16, borderRadius: p.radius.pill, background: accent } }),
       label
     );
   }
 
-  // ─── GRID — special modules ─────────────────────────────────
-  var specialGridCols = isWide ? 'repeat(4, 1fr)' : (isDesktop ? 'repeat(3, 1fr)' : (isTablet ? 'repeat(2, 1fr)' : '1fr'));
-  var subjectGridCols = isWide ? 'repeat(4, 1fr)' : (isDesktop ? 'repeat(3, 1fr)' : (isTablet ? 'repeat(2, 1fr)' : '1fr'));
+  // ─── GRID auto-fit (responsive real, sin breakpoints rígidos) ──
+  // mobile:    1 col (minmax 280px > viewport)
+  // tablet:    2-3 cols
+  // desktop:   3-4 cols
+  // wide:      4-5 cols
+  var moduleGridStyle = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: p.space.lg,
+    width: '100%'
+  };
 
-  return e('div', {
-    style: {
-      maxWidth: 1280,
-      margin: '0 auto',
-      padding: isDesktop ? (p.space.xl + ' ' + p.space.xxl) : (p.space.lg + ' ' + p.space.lg),
-      animation: 'ecept_fadeIn 420ms ' + p.ease.out
-    }
-  },
+  // Container: padding fluido. Hasta 1400px usa padding 24px (32 desktop).
+  // Más allá de 1400px usa padding lateral creciente para centrar pero
+  // mantiene el ancho útil hasta 1400px.
+  var containerStyle = {
+    width: '100%',
+    minHeight: '100vh',
+    padding: '0 max(' + (isDesktop ? 32 : 16) + 'px, calc((100vw - 1400px) / 2))',
+    paddingTop: 0,
+    paddingBottom: p.space.huge,
+    animation: 'ecept_fadeIn 420ms ' + p.ease.out,
+    boxSizing: 'border-box'
+  };
+
+  return e('div', { style: containerStyle },
     hero,
     favStrip,
     e('div', { style: { marginBottom: p.space.xxxl } },
       sectionHeader('⚡ Secciones Especiales', p.color.purple),
-      e('div', { style: { display: 'grid', gridTemplateColumns: specialGridCols, gap: p.space.lg } },
-        specials.map(function(m, i){ return moduleCard(m, i, { compact: true }); })
+      e('div', { style: moduleGridStyle },
+        specials.map(function(m, i){ return moduleCard(m, i, { compact: false }); })
       )
     ),
     e('div', null,
       sectionHeader('📋 Materias', p.color.primaryHi),
-      e('div', { style: { display: 'grid', gridTemplateColumns: subjectGridCols, gap: p.space.lg } },
+      e('div', { style: moduleGridStyle },
         subjects.map(function(m, i){ return moduleCard(m, i + specials.length); })
       )
     )
