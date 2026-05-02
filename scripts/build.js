@@ -101,6 +101,7 @@ var parts = [
   // logo + loading screen (premium primitives — must precede everything that consumes them)
   'src/components/Logo.js',
   'src/components/LoadingScreen.js',
+  'src/components/HomeView.js',
   // chatbot (must come after App? no — function hoisted; keep with components)
   'src/components/ChatBot.js',
   // supabase client (reads window.__ECEPT_ENV; exposes window.ECEPT_SUPABASE)
@@ -179,8 +180,9 @@ var expectedGlobals = [
   'function PerView', 'function ImpView', 'function DprView',
   'function IntroView', 'function RootHub', 'function NeurosisHub',
   'window.SaludMentalView', 'window.SM_SEARCH_INDEX',
-  // logo + loading screen
+  // logo + loading screen + home view
   'function Logo', 'window.Logo', 'function LoadingScreen', 'window.LoadingScreen',
+  'function HomeView', 'window.HomeView',
   // chatbot
   'function ChatBot', 'window.ChatBot',
   // supabase client
