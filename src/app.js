@@ -199,6 +199,9 @@ function App(){
           vista==="general"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Generalidades")),
           vista==="triadas"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Tríadas")),
           vista==="imagenes"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Imágenes")),
+          vista==="flashcards"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Flashcards")),
+          vista==="flashcards_deck"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("flashcards")},style:{color:C.dm,cursor:"pointer"}},"Flashcards"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt,maxWidth:"160px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},(window.ECEPT_DECK_SELECTED&&window.ECEPT_DECK_SELECTED.name)||"Baraja")),
+          vista==="flashcards_study"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("flashcards")},style:{color:C.dm,cursor:"pointer"}},"Flashcards"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Modo estudio")),
           vista==="salud_mental"&&(function(){
             // Deeper SM breadcrumb driven by smView (updated via onViewChange).
             // Each label maps to a single crumb; neurosis themes stack under "Neurosis",
@@ -409,7 +412,7 @@ function App(){
       e("div",{style:{marginBottom:"36px"}},
         e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"16px",fontWeight:800,color:C.mt,marginBottom:"14px",display:"flex",alignItems:"center",gap:"8px",textTransform:"uppercase",letterSpacing:"1px",fontSize:"12px"}},"⚡ Secciones Especiales"),
         e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))",gap:"12px"}},
-          MODS.filter(function(m){return["triadas","labs","imagenes","general"].indexOf(m.id)>-1}).map(function(m,i){
+          MODS.filter(function(m){return["triadas","labs","imagenes","general","flashcards"].indexOf(m.id)>-1}).map(function(m,i){
             var lleno=m.st==="lleno";
             return e("div",{key:m.id,onClick:function(){if(lleno)go(m.id)},style:{
               background:"linear-gradient(135deg,"+C.cd+","+m.col+"06)",border:"1px solid "+m.col+"25",borderRadius:"14px",padding:"16px",
@@ -428,7 +431,7 @@ function App(){
       ),
       e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"12px",fontWeight:800,color:C.mt,marginBottom:"14px",display:"flex",alignItems:"center",gap:"8px",textTransform:"uppercase",letterSpacing:"1px"}},"📋 Materias"),
       e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:"14px"}},
-        MODS.filter(function(m){return["triadas","labs","imagenes","general"].indexOf(m.id)===-1}).map(function(m,i){
+        MODS.filter(function(m){return["triadas","labs","imagenes","general","flashcards"].indexOf(m.id)===-1}).map(function(m,i){
           var lleno=m.st==="lleno";
           return e("div",{key:m.id,onClick:function(){if(lleno)go(m.id==="cirugia"?"cir_menu":m.id==="anatomia"?"anat_menu":m.id==="labs"?"labs":m.id==="epid"?"epid":m.id==="emergen"?"emergen_menu":m.id==="fisio"?"fisio":m.id)},style:{
             background:C.cd,border:"1px solid "+(lleno?m.col+"30":C.bd),borderRadius:"16px",padding:"20px",
@@ -1063,6 +1066,9 @@ function App(){
     )
 
     ,vista==="profile"&&e(ProfileView,{user:ecuUser,onBack:function(){go("home");}})
+    ,vista==="flashcards"&&e(DecksView,{user:ecuUser,onBack:function(){go("home");},go:go,onLoginRequest:function(){setEcuShowAuth(true);}})
+    ,vista==="flashcards_deck"&&e(DeckDetailView,{user:ecuUser,deck:window.ECEPT_DECK_SELECTED,onBack:function(){go("flashcards");},go:go})
+    ,vista==="flashcards_study"&&e(StudyView,{user:ecuUser,deck:window.ECEPT_DECK_SELECTED||null,onBack:function(){go(window.ECEPT_DECK_SELECTED?"flashcards_deck":"flashcards");},go:go,onLoginRequest:function(){setEcuShowAuth(true);}})
     )),
     // ════════════ BACK BUTTON (floating, hidden on home only) ════════════
     vista!=="home"&&e("button",{onClick:handleBack,style:{position:"fixed",bottom:"20px",left:"20px",background:C.ac,color:"#fff",border:"none",borderRadius:"50%",width:"48px",height:"48px",fontSize:"20px",cursor:"pointer",boxShadow:"0 4px 20px "+C.gl,zIndex:90,display:"flex",alignItems:"center",justifyContent:"center"}},"←"),

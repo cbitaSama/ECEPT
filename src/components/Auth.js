@@ -159,9 +159,11 @@ function AuthModal(props){
       backdropFilter:"blur(4px)",
       WebkitBackdropFilter:"blur(4px)",
       display:"flex",
-      alignItems:"center",
+      alignItems:"flex-start",
       justifyContent:"center",
-      padding:"16px",
+      padding:"20px",
+      overflowY:"auto",
+      WebkitOverflowScrolling:"touch",
       zIndex:200,
       animation:"fadeIn .18s ease-out"
     }
@@ -178,7 +180,8 @@ function AuthModal(props){
         boxShadow:"0 12px 40px rgba(0,0,0,.6)",
         padding:"20px 18px 18px",
         animation:"slideUp .25s ease-out",
-        boxSizing:"border-box"
+        boxSizing:"border-box",
+        marginTop:"20px",marginBottom:"20px"
       }
     },
       // ── Header ──

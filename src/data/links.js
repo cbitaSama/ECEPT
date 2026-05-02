@@ -22,6 +22,7 @@ var MODS=[
 {id:"cirugia",n:"Cirugía",ic:"🔪",col:"#ef4444",d:"Abdomen agudo infeccioso, Peritonitis, Apendicitis",st:"lleno"},
 {id:"anatomia",n:"Anatomía",ic:"🩻",col:"#f59e0b",d:"Conducto inguinal, Anillos, Cordón espermático, 12 Pares Craneales",st:"lleno"},
 {id:"general",n:"Generalidades",ic:"📚",col:"#8b5cf6",d:"Inmunología, Cascada de Coagulación, y más",st:"lleno"},
+{id:"flashcards",n:"Flashcards",ic:"🎴",col:"#a78bfa",d:"Tarjetas de estudio · Crea las tuyas o estudia las oficiales",st:"lleno"},
 {id:"epid",n:"Epidemiología (Salud Pública)",ic:"📊",col:"#00b4d8",d:"Tipos de estudio, Pirámide de evidencia, Sesgos, Medidas, Lectura crítica",st:"lleno"},
 {id:"triadas",n:"Tríadas y Síndromes",ic:"🔺",col:"#e879f9",d:TR.length+" asociaciones clásicas multidisciplinarias",st:"lleno"},
 {id:"labs",n:"Valores de Laboratorio",ic:"📊",col:"#4caf82",d:"Hemograma, Coagulación, Hepáticas, Renal, Ionograma, Tiroides",st:"lleno"},

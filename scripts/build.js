@@ -107,6 +107,14 @@ var parts = [
   'src/components/UserMenu.js',
   // profile view (editable user profile screen; exposes window.ProfileView)
   'src/components/ProfileView.js',
+  // decks view (flashcards deck list; exposes window.DecksView)
+  'src/components/DecksView.js',
+  // flashcard editor (create/edit flashcards; exposes window.FlashcardEditor)
+  'src/components/FlashcardEditor.js',
+  // deck detail view (flashcards inside a deck; exposes window.DeckDetailView)
+  'src/components/DeckDetailView.js',
+  // study view (SM-2 spaced repetition study session; exposes window.StudyView)
+  'src/components/StudyView.js',
   // app
   'src/app.js'
 ];
@@ -168,7 +176,15 @@ var expectedGlobals = [
   // user menu
   'function UserMenu', 'window.UserMenu',
   // profile view
-  'function ProfileView', 'window.ProfileView'
+  'function ProfileView', 'window.ProfileView',
+  // decks view
+  'function DecksView', 'window.DecksView',
+  // flashcard editor
+  'function FlashcardEditor', 'window.FlashcardEditor',
+  // deck detail view
+  'function DeckDetailView', 'window.DeckDetailView',
+  // study view
+  'function StudyView', 'window.StudyView'
 ];
 expectedGlobals.forEach(function(g) {
   if (output.indexOf(g) === -1) errors.push('missing global: ' + g);
