@@ -14674,6 +14674,111 @@ window.SkeletonList = SkeletonList;
 window.SkeletonRow = SkeletonRow;
 
 // ══════════════════════════════════════════════════════════════
+// EmptyState — placeholder unificado para listas/secciones vacías
+// ══════════════════════════════════════════════════════════════
+// Props:
+//   icon        — emoji string o ReactElement (default 📭)
+//   title       — string h3
+//   description — string body muted
+//   actions     — array [{label, onClick, variant: 'primary'|'secondary'}]
+// ══════════════════════════════════════════════════════════════
+
+function EmptyState(props) {
+  var p = T;
+  var actions = props.actions || [];
+
+  return e('div', {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '64px 24px',
+      textAlign: 'center',
+      minHeight: 360,
+      gap: 16,
+      animation: 'ecept_fadeSlideUp 420ms ' + p.ease.out
+    }
+  },
+    // Icon container con glow ambient
+    e('div', {
+      style: {
+        width: 88,
+        height: 88,
+        borderRadius: '50%',
+        background: 'linear-gradient(135deg, rgba(96,165,250,0.12), rgba(167,139,250,0.08))',
+        border: '1px solid rgba(96,165,250,0.20)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 40,
+        boxShadow: '0 0 40px rgba(96,165,250,0.15)',
+        marginBottom: 8
+      }
+    }, props.icon || '📭'),
+    // Title
+    e('div', {
+      style: {
+        fontSize: 20,
+        fontWeight: 700,
+        color: p.color.text,
+        letterSpacing: '-0.01em'
+      }
+    }, props.title),
+    // Description
+    props.description && e('div', {
+      style: {
+        fontSize: p.font.bodySm.size,
+        color: p.color.textMuted,
+        maxWidth: 380,
+        lineHeight: 1.55
+      }
+    }, props.description),
+    // Actions
+    actions.length > 0 && e('div', {
+      style: {
+        display: 'flex',
+        gap: 12,
+        marginTop: 12,
+        flexWrap: 'wrap',
+        justifyContent: 'center'
+      }
+    }, actions.map(function(a, i) {
+      var isPrimary = a.variant !== 'secondary';
+      var isPremium = a.variant === 'premium';
+      return e('button', {
+        key: i,
+        onClick: a.onClick,
+        style: {
+          padding: '12px 24px',
+          background: isPremium
+            ? p.color.gradPremium
+            : (isPrimary ? p.color.gradMixed : 'rgba(96,165,250,0.10)'),
+          color: isPremium ? '#0a0e1f' : '#fff',
+          border: isPrimary || isPremium ? 'none' : '1px solid rgba(96,165,250,0.30)',
+          borderRadius: p.radius.lg,
+          fontSize: p.font.body.size,
+          fontWeight: 600,
+          cursor: 'pointer',
+          minHeight: 44,
+          letterSpacing: '-0.01em',
+          boxShadow: isPremium ? p.shadow.glow_premium : (isPrimary ? '0 4px 12px rgba(167,139,250,0.25)' : 'none'),
+          transition: 'transform 200ms ' + p.ease.standard + ', box-shadow 200ms ease-out'
+        },
+        onMouseEnter: function(ev) {
+          if (isPrimary || isPremium) ev.currentTarget.style.transform = 'translateY(-1px)';
+        },
+        onMouseLeave: function(ev) {
+          ev.currentTarget.style.transform = 'translateY(0)';
+        }
+      }, a.label);
+    }))
+  );
+}
+
+window.EmptyState = EmptyState;
+
+// ══════════════════════════════════════════════════════════════
 // CHATBOT — Elion AI assistant for ECEPT
 // ES5 estricto: solo declaraciones var y function. Nada de ES6+.
 // React.createElement vía alias global `e`. Sin JSX.
@@ -15319,8 +15424,18 @@ function ChatBot(props) {
       e('div', { style:{ flex:1, overflowY:'auto', padding:'6px 8px' } },
         CB_loadingConvs && (window.SkeletonRow ? e('div', { style:{ display:'flex', flexDirection:'column', gap:4, padding:'4px 0' } }, e(window.SkeletonRow), e(window.SkeletonRow), e(window.SkeletonRow), e(window.SkeletonRow)) : e('div', { style:{ color:C.dm, fontSize:12, padding:'12px 8px', textAlign:'center' } }, 'Cargando…')),
 
-        !CB_loadingConvs && CB_conversations.length === 0 && e('div', { style:{ padding:'20px 8px', textAlign:'center' } },
-          e('div', { style:{ color:C.dm, fontSize:12, lineHeight:1.6 } }, 'Aún no tenés conversaciones. Mandá tu primer mensaje para empezar.')
+        !CB_loadingConvs && CB_conversations.length === 0 && e('div', { style:{ padding:'24px 12px', textAlign:'center' } },
+          e('div', { style:{
+            width:64, height:64, margin:'0 auto 12px',
+            borderRadius:'50%',
+            background:'linear-gradient(135deg, rgba(96,165,250,0.12), rgba(167,139,250,0.08))',
+            border:'1px solid rgba(96,165,250,0.20)',
+            display:'flex', alignItems:'center', justifyContent:'center',
+            fontSize:28,
+            boxShadow:'0 0 24px rgba(96,165,250,0.12)'
+          } }, '💬'),
+          e('div', { style:{ fontSize:14, fontWeight:600, color:C.tx, marginBottom:4, letterSpacing:'-0.01em' } }, 'Sin conversaciones'),
+          e('div', { style:{ color:C.dm, fontSize:12, lineHeight:1.5, maxWidth:200, margin:'0 auto' } }, 'Mandá tu primer mensaje para empezar a chatear con Elion.')
         ),
 
         CB_conversations.map(function(conv) {
@@ -17298,14 +17413,15 @@ function DecksView(props){
             },"Iniciar sesión / Registrarse")
           )
         : (userDecks.length===0
-            ? e("div",{style:{
-                background:C.cd,border:"1px dashed "+C.bd,
-                borderRadius:"14px",padding:"32px 20px",textAlign:"center"
-              }},
-                e("div",{style:{fontSize:"40px",marginBottom:"10px"}},"📋"),
-                e("p",{style:{fontSize:"14px",color:C.tx,fontWeight:600,marginBottom:"4px"}},"Aún no creaste ninguna baraja."),
-                e("p",{style:{fontSize:"12px",color:C.dm,lineHeight:1.5}},"¡Empezá ahora! Tocá «+ Crear baraja» arriba.")
-              )
+            ? e(window.EmptyState||"div",{
+                icon:"🎴",
+                title:"Todavía no tenés barajas",
+                description:"Creá tu primera baraja desde cero o importá una desde JSON. Cada baraja agrupa flashcards que estudiás con repetición espaciada.",
+                actions:[
+                  {label:"+ Crear baraja",onClick:DV_openCreate,variant:"primary"},
+                  {label:"⬇ Importar JSON",onClick:function(){DV_setImportOpen(true);DV_setImportData(null);DV_setImportError("");},variant:"secondary"}
+                ]
+              })
             : e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:"16px"}},
                 userDecks.map(function(d,i){ return DV_userDeckCard(d,i); })
               )
@@ -20285,16 +20401,21 @@ function DeckDetailView(props){
     DD_loading && e(window.SkeletonList || "div",{count:6,grid:true,minWidth:320,minHeight:110}),
 
     // ── Card list / empty states ──
-    !DD_loading && DD_cards.length===0 && e("div",{style:{
-      background:C.cd,border:"1px dashed "+C.bd,
-      borderRadius:"14px",padding:"40px 24px",textAlign:"center"
-    }},
-      e("div",{style:{fontSize:"48px",marginBottom:"12px"}},"🎴"),
-      e("p",{style:{fontSize:"14px",color:C.tx,fontWeight:600,marginBottom:"6px"}},"Esta baraja está vacía."),
-      e("p",{style:{fontSize:"12px",color:C.dm,lineHeight:1.5}},
-        canEdit?"¡Agrega tu primera tarjeta!":"Aún no se cargaron tarjetas oficiales."
-      )
-    ),
+    !DD_loading && DD_cards.length===0 && (canEdit
+      ? e(window.EmptyState||"div",{
+          icon:"🎴",
+          title:"Esta baraja está vacía",
+          description:"Empezá creando una tarjeta manualmente o dejá que Elion genere varias a partir de tus apuntes (texto, PDF o imagen).",
+          actions:[
+            {label:"+ Nueva tarjeta",onClick:function(){ DD_setEditCard(null); DD_setShowEditor(true); },variant:"primary"},
+            {label:"✨ Generar con IA",onClick:function(){ DD_setElionOpen(true); },variant:"premium"}
+          ]
+        })
+      : e(window.EmptyState||"div",{
+          icon:"🎴",
+          title:"Sin tarjetas todavía",
+          description:"Aún no se cargaron tarjetas oficiales en esta baraja. Volvé a revisar más tarde."
+        })),
 
     !DD_loading && DD_cards.length>0 && filteredCards.length===0 && e("div",{style:{
       background:C.cd,border:"1px dashed "+C.bd,

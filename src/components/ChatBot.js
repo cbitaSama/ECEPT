@@ -644,8 +644,18 @@ function ChatBot(props) {
       e('div', { style:{ flex:1, overflowY:'auto', padding:'6px 8px' } },
         CB_loadingConvs && (window.SkeletonRow ? e('div', { style:{ display:'flex', flexDirection:'column', gap:4, padding:'4px 0' } }, e(window.SkeletonRow), e(window.SkeletonRow), e(window.SkeletonRow), e(window.SkeletonRow)) : e('div', { style:{ color:C.dm, fontSize:12, padding:'12px 8px', textAlign:'center' } }, 'Cargando…')),
 
-        !CB_loadingConvs && CB_conversations.length === 0 && e('div', { style:{ padding:'20px 8px', textAlign:'center' } },
-          e('div', { style:{ color:C.dm, fontSize:12, lineHeight:1.6 } }, 'Aún no tenés conversaciones. Mandá tu primer mensaje para empezar.')
+        !CB_loadingConvs && CB_conversations.length === 0 && e('div', { style:{ padding:'24px 12px', textAlign:'center' } },
+          e('div', { style:{
+            width:64, height:64, margin:'0 auto 12px',
+            borderRadius:'50%',
+            background:'linear-gradient(135deg, rgba(96,165,250,0.12), rgba(167,139,250,0.08))',
+            border:'1px solid rgba(96,165,250,0.20)',
+            display:'flex', alignItems:'center', justifyContent:'center',
+            fontSize:28,
+            boxShadow:'0 0 24px rgba(96,165,250,0.12)'
+          } }, '💬'),
+          e('div', { style:{ fontSize:14, fontWeight:600, color:C.tx, marginBottom:4, letterSpacing:'-0.01em' } }, 'Sin conversaciones'),
+          e('div', { style:{ color:C.dm, fontSize:12, lineHeight:1.5, maxWidth:200, margin:'0 auto' } }, 'Mandá tu primer mensaje para empezar a chatear con Elion.')
         ),
 
         CB_conversations.map(function(conv) {

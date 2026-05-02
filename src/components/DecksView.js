@@ -751,14 +751,15 @@ function DecksView(props){
             },"Iniciar sesión / Registrarse")
           )
         : (userDecks.length===0
-            ? e("div",{style:{
-                background:C.cd,border:"1px dashed "+C.bd,
-                borderRadius:"14px",padding:"32px 20px",textAlign:"center"
-              }},
-                e("div",{style:{fontSize:"40px",marginBottom:"10px"}},"📋"),
-                e("p",{style:{fontSize:"14px",color:C.tx,fontWeight:600,marginBottom:"4px"}},"Aún no creaste ninguna baraja."),
-                e("p",{style:{fontSize:"12px",color:C.dm,lineHeight:1.5}},"¡Empezá ahora! Tocá «+ Crear baraja» arriba.")
-              )
+            ? e(window.EmptyState||"div",{
+                icon:"🎴",
+                title:"Todavía no tenés barajas",
+                description:"Creá tu primera baraja desde cero o importá una desde JSON. Cada baraja agrupa flashcards que estudiás con repetición espaciada.",
+                actions:[
+                  {label:"+ Crear baraja",onClick:DV_openCreate,variant:"primary"},
+                  {label:"⬇ Importar JSON",onClick:function(){DV_setImportOpen(true);DV_setImportData(null);DV_setImportError("");},variant:"secondary"}
+                ]
+              })
             : e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:"16px"}},
                 userDecks.map(function(d,i){ return DV_userDeckCard(d,i); })
               )

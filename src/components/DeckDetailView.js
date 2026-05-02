@@ -1246,16 +1246,21 @@ function DeckDetailView(props){
     DD_loading && e(window.SkeletonList || "div",{count:6,grid:true,minWidth:320,minHeight:110}),
 
     // ── Card list / empty states ──
-    !DD_loading && DD_cards.length===0 && e("div",{style:{
-      background:C.cd,border:"1px dashed "+C.bd,
-      borderRadius:"14px",padding:"40px 24px",textAlign:"center"
-    }},
-      e("div",{style:{fontSize:"48px",marginBottom:"12px"}},"🎴"),
-      e("p",{style:{fontSize:"14px",color:C.tx,fontWeight:600,marginBottom:"6px"}},"Esta baraja está vacía."),
-      e("p",{style:{fontSize:"12px",color:C.dm,lineHeight:1.5}},
-        canEdit?"¡Agrega tu primera tarjeta!":"Aún no se cargaron tarjetas oficiales."
-      )
-    ),
+    !DD_loading && DD_cards.length===0 && (canEdit
+      ? e(window.EmptyState||"div",{
+          icon:"🎴",
+          title:"Esta baraja está vacía",
+          description:"Empezá creando una tarjeta manualmente o dejá que Elion genere varias a partir de tus apuntes (texto, PDF o imagen).",
+          actions:[
+            {label:"+ Nueva tarjeta",onClick:function(){ DD_setEditCard(null); DD_setShowEditor(true); },variant:"primary"},
+            {label:"✨ Generar con IA",onClick:function(){ DD_setElionOpen(true); },variant:"premium"}
+          ]
+        })
+      : e(window.EmptyState||"div",{
+          icon:"🎴",
+          title:"Sin tarjetas todavía",
+          description:"Aún no se cargaron tarjetas oficiales en esta baraja. Volvé a revisar más tarde."
+        })),
 
     !DD_loading && DD_cards.length>0 && filteredCards.length===0 && e("div",{style:{
       background:C.cd,border:"1px dashed "+C.bd,

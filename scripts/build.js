@@ -107,6 +107,7 @@ var parts = [
   'src/components/Toast.js',
   'src/components/Button.js',
   'src/components/Skeleton.js',
+  'src/components/EmptyState.js',
   // chatbot (must come after App? no — function hoisted; keep with components)
   'src/components/ChatBot.js',
   // supabase client (reads window.__ECEPT_ENV; exposes window.ECEPT_SUPABASE)
@@ -193,6 +194,7 @@ var expectedGlobals = [
   'function ToastHost', 'window.ToastHost', 'window.ECEPT_toast',
   'function Button', 'window.Button',
   'function SkeletonCard', 'function SkeletonList', 'window.SkeletonCard', 'window.SkeletonList',
+  'function EmptyState', 'window.EmptyState',
   'function LayeredCard', 'window.LayeredCard',
   'function InfoLayer', 'window.InfoLayer',
   'function Detail', 'window.Detail',
