@@ -387,19 +387,34 @@ function DecksView(props){
       )
     ),
 
-    // ── Create button ──
-    user&&e("button",{
-      onClick:DV_openCreate,
-      style:{
-        width:"100%",minHeight:"52px",padding:"14px 20px",
-        borderRadius:"14px",
-        background:"linear-gradient(135deg,#a78bfa,#60a5fa)",
-        color:"#fff",border:"none",
-        fontSize:"15px",fontWeight:700,cursor:"pointer",
-        marginBottom:"28px",
-        boxShadow:"0 4px 18px rgba(167,139,250,.35)"
-      }
-    },"+ Crear baraja"),
+    // ── Action buttons ──
+    e("div",{style:{display:"flex",gap:"10px",marginBottom:"28px",flexWrap:"wrap"}},
+      e("button",{
+        onClick:function(){
+          window.ECEPT_DECK_SELECTED=null;
+          if(typeof go==="function") go("flashcards_study");
+        },
+        style:{
+          flex:"1 1 160px",minHeight:"52px",padding:"14px 20px",
+          borderRadius:"14px",
+          background:"linear-gradient(135deg,#a78bfa,#60a5fa)",
+          color:"#fff",border:"none",
+          fontSize:"14px",fontWeight:700,cursor:"pointer",
+          boxShadow:"0 4px 18px rgba(167,139,250,.35)"
+        }
+      },"🎯 Estudiar todo"),
+      user&&e("button",{
+        onClick:DV_openCreate,
+        style:{
+          flex:"1 1 160px",minHeight:"52px",padding:"14px 20px",
+          borderRadius:"14px",
+          background:"none",
+          border:"1.5px solid rgba(167,139,250,.4)",
+          color:"#a78bfa",
+          fontSize:"14px",fontWeight:700,cursor:"pointer"
+        }
+      },"+ Crear baraja")
+    ),
 
     // ── Load error ──
     DV_loadErr && e("div",{style:{

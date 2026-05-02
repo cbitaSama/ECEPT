@@ -15,6 +15,23 @@ function DD_previewText(text,type){
   return stripped;
 }
 
+function DD_clozeEl(text){
+  var parts=[];
+  var re=/\{\{c\d+::(.*?)\}\}/g;
+  var last=0,match,idx=0;
+  while((match=re.exec(text))!==null){
+    if(match.index>last) parts.push(e("span",{key:"t"+idx++},text.slice(last,match.index)));
+    parts.push(e("span",{key:"c"+idx++,style:{
+      display:"inline-block",padding:"1px 6px",borderRadius:"4px",
+      background:"rgba(251,191,36,.18)",border:"1px solid rgba(251,191,36,.35)",
+      color:"#fbbf24",fontWeight:700,fontSize:"11px",margin:"0 1px"
+    }},"..."));
+    last=re.lastIndex;
+  }
+  if(last<text.length) parts.push(e("span",{key:"t"+idx++},text.slice(last)));
+  return parts.length ? e("span",null,parts) : e("span",null,text||"");
+}
+
 function DeckDetailView(props){
   var user=props.user;
   var deck=props.deck;
@@ -38,7 +55,9 @@ function DeckDetailView(props){
       var st=document.createElement("style");
       st.textContent=
         "@keyframes DD_shimmer{0%{background-position:-300px 0}100%{background-position:300px 0}}" +
-        ".dd-skel{background:linear-gradient(90deg,rgba(255,255,255,.03) 25%,rgba(255,255,255,.08) 50%,rgba(255,255,255,.03) 75%);background-size:600px 100%;animation:DD_shimmer 1.4s ease-in-out infinite;border-radius:6px}";
+        ".dd-skel{background:linear-gradient(90deg,rgba(255,255,255,.03) 25%,rgba(255,255,255,.08) 50%,rgba(255,255,255,.03) 75%);background-size:600px 100%;animation:DD_shimmer 1.4s ease-in-out infinite;border-radius:6px}" +
+        ".dd-card-item{transition:box-shadow .15s ease,background .15s ease}" +
+        ".dd-card-item:hover{background:#111827!important;box-shadow:0 4px 18px rgba(0,0,0,.35)}";
       document.head.appendChild(st);
       DD_styleInjected=true;
     }
@@ -244,68 +263,87 @@ function DeckDetailView(props){
 
   function DD_cardItem(c,i){
     var isMenuOpen=DD_menuOpenId===c.id;
-    var preview=DD_previewText(c.front,c.card_type);
-    var hasProgress=!!DD_progress[c.id];
-    var pStatus="";
-    if(!hasProgress){ pStatus="nueva"; }
-    else if(DD_progress[c.id].next_review<=nowIso){ pStatus="hoy"; }
+    var isCloze=c.card_type==="cloze";
+    var prog=DD_progress[c.id];
+
+    // Stats line
+    var statsText="";
+    if(prog){
+      statsText="Vista "+(prog.repetitions||0)+" "+(prog.repetitions===1?"vez":"veces");
+      if(prog.next_review){
+        var nrd=new Date(prog.next_review);
+        var diffMs=nrd-new Date();
+        var diffD=Math.round(diffMs/(1000*60*60*24));
+        if(diffD<=0) statsText+=" · Hoy";
+        else if(diffD===1) statsText+=" · Mañana";
+        else statsText+=" · En "+diffD+"d";
+      }
+    }
+
     return e("div",{
       key:c.id,
+      className:"dd-card-item",
       style:{
         position:"relative",
         background:C.cd,border:"1px solid "+C.bd,
-        borderRadius:"12px",padding:"14px",
-        marginBottom:"10px",
-        animation:"slideUp .3s ease-out "+(Math.min(i,10)*0.03)+"s both"
+        borderRadius:"12px",padding:"14px 14px 12px",
+        marginBottom:"8px"
       }
     },
-      // Top row: type badge + status pill + ⋮
-      e("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"8px"}},
-        DD_typeBadge(c.card_type||"basic"),
-        pStatus==="nueva" && e("span",{style:{
-          fontSize:"9px",fontWeight:700,padding:"3px 7px",borderRadius:"4px",
-          background:"rgba(167,139,250,.15)",color:"#a78bfa",letterSpacing:"0.5px"
-        }},"NUEVA"),
-        pStatus==="hoy" && e("span",{style:{
-          fontSize:"9px",fontWeight:700,padding:"3px 7px",borderRadius:"4px",
-          background:"rgba(251,191,36,.15)",color:"#fbbf24",letterSpacing:"0.5px"
-        }},"HOY"),
-        e("div",{style:{flex:1}}),
+      // Main row: icon + content + menu button
+      e("div",{style:{display:"flex",gap:"12px",alignItems:"flex-start"}},
+        // Type icon circle
+        e("div",{style:{
+          width:"34px",height:"34px",flexShrink:0,
+          borderRadius:"8px",marginTop:"1px",
+          background:isCloze?"rgba(251,191,36,.12)":"rgba(96,165,250,.12)",
+          display:"flex",alignItems:"center",justifyContent:"center",fontSize:"14px"
+        }},isCloze?"✂️":"📝"),
+        // Content
+        e("div",{style:{flex:1,minWidth:0}},
+          // Front (2 lines max)
+          e("div",{style:{
+            fontSize:"14px",color:C.tx,fontWeight:600,lineHeight:1.45,
+            overflow:"hidden",display:"-webkit-box",
+            WebkitLineClamp:2,WebkitBoxOrient:"vertical",
+            marginBottom:4
+          }},isCloze ? DD_clozeEl(c.front||"") : (c.front||"")),
+          // Back preview (basic only)
+          !isCloze&&c.back&&e("div",{style:{
+            fontSize:"12px",color:C.dm,lineHeight:1.4,
+            overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"
+          }},"→ "+(c.back.length>80?c.back.slice(0,77)+"...":c.back)),
+          // Tags
+          Array.isArray(c.tags)&&c.tags.length>0&&e("div",{style:{display:"flex",flexWrap:"wrap",gap:"4px",marginTop:"6px"}},
+            c.tags.map(function(t,ti){
+              return e("span",{key:ti,style:{
+                fontSize:"9px",fontWeight:700,padding:"2px 6px",
+                borderRadius:"999px",background:"rgba(255,255,255,.04)",
+                border:"1px solid "+C.bd,color:C.dm
+              }},"#"+t);
+            })
+          ),
+          // Stats
+          statsText&&e("div",{style:{fontSize:"10px",color:C.dm,marginTop:"5px"}},statsText)
+        ),
+        // ⋮ button or readonly badge
         canEdit
           ? e("button",{
               onClick:function(ev){ ev.stopPropagation(); DD_setMenuOpenId(isMenuOpen?null:c.id); },
               "aria-label":"Opciones",
               style:{
-                background:"none",border:"none",color:C.dm,
-                fontSize:"16px",cursor:"pointer",
+                background:"none",border:"none",color:C.dm,fontSize:"16px",cursor:"pointer",
                 width:"32px",height:"32px",flexShrink:0,
-                display:"flex",alignItems:"center",justifyContent:"center",
-                borderRadius:"6px"
+                display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"6px",marginTop:"-2px"
               }
             },"⋮")
-          : isOfficial && e("span",{style:{fontSize:"9px",color:C.dm,fontWeight:600,letterSpacing:"0.5px"}},"⭐ SOLO LECTURA")
-      ),
-      // Front preview
-      e("div",{style:{
-        fontSize:"13px",color:C.tx,lineHeight:1.5,
-        wordBreak:"break-word",whiteSpace:"pre-wrap",
-        marginBottom:Array.isArray(c.tags)&&c.tags.length>0?"8px":0
-      }},preview),
-      // Tags
-      Array.isArray(c.tags)&&c.tags.length>0 && e("div",{style:{display:"flex",flexWrap:"wrap",gap:"4px"}},
-        c.tags.map(function(t,ti){
-          return e("span",{key:ti,style:{
-            fontSize:"10px",fontWeight:600,padding:"2px 7px",
-            borderRadius:"999px",background:"rgba(255,255,255,.05)",
-            border:"1px solid "+C.bd,color:C.dm
-          }},"#"+t);
-        })
+          : isOfficial&&e("span",{style:{fontSize:"9px",color:C.dm,fontWeight:600,flexShrink:0,paddingTop:"2px"}},"⭐")
       ),
       // ⋮ Dropdown
-      isMenuOpen && e("div",{
+      isMenuOpen&&e("div",{
         onClick:function(ev){ ev.stopPropagation(); },
         style:{
-          position:"absolute",top:"38px",right:"10px",
+          position:"absolute",top:"44px",right:"10px",
           background:C.cd,border:"1px solid "+C.bd,
           borderRadius:"10px",overflow:"hidden",
           boxShadow:"0 8px 24px rgba(0,0,0,.5)",
@@ -318,12 +356,8 @@ function DeckDetailView(props){
             DD_setMenuOpenId(null);
             setTimeout(function(){ DD_setEditCard(c); DD_setShowEditor(true); },0);
           },
-          style:{
-            display:"block",width:"100%",minHeight:"44px",
-            padding:"10px 14px",textAlign:"left",
-            background:"none",border:"none",color:C.tx,
-            fontSize:"13px",fontWeight:600,cursor:"pointer"
-          }
+          style:{display:"block",width:"100%",minHeight:"44px",padding:"10px 14px",textAlign:"left",
+            background:"none",border:"none",color:C.tx,fontSize:"13px",fontWeight:600,cursor:"pointer"}
         },"✏️  Editar"),
         e("div",{style:{height:"1px",background:C.bd}}),
         e("button",{
@@ -332,12 +366,8 @@ function DeckDetailView(props){
             DD_setMenuOpenId(null);
             setTimeout(function(){ DD_setDeleteConfirmId(c.id); },0);
           },
-          style:{
-            display:"block",width:"100%",minHeight:"44px",
-            padding:"10px 14px",textAlign:"left",
-            background:"none",border:"none",color:"#fca5a5",
-            fontSize:"13px",fontWeight:600,cursor:"pointer"
-          }
+          style:{display:"block",width:"100%",minHeight:"44px",padding:"10px 14px",textAlign:"left",
+            background:"none",border:"none",color:"#fca5a5",fontSize:"13px",fontWeight:600,cursor:"pointer"}
         },"🗑  Eliminar")
       )
     );

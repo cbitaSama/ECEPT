@@ -201,6 +201,7 @@ function App(){
           vista==="imagenes"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Imágenes")),
           vista==="flashcards"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Flashcards")),
           vista==="flashcards_deck"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("flashcards")},style:{color:C.dm,cursor:"pointer"}},"Flashcards"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt,maxWidth:"160px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},(window.ECEPT_DECK_SELECTED&&window.ECEPT_DECK_SELECTED.name)||"Baraja")),
+          vista==="flashcards_study"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{onClick:function(){go("flashcards")},style:{color:C.dm,cursor:"pointer"}},"Flashcards"),e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Modo estudio")),
           vista==="salud_mental"&&(function(){
             // Deeper SM breadcrumb driven by smView (updated via onViewChange).
             // Each label maps to a single crumb; neurosis themes stack under "Neurosis",
@@ -1067,6 +1068,7 @@ function App(){
     ,vista==="profile"&&e(ProfileView,{user:ecuUser,onBack:function(){go("home");}})
     ,vista==="flashcards"&&e(DecksView,{user:ecuUser,onBack:function(){go("home");},go:go,onLoginRequest:function(){setEcuShowAuth(true);}})
     ,vista==="flashcards_deck"&&e(DeckDetailView,{user:ecuUser,deck:window.ECEPT_DECK_SELECTED,onBack:function(){go("flashcards");},go:go})
+    ,vista==="flashcards_study"&&e(StudyView,{user:ecuUser,deck:window.ECEPT_DECK_SELECTED||null,onBack:function(){go(window.ECEPT_DECK_SELECTED?"flashcards_deck":"flashcards");},go:go,onLoginRequest:function(){setEcuShowAuth(true);}})
     )),
     // ════════════ BACK BUTTON (floating, hidden on home only) ════════════
     vista!=="home"&&e("button",{onClick:handleBack,style:{position:"fixed",bottom:"20px",left:"20px",background:C.ac,color:"#fff",border:"none",borderRadius:"50%",width:"48px",height:"48px",fontSize:"20px",cursor:"pointer",boxShadow:"0 4px 20px "+C.gl,zIndex:90,display:"flex",alignItems:"center",justifyContent:"center"}},"←"),
