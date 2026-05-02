@@ -16,6 +16,7 @@ var shell = fs.readFileSync('src/index.html', 'utf8');
 var parts = [
   // styles
   'src/styles/theme.js',
+  'src/styles/tokens.js',
   // data (order matters: triadas before links)
   'src/data/reuma.js',
   'src/data/inmuno.js',
@@ -141,6 +142,8 @@ var errors = [];
 var expectedGlobals = [
   // core data + existing modules
   'RD=', 'REUMA_SECS', 'SUB=', 'TR=', 'TC=',
+  // design tokens
+  'ECEPT_TOKENS', 'window.T',
   'ABD_DATA', 'QUEM_PASOS', 'ING_',
   'PIRAMIDE', 'ESTUDIOS', 'SESGOS', 'MEDIDAS_EPI', 'CHECKLIST_LC',
   'LAB_SECTIONS', 'var ADR', 'RECEPTOR_FAMILIES', 'RECEPTOR_QUIZZES', 'RECEPTOR_PEARLS', 'RECEPTOR_PROT_G',
