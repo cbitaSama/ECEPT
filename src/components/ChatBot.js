@@ -28,22 +28,33 @@ function CB_elionAvatar(sz) {
   }}, 'E');
 }
 
-// ── Inline markdown: **bold**, `code`, *italic* ───────────────
+// ── Inline markdown: [link](url), **bold**, `code`, *italic* ─
 function CB_parseInline(text) {
   var result = [];
   var remaining = String(text || '');
   var kn = 0;
+  // Groups: 1=link-text 2=link-url 3=bold 4=code 5=italic
   while (remaining.length > 0) {
-    var m = /\*\*(.+?)\*\*|`([^`]+)`|\*([^*\n]+)\*/.exec(remaining);
+    var m = /\[([^\]]+)\]\(([^)]+)\)|\*\*(.+?)\*\*|`([^`]+)`|\*([^*\n]+)\*/.exec(remaining);
     if (!m) { if (remaining) result.push(remaining); break; }
     if (m.index > 0) result.push(remaining.slice(0, m.index));
-    if (m[1] !== undefined)
-      result.push(e('strong', { key:'ck'+(kn++), style:{fontWeight:700} }, m[1]));
-    else if (m[2] !== undefined)
-      result.push(e('code', { key:'ck'+(kn++), style:{background:'rgba(255,255,255,.1)',padding:'1px 4px',borderRadius:3,fontFamily:'monospace',fontSize:'0.9em'} }, m[2]));
-    else if (m[3] !== undefined)
-      result.push(e('em', { key:'ck'+(kn++), style:{fontStyle:'italic'} }, m[3]));
-    else result.push(m[0]);
+    if (m[1] !== undefined) {
+      // Link — use IIFE to capture href/label per iteration
+      (function(href, label, key) {
+        if (href.indexOf('#') === 0) {
+          var route = href.slice(1);
+          result.push(e('span', { key:key, onClick:function() { if (window.CB_go) window.CB_go(route); }, style:{ color:C.ac, cursor:'pointer', textDecoration:'underline' } }, label));
+        } else {
+          result.push(e('a', { key:key, href:href, target:'_blank', rel:'noopener', style:{ color:C.ac2, textDecoration:'underline' } }, label));
+        }
+      })(m[2], m[1], 'ck'+(kn++));
+    } else if (m[3] !== undefined) {
+      result.push(e('strong', { key:'ck'+(kn++), style:{fontWeight:700} }, m[3]));
+    } else if (m[4] !== undefined) {
+      result.push(e('code', { key:'ck'+(kn++), style:{background:'rgba(255,255,255,.1)',padding:'1px 4px',borderRadius:3,fontFamily:'monospace',fontSize:'0.9em'} }, m[4]));
+    } else if (m[5] !== undefined) {
+      result.push(e('em', { key:'ck'+(kn++), style:{fontStyle:'italic'} }, m[5]));
+    } else result.push(m[0]);
     remaining = remaining.slice(m.index + m[0].length);
   }
   return result;
@@ -57,25 +68,78 @@ function CB_renderMarkdown(text) {
   var kn = 0;
   while (i < lines.length) {
     var line = lines[i];
+
+    // Code block
     if (/^\s*```/.test(line)) {
       var codeLines = [];
       i++;
       while (i < lines.length && !/^\s*```/.test(lines[i])) { codeLines.push(lines[i]); i++; }
-      elems.push(e('pre', { key:'mk'+(kn++), style:{ background:'rgba(0,0,0,.35)', borderRadius:6, padding:'8px 10px', fontSize:11, fontFamily:'monospace', overflowX:'auto', margin:'6px 0', color:'#e2e8f0', whiteSpace:'pre-wrap', wordBreak:'break-all' } }, codeLines.join('\n')));
+      elems.push(e('pre', { key:'mk'+(kn++), style:{ background:'#0a0e1f', border:'1px solid '+C.bd, borderRadius:8, padding:12, fontSize:12, fontFamily:'monospace', overflowX:'auto', margin:'8px 0', color:'#e2e8f0', whiteSpace:'pre-wrap', wordBreak:'break-all' } }, codeLines.join('\n')));
       i++; continue;
     }
+
+    // Headers
     if (line.indexOf('### ') === 0) {
-      elems.push(e('div', { key:'mk'+(kn++), style:{ color:C.ac, fontSize:13, fontWeight:700, margin:'8px 0 3px' } }, e('span', null, CB_parseInline(line.slice(4)))));
+      elems.push(e('div', { key:'mk'+(kn++), style:{ color:C.ac2, fontSize:14, fontWeight:600, marginTop:12, marginBottom:6 } }, e('span', null, CB_parseInline(line.slice(4)))));
       i++; continue;
     }
     if (line.indexOf('## ') === 0) {
-      elems.push(e('div', { key:'mk'+(kn++), style:{ color:C.ac, fontSize:14, fontWeight:700, margin:'10px 0 4px' } }, e('span', null, CB_parseInline(line.slice(3)))));
+      elems.push(e('div', { key:'mk'+(kn++), style:{ color:C.ac, fontSize:16, fontWeight:700, marginTop:16, marginBottom:8 } }, e('span', null, CB_parseInline(line.slice(3)))));
       i++; continue;
     }
     if (line.indexOf('# ') === 0) {
-      elems.push(e('div', { key:'mk'+(kn++), style:{ color:C.ac, fontSize:16, fontWeight:700, margin:'10px 0 5px' } }, e('span', null, CB_parseInline(line.slice(2)))));
+      elems.push(e('div', { key:'mk'+(kn++), style:{ color:C.ac, fontSize:18, fontWeight:700, marginTop:16, marginBottom:8 } }, e('span', null, CB_parseInline(line.slice(2)))));
       i++; continue;
     }
+
+    // Horizontal rule
+    if (/^\s*---+\s*$/.test(line) || /^\s*\*\*\*+\s*$/.test(line)) {
+      elems.push(e('hr', { key:'mk'+(kn++), style:{ border:0, borderTop:'1px solid '+C.bd, margin:'12px 0' } }));
+      i++; continue;
+    }
+
+    // Table: first line has | and next line is a separator |---|---|
+    if (line.indexOf('|') !== -1 && i+1 < lines.length && /^\s*\|[\s|:=-]+\|\s*$/.test(lines[i+1])) {
+      var headerCells = line.split('|').filter(function(c) { return c.trim() !== ''; }).map(function(c) { return c.trim(); });
+      i += 2; // skip header + separator
+      var tableRows = [];
+      while (i < lines.length && lines[i].indexOf('|') !== -1) { tableRows.push(lines[i]); i++; }
+      elems.push(e('div', { key:'mk'+(kn++), style:{ overflowX:'auto', margin:'8px 0' } },
+        e('table', { style:{ borderCollapse:'collapse', width:'100%', fontSize:12 } },
+          e('thead', null, e('tr', null,
+            headerCells.map(function(hc, hi) {
+              return e('th', { key:hi, style:{ padding:'8px', borderBottom:'2px solid '+C.ac, textAlign:'left', color:C.ac, fontWeight:700 } }, hc);
+            })
+          )),
+          e('tbody', null,
+            tableRows.map(function(row, ri) {
+              var cells = row.split('|').filter(function(c) { return c.trim() !== ''; }).map(function(c) { return c.trim(); });
+              return e('tr', { key:ri },
+                cells.map(function(cell, ci) {
+                  return e('td', { key:ci, style:{ padding:'8px', borderBottom:'1px solid '+C.bd, fontSize:13 } }, e('span', null, CB_parseInline(cell)));
+                })
+              );
+            })
+          )
+        )
+      ));
+      continue;
+    }
+
+    // Callout blocks (⚠️ warning, 💡 tip, 🚨 critical)
+    var calloutStyle = null;
+    if (line.indexOf('⚠') === 0)
+      calloutStyle = { background:'rgba(245,158,11,.1)', borderLeft:'3px solid #fbbf24', padding:'8px 12px', borderRadius:6, margin:'4px 0' };
+    else if (line.indexOf('💡') === 0)
+      calloutStyle = { background:'rgba(52,211,153,.1)', borderLeft:'3px solid #34d399', padding:'8px 12px', borderRadius:6, margin:'4px 0' };
+    else if (line.indexOf('🚨') === 0)
+      calloutStyle = { background:'rgba(239,68,68,.08)', borderLeft:'3px solid #ef4444', padding:'8px 12px', borderRadius:6, margin:'4px 0' };
+    if (calloutStyle) {
+      elems.push(e('div', { key:'mk'+(kn++), style:calloutStyle }, e('span', null, CB_parseInline(line))));
+      i++; continue;
+    }
+
+    // List items
     if (line.indexOf('- ') === 0 || line.indexOf('* ') === 0) {
       elems.push(e('div', { key:'mk'+(kn++), style:{ display:'flex', gap:'6px', margin:'2px 0', alignItems:'flex-start' } },
         e('span', { style:{ color:C.ac, flexShrink:0, marginTop:2, fontSize:12 } }, '•'),
@@ -83,10 +147,14 @@ function CB_renderMarkdown(text) {
       ));
       i++; continue;
     }
+
+    // Empty line → spacer
     if (!line.trim()) {
       elems.push(e('div', { key:'mk'+(kn++), style:{ height:6 } }));
       i++; continue;
     }
+
+    // Normal paragraph
     elems.push(e('p', { key:'mk'+(kn++), style:{ margin:'2px 0', lineHeight:1.55 } }, e('span', null, CB_parseInline(line))));
     i++;
   }
@@ -129,6 +197,13 @@ function ChatBot(props) {
       CB_styleInjected = true;
     }
   }, []);
+
+  // ── Scroll lock when panel is fullscreen or on mobile ──
+  useEffect(function() {
+    var locked = CB_open && (CB_fullscreen || !CB_isDesktop);
+    document.body.style.overflow = locked ? 'hidden' : '';
+    return function() { document.body.style.overflow = ''; };
+  }, [CB_open, CB_fullscreen, CB_isDesktop]);
 
   // ── Auth + viewport resize ──
   useEffect(function() {
