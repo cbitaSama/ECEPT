@@ -15956,7 +15956,7 @@ function DeckDetailView(props){
       var insRes=await window.ECEPT_SUPABASE.from('flashcards').insert({
         deck_id:targetDeckId,user_id:user.id,is_official:false,
         card_type:DD_copyCard.card_type,front:DD_copyCard.front,
-        back:DD_copyCard.back,tags:DD_copyCard.tags||[]
+        back:DD_copyCard.back,tags:[]
       });
       if(insRes.error) throw insRes.error;
       DD_setCopyCard(null);
