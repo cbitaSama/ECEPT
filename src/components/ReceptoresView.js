@@ -22,6 +22,11 @@ function ReceptoresView(){
     try{window.scrollTo({top:0,behavior:'smooth'})}catch(err){}
   }
 
+  useEffect(function(){
+    window._receptorFocus=function(subId){changeFamily(subId);};
+    return function(){window._receptorFocus=null;};
+  },[]);
+
   function answerQuiz(qi,oi){
     if(quizAns[qi]!==undefined) return;
     var newAns={};

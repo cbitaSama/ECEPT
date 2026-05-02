@@ -33,7 +33,12 @@ const SYSTEM_PROMPT =
   '#epid (Epidemiología), #triadas (Tríadas y Síndromes), #labs (Laboratorios), #fisio (Fisiología), ' +
   '#receptores (Receptores celulares), #mediadores (Mediadores inflamación), #coagulacion (Coagulación), ' +
   '#salud_mental (Psiquiatría), #emergen_menu (Emergenciología), #trauma-u1 (Trauma), #vocabulario (Vocabulario médico), #flashcards (Flashcards).\n' +
-  'Solo incluí el link si el módulo es directamente relevante. Un link máximo por respuesta.';
+  'Solo incluí el link si el módulo es directamente relevante. Un link máximo por respuesta.\n' +
+  'Para subsecciones específicas usá el formato [texto](#modulo/subseccion). ' +
+  'Ejemplos: [Receptores adrenérgicos](#receptores/adr), [Receptores muscarínicos](#receptores/musc), ' +
+  '[Receptores dopaminérgicos](#receptores/dop), [Citocinas](#mediadores/citok), ' +
+  '[Eicosanoides](#mediadores/eico), [Complemento](#mediadores/comp), ' +
+  '[Coagulación](#labs/coag), [Hemograma](#labs/hemo).';
 
 const VALID_MIMES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
 const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;

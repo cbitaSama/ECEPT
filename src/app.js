@@ -87,7 +87,26 @@ function App(){
     },120);
   },[vista,cs,cd,vi]);
   // Expose go() to ChatBot (and any other window-scoped caller).
-  useEffect(function(){ window.CB_go=go; },[go]);
+  // Supports "modId/subId" format for granular deeplinks.
+  useEffect(function(){
+    window.CB_go=function(target){
+      var parts=target.split('/');
+      var modId=parts[0];
+      var subId=parts[1]||null;
+      go(modId);
+      if(subId){
+        setTimeout(function(){
+          if(modId==='receptores'&&window._receptorFocus) window._receptorFocus(subId);
+          else if(modId==='mediadores'&&window._medFocus) window._medFocus(subId);
+          else if(modId==='labs'&&window._labFocus) window._labFocus(subId);
+          else if(modId==='salud_mental'&&window._smFocus) window._smFocus(subId);
+        },300);
+      }
+    };
+  },[go]);
+  useEffect(function(){
+    window._labFocus=function(secId){setAbdOpen(secId);};
+  },[]);
 
   var goBack=useCallback(function(){
     if(hist.length>0){

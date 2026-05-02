@@ -212,6 +212,11 @@ function MediadoresView(){
   var _q=useState(""),q=_q[0],setQ=_q[1];
   var _o=useState(null),open=_o[0],setOpen=_o[1];
 
+  useEffect(function(){
+    window._medFocus=function(subId){setFam(subId);setOpen(null);try{window.scrollTo({top:0,behavior:'smooth'});}catch(e2){}};
+    return function(){window._medFocus=null;};
+  },[]);
+
   var filtered=useMemo(function(){
     var l=q.toLowerCase();
     return MED_LIST.filter(function(m){

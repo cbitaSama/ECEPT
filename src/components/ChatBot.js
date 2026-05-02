@@ -22,10 +22,10 @@ var CB_styleInjected = false;
 function CB_elionAvatar(sz) {
   return e('div', { style:{
     width:sz+'px', height:sz+'px', flexShrink:0, borderRadius:'50%',
-    background:'linear-gradient(135deg,#60a5fa,#a78bfa)',
+    background:'rgba(59,130,246,.15)', border:'1px solid rgba(59,130,246,.3)',
     display:'flex', alignItems:'center', justifyContent:'center',
-    fontSize:Math.round(sz*0.46)+'px', fontWeight:700, color:'#fff', userSelect:'none'
-  }}, 'E');
+    fontSize:Math.round(sz*0.52)+'px', userSelect:'none'
+  }}, '🧬');
 }
 
 // ── Inline markdown: [link](url), **bold**, `code`, *italic* ─
@@ -39,11 +39,14 @@ function CB_parseInline(text) {
     if (!m) { if (remaining) result.push(remaining); break; }
     if (m.index > 0) result.push(remaining.slice(0, m.index));
     if (m[1] !== undefined) {
-      // Link — use IIFE to capture href/label per iteration
+      // Link — IIFE captures href/label per iteration
       (function(href, label, key) {
         if (href.indexOf('#') === 0) {
           var route = href.slice(1);
-          result.push(e('span', { key:key, onClick:function() { if (window.CB_go) window.CB_go(route); }, style:{ color:C.ac, cursor:'pointer', textDecoration:'underline' } }, label));
+          result.push(e('span', { key:key, onClick:function() {
+            if (window.CB_go) window.CB_go(route);
+            if (window._CB_closePanel) window._CB_closePanel();
+          }, style:{ color:C.ac, cursor:'pointer', textDecoration:'underline' } }, label));
         } else {
           result.push(e('a', { key:key, href:href, target:'_blank', rel:'noopener', style:{ color:C.ac2, textDecoration:'underline' } }, label));
         }
@@ -98,10 +101,10 @@ function CB_renderMarkdown(text) {
       i++; continue;
     }
 
-    // Table: first line has | and next line is a separator |---|---|
+    // Table
     if (line.indexOf('|') !== -1 && i+1 < lines.length && /^\s*\|[\s|:=-]+\|\s*$/.test(lines[i+1])) {
       var headerCells = line.split('|').filter(function(c) { return c.trim() !== ''; }).map(function(c) { return c.trim(); });
-      i += 2; // skip header + separator
+      i += 2;
       var tableRows = [];
       while (i < lines.length && lines[i].indexOf('|') !== -1) { tableRows.push(lines[i]); i++; }
       elems.push(e('div', { key:'mk'+(kn++), style:{ overflowX:'auto', margin:'8px 0' } },
@@ -126,7 +129,7 @@ function CB_renderMarkdown(text) {
       continue;
     }
 
-    // Callout blocks (⚠️ warning, 💡 tip, 🚨 critical)
+    // Callout blocks
     var calloutStyle = null;
     if (line.indexOf('⚠') === 0)
       calloutStyle = { background:'rgba(245,158,11,.1)', borderLeft:'3px solid #fbbf24', padding:'8px 12px', borderRadius:6, margin:'4px 0' };
@@ -148,7 +151,7 @@ function CB_renderMarkdown(text) {
       i++; continue;
     }
 
-    // Empty line → spacer
+    // Empty line
     if (!line.trim()) {
       elems.push(e('div', { key:'mk'+(kn++), style:{ height:6 } }));
       i++; continue;
@@ -180,6 +183,7 @@ function ChatBot(props) {
   s=useState('gemini-2.5-flash-lite');   var CB_selectedModel=s[0],   CB_setSelectedModel=s[1];
   s=useState([]);                        var CB_pendingFiles=s[0],    CB_setPendingFiles=s[1];
   s=useState(false);                     var CB_showPicker=s[0],      CB_setShowPicker=s[1];
+  s=useState(false);                     var CB_inputFocused=s[0],    CB_setInputFocused=s[1];
 
   var CB_scrollRef = useRef(null);
   var CB_inputRef  = useRef(null);
@@ -190,8 +194,8 @@ function ChatBot(props) {
       var st = document.createElement('style');
       st.textContent =
         '@keyframes CB_dotBounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}' +
-        '@keyframes CB_slideInLeft{from{transform:translateX(-100%)}to{transform:translateX(0)}}' +
-        '@keyframes CB_slideInUp{from{transform:translateY(100%)}to{transform:translateY(0)}}' +
+        '@keyframes CB_panelIn{from{opacity:0;transform:translateX(-30px) scale(0.97)}to{opacity:1;transform:translateX(0) scale(1)}}' +
+        '@keyframes CB_panelInMobile{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}' +
         '@keyframes CB_spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}';
       document.head.appendChild(st);
       CB_styleInjected = true;
@@ -204,6 +208,37 @@ function ChatBot(props) {
     document.body.style.overflow = locked ? 'hidden' : '';
     return function() { document.body.style.overflow = ''; };
   }, [CB_open, CB_fullscreen, CB_isDesktop]);
+
+  // ── iPad keyboard fix (visualViewport) ──
+  useEffect(function() {
+    if (!CB_open || !window.visualViewport) return;
+    function CB_handleViewport() {
+      var vv = window.visualViewport;
+      var panel = document.getElementById('CB_panel');
+      if (!panel) return;
+      if (CB_isDesktop && !CB_fullscreen) {
+        var kbHeight = window.innerHeight - vv.height;
+        panel.style.bottom = (16 + kbHeight) + 'px';
+      } else {
+        panel.style.height = vv.height + 'px';
+      }
+    }
+    window.visualViewport.addEventListener('resize', CB_handleViewport);
+    window.visualViewport.addEventListener('scroll', CB_handleViewport);
+    CB_handleViewport();
+    return function() {
+      window.visualViewport.removeEventListener('resize', CB_handleViewport);
+      window.visualViewport.removeEventListener('scroll', CB_handleViewport);
+      var panel = document.getElementById('CB_panel');
+      if (panel) { panel.style.bottom = ''; panel.style.height = ''; }
+    };
+  }, [CB_open, CB_isDesktop, CB_fullscreen]);
+
+  // ── Expose close handler for deeplink auto-close ──
+  useEffect(function() {
+    window._CB_closePanel = function() { CB_setOpen(false); CB_setFullscreen(false); };
+    return function() { window._CB_closePanel = null; };
+  }, [CB_setOpen, CB_setFullscreen]);
 
   // ── Auth + viewport resize ──
   useEffect(function() {
@@ -271,7 +306,6 @@ function ChatBot(props) {
         method:'POST',
         headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
         body:JSON.stringify({ messages:history, model:CB_selectedModel })
-        // attachments: CB_pendingFiles — TODO commit B
       });
       var data = await res.json();
 
@@ -299,18 +333,26 @@ function ChatBot(props) {
   for (var cmIdx = 0; cmIdx < CB_MODELS.length; cmIdx++) {
     if (CB_MODELS[cmIdx].id === CB_selectedModel) { currentModel = CB_MODELS[cmIdx]; break; }
   }
-  var modelLabel  = currentModel ? (currentModel.icon+' '+currentModel.name) : CB_selectedModel;
-  var quotaStr    = CB_quota ? (CB_quota.dailyUsed+'/'+CB_quota.dailyLimit) : '—';
+  var modelLabel   = currentModel ? (currentModel.icon+' '+currentModel.name) : CB_selectedModel;
+  var quotaStr     = CB_quota ? (CB_quota.dailyUsed+'/'+CB_quota.dailyLimit) : '—';
   var quickPrompts = ['Explicame los betabloqueantes','DDx de dolor torácico','Resumen de cetoacidosis diabética'];
 
   var panelStyle;
   if (isMobile) {
-    panelStyle = { position:'fixed', inset:0, background:C.bg, zIndex:9999, display:'flex', flexDirection:'column', animation:'CB_slideInUp 250ms ease-out' };
+    panelStyle = { position:'fixed', inset:0, background:C.bg, zIndex:9999, display:'flex', flexDirection:'column', overflow:'hidden', animation:'CB_panelInMobile 280ms cubic-bezier(0.32,0.72,0,1)' };
   } else if (CB_fullscreen) {
-    panelStyle = { position:'fixed', inset:0, background:C.bg, zIndex:9999, display:'flex', flexDirection:'row', animation:'CB_slideInLeft 250ms ease-out' };
+    panelStyle = { position:'fixed', inset:0, background:C.bg, zIndex:9999, display:'flex', flexDirection:'row', overflow:'hidden', animation:'CB_panelIn 280ms cubic-bezier(0.32,0.72,0,1)' };
   } else {
-    panelStyle = { position:'fixed', left:0, top:0, bottom:0, width:'420px', background:C.bg, borderRight:'1px solid '+C.bd, zIndex:9999, display:'flex', flexDirection:'column', animation:'CB_slideInLeft 250ms ease-out' };
+    panelStyle = { position:'fixed', top:16, left:16, bottom:16, width:'440px', borderRadius:20, background:'linear-gradient(180deg,#0d1224 0%,#060a14 100%)', border:'1px solid rgba(59,130,246,.25)', boxShadow:'0 20px 60px rgba(0,0,0,.6),0 0 0 1px rgba(59,130,246,.1) inset', zIndex:9999, display:'flex', flexDirection:'column', overflow:'hidden', animation:'CB_panelIn 280ms cubic-bezier(0.32,0.72,0,1)' };
   }
+
+  var inputContainerStyle = {
+    display:'flex', alignItems:'flex-end', gap:8,
+    background:C.cd, border:'1px solid '+(CB_inputFocused?'rgba(59,130,246,.4)':C.bd),
+    borderRadius:14, padding:'6px 8px 6px 12px',
+    transition:'border-color .2s,box-shadow .2s',
+    boxShadow:CB_inputFocused?'0 0 0 3px rgba(59,130,246,.1)':'none'
+  };
 
   return e('div', null,
 
@@ -324,14 +366,14 @@ function ChatBot(props) {
       style:{ position:'fixed', bottom:20, right:20, width:52, height:52, minWidth:44, minHeight:44, borderRadius:'50%', background:'linear-gradient(135deg,#60a5fa,#a78bfa)', border:'none', color:'#fff', fontSize:20, cursor:'pointer', boxShadow:'0 4px 20px rgba(96,165,250,.45)', zIndex:95, display:'flex', alignItems:'center', justifyContent:'center' }
     }, '🧬'),
 
-    // ── Backdrop (mobile / fullscreen) ──
+    // ── Backdrop (mobile / fullscreen only) ──
     CB_open && (isMobile || CB_fullscreen) && e('div', {
       onClick: function() { CB_setOpen(false); CB_setFullscreen(false); },
       style:{ position:'fixed', inset:0, background:'rgba(0,0,0,.6)', zIndex:9998 }
     }),
 
     // ── Panel ──
-    CB_open && e('div', { style:panelStyle },
+    CB_open && e('div', { id:'CB_panel', style:panelStyle },
 
       // Sidebar (desktop fullscreen only)
       CB_isDesktop && CB_fullscreen && e('div', {
@@ -342,11 +384,11 @@ function ChatBot(props) {
       e('div', { style:{ flex:1, display:'flex', flexDirection:'column', minWidth:0, overflow:'hidden' } },
 
         // ── Header ──
-        e('div', { style:{ padding:'12px 16px', borderBottom:'1px solid '+C.bd, display:'flex', alignItems:'center', justifyContent:'space-between', background:C.bg, flexShrink:0 } },
-          e('div', { style:{ display:'flex', alignItems:'center', gap:10, overflow:'hidden', minWidth:0 } },
-            CB_elionAvatar(32),
+        e('div', { style:{ padding:'18px 20px 16px', background:'linear-gradient(180deg,rgba(59,130,246,.08),transparent)', borderBottom:'1px solid rgba(59,130,246,.15)', display:'flex', alignItems:'center', justifyContent:'space-between', flexShrink:0 } },
+          e('div', { style:{ display:'flex', alignItems:'center', gap:12, overflow:'hidden', minWidth:0 } },
+            e('div', { style:{ width:36, height:36, borderRadius:'50%', background:'rgba(59,130,246,.15)', border:'1px solid rgba(59,130,246,.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, flexShrink:0 } }, '🧬'),
             e('div', { style:{ display:'flex', flexDirection:'column', gap:2, overflow:'hidden' } },
-              e('div', { style:{ fontWeight:700, color:C.tx, fontSize:16, lineHeight:'1.2' } }, 'Elion'),
+              e('div', { style:{ fontWeight:700, fontSize:16, lineHeight:'1.2', background:'linear-gradient(135deg,#60a5fa,#a78bfa)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' } }, 'Elion'),
               e('div', {
                 onClick: function() { CB_setShowPicker(true); },
                 style:{ fontSize:11, color:C.mt, lineHeight:'1.2', cursor:'pointer', display:'flex', gap:5, alignItems:'center', flexWrap:'wrap' }
@@ -390,21 +432,21 @@ function ChatBot(props) {
             )
           : e(F, null,
               // Messages scroll area
-              e('div', { ref:CB_scrollRef, style:{ flex:1, overflowY:'auto', padding:16, display:'flex', flexDirection:'column', gap:12 } },
+              e('div', { ref:CB_scrollRef, style:{ flex:1, overflowY:'auto', padding:16, display:'flex', flexDirection:'column', gap:14 } },
 
                 // Empty state
                 CB_msgs.length === 0 && !CB_loading && e('div', {
                   style:{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flex:1, gap:14, minHeight:200, paddingTop:20 }
                 },
-                  e('div', { style:{ fontSize:44 } }, '🧬'),
-                  e('div', { style:{ color:C.tx, fontWeight:700, fontSize:18 } }, 'Hola, soy Elion'),
+                  e('div', { style:{ width:64, height:64, borderRadius:'50%', background:'rgba(59,130,246,.12)', border:'1px solid rgba(59,130,246,.25)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:30, boxShadow:'0 0 40px rgba(59,130,246,.3)' } }, '🧬'),
+                  e('div', { style:{ fontWeight:700, fontSize:20, background:'linear-gradient(135deg,#60a5fa,#a78bfa)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' } }, 'Hola, soy Elion'),
                   e('div', { style:{ color:C.mt, fontSize:13 } }, '¿Con qué te ayudo hoy?'),
                   e('div', { style:{ display:'flex', flexDirection:'column', gap:8, width:'100%', maxWidth:300, marginTop:4 } },
                     quickPrompts.map(function(qp, qi) {
                       return e('button', {
                         key:qi,
                         onClick: function() { CB_setInput(qp); if (CB_inputRef.current) CB_inputRef.current.focus(); },
-                        style:{ minHeight:44, padding:'10px 14px', borderRadius:10, background:'rgba(59,130,246,.08)', border:'1px solid rgba(59,130,246,.2)', color:C.tx, fontSize:13, cursor:'pointer', textAlign:'left', lineHeight:1.4 }
+                        style:{ minHeight:44, padding:'12px 14px', borderRadius:12, background:C.cd, border:'1px solid '+C.bd, color:C.tx, fontSize:13, cursor:'pointer', textAlign:'left', lineHeight:1.4, transition:'border-color .2s,transform .2s' }
                       }, qp);
                     })
                   )
@@ -415,10 +457,10 @@ function ChatBot(props) {
                   var isUser = m.role === 'user';
                   return e('div', { key:i, style:{ display:'flex', flexDirection:'column', alignItems:isUser?'flex-end':'flex-start', gap:4 } },
                     isUser
-                      ? e('div', { style:{ maxWidth:'85%', padding:'12px 16px', borderRadius:'18px 18px 4px 18px', background:'rgba(59,130,246,.15)', border:'1px solid '+C.ac, color:C.tx, fontSize:13, lineHeight:1.55, wordBreak:'break-word', whiteSpace:'pre-wrap' } }, m.text)
+                      ? e('div', { style:{ maxWidth:'85%', padding:'14px 16px', borderRadius:'18px 18px 4px 18px', background:'linear-gradient(135deg,rgba(59,130,246,.18),rgba(96,165,250,.12))', border:'1px solid rgba(96,165,250,.25)', color:C.tx, fontSize:13, lineHeight:1.55, wordBreak:'break-word', whiteSpace:'pre-wrap' } }, m.text)
                       : e('div', { style:{ display:'flex', alignItems:'flex-start', gap:8, maxWidth:'92%' } },
                           CB_elionAvatar(28),
-                          e('div', { style:{ padding:'12px 16px', borderRadius:'4px 18px 18px 18px', background:m.error?'rgba(239,68,68,.08)':C.cd, border:'1px solid '+(m.error?'rgba(239,68,68,.25)':C.bd), color:m.error?'#ef4444':C.tx, fontSize:13, lineHeight:1.55, wordBreak:'break-word' } },
+                          e('div', { style:{ padding:'14px 16px', borderRadius:'4px 18px 18px 18px', background:m.error?'rgba(239,68,68,.08)':'#0d1224', border:'1px solid '+(m.error?'rgba(239,68,68,.25)':'#1a2040'), boxShadow:m.error?'none':'0 2px 8px rgba(0,0,0,.2)', color:m.error?'#ef4444':C.tx, fontSize:13, lineHeight:1.55, wordBreak:'break-word' } },
                             m.error ? e('span', null, m.text) : CB_renderMarkdown(m.text)
                           )
                         )
@@ -428,7 +470,7 @@ function ChatBot(props) {
                 // Typing indicator
                 CB_loading && e('div', { style:{ display:'flex', alignItems:'flex-start', gap:8 } },
                   CB_elionAvatar(28),
-                  e('div', { style:{ padding:'12px 16px', borderRadius:'4px 18px 18px 18px', background:C.cd, border:'1px solid '+C.bd, display:'flex', alignItems:'center', gap:5 } },
+                  e('div', { style:{ padding:'14px 16px', borderRadius:'4px 18px 18px 18px', background:'#0d1224', border:'1px solid #1a2040', display:'flex', alignItems:'center', gap:5 } },
                     e('span', { style:{ display:'inline-block', fontSize:8, color:C.dm, animation:'CB_dotBounce .8s ease-in-out infinite', animationDelay:'0s' } }, '●'),
                     e('span', { style:{ display:'inline-block', fontSize:8, color:C.dm, animation:'CB_dotBounce .8s ease-in-out infinite', animationDelay:'.15s' } }, '●'),
                     e('span', { style:{ display:'inline-block', fontSize:8, color:C.dm, animation:'CB_dotBounce .8s ease-in-out infinite', animationDelay:'.3s' } }, '●')
@@ -436,16 +478,18 @@ function ChatBot(props) {
                 )
               ),
 
-              // ── Input bar ──
-              e('div', { style:{ padding:'10px 12px', borderTop:'1px solid '+C.bd, background:C.bg, flexShrink:0 } },
-                e('div', { style:{ display:'flex', alignItems:'flex-end', gap:8 } },
+              // ── Input bar (capsule design) ──
+              e('div', { style:{ padding:'12px 14px', borderTop:'1px solid rgba(59,130,246,.1)', background:C.bg, flexShrink:0 } },
+                e('div', { style:inputContainerStyle },
                   e('button', {
                     disabled:true, title:'Próximamente',
-                    style:{ minWidth:44, minHeight:44, flexShrink:0, background:'rgba(255,255,255,.04)', border:'1px solid '+C.bd, borderRadius:10, color:C.mt, fontSize:16, cursor:'not-allowed', display:'flex', alignItems:'center', justifyContent:'center', opacity:0.5 }
+                    style:{ width:32, height:32, flexShrink:0, background:'none', border:'none', color:C.mt, fontSize:16, cursor:'not-allowed', display:'flex', alignItems:'center', justifyContent:'center', opacity:0.4, padding:0 }
                   }, '📎'),
                   e('textarea', {
                     ref:CB_inputRef,
                     value:CB_input, rows:1,
+                    onFocus: function() { CB_setInputFocused(true); },
+                    onBlur:  function() { CB_setInputFocused(false); },
                     onChange:function(ev) {
                       CB_setInput(ev.target.value);
                       ev.target.style.height='auto';
@@ -454,14 +498,15 @@ function ChatBot(props) {
                     onKeyDown:function(ev) { if (ev.key==='Enter'&&!ev.shiftKey) { ev.preventDefault(); CB_send(); } },
                     placeholder:'Escribe tu mensaje...',
                     disabled:CB_loading,
+                    enterKeyHint:'send',
                     'aria-label':'Mensaje',
-                    style:{ flex:1, minHeight:44, maxHeight:96, padding:'11px 12px', borderRadius:10, border:'1px solid '+C.bd, background:C.cd, color:C.tx, fontSize:14, outline:'none', resize:'none', lineHeight:'1.4', fontFamily:'inherit', overflowY:'auto' }
+                    style:{ flex:1, minHeight:36, maxHeight:96, padding:'8px 4px', border:'none', background:'transparent', color:C.tx, fontSize:14, outline:'none', resize:'none', lineHeight:'1.4', fontFamily:'inherit', overflowY:'auto' }
                   }),
                   e('button', {
                     onClick:CB_send,
                     disabled:CB_loading||(!CB_input.trim()&&CB_pendingFiles.length===0),
                     'aria-label':CB_loading?'Cargando':'Enviar',
-                    style:{ minWidth:44, minHeight:44, flexShrink:0, padding:'0 14px', borderRadius:10, background:(CB_loading||(!CB_input.trim()&&CB_pendingFiles.length===0))?C.dm:C.ac, color:'#fff', border:'none', cursor:(CB_loading||(!CB_input.trim()&&CB_pendingFiles.length===0))?'default':'pointer', fontSize:16, fontWeight:700, display:'flex', alignItems:'center', justifyContent:'center' }
+                    style:{ width:36, height:36, flexShrink:0, borderRadius:10, border:'none', background:(CB_loading||(!CB_input.trim()&&CB_pendingFiles.length===0))?'#1a2040':C.ac, color:'#fff', cursor:(CB_loading||(!CB_input.trim()&&CB_pendingFiles.length===0))?'default':'pointer', fontSize:14, fontWeight:700, display:'flex', alignItems:'center', justifyContent:'center', transition:'background .2s', padding:0 }
                   }, CB_loading
                     ? e('span', { style:{ display:'inline-block', animation:'CB_spin .8s linear infinite' } }, '⟳')
                     : '➤'
