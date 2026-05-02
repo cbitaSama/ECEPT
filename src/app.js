@@ -217,7 +217,9 @@ function App(){
   }
 
   // ═══ RENDER ═══
-  return e("div",{style:{background:C.bg,minHeight:"100vh",fontFamily:"'DM Sans',sans-serif",color:C.tx}},
+  return e("div",{style:{background:C.bg,minHeight:"100vh",fontFamily:"'Inter','DM Sans',sans-serif",color:C.tx}},
+    // Toast host (montado una sola vez)
+    typeof ToastHost === 'function' && e(ToastHost),
     // HEADER
     e("div",{style:{background:"linear-gradient(180deg,rgba(13,18,36,.98),rgba(6,10,20,.95))",borderBottom:"1px solid "+C.bd,padding:"12px 16px",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)"}},
       e("div",{style:{maxWidth:"900px",margin:"0 auto",display:"flex",alignItems:"center",gap:"10px"}},

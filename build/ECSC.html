@@ -14221,6 +14221,233 @@ function InfoLayer(props) {
 window.InfoLayer = InfoLayer;
 
 // ══════════════════════════════════════════════════════════════
+// Toast — sistema de notificaciones premium ECEPT
+// ══════════════════════════════════════════════════════════════
+// API:
+//   showToast({ message, variant, duration })
+//   variant: 'success' | 'error' | 'info' | 'warning' | 'premium'
+//
+// Uso:
+//   window.ECEPT_toast('Guardado ✓', 'success')
+//   window.ECEPT_toast('Error de red', 'error')
+//
+// El componente <ToastHost /> debe montarse una sola vez en App.
+// ══════════════════════════════════════════════════════════════
+
+var ECEPT_TOASTS = [];
+var ECEPT_TOAST_LISTENERS = [];
+var ECEPT_TOAST_NEXT_ID = 1;
+
+function ECEPT_toast_emit() {
+  for (var i = 0; i < ECEPT_TOAST_LISTENERS.length; i++) {
+    try { ECEPT_TOAST_LISTENERS[i](); } catch (e2) {}
+  }
+}
+
+window.ECEPT_toast = function(message, variant, duration) {
+  var id = ECEPT_TOAST_NEXT_ID++;
+  var v = variant || 'info';
+  var d = duration || (v === 'error' ? 8000 : 4000);
+  ECEPT_TOASTS.push({ id: id, message: message, variant: v, t: Date.now() });
+  ECEPT_toast_emit();
+  setTimeout(function() {
+    ECEPT_TOASTS = ECEPT_TOASTS.filter(function(t){ return t.id !== id; });
+    ECEPT_toast_emit();
+  }, d);
+  return id;
+};
+
+function ToastHost() {
+  var p = T;
+  var s = useState(0);
+  var setTick = s[1];
+  useEffect(function() {
+    function onChange() { setTick(function(x){ return x + 1; }); }
+    ECEPT_TOAST_LISTENERS.push(onChange);
+    return function() {
+      ECEPT_TOAST_LISTENERS = ECEPT_TOAST_LISTENERS.filter(function(f){ return f !== onChange; });
+    };
+  }, []);
+
+  var variants = {
+    success: { color: p.color.success, icon: '✓', bg: 'rgba(52,211,153,0.10)' },
+    error:   { color: p.color.danger,  icon: '✕', bg: 'rgba(239,68,68,0.10)' },
+    info:    { color: p.color.primaryHi, icon: 'ℹ', bg: 'rgba(96,165,250,0.10)' },
+    warning: { color: p.color.warning, icon: '!', bg: 'rgba(251,191,36,0.10)' },
+    premium: { color: p.color.gold,    icon: '★', bg: 'rgba(251,191,36,0.10)' }
+  };
+
+  return e('div', {
+    style: {
+      position: 'fixed',
+      bottom: 24,
+      right: 24,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 8,
+      zIndex: p.z.toast,
+      pointerEvents: 'none',
+      maxWidth: 'calc(100vw - 48px)'
+    }
+  },
+    ECEPT_TOASTS.map(function(t) {
+      var v = variants[t.variant] || variants.info;
+      var isPremium = t.variant === 'premium';
+      return e('div', {
+        key: t.id,
+        style: {
+          background: 'rgba(17,23,58,0.92)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          border: '1px solid ' + p.color.bg4,
+          borderLeft: '3px solid ' + v.color,
+          borderRadius: p.radius.lg,
+          padding: '14px 18px',
+          maxWidth: 360,
+          minWidth: 240,
+          boxShadow: isPremium ? p.shadow.glow_premium : p.shadow.lg,
+          color: p.color.text,
+          fontSize: p.font.bodySm.size,
+          lineHeight: 1.5,
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: 10,
+          pointerEvents: 'auto',
+          animation: 'ecept_fadeSlideUp 320ms ' + p.ease.out
+        }
+      },
+        e('span', {
+          style: {
+            color: v.color,
+            fontWeight: 700,
+            fontSize: 14,
+            width: 20,
+            height: 20,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            marginTop: 1
+          }
+        }, v.icon),
+        e('span', { style: { flex: 1, wordBreak: 'break-word' } }, t.message)
+      );
+    })
+  );
+}
+
+window.ToastHost = ToastHost;
+
+// ══════════════════════════════════════════════════════════════
+// Button — sistema unificado de botones premium ECEPT
+// ══════════════════════════════════════════════════════════════
+// Props:
+//   variant: 'primary' | 'secondary' | 'ghost' | 'danger' | 'premium'
+//   size:    'sm' (32px) | 'md' (40px) | 'lg' (48px)
+//   icon:    string opcional (emoji o ReactElement)
+//   iconRight: boolean (icon a la derecha)
+//   loading: boolean
+//   disabled: boolean
+//   onClick: fn
+//   children: label
+// ══════════════════════════════════════════════════════════════
+
+function Button(props) {
+  var p = T;
+  var variant = props.variant || 'primary';
+  var size = props.size || 'md';
+  var disabled = props.disabled || props.loading;
+
+  var heights = { sm: 32, md: 40, lg: 48 };
+  var paddings = { sm: '0 12px', md: '0 18px', lg: '0 24px' };
+  var fontSizes = { sm: p.font.bodySm.size, md: p.font.body.size, lg: p.font.body.size };
+
+  var styles = {
+    primary: {
+      background: 'linear-gradient(135deg,#60a5fa,#a78bfa)',
+      color: '#fff',
+      border: 'none',
+      boxShadow: '0 4px 12px rgba(167,139,250,0.25)'
+    },
+    secondary: {
+      background: p.color.bg2,
+      color: p.color.text,
+      border: '1px solid ' + p.color.bg4,
+      boxShadow: 'none'
+    },
+    ghost: {
+      background: 'transparent',
+      color: p.color.textMuted,
+      border: '1px solid transparent',
+      boxShadow: 'none'
+    },
+    danger: {
+      background: 'rgba(239,68,68,0.12)',
+      color: p.color.danger,
+      border: '1px solid rgba(239,68,68,0.30)',
+      boxShadow: 'none'
+    },
+    premium: {
+      background: p.color.gradPremium,
+      color: '#0a0e1f',
+      border: 'none',
+      boxShadow: p.shadow.glow_premium
+    }
+  };
+  var st = styles[variant] || styles.primary;
+
+  return e('button', {
+    onClick: disabled ? undefined : props.onClick,
+    disabled: disabled,
+    'aria-label': props['aria-label'],
+    style: Object.assign({
+      height: heights[size],
+      minWidth: heights[size],
+      padding: paddings[size],
+      borderRadius: p.radius.lg,
+      fontSize: fontSizes[size],
+      fontWeight: 600,
+      letterSpacing: '-0.01em',
+      cursor: disabled ? 'not-allowed' : 'pointer',
+      opacity: disabled ? 0.55 : 1,
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      transition: 'transform 200ms ' + p.ease.standard + ', box-shadow 200ms ease-out, opacity 180ms ease',
+      flexShrink: 0
+    }, st),
+    onMouseEnter: function(ev) {
+      if (disabled) return;
+      if (variant === 'primary' || variant === 'premium') {
+        ev.currentTarget.style.transform = 'translateY(-1px)';
+      } else if (variant === 'ghost') {
+        ev.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+      } else if (variant === 'secondary') {
+        ev.currentTarget.style.borderColor = p.color.primaryHi;
+      } else if (variant === 'danger') {
+        ev.currentTarget.style.background = 'rgba(239,68,68,0.20)';
+      }
+    },
+    onMouseLeave: function(ev) {
+      if (disabled) return;
+      ev.currentTarget.style.transform = 'translateY(0)';
+      if (variant === 'ghost') ev.currentTarget.style.background = 'transparent';
+      if (variant === 'secondary') ev.currentTarget.style.borderColor = p.color.bg4;
+      if (variant === 'danger') ev.currentTarget.style.background = 'rgba(239,68,68,0.12)';
+    }
+  },
+    props.loading
+      ? e('span', { style: { animation: 'ecept_logoSpin 800ms linear infinite', display: 'inline-block' } }, '⟳')
+      : (props.icon && !props.iconRight ? e('span', null, props.icon) : null),
+    props.children && e('span', null, props.children),
+    !props.loading && props.icon && props.iconRight ? e('span', null, props.icon) : null
+  );
+}
+
+window.Button = Button;
+
+// ══════════════════════════════════════════════════════════════
 // CHATBOT — Elion AI assistant for ECEPT
 // ES5 estricto: solo declaraciones var y function. Nada de ES6+.
 // React.createElement vía alias global `e`. Sin JSX.
@@ -22129,7 +22356,9 @@ function App(){
   }
 
   // ═══ RENDER ═══
-  return e("div",{style:{background:C.bg,minHeight:"100vh",fontFamily:"'DM Sans',sans-serif",color:C.tx}},
+  return e("div",{style:{background:C.bg,minHeight:"100vh",fontFamily:"'Inter','DM Sans',sans-serif",color:C.tx}},
+    // Toast host (montado una sola vez)
+    typeof ToastHost === 'function' && e(ToastHost),
     // HEADER
     e("div",{style:{background:"linear-gradient(180deg,rgba(13,18,36,.98),rgba(6,10,20,.95))",borderBottom:"1px solid "+C.bd,padding:"12px 16px",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)"}},
       e("div",{style:{maxWidth:"900px",margin:"0 auto",display:"flex",alignItems:"center",gap:"10px"}},

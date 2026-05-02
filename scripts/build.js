@@ -104,6 +104,8 @@ var parts = [
   'src/components/HomeView.js',
   'src/components/ModuleShell.js',
   'src/components/Layered.js',
+  'src/components/Toast.js',
+  'src/components/Button.js',
   // chatbot (must come after App? no — function hoisted; keep with components)
   'src/components/ChatBot.js',
   // supabase client (reads window.__ECEPT_ENV; exposes window.ECEPT_SUPABASE)
@@ -187,6 +189,8 @@ var expectedGlobals = [
   'function HomeView', 'window.HomeView',
   'function ModuleShell', 'window.ModuleShell',
   'function CollapsibleSection', 'window.CollapsibleSection',
+  'function ToastHost', 'window.ToastHost', 'window.ECEPT_toast',
+  'function Button', 'window.Button',
   'function LayeredCard', 'window.LayeredCard',
   'function InfoLayer', 'window.InfoLayer',
   'function Detail', 'window.Detail',
