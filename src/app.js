@@ -186,31 +186,43 @@ function App(){
       {id:"hemato",ic:"🩸",n:"Hematología",d:"Hemostasia, eritropoyesis — Próximamente",col:"#dc2626",ready:false}
     ];
     var readyCount=topics.filter(function(t){return t.ready}).length;
-    return e("div",null,
-      e("div",{style:{marginBottom:"20px"}},
-        e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"24px",fontWeight:800,marginBottom:"4px",color:C.tx}},"🔬 Fisiología"),
-        e("p",{style:{fontSize:"13px",color:C.dm}},"Funcionamiento normal del cuerpo humano · "+readyCount+" tema"+(readyCount===1?"":"s")+" disponible"+(readyCount===1?"":"s"))
-      ),
-      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:"12px"}},
-        topics.map(function(t){
+    return e(ModuleShell,{
+      title:"Fisiología",
+      subtitle:"Funcionamiento normal del cuerpo humano · "+readyCount+" tema"+(readyCount===1?"":"s")+" disponible"+(readyCount===1?"":"s"),
+      icon:"🔬",
+      accent:"#ec4899"
+    },
+      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:"16px"}},
+        topics.map(function(t,ti){
           return e("div",{key:t.id,
             onClick:t.ready?function(){go(t.v)}:null,
             style:{
-              background:C.cd,
-              border:"1.5px solid "+(t.ready?t.col+"40":C.bd),
-              borderRadius:"14px",padding:"18px",
+              background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",
+              border:"1px solid "+(t.ready?t.col+"40":C.bd),
+              borderRadius:"16px",padding:"20px 22px",
               cursor:t.ready?"pointer":"default",
-              opacity:t.ready?1:0.55,
-              transition:"all .2s"}},
-            e("div",{style:{display:"flex",alignItems:"center",gap:"12px",marginBottom:"8px"}},
-              e("span",{style:{fontSize:"28px"}},t.ic),
-              e("div",{style:{flex:1}},
-                e("h3",{style:{fontSize:"15px",fontWeight:700,color:t.ready?t.col:C.mt,marginBottom:"2px"}},t.n),
-                t.ready&&e("span",{style:{fontSize:"9px",letterSpacing:"1.5px",textTransform:"uppercase",color:"#34d399",fontWeight:700}},"✓ Disponible")
+              opacity:t.ready?1:0.50,
+              minHeight:"150px",
+              display:"flex",
+              flexDirection:"column",
+              transition:"transform 240ms cubic-bezier(0.32,0.72,0,1),border-color 240ms cubic-bezier(0.32,0.72,0,1),box-shadow 240ms ease-out",
+              animation:"ecept_fadeSlideUp 480ms cubic-bezier(0.16,1,0.3,1) "+(ti*40+80)+"ms both",
+              boxSizing:"border-box"
+            },
+            onMouseEnter:t.ready?function(ev){ev.currentTarget.style.borderColor=t.col+"80";ev.currentTarget.style.transform="translateY(-2px)";ev.currentTarget.style.boxShadow="0 8px 24px rgba(0,0,0,0.30), 0 2px 8px rgba(0,0,0,0.20)";}:null,
+            onMouseLeave:t.ready?function(ev){ev.currentTarget.style.borderColor=t.col+"40";ev.currentTarget.style.transform="translateY(0)";ev.currentTarget.style.boxShadow="none";}:null
+          },
+            e("div",{style:{display:"flex",alignItems:"center",gap:"12px",marginBottom:"10px"}},
+              e("span",{style:{fontSize:"30px",width:"52px",height:"52px",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"14px",background:t.col+"14",border:"1px solid "+t.col+"24",flexShrink:0}},t.ic),
+              e("div",{style:{flex:1,minWidth:0}},
+                e("h3",{style:{fontSize:"16px",fontWeight:600,color:t.ready?C.tx:C.mt,letterSpacing:"-0.01em"}},t.n),
+                t.ready
+                  ?e("span",{style:{fontSize:"10px",letterSpacing:"0.10em",textTransform:"uppercase",color:"#34d399",fontWeight:700}},"✓ ACTIVO")
+                  :e("span",{style:{fontSize:"10px",letterSpacing:"0.10em",textTransform:"uppercase",color:C.dm,fontWeight:600}},"PRONTO")
               )
             ),
-            e("p",{style:{fontSize:"11.5px",color:C.dm,lineHeight:1.5}},t.d),
-            t.ready&&e("div",{style:{marginTop:"10px",fontSize:"12px",color:t.col,fontWeight:600}},"Abrir →")
+            e("p",{style:{fontSize:"13px",color:C.dm,lineHeight:1.5,flex:1}},t.d),
+            t.ready&&e("div",{style:{marginTop:"12px",fontSize:"12px",color:t.col,fontWeight:600,letterSpacing:"-0.01em"}},"Abrir →")
           )
         })
       )
@@ -417,7 +429,7 @@ function App(){
     // Vistas que usan ModuleShell o gestionan su propio ancho escapan del
     // wrapper de 900px. El resto mantiene wrapper estrecho para legibilidad
     // de prosa larga.
-    e("div",{style:({home:1,reuma:1,cir_menu:1,anat_menu:1,emergen_menu:1}[vista])?{width:"100%",margin:0,padding:"0 0 80px"}:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
+    e("div",{style:({home:1,reuma:1,cir_menu:1,anat_menu:1,emergen_menu:1,fisio:1,general:1,vocabulario:1,"trauma-u1":1}[vista])?{width:"100%",margin:0,padding:"0 0 80px"}:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
 
     // ════════════ HOME ════════════
     vista==="home"&&e(HomeView,{user:ecuUser,vi:vi,favs:favs,bestStreak:bestStreak,go:go}),
@@ -559,10 +571,14 @@ function App(){
     ),
 
     // ════════════ TRAUMA — UNIDAD 1 (NATIVE) ════════════
-    vista==="trauma-u1"&&e(TraumaView,{widgets:traumaWidgets,onBackRef:traumaBackRef}),
+    vista==="trauma-u1"&&e(ModuleShell,{title:"Trauma — Unidad 1",subtitle:"Vía aérea · Shock · Tórax · Triage · Deontología",icon:"🩸",accent:"#ef4444"},
+      e(TraumaView,{widgets:traumaWidgets,onBackRef:traumaBackRef})
+    ),
 
     // ════════════ VOCABULARIO MÉDICO (NATIVE) ════════════
-    vista==="vocabulario"&&e(VocabularioView),
+    vista==="vocabulario"&&e(ModuleShell,{title:"Vocabulario Médico",subtitle:"Raíces, prefijos y sufijos · Decoder + Quiz",icon:"🔤",accent:"#06b6d4"},
+      e(VocabularioView)
+    ),
 
     // ════════════ MEDIADORES DE LA INFLAMACIÓN ════════════
     vista==="mediadores"&&e(MediadoresView),
@@ -868,8 +884,7 @@ function App(){
 
 
         // ════════════ GENERALIDADES ════════════
-    vista==="general"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"28px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"📚"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"22px",fontWeight:800,color:"#8b5cf6"}},"Generalidades"),e("p",{style:{color:C.dm,fontSize:"13px"}},"Contenidos transversales para toda la carrera")),
+    vista==="general"&&e(ModuleShell,{title:"Generalidades",subtitle:"Contenidos transversales para toda la carrera",icon:"📚",accent:"#8b5cf6"},
       // Bases Inmunológicas
       e("div",{style:{marginBottom:"24px"}},
         e("div",{onClick:function(){setAbdOpen(abdOpen==="inmuno"?null:"inmuno")},style:{background:C.cd,border:"1px solid "+(abdOpen==="inmuno"?"#3b82f644":C.bd),borderRadius:"14px",padding:"18px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between"}},
