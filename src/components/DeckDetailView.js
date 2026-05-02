@@ -113,6 +113,10 @@ function DeckDetailView(props){
   s=useState("");      var DD_bulkTargetDeckId=s[0],DD_setBulkTargetDeckId=s[1];
   s=useState(false);   var DD_bulkLoading=s[0],    DD_setBulkLoading=s[1];
   s=useState("");      var DD_bulkErrMsg=s[0],     DD_setBulkErrMsg=s[1];
+  s=useState(false);   var DD_tagBulkOpen=s[0],    DD_setTagBulkOpen=s[1];
+  s=useState("");      var DD_tagBulkInput=s[0],   DD_setTagBulkInput=s[1];
+  s=useState(false);   var DD_tagBulkLoading=s[0], DD_setTagBulkLoading=s[1];
+  s=useState("");      var DD_tagBulkErrMsg=s[0],  DD_setTagBulkErrMsg=s[1];
   var DD_pressTimer=useRef(null);
 
   // ── Inject CSS once ──
@@ -385,6 +389,71 @@ function DeckDetailView(props){
       DD_setBulkErrMsg("Error al copiar. Intentá de nuevo.");
     }finally{
       DD_setBulkLoading(false);
+    }
+  }
+
+  async function DD_execBulkTag(){
+    var tag=DD_tagBulkInput.trim().toLowerCase().replace(/[^a-z0-9\-_áéíóúñü]/g,"");
+    if(!tag||!user||!window.ECEPT_SUPABASE) return;
+    var snap=DD_selectedIds;
+    var selectedCards=[];
+    for(var bti=0;bti<DD_cards.length;bti++){
+      if(snap[DD_cards[bti].id]) selectedCards.push(DD_cards[bti]);
+    }
+    if(!selectedCards.length) return;
+    DD_setTagBulkLoading(true); DD_setTagBulkErrMsg("");
+    try{
+      var promises=[];
+      for(var btj=0;btj<selectedCards.length;btj++){
+        var btc=selectedCards[btj];
+        var curTags=btc.tags||[];
+        if(curTags.indexOf(tag)!==-1){ promises.push(Promise.resolve()); continue; }
+        promises.push(
+          window.ECEPT_SUPABASE.from("flashcards")
+            .update({tags:curTags.concat([tag])})
+            .eq("id",btc.id).eq("user_id",user.id)
+        );
+      }
+      var results=await Promise.all(promises);
+      for(var btr=0;btr<results.length;btr++){
+        if(results[btr]&&results[btr].error) throw results[btr].error;
+      }
+      DD_setCards(function(prev){
+        return prev.map(function(c){
+          if(!snap[c.id]) return c;
+          var cur=c.tags||[];
+          if(cur.indexOf(tag)!==-1) return c;
+          var updated={};
+          updated.id=c.id; updated.deck_id=c.deck_id; updated.user_id=c.user_id;
+          updated.is_official=c.is_official; updated.card_type=c.card_type;
+          updated.front=c.front; updated.back=c.back; updated.created_at=c.created_at;
+          updated.tags=cur.concat([tag]);
+          return updated;
+        });
+      });
+      var tagExists=false;
+      for(var btk=0;btk<DD_userTagsList.length;btk++){
+        if(DD_userTagsList[btk].name===tag){ tagExists=true; break; }
+      }
+      if(!tagExists&&user){
+        try{
+          await window.ECEPT_SUPABASE.from("user_tags")
+            .insert({user_id:user.id,name:tag,color:"#a78bfa"});
+        }catch(e){ console.warn("user_tags insert warn",e); }
+      }
+      var n=selectedCards.length;
+      DD_setTagBulkOpen(false);
+      DD_setTagBulkInput("");
+      DD_setSelectMode(false);
+      DD_setSelectedIds({});
+      DD_setBulkDelConfirm(false);
+      DD_setBulkMsg("Etiqueta '#"+tag+"' agregada a "+n+" card"+(n===1?"":"s"));
+      setTimeout(function(){ DD_setBulkMsg(""); },3000);
+    }catch(err){
+      console.error("bulk tag error",err);
+      DD_setTagBulkErrMsg("Error al etiquetar. Intentá de nuevo.");
+    }finally{
+      DD_setTagBulkLoading(false);
     }
   }
 
@@ -928,13 +997,11 @@ function DeckDetailView(props){
                     fontSize:"13px",fontWeight:700,cursor:DD_selectCount?"pointer":"default"}
                 },"📋 Copiar"),
                 e("button",{
-                  onClick:function(){
-                    DD_setBulkMsg("Próximamente");
-                    setTimeout(function(){ DD_setBulkMsg(""); },1500);
-                  },
+                  onClick:function(){ DD_setTagBulkOpen(true); DD_setTagBulkInput(""); DD_setTagBulkErrMsg(""); },
+                  disabled:!DD_selectCount,
                   style:{padding:"10px 18px",borderRadius:"10px",background:"none",
-                    border:"1px solid "+C.bd,color:C.dm,
-                    fontSize:"13px",fontWeight:700,cursor:"pointer"}
+                    border:"1px solid "+C.bd,color:DD_selectCount?C.tx:C.dm,
+                    fontSize:"13px",fontWeight:700,cursor:DD_selectCount?"pointer":"default"}
                 },"🏷 Etiquetar")
               ),
           DD_bulkMsg&&e("div",{style:{marginTop:"8px",fontSize:"12px",
@@ -1357,6 +1424,106 @@ function DeckDetailView(props){
       }},"✓ Card agregada a tu baraja"),
       document.body
     ),
+    DD_tagBulkOpen&&(function(){
+      var tbTag=DD_tagBulkInput.trim().toLowerCase().replace(/[^a-z0-9\-_áéíóúñü]/g,"");
+      var canAdd=!!tbTag&&!DD_tagBulkLoading;
+      var tbSuggs=[];
+      for(var tbs=0;tbs<DD_userTagsList.length;tbs++){
+        var tbsn=DD_userTagsList[tbs].name;
+        var tbq=DD_tagBulkInput.trim().toLowerCase();
+        if(!tbq||tbsn.indexOf(tbq)>=0) tbSuggs.push(tbsn);
+      }
+      return ReactDOM.createPortal(
+        e("div",{
+          onClick:function(){ if(!DD_tagBulkLoading){ DD_setTagBulkOpen(false); DD_setTagBulkInput(""); DD_setTagBulkErrMsg(""); } },
+          style:{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",
+            display:"flex",alignItems:"center",justifyContent:"center",
+            zIndex:1050,padding:"16px"}
+        },
+          e("div",{
+            onClick:function(ev){ ev.stopPropagation(); },
+            style:{width:"100%",maxWidth:"400px",background:C.cd,
+              border:"1px solid "+C.bd,borderRadius:"16px",
+              boxShadow:"0 12px 40px rgba(0,0,0,.6)",overflow:"hidden"}
+          },
+            e("div",{style:{
+              display:"flex",alignItems:"center",justifyContent:"space-between",
+              padding:"16px 18px",borderBottom:"1px solid "+C.bd
+            }},
+              e("span",{style:{fontSize:"14px",color:C.tx,fontWeight:700}},
+                "🏷 Agregar etiqueta a "+DD_selectCount+" card"+(DD_selectCount===1?"":"s")
+              ),
+              e("button",{
+                onClick:function(){ DD_setTagBulkOpen(false); DD_setTagBulkInput(""); DD_setTagBulkErrMsg(""); },
+                disabled:DD_tagBulkLoading,
+                style:{background:"none",border:"none",color:C.dm,fontSize:"20px",
+                  cursor:"pointer",lineHeight:1,padding:"4px 8px"}
+              },"×")
+            ),
+            e("div",{style:{padding:"14px 18px 0"}},
+              e("input",{
+                type:"text",value:DD_tagBulkInput,
+                autoFocus:true,disabled:DD_tagBulkLoading,
+                placeholder:"Nombre del tag...",
+                onChange:function(ev){ DD_setTagBulkInput(ev.target.value); },
+                onKeyDown:function(ev){
+                  if(ev.key==="Enter"&&canAdd) DD_execBulkTag();
+                  if(ev.key==="Escape"){ DD_setTagBulkOpen(false); DD_setTagBulkInput(""); DD_setTagBulkErrMsg(""); }
+                },
+                style:{
+                  width:"100%",minHeight:"44px",padding:"10px 14px",
+                  borderRadius:"10px",border:"1px solid "+C.bd,
+                  background:C.bg,color:C.tx,fontSize:"13px",
+                  outline:"none",boxSizing:"border-box"
+                }
+              }),
+              tbSuggs.length>0&&e("div",{style:{
+                display:"flex",flexWrap:"wrap",gap:"6px",marginTop:"10px"
+              }},
+                tbSuggs.map(function(tag){
+                  var col=DD_userTagColorMap[tag]||"#a78bfa";
+                  return e("button",{key:tag,
+                    onClick:function(){ DD_setTagBulkInput(tag); },
+                    style:{padding:"4px 12px",borderRadius:"999px",
+                      background:col+"14",border:"1px solid "+col+"38",
+                      color:col,fontSize:"11px",fontWeight:600,cursor:"pointer",minHeight:"28px"}
+                  },"#"+tag);
+                })
+              )
+            ),
+            DD_tagBulkErrMsg&&e("div",{style:{margin:"10px 18px 0",fontSize:"12px",
+              color:"#fca5a5",fontWeight:600}},DD_tagBulkErrMsg),
+            e("div",{style:{
+              padding:"14px 18px",borderTop:"1px solid "+C.bd,
+              display:"flex",gap:"8px",marginTop:"14px"
+            }},
+              e("button",{
+                onClick:DD_execBulkTag,
+                disabled:!canAdd,
+                style:{
+                  flex:1,minHeight:"44px",padding:"12px",borderRadius:"12px",
+                  border:"none",
+                  background:canAdd?"#a78bfa":"rgba(255,255,255,.08)",
+                  color:canAdd?"#fff":C.mt,
+                  fontSize:"14px",fontWeight:700,
+                  cursor:canAdd?"pointer":"default"
+                }
+              },DD_tagBulkLoading?"Agregando...":"Agregar"),
+              e("button",{
+                onClick:function(){ DD_setTagBulkOpen(false); DD_setTagBulkInput(""); DD_setTagBulkErrMsg(""); },
+                disabled:DD_tagBulkLoading,
+                style:{
+                  minHeight:"44px",padding:"12px 18px",borderRadius:"12px",
+                  background:"none",border:"1px solid "+C.bd,
+                  color:C.mt,fontSize:"14px",fontWeight:700,cursor:"pointer"
+                }
+              },"Cancelar")
+            )
+          )
+        ),
+        document.body
+      );
+    })(),
     DD_bulkAction&&(function(){
       var isMove=DD_bulkAction==="move";
       var otherDecks=[];
