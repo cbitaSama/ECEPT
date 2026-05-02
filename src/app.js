@@ -97,10 +97,12 @@ function App(){
       var modId=parts[0];
       var subId=parts[1]||null;
       function fireSubFocus(){
-        if(modId==='receptores'&&window._receptorFocus) window._receptorFocus(subId);
-        else if(modId==='mediadores'&&window._medFocus) window._medFocus(subId);
-        else if(modId==='labs'&&window._labFocus) window._labFocus(subId);
-        else if(modId==='salud_mental'&&window._smFocus) window._smFocus(subId);
+        try{
+          if(modId==='receptores'&&window._receptorFocus) window._receptorFocus(subId);
+          else if(modId==='mediadores'&&window._medFocus) window._medFocus(subId);
+          else if(modId==='labs'&&window._labFocus) window._labFocus(subId);
+          else if(modId==='salud_mental'&&window._smFocus) window._smFocus(subId);
+        }catch(err){console.warn('[ECEPT] deeplink subseccion inválida:',modId+'/'+subId,err);}
       }
       if(window._currentVista===modId){
         if(subId) fireSubFocus();

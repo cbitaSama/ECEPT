@@ -31,18 +31,20 @@ const SYSTEM_PROMPT =
   '1. Solo enlazá a contenido que EXISTE en ECEPT. Módulos disponibles:\n' +
   '   reuma · cir_menu · anat_menu · general · epid · triadas · coagulacion · fisio · vocabulario · flashcards · emergen_menu · trauma-u1\n' +
   '   labs (subsecciones: coag, hemo)\n' +
-  '   receptores (subsecciones: adr=adrenérgicos, musc=muscarínicos, dop=dopaminérgicos, sero=serotoninérgicos, opi=opioides)\n' +
-  '   mediadores (subsecciones: citok=citoquinas, eico=eicosanoides, comp=complemento, amin=aminas, pept=péptidos, nit=óxido nítrico)\n' +
-  '   salud_mental (subsecciones: anxiety, psicosis, toc, trauma, somaticos, tca, sueno, personalidad, impulsos, depresivos)\n\n' +
+  '   receptores (subsecciones: adr=adrenérgicos, musc=muscarínicos, nic=nicotínicos, dop=dopaminérgicos,\n' +
+  '     sero=serotoninérgicos, hist=histaminérgicos, opi=opioides, glu=glutamatérgicos, gaba=GABAérgicos, cb=cannabinoides)\n' +
+  '   mediadores (subsecciones: citok=citoquinas, eico=eicosanoides, comp=complemento, amin=aminas vasoactivas,\n' +
+  '     pept=péptidos y quininas, nit=radicales y gases — GABA NO está aquí, está en receptores/gaba)\n' +
+  '   salud_mental (subsecciones: anx=ansiedad, psicosis, toc=TOC, trm=trauma, som=somáticos,\n' +
+  '     tca=conducta alimentaria, sue=sueño, per=personalidad, imp=impulsos, dpr=depresivos, neurosis=hub neurosis)\n\n' +
   '2. Si el tema NO está en esa lista NO incluyas link. Farmacología clínica, microbiología, embriología no están en ECEPT.\n\n' +
   '3. El TEXTO del link debe ser específico al contenido enlazado, NUNCA "Ver en ECEPT".\n' +
-  '   ✓ [Receptores opioides en ECEPT](#receptores/opi)\n' +
-  '   ✓ [Trastornos de ansiedad en ECEPT](#salud_mental/anxiety)\n' +
+  '   ✓ [Receptores GABAérgicos en ECEPT](#receptores/gaba)\n' +
+  '   ✓ [Trastornos de ansiedad en ECEPT](#salud_mental/anx)\n' +
   '   ✓ [Eicosanoides en ECEPT](#mediadores/eico)\n' +
-  '   ✓ [Tríadas clínicas en ECEPT](#triadas)\n' +
-  '   ✗ [Ver en ECEPT](#receptores) ← nunca usar\n\n' +
+  '   ✗ [Ver en ECEPT](#receptores) ← nunca usar texto genérico\n\n' +
   '4. Podés incluir múltiples links si el tema toca varios módulos. Ejemplo al final de la respuesta:\n' +
-  '   "📚 En ECEPT: [Mediadores aminas](#mediadores/amin) · [Receptores serotoninérgicos](#receptores/sero) · [Trastornos de ansiedad](#salud_mental/anxiety)"';
+  '   "📚 En ECEPT: [Mediadores aminas](#mediadores/amin) · [Receptores serotoninérgicos](#receptores/sero) · [Trastornos de ansiedad](#salud_mental/anx)"';
 
 const VALID_MIMES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
 const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;

@@ -43,10 +43,29 @@ function CB_parseInline(text) {
       (function(href, label, key) {
         if (href.indexOf('#') === 0) {
           var route = href.slice(1);
-          result.push(e('span', { key:key, onClick:function() {
-            if (window.CB_go) window.CB_go(route);
-            if (window._CB_closePanel) window._CB_closePanel();
-          }, style:{ color:C.ac, cursor:'pointer', textDecoration:'underline' } }, label));
+          result.push(e('button', { key:key,
+            onClick:function(ev) {
+              ev.preventDefault(); ev.stopPropagation();
+              if (window.CB_go) window.CB_go(route);
+              if (window._CB_closePanel) window._CB_closePanel();
+            },
+            onMouseOver:function(ev) {
+              ev.currentTarget.style.background='linear-gradient(135deg,rgba(59,130,246,0.25),rgba(96,165,250,0.15))';
+              ev.currentTarget.style.transform='translateY(-1px)';
+            },
+            onMouseOut:function(ev) {
+              ev.currentTarget.style.background='linear-gradient(135deg,rgba(59,130,246,0.15),rgba(96,165,250,0.08))';
+              ev.currentTarget.style.transform='translateY(0)';
+            },
+            style:{
+              display:'inline-flex', alignItems:'center', gap:'6px',
+              padding:'6px 12px', margin:'2px 4px 2px 0',
+              background:'linear-gradient(135deg,rgba(59,130,246,0.15),rgba(96,165,250,0.08))',
+              border:'1px solid rgba(96,165,250,0.3)', borderRadius:'999px',
+              color:'#60a5fa', fontSize:'12px', fontWeight:500, cursor:'pointer',
+              fontFamily:'inherit', transition:'all 200ms ease', whiteSpace:'nowrap'
+            }
+          }, '🔗 '+label));
         } else {
           result.push(e('a', { key:key, href:href, target:'_blank', rel:'noopener', style:{ color:C.ac2, textDecoration:'underline' } }, label));
         }
@@ -154,6 +173,19 @@ function CB_renderMarkdown(text) {
     // Empty line
     if (!line.trim()) {
       elems.push(e('div', { key:'mk'+(kn++), style:{ height:6 } }));
+      i++; continue;
+    }
+
+    // ECEPT navigation footer (📚 En ECEPT: ...)
+    if (line.indexOf('📚 En ECEPT:') === 0) {
+      var footerText = line.slice('📚 En ECEPT:'.length).trim();
+      elems.push(e('div', { key:'mk'+(kn++), style:{
+        borderTop:'1px solid rgba(96,165,250,0.15)', marginTop:12, paddingTop:10,
+        display:'flex', flexWrap:'wrap', alignItems:'center', gap:4
+      }},
+        e('span', { style:{ fontSize:11, color:'#94a3b8', fontWeight:600, marginRight:4, flexShrink:0 } }, '📚 En ECEPT:'),
+        e('span', { style:{ display:'inline-flex', flexWrap:'wrap', gap:4 } }, CB_parseInline(footerText))
+      ));
       i++; continue;
     }
 
