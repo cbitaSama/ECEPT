@@ -48,6 +48,11 @@ function DeckDetailView(props){
   s=useState(null);  var DD_deleteConfirmId=s[0], DD_setDeleteConfirmId=s[1];
   s=useState(false); var DD_showEditor=s[0],  DD_setShowEditor=s[1];
   s=useState(null);  var DD_editCard=s[0],    DD_setEditCard=s[1];
+  s=useState({});    var DD_userCardTags=s[0],  DD_setUserCardTags=s[1];
+  s=useState([]);    var DD_userTagsList=s[0],   DD_setUserTagsList=s[1];
+  s=useState(null);  var DD_addTagCardId=s[0],   DD_setAddTagCardId=s[1];
+  s=useState("");    var DD_addTagInput=s[0],    DD_setAddTagInput=s[1];
+  s=useState(false); var DD_addTagSaving=s[0],   DD_setAddTagSaving=s[1];
 
   // ── Inject CSS once ──
   useEffect(function(){
@@ -99,7 +104,29 @@ function DeckDetailView(props){
         progMap[progRows[i].flashcard_id]=progRows[i];
       }
       DD_setProgress(progMap);
-      DD_setLoading(false);
+      // Para barajas oficiales con sesión: cargar user_tags + user_card_tags
+      if(deck.is_official&&user&&window.ECEPT_SUPABASE){
+        var cids=[];
+        for(var uci=0;uci<allCards.length;uci++){ cids.push(allCards[uci].id); }
+        var utP=window.ECEPT_SUPABASE.from("user_tags").select("id,name,color").eq("user_id",user.id).order("name");
+        var uctP=cids.length>0
+          ?window.ECEPT_SUPABASE.from("user_card_tags").select("flashcard_id,tag").eq("user_id",user.id).in("flashcard_id",cids)
+          :Promise.resolve({data:[],error:null});
+        Promise.all([utP,uctP]).then(function(r2){
+          DD_setUserTagsList((r2[0]&&!r2[0].error)?(r2[0].data||[]):[]);
+          var uctMap={};
+          var uctRows=(r2[1]&&!r2[1].error)?(r2[1].data||[]):[];
+          for(var j=0;j<uctRows.length;j++){
+            var fid2=uctRows[j].flashcard_id;
+            if(!uctMap[fid2]) uctMap[fid2]=[];
+            uctMap[fid2].push(uctRows[j].tag);
+          }
+          DD_setUserCardTags(uctMap);
+          DD_setLoading(false);
+        }).catch(function(){ DD_setLoading(false); });
+      } else {
+        DD_setLoading(false);
+      }
     }).catch(function(){
       DD_setLoading(false);
       DD_setLoadErr("Error de conexión.");
@@ -144,6 +171,41 @@ function DeckDetailView(props){
     DD_setSelectedTags([]);
   }
 
+  function DD_addUserCardTag(cardId,tagName){
+    var tag=tagName.trim().toLowerCase().replace(/[^a-z0-9\-_áéíóúñü]/g,"");
+    if(!tag||!user||!window.ECEPT_SUPABASE) return;
+    var existing=DD_userCardTags[cardId]||[];
+    if(existing.indexOf(tag)!==-1){ DD_setAddTagCardId(null); DD_setAddTagInput(""); return; }
+    DD_setAddTagSaving(true);
+    window.ECEPT_SUPABASE.from("user_card_tags")
+      .insert({user_id:user.id,flashcard_id:cardId,tag:tag})
+      .then(function(res){
+        DD_setAddTagSaving(false);
+        var next={};
+        for(var k in DD_userCardTags){ if(DD_userCardTags.hasOwnProperty(k)) next[k]=DD_userCardTags[k].slice(); }
+        if(!next[cardId]) next[cardId]=[];
+        if((!res||!res.error)&&next[cardId].indexOf(tag)===-1) next[cardId]=next[cardId].concat([tag]);
+        DD_setUserCardTags(next);
+        DD_setAddTagCardId(null);
+        DD_setAddTagInput("");
+      }).catch(function(){ DD_setAddTagSaving(false); });
+  }
+
+  function DD_removeUserCardTag(cardId,tagName){
+    if(!user||!window.ECEPT_SUPABASE) return;
+    window.ECEPT_SUPABASE.from("user_card_tags").delete()
+      .eq("user_id",user.id).eq("flashcard_id",cardId).eq("tag",tagName)
+      .then(function(){
+        var next={};
+        for(var k in DD_userCardTags){ if(DD_userCardTags.hasOwnProperty(k)) next[k]=DD_userCardTags[k].slice(); }
+        if(next[cardId]){
+          var idx=next[cardId].indexOf(tagName);
+          if(idx!==-1) next[cardId].splice(idx,1);
+        }
+        DD_setUserCardTags(next);
+      }).catch(function(){});
+  }
+
   function DD_handleNewCard(){
     DD_setEditCard(null);
     DD_setShowEditor(true);
@@ -179,6 +241,10 @@ function DeckDetailView(props){
   var deckIcon=deck.icon||"🎴";
   var isOfficial=!!deck.is_official;
   var canEdit=!isOfficial && user && deck.user_id===user.id;
+  var DD_userTagColorMap={};
+  for(var utcm=0;utcm<DD_userTagsList.length;utcm++){
+    DD_userTagColorMap[DD_userTagsList[utcm].name]=DD_userTagsList[utcm].color||"#a78bfa";
+  }
 
   // Stats
   var nowIso=new Date().toISOString();
@@ -244,6 +310,18 @@ function DeckDetailView(props){
     var isMenuOpen=DD_menuOpenId===c.id;
     var isCloze=c.card_type==="cloze";
     var prog=DD_progress[c.id];
+    var existingUserTags=DD_userCardTags[c.id]||[];
+    var isAddingTag=DD_addTagCardId===c.id;
+    var filteredSuggs=[];
+    if(isAddingTag){
+      var q2=DD_addTagInput.toLowerCase().trim();
+      for(var si2=0;si2<DD_userTagsList.length;si2++){
+        var sn=DD_userTagsList[si2].name;
+        if(existingUserTags.indexOf(sn)===-1&&(!q2||sn.indexOf(q2)>=0)){
+          filteredSuggs.push(sn);
+        }
+      }
+    }
 
     // Stats line
     var statsText="";
@@ -292,7 +370,7 @@ function DeckDetailView(props){
             fontSize:"12px",color:C.dm,lineHeight:1.4,
             overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"
           }},"→ "+(c.back.length>80?c.back.slice(0,77)+"...":c.back)),
-          // Tags
+          // Tags oficiales (solid border, color muted)
           Array.isArray(c.tags)&&c.tags.length>0&&e("div",{style:{display:"flex",flexWrap:"wrap",gap:"4px",marginTop:"6px"}},
             c.tags.map(function(t,ti){
               return e("span",{key:ti,style:{
@@ -301,6 +379,81 @@ function DeckDetailView(props){
                 border:"1px solid "+C.bd,color:C.dm
               }},"#"+t);
             })
+          ),
+          // Tags personales en cards oficiales (dashed border, color del tag)
+          isOfficial&&user&&e("div",{
+            style:{display:"flex",flexWrap:"wrap",gap:"4px",marginTop:"6px",alignItems:"center"}
+          },
+            existingUserTags.map(function(tag){
+              var col=DD_userTagColorMap[tag]||"#a78bfa";
+              return e("span",{key:tag,style:{
+                display:"inline-flex",alignItems:"center",gap:"3px",
+                padding:"2px 6px 2px 8px",borderRadius:"999px",
+                background:col+"14",border:"2px dashed "+col,
+                color:col,fontSize:"9px",fontWeight:700
+              }},
+                "#"+tag,
+                e("button",{
+                  onClick:function(ev){ ev.stopPropagation(); DD_removeUserCardTag(c.id,tag); },
+                  style:{background:"none",border:"none",color:col,cursor:"pointer",
+                    padding:"0 1px",lineHeight:1,fontSize:"11px"}
+                },"×")
+              );
+            }),
+            !isAddingTag&&e("button",{
+              onClick:function(ev){ ev.stopPropagation(); DD_setAddTagCardId(c.id); DD_setAddTagInput(""); },
+              style:{
+                display:"inline-flex",alignItems:"center",gap:"2px",
+                padding:"2px 8px",borderRadius:"999px",
+                background:"rgba(167,139,250,.08)",border:"1px dashed rgba(167,139,250,.4)",
+                color:"#a78bfa",fontSize:"9px",fontWeight:700,cursor:"pointer"
+              }
+            },"+ 🏷"),
+            isAddingTag&&e("div",{
+              onClick:function(ev){ ev.stopPropagation(); },
+              style:{width:"100%",marginTop:"6px"}
+            },
+              e("div",{style:{display:"flex",gap:"6px",alignItems:"center"}},
+                e("input",{
+                  type:"text",value:DD_addTagInput,disabled:DD_addTagSaving,
+                  placeholder:"Etiqueta...",
+                  onChange:function(ev){ DD_setAddTagInput(ev.target.value); },
+                  onKeyDown:function(ev){
+                    if(ev.key==="Enter"&&DD_addTagInput.trim()) DD_addUserCardTag(c.id,DD_addTagInput);
+                    if(ev.key==="Escape"){ DD_setAddTagCardId(null); DD_setAddTagInput(""); }
+                  },
+                  style:{flex:1,minHeight:"36px",padding:"6px 10px",borderRadius:"8px",
+                    border:"1px solid "+C.bd,background:C.bg,color:C.tx,
+                    fontSize:"12px",outline:"none",boxSizing:"border-box"}
+                }),
+                e("button",{
+                  onClick:function(){ if(DD_addTagInput.trim()) DD_addUserCardTag(c.id,DD_addTagInput); },
+                  disabled:!DD_addTagInput.trim()||DD_addTagSaving,
+                  style:{minHeight:"36px",padding:"6px 12px",borderRadius:"8px",
+                    background:(DD_addTagInput.trim()&&!DD_addTagSaving)?"#a78bfa":C.bd,
+                    border:"none",color:"#fff",fontSize:"12px",fontWeight:700,
+                    cursor:(DD_addTagInput.trim()&&!DD_addTagSaving)?"pointer":"default"}
+                },"+"),
+                e("button",{
+                  onClick:function(){ DD_setAddTagCardId(null); DD_setAddTagInput(""); },
+                  disabled:DD_addTagSaving,
+                  style:{minHeight:"36px",padding:"6px 10px",borderRadius:"8px",
+                    background:"none",border:"1px solid "+C.bd,
+                    color:C.mt,fontSize:"12px",cursor:"pointer"}
+                },"×")
+              ),
+              filteredSuggs.length>0&&e("div",{style:{display:"flex",flexWrap:"wrap",gap:"4px",marginTop:"6px"}},
+                filteredSuggs.map(function(tag){
+                  var col=DD_userTagColorMap[tag]||"#a78bfa";
+                  return e("button",{key:tag,
+                    onClick:function(){ DD_addUserCardTag(c.id,tag); },
+                    style:{padding:"3px 10px",borderRadius:"999px",minHeight:"28px",
+                      background:col+"14",border:"1px solid "+col+"38",
+                      color:col,fontSize:"11px",cursor:"pointer"}
+                  },"#"+tag);
+                })
+              )
+            )
           ),
           // Stats
           statsText&&e("div",{style:{fontSize:"10px",color:C.dm,marginTop:"5px"}},statsText)
