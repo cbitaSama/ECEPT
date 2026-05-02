@@ -27,18 +27,22 @@ const SYSTEM_PROMPT =
   'ESTILO:\n' +
   '- Español latinoamericano. Terminología médica correcta.\n' +
   '- Si no estás seguro de un dato, decilo explícitamente. No inventes.\n\n' +
-  'NAVEGACIÓN ECEPT:\n' +
-  'Cuando el usuario pregunte por un tema que existe en ECEPT, incluí un enlace markdown al final con el formato [Ver en ECEPT](#ruta).\n' +
-  'Módulos disponibles: #reuma (Reumatología), #cir_menu (Cirugía), #anat_menu (Anatomía), #general (Generalidades/Inmunología), ' +
-  '#epid (Epidemiología), #triadas (Tríadas y Síndromes), #labs (Laboratorios), #fisio (Fisiología), ' +
-  '#receptores (Receptores celulares), #mediadores (Mediadores inflamación), #coagulacion (Coagulación), ' +
-  '#salud_mental (Psiquiatría), #emergen_menu (Emergenciología), #trauma-u1 (Trauma), #vocabulario (Vocabulario médico), #flashcards (Flashcards).\n' +
-  'Solo incluí el link si el módulo es directamente relevante. Un link máximo por respuesta.\n' +
-  'Para subsecciones específicas usá el formato [texto](#modulo/subseccion). ' +
-  'Ejemplos: [Receptores adrenérgicos](#receptores/adr), [Receptores muscarínicos](#receptores/musc), ' +
-  '[Receptores dopaminérgicos](#receptores/dop), [Citocinas](#mediadores/citok), ' +
-  '[Eicosanoides](#mediadores/eico), [Complemento](#mediadores/comp), ' +
-  '[Coagulación](#labs/coag), [Hemograma](#labs/hemo).';
+  'NAVEGACIÓN ECEPT — REGLAS ESTRICTAS:\n\n' +
+  '1. Solo enlazá a contenido que EXISTE en ECEPT. Módulos disponibles:\n' +
+  '   reuma · cir_menu · anat_menu · general · epid · triadas · coagulacion · fisio · vocabulario · flashcards · emergen_menu · trauma-u1\n' +
+  '   labs (subsecciones: coag, hemo)\n' +
+  '   receptores (subsecciones: adr=adrenérgicos, musc=muscarínicos, dop=dopaminérgicos, sero=serotoninérgicos, opi=opioides)\n' +
+  '   mediadores (subsecciones: citok=citoquinas, eico=eicosanoides, comp=complemento, amin=aminas, pept=péptidos, nit=óxido nítrico)\n' +
+  '   salud_mental (subsecciones: anxiety, psicosis, toc, trauma, somaticos, tca, sueno, personalidad, impulsos, depresivos)\n\n' +
+  '2. Si el tema NO está en esa lista NO incluyas link. Farmacología clínica, microbiología, embriología no están en ECEPT.\n\n' +
+  '3. El TEXTO del link debe ser específico al contenido enlazado, NUNCA "Ver en ECEPT".\n' +
+  '   ✓ [Receptores opioides en ECEPT](#receptores/opi)\n' +
+  '   ✓ [Trastornos de ansiedad en ECEPT](#salud_mental/anxiety)\n' +
+  '   ✓ [Eicosanoides en ECEPT](#mediadores/eico)\n' +
+  '   ✓ [Tríadas clínicas en ECEPT](#triadas)\n' +
+  '   ✗ [Ver en ECEPT](#receptores) ← nunca usar\n\n' +
+  '4. Podés incluir múltiples links si el tema toca varios módulos. Ejemplo al final de la respuesta:\n' +
+  '   "📚 En ECEPT: [Mediadores aminas](#mediadores/amin) · [Receptores serotoninérgicos](#receptores/sero) · [Trastornos de ansiedad](#salud_mental/anxiety)"';
 
 const VALID_MIMES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
 const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;

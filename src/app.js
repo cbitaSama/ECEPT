@@ -84,24 +84,30 @@ function App(){
       setVista(x);setCs(sc||null);setCd(dc||null);setTab(0);setQm(false);setQa({});setEt(null);setAbdOpen(null);setAbdExp({});setIngTab(0);setAn(true);
       if(dc&&vi.indexOf(dc)===-1)setVi(function(p){return p.concat([dc])});
       window.scrollTo(0,0);
+      window._currentVista=x;
     },120);
   },[vista,cs,cd,vi]);
-  // Expose go() to ChatBot (and any other window-scoped caller).
-  // Supports "modId/subId" format for granular deeplinks.
+  // Expose go() to ChatBot. Supports "modId/subId" deeplinks + anti-double-click debounce.
   useEffect(function(){
     window.CB_go=function(target){
+      if(window._CB_navigating) return;
+      window._CB_navigating=true;
+      setTimeout(function(){window._CB_navigating=false;},500);
       var parts=target.split('/');
       var modId=parts[0];
       var subId=parts[1]||null;
-      go(modId);
-      if(subId){
-        setTimeout(function(){
-          if(modId==='receptores'&&window._receptorFocus) window._receptorFocus(subId);
-          else if(modId==='mediadores'&&window._medFocus) window._medFocus(subId);
-          else if(modId==='labs'&&window._labFocus) window._labFocus(subId);
-          else if(modId==='salud_mental'&&window._smFocus) window._smFocus(subId);
-        },300);
+      function fireSubFocus(){
+        if(modId==='receptores'&&window._receptorFocus) window._receptorFocus(subId);
+        else if(modId==='mediadores'&&window._medFocus) window._medFocus(subId);
+        else if(modId==='labs'&&window._labFocus) window._labFocus(subId);
+        else if(modId==='salud_mental'&&window._smFocus) window._smFocus(subId);
       }
+      if(window._currentVista===modId){
+        if(subId) fireSubFocus();
+        return;
+      }
+      go(modId);
+      if(subId) setTimeout(fireSubFocus,420);
     };
   },[go]);
   useEffect(function(){
