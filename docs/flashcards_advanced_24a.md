@@ -57,3 +57,12 @@
 - 0913a65 show/hide toggle (Fase 5)
 - 18b6d5d fix cloze list render (Fase 5 fix)
 - 96d7bad copy card to own deck (Fase 6)
+
+## Fixes post-implementación
+
+### fix(24a): double toast en cards copiadas (d9540e2)
+Al editar una card copiada desde oficial, aparecían simultáneamente
+"Guardado con éxito" y "Error de conexión". Causa: el upsert fire-and-forget
+a user_tags podía lanzar síncronamente, escapando su propio .catch() y
+cayendo al .catch() exterior del save handler. Fix: wrappear el bloque
+upsert en try/catch adicional.
