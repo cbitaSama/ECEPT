@@ -15728,6 +15728,10 @@ function DeckDetailView(props){
   s=useState(null);  var DD_addTagCardId=s[0],   DD_setAddTagCardId=s[1];
   s=useState("");    var DD_addTagInput=s[0],    DD_setAddTagInput=s[1];
   s=useState(false); var DD_addTagSaving=s[0],   DD_setAddTagSaving=s[1];
+  s=useState(null);  var DD_previewIdx=s[0],     DD_setPreviewIdx=s[1];
+  s=useState(false); var DD_previewFlipped=s[0], DD_setPreviewFlipped=s[1];
+  var DD_swipeStartY=useRef(null);
+  var DD_filteredRef=useRef([]);
 
   // ── Inject CSS once ──
   useEffect(function(){
@@ -15817,6 +15821,24 @@ function DeckDetailView(props){
     document.addEventListener("click", DD_docClose);
     return function(){ document.removeEventListener("click", DD_docClose); };
   },[DD_menuOpenId]);
+
+  useEffect(function(){
+    if(DD_previewIdx===null) return;
+    function DD_onKeyDown(ev){
+      var tot=DD_filteredRef.current.length;
+      if(ev.key==="Escape"){ DD_setPreviewIdx(null); DD_setPreviewFlipped(false); }
+      else if(ev.key==="ArrowRight"){
+        DD_setPreviewIdx(function(pi){ return pi<tot-1?pi+1:0; });
+        DD_setPreviewFlipped(false);
+      }
+      else if(ev.key==="ArrowLeft"){
+        DD_setPreviewIdx(function(pi){ return pi>0?pi-1:tot-1; });
+        DD_setPreviewFlipped(false);
+      }
+    }
+    document.addEventListener("keydown",DD_onKeyDown);
+    return function(){ document.removeEventListener("keydown",DD_onKeyDown); };
+  },[DD_previewIdx]);
 
   function DD_handleDelete(cardId){
     if(!user||!window.ECEPT_SUPABASE) return;
@@ -15955,6 +15977,7 @@ function DeckDetailView(props){
     }
     return true;
   });
+  DD_filteredRef.current=filteredCards;
 
   var hasFilters=q.length>0 || DD_selectedTags.length>0;
 
@@ -16015,8 +16038,9 @@ function DeckDetailView(props){
     return e("div",{
       key:c.id,
       className:"dd-card-item",
+      onClick:function(){ DD_setPreviewIdx(i); DD_setPreviewFlipped(false); },
       style:{
-        position:"relative",
+        position:"relative",cursor:"pointer",
         background:C.cd,border:"1px solid "+C.bd,
         borderRadius:"12px",padding:"14px 14px 12px",
         marginBottom:"8px"
@@ -16416,7 +16440,105 @@ function DeckDetailView(props){
       card:DD_editCard,
       onSaved:function(){ DD_setShowEditor(false); DD_setEditCard(null); DD_loadCards(); },
       onClose:function(){ DD_setShowEditor(false); DD_setEditCard(null); }
-    })
+    }),
+    DD_previewIdx!==null&&(function(){
+      var pc=filteredCards[DD_previewIdx];
+      if(!pc) return null;
+      var pcIsCloze=pc.card_type==="cloze";
+      var pcTotal=filteredCards.length;
+      return ReactDOM.createPortal(
+        e("div",{
+          onPointerDown:function(ev){ DD_swipeStartY.current=ev.clientY; },
+          onPointerUp:function(ev){
+            if(DD_swipeStartY.current!==null){
+              var delta=ev.clientY-DD_swipeStartY.current;
+              DD_swipeStartY.current=null;
+              if(delta>60){ DD_setPreviewIdx(null); DD_setPreviewFlipped(false); }
+            }
+          },
+          onClick:function(){ DD_setPreviewIdx(null); DD_setPreviewFlipped(false); },
+          style:{
+            position:"fixed",top:0,left:0,right:0,bottom:0,
+            background:"rgba(6,10,20,.88)",
+            backdropFilter:"blur(6px)",WebkitBackdropFilter:"blur(6px)",
+            display:"flex",alignItems:"center",justifyContent:"center",
+            padding:"16px",zIndex:1000
+          }
+        },
+          e("div",{
+            onClick:function(ev){ ev.stopPropagation(); },
+            style:{
+              width:"100%",maxWidth:"520px",
+              background:C.cd,border:"1px solid "+C.bd,
+              borderRadius:"20px",overflow:"hidden",
+              boxShadow:"0 20px 60px rgba(0,0,0,.7)",
+              display:"flex",flexDirection:"column"
+            }
+          },
+            e("div",{style:{
+              display:"flex",alignItems:"center",justifyContent:"space-between",
+              padding:"14px 16px",borderBottom:"1px solid "+C.bd
+            }},
+              e("span",{style:{fontSize:"12px",color:C.dm,fontWeight:600}},
+                String(DD_previewIdx+1)+" / "+String(pcTotal)
+              ),
+              e("button",{
+                onClick:function(){ DD_setPreviewIdx(null); DD_setPreviewFlipped(false); },
+                style:{background:"none",border:"none",color:C.dm,fontSize:"20px",
+                  cursor:"pointer",lineHeight:1,padding:"4px 8px"}
+              },"×")
+            ),
+            e("div",{style:{
+              padding:"28px 24px",minHeight:"200px",
+              display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
+              gap:"20px",textAlign:"center"
+            }},
+              e("div",{style:{fontSize:"17px",color:C.tx,fontWeight:600,lineHeight:1.5}},
+                pcIsCloze?DD_clozeEl(pc.front||""):(pc.front||"")
+              ),
+              DD_previewFlipped&&pc.back&&e("div",{style:{
+                paddingTop:"16px",borderTop:"1px solid "+C.bd,width:"100%",
+                fontSize:"15px",color:C.dm,lineHeight:1.5
+              }},pc.back),
+              e("button",{
+                onClick:function(){ DD_setPreviewFlipped(!DD_previewFlipped); },
+                style:{
+                  padding:"10px 24px",borderRadius:"10px",
+                  background:DD_previewFlipped?"rgba(255,255,255,.06)":"#a78bfa",
+                  border:DD_previewFlipped?"1px solid "+C.bd:"none",
+                  color:DD_previewFlipped?C.mt:"#fff",
+                  fontSize:"13px",fontWeight:700,cursor:"pointer",minHeight:"40px"
+                }
+              },DD_previewFlipped?"Ocultar respuesta":"Mostrar respuesta")
+            ),
+            e("div",{style:{
+              display:"flex",gap:"8px",
+              padding:"14px 16px",borderTop:"1px solid "+C.bd
+            }},
+              e("button",{
+                onClick:function(){
+                  DD_setPreviewIdx(DD_previewIdx>0?DD_previewIdx-1:pcTotal-1);
+                  DD_setPreviewFlipped(false);
+                },
+                style:{flex:1,minHeight:"44px",borderRadius:"10px",
+                  background:"rgba(255,255,255,.04)",border:"1px solid "+C.bd,
+                  color:C.tx,fontSize:"20px",cursor:"pointer"}
+              },"◀"),
+              e("button",{
+                onClick:function(){
+                  DD_setPreviewIdx(DD_previewIdx<pcTotal-1?DD_previewIdx+1:0);
+                  DD_setPreviewFlipped(false);
+                },
+                style:{flex:1,minHeight:"44px",borderRadius:"10px",
+                  background:"rgba(255,255,255,.04)",border:"1px solid "+C.bd,
+                  color:C.tx,fontSize:"20px",cursor:"pointer"}
+              },"▶")
+            )
+          )
+        ),
+        document.body
+      );
+    })()
   ));
 }
 
