@@ -8,24 +8,56 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ECEPT">
 <meta name="theme-color" content="#060a14">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧬</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><defs><linearGradient id=%22g%22 x1=%220%22 y1=%220%22 x2=%2264%22 y2=%2264%22 gradientUnits=%22userSpaceOnUse%22><stop offset=%220%22 stop-color=%22%2360a5fa%22/><stop offset=%221%22 stop-color=%22%23a78bfa%22/></linearGradient></defs><path d=%22M18 6 C30 18 34 18 46 6 M18 22 C30 34 34 34 46 22 M18 42 C30 54 34 54 46 42 M18 58 C30 70 34 70 46 58%22 stroke=%22url(%23g)%22 stroke-width=%223%22 stroke-linecap=%22round%22 fill=%22none%22/><line x1=%2222%22 y1=%2214%22 x2=%2242%22 y2=%2214%22 stroke=%22url(%23g)%22 stroke-width=%222%22 opacity=%22.6%22/><line x1=%2222%22 y1=%2230%22 x2=%2242%22 y2=%2230%22 stroke=%22url(%23g)%22 stroke-width=%222%22 opacity=%22.6%22/><line x1=%2222%22 y1=%2250%22 x2=%2242%22 y2=%2250%22 stroke=%22url(%23g)%22 stroke-width=%222%22 opacity=%22.6%22/></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
 <script>
   window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
 </script>
 <script defer src="/_vercel/speed-insights/script.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#060a14;font-family:'DM Sans',sans-serif;color:#e2e8f0;-webkit-tap-highlight-color:transparent;min-height:100vh;overflow-x:hidden}
-::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:#1a2040;border-radius:3px}
-input,button{font-family:inherit;-webkit-appearance:none}
+:root {
+  --ease-standard: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-sharp: cubic-bezier(0.4, 0, 0.6, 1);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: #060a14;
+  font-family: 'Inter', 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-feature-settings: 'cv11', 'ss01', 'ss03';
+  color: #e2e8f0;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(96,165,250,0.15); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(96,165,250,0.3); }
+::selection { background: rgba(96,165,250,0.3); color: #e2e8f0; }
+input, button, textarea { font-family: inherit; -webkit-appearance: none; outline: none; border: none; }
+button { cursor: pointer; color: inherit; background: none; }
 @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-/* Salud Mental II · scoped styles (mirrors artifacts/salud_mental.html <style>) */
+@keyframes ecept_fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ecept_fadeSlideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes ecept_fadeSlideDown { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes ecept_scaleIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes ecept_modalIn { from { opacity: 0; transform: translateY(20px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes ecept_backdropIn { from { opacity: 0; backdrop-filter: blur(0px); } to { opacity: 1; backdrop-filter: blur(12px); } }
+@keyframes ecept_glowPulse { 0%, 100% { box-shadow: 0 0 20px rgba(96,165,250,0.2); } 50% { box-shadow: 0 0 40px rgba(96,165,250,0.4); } }
+@keyframes ecept_shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes ecept_logoSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes ecept_logoFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-6px); } }
+@keyframes ecept_messageIn { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes ecept_initialPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+/* Salud Mental II · scoped styles */
 .sm-root .prose{font-size:14.5px;line-height:1.7;color:#e2e8f0}
 .sm-root .prose b,.sm-root .prose strong{color:#fff;font-weight:700}
 .sm-root input,.sm-root button,.sm-root select{border:none;outline:none}
@@ -33,6 +65,45 @@ input,button{font-family:inherit;-webkit-appearance:none}
 </style>
 </head>
 <body>
+<div id="initial-loader" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#060a14;z-index:99999;transition:opacity 240ms cubic-bezier(0.16,1,0.3,1);">
+  <div style="text-align:center;">
+    <div style="width:80px;height:80px;margin:0 auto 24px;animation:ecept_logoFloat 2.4s ease-in-out infinite;">
+      <svg width="80" height="80" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 16px rgba(167,139,250,0.45));">
+        <defs>
+          <linearGradient id="il_g" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#60a5fa"/>
+            <stop offset="100%" stop-color="#a78bfa"/>
+          </linearGradient>
+        </defs>
+        <path d="M18 6 C30 18 34 18 46 6 M18 22 C30 34 34 34 46 22 M18 42 C30 54 34 54 46 42 M18 58 C30 70 34 70 46 58" stroke="url(#il_g)" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+        <line x1="22" y1="14" x2="42" y2="14" stroke="url(#il_g)" stroke-width="1.8" opacity="0.6"/>
+        <line x1="22" y1="30" x2="42" y2="30" stroke="url(#il_g)" stroke-width="1.8" opacity="0.6"/>
+        <line x1="22" y1="50" x2="42" y2="50" stroke="url(#il_g)" stroke-width="1.8" opacity="0.6"/>
+      </svg>
+    </div>
+    <div style="font-family:'Inter','DM Sans',sans-serif;font-size:32px;font-weight:800;letter-spacing:-0.02em;background:linear-gradient(135deg,#60a5fa 0%,#a78bfa 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;">ECEPT</div>
+    <div style="font-family:'Inter','DM Sans',sans-serif;font-size:13px;color:#64748b;animation:ecept_initialPulse 1.6s ease-in-out infinite;">El Conocimiento Es Para Todos</div>
+  </div>
+</div>
+<script>
+  window.addEventListener('ECEPT_READY', function() {
+    var l = document.getElementById('initial-loader');
+    if (l) {
+      l.style.opacity = '0';
+      setTimeout(function(){ if (l && l.parentNode) l.parentNode.removeChild(l); }, 280);
+    }
+  });
+  window.addEventListener('error', function(ev) {
+    var l = document.getElementById('initial-loader');
+    if (!l) return;
+    setTimeout(function() {
+      var still = document.getElementById('initial-loader');
+      if (still) {
+        still.innerHTML = '<div style="text-align:center;font-family:Inter,sans-serif;color:#e2e8f0;padding:24px;"><div style="font-size:18px;font-weight:600;margin-bottom:8px;">Algo falló al cargar</div><div style="font-size:13px;color:#94a3b8;margin-bottom:20px;max-width:320px;">Intentá recargar la página. Si persiste, verificá tu conexión.</div><button onclick="window.location.reload()" style="background:linear-gradient(135deg,#60a5fa,#a78bfa);color:white;border:none;padding:10px 24px;border-radius:14px;font-weight:600;font-size:14px;cursor:pointer;">Recargar</button></div>';
+      }
+    }, 50);
+  });
+</script>
 <div id="root"></div>
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
@@ -47,6 +118,119 @@ var useState=React.useState,useEffect=React.useEffect,useCallback=React.useCallb
 // ══════════════════════════════════════════════════════════════
 var C={bg:"#060a14",cd:"#0d1224",bd:"#1a2040",ac:"#3b82f6",ac2:"#60a5fa",gl:"rgba(59,130,246,.15)",tx:"#e2e8f0",mt:"#94a3b8",dm:"#64748b",cl:"#f472b6",dx:"#60a5fa",ex:"#34d399",tt:"#a78bfa",px:"#fbbf24",pl:"#fb923c",tr:"#e879f9"};
 var SUB=[{k:"cc",l:"Cuadro Clínico",i:"🩺",c:C.cl},{k:"dx",l:"Diagnóstico",i:"🔬",c:C.dx},{k:"ex",l:"Exámenes",i:"🧪",c:C.ex},{k:"tx",l:"Tratamiento",i:"💊",c:C.tt},{k:"px",l:"Pronóstico",i:"⚠️",c:C.px},{k:"pe",l:"Perlas",i:"📌",c:C.pl}];
+
+// ══════════════════════════════════════════════════════════════
+// ECEPT_TOKENS — design tokens premium
+// ══════════════════════════════════════════════════════════════
+// Sistema unificado de spacing/radius/shadow/easing/timing/font/color/bp/z.
+// Uso: T.color.primary, T.space.lg, T.ease.standard, etc.
+// ══════════════════════════════════════════════════════════════
+var ECEPT_TOKENS = {
+  space: {
+    xs:   '4px',
+    sm:   '8px',
+    md:   '12px',
+    lg:   '16px',
+    xl:   '24px',
+    xxl:  '32px',
+    xxxl: '48px',
+    huge: '64px'
+  },
+  radius: {
+    sm:   '6px',
+    md:   '10px',
+    lg:   '14px',
+    xl:   '20px',
+    xxl:  '28px',
+    pill: '999px'
+  },
+  shadow: {
+    sm:           '0 1px 2px rgba(0,0,0,0.2)',
+    md:           '0 2px 8px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.15)',
+    lg:           '0 8px 24px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2)',
+    xl:           '0 20px 48px rgba(0,0,0,0.4), 0 8px 16px rgba(0,0,0,0.25)',
+    glow_blue:    '0 0 32px rgba(96,165,250,0.25)',
+    glow_purple:  '0 0 32px rgba(167,139,250,0.25)',
+    glow_premium: '0 0 40px rgba(251,191,36,0.2), 0 4px 16px rgba(251,191,36,0.15)',
+    inset_hi:     'inset 0 1px 0 rgba(255,255,255,0.04)'
+  },
+  ease: {
+    standard: 'cubic-bezier(0.32, 0.72, 0, 1)',
+    out:      'cubic-bezier(0.16, 1, 0.3, 1)',
+    spring:   'cubic-bezier(0.34, 1.56, 0.64, 1)',
+    sharp:    'cubic-bezier(0.4, 0, 0.6, 1)'
+  },
+  time: {
+    instant: '120ms',
+    fast:    '180ms',
+    medium:  '240ms',
+    slow:    '320ms',
+    slower:  '480ms',
+    spring:  '520ms'
+  },
+  font: {
+    display: { size: '48px', weight: 800, lh: '1.05', spacing: '-0.025em' },
+    h1:      { size: '36px', weight: 700, lh: '1.15', spacing: '-0.02em' },
+    h2:      { size: '24px', weight: 700, lh: '1.25', spacing: '-0.015em' },
+    h3:      { size: '18px', weight: 600, lh: '1.35', spacing: '-0.01em' },
+    body:    { size: '15px', weight: 400, lh: '1.55' },
+    bodySm:  { size: '13px', weight: 400, lh: '1.5' },
+    caption: { size: '12px', weight: 500, lh: '1.4' },
+    micro:   { size: '11px', weight: 500, lh: '1.3' }
+  },
+  color: {
+    bg0: '#060a14',
+    bg1: '#0a0e1f',
+    bg2: '#0d1224',
+    bg3: '#11173a',
+    bg4: '#1a2040',
+
+    text:      '#e2e8f0',
+    textMuted: '#94a3b8',
+    textDim:   '#64748b',
+    textGhost: '#475569',
+
+    primary:     '#3b82f6',
+    primaryHi:   '#60a5fa',
+    primarySoft: 'rgba(59,130,246,0.12)',
+
+    purple: '#a78bfa',
+    cyan:   '#06b6d4',
+    pink:   '#f472b6',
+
+    success: '#34d399',
+    warning: '#fbbf24',
+    danger:  '#ef4444',
+
+    gold:   '#fbbf24',
+    goldHi: '#fcd34d',
+
+    gradBlue:    'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)',
+    gradPurple:  'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)',
+    gradMixed:   'linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%)',
+    gradPremium: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+    gradHero:    'linear-gradient(180deg, #0a0e1f 0%, #060a14 100%)',
+    gradSurface: 'linear-gradient(180deg, #0d1224 0%, #0a0e1f 100%)'
+  },
+  bp: {
+    mobile:  640,
+    tablet:  768,
+    desktop: 1024,
+    wide:    1280
+  },
+  z: {
+    base:     1,
+    sticky:   100,
+    dropdown: 1000,
+    modal:    5000,
+    toast:    8000,
+    tooltip:  9000,
+    max:      99999
+  }
+};
+
+window.ECEPT_TOKENS = ECEPT_TOKENS;
+window.T = ECEPT_TOKENS;
 
 // ══════════════════════════════════════════════════════════════
 // DATOS REUMATOLOGÍA — SECCIONES
@@ -13059,6 +13243,1211 @@ window.SM_SEARCH_INDEX = SEARCH_INDEX;
 })();
 
 // ══════════════════════════════════════════════════════════════
+// Logo — hélice doble custom (SVG)
+// ══════════════════════════════════════════════════════════════
+// Reemplazo del emoji 🧬. Geometría minimal: dos curvas sinusoidales
+// entrelazadas con conectores horizontales (rungs). Gradiente azul→violeta.
+//
+// Props:
+//   size      — número (default 48). Tamaño cuadrado en px.
+//   animated  — boolean. Rotación continua lenta (10s).
+//   glow      — boolean. drop-shadow violeta sutil.
+//   float     — boolean. Animación de flotado vertical (subtle).
+// ══════════════════════════════════════════════════════════════
+
+function Logo(props) {
+  var size = props.size || 48;
+  var animated = props.animated;
+  var glow = props.glow;
+  var float = props.float;
+  var gradId = 'logoGrad_' + (props.idSuffix || size);
+
+  var anim = 'none';
+  if (animated && float) anim = 'ecept_logoSpin 10s linear infinite, ecept_logoFloat 3.6s ease-in-out infinite';
+  else if (animated) anim = 'ecept_logoSpin 10s linear infinite';
+  else if (float) anim = 'ecept_logoFloat 3.6s ease-in-out infinite';
+
+  return e('div', {
+    style: {
+      width: size,
+      height: size,
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      animation: anim,
+      filter: glow ? 'drop-shadow(0 0 ' + Math.round(size / 4) + 'px rgba(167,139,250,0.45))' : 'none',
+      flexShrink: 0
+    }
+  },
+    e('svg', {
+      width: size,
+      height: size,
+      viewBox: '0 0 64 64',
+      fill: 'none',
+      xmlns: 'http://www.w3.org/2000/svg'
+    },
+      e('defs', null,
+        e('linearGradient', { id: gradId, x1: 0, y1: 0, x2: 64, y2: 64, gradientUnits: 'userSpaceOnUse' },
+          e('stop', { offset: '0%', stopColor: '#60a5fa' }),
+          e('stop', { offset: '100%', stopColor: '#a78bfa' })
+        )
+      ),
+      // Strand 1 — curva superior, descendente
+      e('path', {
+        d: 'M18 6 C30 18 34 18 46 6 M18 22 C30 34 34 34 46 22 M18 42 C30 54 34 54 46 42 M18 58 C30 70 34 70 46 58',
+        stroke: 'url(#' + gradId + ')',
+        strokeWidth: 2.6,
+        strokeLinecap: 'round',
+        fill: 'none'
+      }),
+      // Strand 2 — espejo
+      e('path', {
+        d: 'M46 6 C34 18 30 18 18 6 M46 22 C34 34 30 34 18 22 M46 42 C34 54 30 54 18 42 M46 58 C34 70 30 70 18 58',
+        stroke: 'url(#' + gradId + ')',
+        strokeWidth: 2.6,
+        strokeLinecap: 'round',
+        fill: 'none',
+        opacity: 0.55
+      }),
+      // Conectores (rungs) — donde las hebras se cruzan
+      e('line', { x1: 22, y1: 14, x2: 42, y2: 14, stroke: 'url(#' + gradId + ')', strokeWidth: 1.8, strokeLinecap: 'round', opacity: 0.6 }),
+      e('line', { x1: 22, y1: 30, x2: 42, y2: 30, stroke: 'url(#' + gradId + ')', strokeWidth: 1.8, strokeLinecap: 'round', opacity: 0.6 }),
+      e('line', { x1: 22, y1: 50, x2: 42, y2: 50, stroke: 'url(#' + gradId + ')', strokeWidth: 1.8, strokeLinecap: 'round', opacity: 0.6 })
+    )
+  );
+}
+
+window.Logo = Logo;
+
+// ══════════════════════════════════════════════════════════════
+// LoadingScreen — pantalla de transición cuando se monta la app
+// ══════════════════════════════════════════════════════════════
+// Notas:
+//   - El "initial-loader" en index.html se oculta apenas dispara
+//     window.dispatchEvent('ECEPT_READY'). Este componente es para
+//     transiciones internas largas (carga de Supabase user, fetch inicial).
+//   - Si props.done = true → fade out 200ms.
+//   - Timeout 5s sin done → muestra estado "connecting" con retry.
+//
+// Props:
+//   done      — boolean. Cuando true, completa progress y desmonta.
+//   message   — string opcional. Texto bajo el título.
+//   onRetry   — fn opcional. Click en botón Recargar.
+// ══════════════════════════════════════════════════════════════
+
+function LoadingScreen(props) {
+  var p = T;
+  var s0 = useState(0);
+  var progress = s0[0];
+  var setProgress = s0[1];
+  var s1 = useState('loading');
+  var phase = s1[0];
+  var setPhase = s1[1];
+  var s2 = useState(false);
+  var fadingOut = s2[0];
+  var setFadingOut = s2[1];
+
+  useEffect(function() {
+    var p1 = 0;
+    var iv = setInterval(function() {
+      p1 += Math.random() * 8 + 4;
+      if (p1 > 92) p1 = 92;
+      setProgress(p1);
+    }, 140);
+    var to = setTimeout(function() {
+      setPhase('slow');
+    }, 5000);
+    return function() {
+      clearInterval(iv);
+      clearTimeout(to);
+    };
+  }, []);
+
+  useEffect(function() {
+    if (props.done) {
+      setProgress(100);
+      var to = setTimeout(function() { setFadingOut(true); }, 200);
+      return function() { clearTimeout(to); };
+    }
+  }, [props.done]);
+
+  return e('div', {
+    style: {
+      position: 'fixed',
+      inset: 0,
+      background: p.color.bg0,
+      zIndex: p.z.max,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      opacity: fadingOut ? 0 : 1,
+      transition: 'opacity 280ms ' + p.ease.out,
+      pointerEvents: fadingOut ? 'none' : 'auto'
+    }
+  },
+    e('div', {
+      style: {
+        textAlign: 'center',
+        maxWidth: 360,
+        padding: p.space.xl
+      }
+    },
+      // Logo
+      e('div', { style: { marginBottom: p.space.xl, display: 'flex', justifyContent: 'center' } },
+        e(Logo, { size: 96, glow: true, float: true })
+      ),
+      // ECEPT title gradient
+      e('div', {
+        style: {
+          fontSize: '40px',
+          fontWeight: 800,
+          letterSpacing: '-0.025em',
+          background: p.color.gradMixed,
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+          marginBottom: p.space.sm,
+          lineHeight: 1.05
+        }
+      }, 'ECEPT'),
+      // Tagline
+      e('div', {
+        style: {
+          fontSize: p.font.bodySm.size,
+          color: p.color.textDim,
+          marginBottom: p.space.xxl,
+          letterSpacing: '0.01em'
+        }
+      }, 'El Conocimiento Es Para Todos'),
+      // Progress bar
+      e('div', {
+        style: {
+          width: '100%',
+          height: 3,
+          background: p.color.bg2,
+          borderRadius: p.radius.pill,
+          overflow: 'hidden',
+          marginBottom: p.space.lg
+        }
+      },
+        e('div', {
+          style: {
+            height: '100%',
+            width: progress + '%',
+            background: p.color.gradMixed,
+            borderRadius: p.radius.pill,
+            transition: 'width 320ms ' + p.ease.out,
+            boxShadow: '0 0 12px rgba(96,165,250,0.4)'
+          }
+        })
+      ),
+      // Status text
+      e('div', {
+        style: {
+          fontSize: p.font.caption.size,
+          color: phase === 'slow' ? p.color.warning : p.color.textGhost,
+          minHeight: 20
+        }
+      }, phase === 'slow' ? 'Está tardando más de lo normal...' : (props.message || 'Cargando tu sesión...')),
+      // Retry button (slow state)
+      phase === 'slow' && e('button', {
+        onClick: function() {
+          if (props.onRetry) props.onRetry();
+          else window.location.reload();
+        },
+        style: {
+          marginTop: p.space.lg,
+          padding: '10px 24px',
+          background: p.color.gradMixed,
+          color: '#fff',
+          border: 'none',
+          borderRadius: p.radius.lg,
+          fontWeight: 600,
+          fontSize: p.font.bodySm.size,
+          cursor: 'pointer',
+          boxShadow: p.shadow.md,
+          animation: 'ecept_fadeSlideUp 280ms ' + p.ease.out
+        }
+      }, 'Reintentar')
+    )
+  );
+}
+
+window.LoadingScreen = LoadingScreen;
+
+// ══════════════════════════════════════════════════════════════
+// HomeView — landing del usuario, layout responsive premium
+// ══════════════════════════════════════════════════════════════
+// Mantiene TODA la información del home original (stats, progreso
+// reuma, favoritos, módulos), pero con jerarquía visual real,
+// padding generoso, grid multi-columna y aprovechamiento del viewport
+// en desktop/iPad horizontal.
+//
+// Props:
+//   user        — supabase user (puede ser null)
+//   vi          — array de IDs revisados
+//   favs        — array de IDs favoritos
+//   bestStreak  — número
+//   go          — fn navegación (modId)
+//   onFav       — fn click favorito (id)
+// ══════════════════════════════════════════════════════════════
+
+function ECEPT_useViewport() {
+  var s = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
+  var w = s[0];
+  var setW = s[1];
+  useEffect(function() {
+    function on() { setW(window.innerWidth); }
+    window.addEventListener('resize', on);
+    return function() { window.removeEventListener('resize', on); };
+  }, []);
+  return w;
+}
+window.ECEPT_useViewport = ECEPT_useViewport;
+
+function HomeView(props) {
+  var p = T;
+  var w = ECEPT_useViewport();
+  var isDesktop = w >= p.bp.desktop;
+  var isWide = w >= p.bp.wide;
+  var isTablet = w >= p.bp.tablet;
+
+  var go = props.go;
+  var vi = props.vi || [];
+  var favs = props.favs || [];
+  var bestStreak = props.bestStreak || 0;
+  var totalReuma = (typeof RD !== 'undefined' && RD.length) || 0;
+  var pct = totalReuma > 0 ? Math.round(vi.length / totalReuma * 100) : 0;
+
+  var specialIds = ['triadas','labs','imagenes','general','flashcards'];
+  var specials = (typeof MODS !== 'undefined' ? MODS : []).filter(function(m){ return specialIds.indexOf(m.id) > -1; });
+  var subjects = (typeof MODS !== 'undefined' ? MODS : []).filter(function(m){ return specialIds.indexOf(m.id) === -1; });
+
+  // ─── HERO ─────────────────────────────────────────────────
+  var hero = e('div', {
+    style: {
+      textAlign: 'center',
+      padding: isDesktop ? (p.space.xxxl + ' ' + p.space.xl + ' ' + p.space.xxl) : (p.space.xxl + ' ' + p.space.lg + ' ' + p.space.xl),
+      marginBottom: p.space.xxl,
+      background: 'radial-gradient(ellipse at center top, rgba(96,165,250,0.08) 0%, transparent 60%)',
+      borderRadius: p.radius.xxl,
+      animation: 'ecept_fadeSlideUp 480ms ' + p.ease.out
+    }
+  },
+    e('div', { style: { display: 'flex', justifyContent: 'center', marginBottom: p.space.lg } },
+      e(Logo, { size: isDesktop ? 88 : 64, glow: true, float: true })
+    ),
+    e('h1', {
+      style: {
+        fontSize: isDesktop ? '56px' : (isTablet ? '44px' : '36px'),
+        fontWeight: 800,
+        letterSpacing: '-0.025em',
+        background: p.color.gradMixed,
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        backgroundClip: 'text',
+        marginBottom: p.space.sm,
+        lineHeight: 1.05
+      }
+    }, 'ECEPT'),
+    e('p', {
+      style: {
+        fontSize: isDesktop ? p.font.h3.size : p.font.body.size,
+        color: p.color.textMuted,
+        fontWeight: 500,
+        marginBottom: p.space.xl,
+        letterSpacing: '0.01em'
+      }
+    }, 'El Conocimiento Es Para Todos'),
+    // Stats inline
+    e('div', { style: { display: 'flex', justifyContent: 'center', gap: p.space.md, flexWrap: 'wrap', maxWidth: 720, margin: '0 auto' } },
+      [
+        { v: vi.length + '/' + totalReuma, l: 'Revisadas', c: p.color.primaryHi, bg: 'rgba(96,165,250,0.08)', bd: 'rgba(96,165,250,0.18)' },
+        { v: favs.length, l: 'Favoritos', c: p.color.gold, bg: 'rgba(251,191,36,0.08)', bd: 'rgba(251,191,36,0.18)' },
+        { v: bestStreak, l: 'Mejor racha', c: p.color.success, bg: 'rgba(52,211,153,0.08)', bd: 'rgba(52,211,153,0.18)' }
+      ].map(function(st, i){
+        return e('div', {
+          key: i,
+          style: {
+            textAlign: 'center',
+            padding: '12px 22px',
+            background: st.bg,
+            borderRadius: p.radius.lg,
+            border: '1px solid ' + st.bd,
+            minWidth: 110
+          }
+        },
+          e('div', { style: { fontSize: '24px', fontWeight: 800, color: st.c, fontFamily: 'Inter, monospace', letterSpacing: '-0.02em' } }, String(st.v)),
+          e('div', { style: { fontSize: p.font.micro.size, color: p.color.textDim, marginTop: 2, letterSpacing: '0.05em', textTransform: 'uppercase' } }, st.l)
+        );
+      })
+    ),
+    // Progress reuma
+    totalReuma > 0 && e('div', { style: { maxWidth: 360, margin: p.space.lg + ' auto 0' } },
+      e('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: 6 } },
+        e('span', { style: { fontSize: p.font.micro.size, color: p.color.textDim, letterSpacing: '0.04em', textTransform: 'uppercase' } }, 'Progreso Reumatología'),
+        e('span', { style: { fontSize: p.font.micro.size, color: p.color.primaryHi, fontWeight: 700 } }, pct + '%')
+      ),
+      e('div', { style: { height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: p.radius.pill, overflow: 'hidden' } },
+        e('div', {
+          style: {
+            width: pct + '%',
+            height: '100%',
+            background: p.color.gradMixed,
+            borderRadius: p.radius.pill,
+            transition: 'width 600ms ' + p.ease.out,
+            boxShadow: '0 0 8px rgba(96,165,250,0.4)'
+          }
+        })
+      )
+    )
+  );
+
+  // ─── FAVORITES STRIP ────────────────────────────────────────
+  var favStrip = favs.length > 0 && e('div', {
+    style: {
+      marginBottom: p.space.xxl,
+      padding: p.space.lg + ' ' + p.space.xl,
+      background: 'linear-gradient(135deg, ' + p.color.bg2 + ', rgba(251,191,36,0.04))',
+      border: '1px solid rgba(251,191,36,0.18)',
+      borderRadius: p.radius.xl,
+      animation: 'ecept_fadeSlideUp 520ms ' + p.ease.out + ' 80ms both'
+    }
+  },
+    e('div', { style: { display: 'flex', alignItems: 'center', gap: p.space.sm, marginBottom: p.space.md } },
+      e('span', { style: { fontSize: 18 } }, '⭐'),
+      e('h3', { style: { fontSize: p.font.bodySm.size, fontWeight: 700, color: p.color.gold, letterSpacing: '0.04em', textTransform: 'uppercase' } }, 'Tus Favoritos')
+    ),
+    e('div', { style: { display: 'flex', flexWrap: 'wrap', gap: p.space.sm } },
+      favs.map(function(fid){
+        var enf = (typeof RD !== 'undefined' ? RD : []).find(function(d){ return d.id === fid; });
+        if (!enf) return null;
+        return e('button', {
+          key: fid,
+          onClick: function(){ go('reuma_dis', enf.s, enf.id); },
+          style: {
+            padding: '8px 14px',
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid ' + p.color.bg4,
+            borderRadius: p.radius.md,
+            cursor: 'pointer',
+            fontSize: p.font.bodySm.size,
+            fontWeight: 600,
+            color: p.color.text,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            transition: 'all 200ms ' + p.ease.standard
+          },
+          onMouseEnter: function(ev){
+            ev.currentTarget.style.borderColor = 'rgba(251,191,36,0.4)';
+            ev.currentTarget.style.transform = 'translateY(-1px)';
+          },
+          onMouseLeave: function(ev){
+            ev.currentTarget.style.borderColor = p.color.bg4;
+            ev.currentTarget.style.transform = 'translateY(0)';
+          }
+        },
+          e('span', { style: { fontSize: 14 } }, '⭐'),
+          enf.n
+        );
+      })
+    )
+  );
+
+  // ─── MODULE CARD (compartido) ───────────────────────────────
+  function moduleCard(m, i, opts) {
+    opts = opts || {};
+    var lleno = m.st === 'lleno';
+    var col = m.col || p.color.primaryHi;
+    var target = m.id;
+    if (m.id === 'cirugia') target = 'cir_menu';
+    else if (m.id === 'anatomia') target = 'anat_menu';
+    else if (m.id === 'emergen') target = 'emergen_menu';
+
+    return e('div', {
+      key: m.id,
+      onClick: function(){ if (lleno) go(target); },
+      style: {
+        background: p.color.gradSurface,
+        border: '1px solid ' + (lleno ? col + '30' : p.color.bg4),
+        borderRadius: p.radius.xl,
+        padding: opts.compact ? (p.space.lg + ' ' + p.space.xl) : (p.space.xl + ' ' + p.space.xl),
+        cursor: lleno ? 'pointer' : 'default',
+        opacity: lleno ? 1 : 0.45,
+        transition: 'all 240ms ' + p.ease.out,
+        animation: 'ecept_fadeSlideUp 480ms ' + p.ease.out + ' ' + (i * 40 + 120) + 'ms both',
+        position: 'relative',
+        overflow: 'hidden'
+      },
+      onMouseEnter: function(ev){
+        if (!lleno) return;
+        ev.currentTarget.style.borderColor = col + '66';
+        ev.currentTarget.style.transform = 'translateY(-2px)';
+        ev.currentTarget.style.boxShadow = p.shadow.lg;
+      },
+      onMouseLeave: function(ev){
+        if (!lleno) return;
+        ev.currentTarget.style.borderColor = col + '30';
+        ev.currentTarget.style.transform = 'translateY(0)';
+        ev.currentTarget.style.boxShadow = 'none';
+      }
+    },
+      // top row: icon + state badge
+      e('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: p.space.md } },
+        e('span', {
+          style: {
+            fontSize: 26,
+            width: 52,
+            height: 52,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: p.radius.lg,
+            background: col + '14',
+            border: '1px solid ' + col + '20'
+          }
+        }, m.ic),
+        lleno
+          ? e('span', { style: { fontSize: p.font.micro.size, padding: '3px 10px', borderRadius: p.radius.pill, background: col + '18', color: col, fontWeight: 700, letterSpacing: '0.04em' } }, 'ACTIVO')
+          : e('span', { style: { fontSize: p.font.micro.size, padding: '3px 10px', borderRadius: p.radius.pill, background: 'rgba(255,255,255,0.05)', color: p.color.textDim, fontWeight: 600, letterSpacing: '0.04em' } }, 'PRONTO')
+      ),
+      e('h3', { style: { fontSize: p.font.h3.size, fontWeight: 600, color: p.color.text, marginBottom: 4, letterSpacing: '-0.01em' } }, m.n),
+      e('p', { style: { fontSize: p.font.bodySm.size, color: p.color.textMuted, lineHeight: 1.55 } }, m.d)
+    );
+  }
+
+  // ─── SECCIÓN HEADER ─────────────────────────────────────────
+  function sectionHeader(label, accent) {
+    return e('h2', {
+      style: {
+        fontSize: p.font.caption.size,
+        fontWeight: 700,
+        color: p.color.textMuted,
+        marginBottom: p.space.lg,
+        textTransform: 'uppercase',
+        letterSpacing: '0.12em',
+        display: 'flex',
+        alignItems: 'center',
+        gap: p.space.sm
+      }
+    },
+      e('span', { style: { width: 4, height: 14, borderRadius: p.radius.pill, background: accent } }),
+      label
+    );
+  }
+
+  // ─── GRID — special modules ─────────────────────────────────
+  var specialGridCols = isWide ? 'repeat(4, 1fr)' : (isDesktop ? 'repeat(3, 1fr)' : (isTablet ? 'repeat(2, 1fr)' : '1fr'));
+  var subjectGridCols = isWide ? 'repeat(4, 1fr)' : (isDesktop ? 'repeat(3, 1fr)' : (isTablet ? 'repeat(2, 1fr)' : '1fr'));
+
+  return e('div', {
+    style: {
+      maxWidth: 1280,
+      margin: '0 auto',
+      padding: isDesktop ? (p.space.xl + ' ' + p.space.xxl) : (p.space.lg + ' ' + p.space.lg),
+      animation: 'ecept_fadeIn 420ms ' + p.ease.out
+    }
+  },
+    hero,
+    favStrip,
+    e('div', { style: { marginBottom: p.space.xxxl } },
+      sectionHeader('⚡ Secciones Especiales', p.color.purple),
+      e('div', { style: { display: 'grid', gridTemplateColumns: specialGridCols, gap: p.space.lg } },
+        specials.map(function(m, i){ return moduleCard(m, i, { compact: true }); })
+      )
+    ),
+    e('div', null,
+      sectionHeader('📋 Materias', p.color.primaryHi),
+      e('div', { style: { display: 'grid', gridTemplateColumns: subjectGridCols, gap: p.space.lg } },
+        subjects.map(function(m, i){ return moduleCard(m, i + specials.length); })
+      )
+    )
+  );
+}
+
+window.HomeView = HomeView;
+
+// ══════════════════════════════════════════════════════════════
+// ModuleShell — wrapper consistente para vistas de módulo
+// ══════════════════════════════════════════════════════════════
+// Proporciona header sticky con título/subtítulo/icono/acciones,
+// content area con max-width 1280 + padding generoso, y opcional
+// glow premium ambient en el header (cuando premium=true).
+//
+// Props:
+//   title     — string (h1)
+//   subtitle  — string opcional (body muted)
+//   icon      — string emoji o ReactElement
+//   accent    — color hex para barra accent vertical (default primaryHi)
+//   actions   — ReactNode opcional (botones derecha del header)
+//   children  — contenido del módulo
+//   premium   — boolean. Glow dorado ambient sutil.
+//   onBack    — fn opcional. Si se pasa, muestra botón ← a la izquierda.
+// ══════════════════════════════════════════════════════════════
+
+function ModuleShell(props) {
+  var p = T;
+  var w = (typeof ECEPT_useViewport === 'function') ? ECEPT_useViewport() : 1024;
+  var isDesktop = w >= p.bp.desktop;
+  var accent = props.accent || p.color.primaryHi;
+  var icon = props.icon;
+
+  return e('div', {
+    style: {
+      minHeight: '100vh',
+      animation: 'ecept_fadeIn 280ms ' + p.ease.out
+    }
+  },
+    // ── Header sticky ──
+    e('div', {
+      style: {
+        position: 'sticky',
+        top: 0,
+        zIndex: p.z.sticky,
+        background: 'rgba(10,14,31,0.85)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderBottom: '1px solid ' + p.color.bg4,
+        boxShadow: props.premium ? p.shadow.glow_premium : 'none',
+        transition: 'box-shadow 320ms ' + p.ease.out
+      }
+    },
+      e('div', {
+        style: {
+          maxWidth: 1280,
+          margin: '0 auto',
+          padding: isDesktop ? (p.space.xl + ' ' + p.space.xxl) : (p.space.lg + ' ' + p.space.lg),
+          display: 'flex',
+          alignItems: 'center',
+          gap: p.space.lg
+        }
+      },
+        // Optional back button
+        props.onBack && e('button', {
+          onClick: props.onBack,
+          'aria-label': 'Volver',
+          style: {
+            background: 'none',
+            border: 'none',
+            color: p.color.textMuted,
+            fontSize: 22,
+            cursor: 'pointer',
+            width: 40,
+            height: 40,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: p.radius.md,
+            transition: 'background-color 200ms ease-out',
+            flexShrink: 0
+          },
+          onMouseEnter: function(ev) { ev.currentTarget.style.background = 'rgba(255,255,255,0.05)'; },
+          onMouseLeave: function(ev) { ev.currentTarget.style.background = 'none'; }
+        }, '←'),
+        // Accent bar
+        e('div', {
+          style: {
+            width: 4,
+            height: 36,
+            background: props.premium ? p.color.gradPremium : accent,
+            borderRadius: p.radius.pill,
+            flexShrink: 0
+          }
+        }),
+        // Icon
+        icon && e('div', {
+          style: {
+            fontSize: 28,
+            width: 48,
+            height: 48,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: accent + '14',
+            border: '1px solid ' + accent + '24',
+            borderRadius: p.radius.lg,
+            flexShrink: 0
+          }
+        }, icon),
+        // Title block
+        e('div', { style: { flex: 1, minWidth: 0 } },
+          e('h1', {
+            style: {
+              fontSize: isDesktop ? p.font.h1.size : p.font.h2.size,
+              fontWeight: 700,
+              color: p.color.text,
+              letterSpacing: p.font.h1.spacing,
+              lineHeight: 1.15,
+              margin: 0
+            }
+          }, props.title),
+          props.subtitle && e('div', {
+            style: {
+              fontSize: p.font.bodySm.size,
+              color: p.color.textMuted,
+              marginTop: 2,
+              lineHeight: 1.4
+            }
+          }, props.subtitle)
+        ),
+        // Actions
+        props.actions && e('div', { style: { display: 'flex', gap: p.space.sm, alignItems: 'center', flexShrink: 0 } }, props.actions)
+      )
+    ),
+    // ── Content area ──
+    e('div', {
+      style: {
+        maxWidth: 1280,
+        margin: '0 auto',
+        padding: isDesktop ? (p.space.xxl + ' ' + p.space.xxl) : (p.space.lg + ' ' + p.space.lg)
+      }
+    }, props.children)
+  );
+}
+
+window.ModuleShell = ModuleShell;
+
+// ══════════════════════════════════════════════════════════════
+// Layered — infraestructura de capas progresivas
+// ══════════════════════════════════════════════════════════════
+// Componentes para construir UIs con jerarquía de información:
+//   - CollapsibleSection: sección expandible con animación.
+//   - Detail: wrapper "ver más" inline.
+//   - LayeredCard: card con 3 niveles (resumen / detalles / profundizar).
+//   - InfoLayer: panel lateral derecho 480px para "profundizar".
+//
+// USO FUTURO (no se migra contenido todavía):
+// 1. Identificá un módulo denso (ej: ReceptoresView con 30 ítems).
+// 2. Reemplazá los items planos por LayeredCard:
+//      e(LayeredCard, {
+//        title: 'β1-adrenérgico', summary: 'Cardioacelerador',
+//        details: e(...info media...),
+//        deepDive: e(...info larga + tablas...),
+//        icon: '💓', accent: '#ef4444'
+//      })
+// 3. Para secciones largas dentro de un detail view, usá CollapsibleSection
+//    con level (1=h2, 2=h3, 3=h4) para jerarquía consistente.
+// 4. Para abrir contenido extra sin perder contexto, InfoLayer slidea
+//    desde la derecha (no modal centrado).
+//
+// Estos primitives respetan los design tokens (T) y las animaciones
+// premium (ease.standard, ease.out). NO modifican datos.
+// ══════════════════════════════════════════════════════════════
+
+// ─── CollapsibleSection ────────────────────────────────────
+function CollapsibleSection(props) {
+  var p = T;
+  var s = useState(!!props.defaultOpen);
+  var open = s[0];
+  var setOpen = s[1];
+  var level = props.level || 1;
+  var accent = props.accent || p.color.primaryHi;
+  var titleSize = level === 1 ? p.font.h2.size : (level === 2 ? p.font.h3.size : p.font.body.size);
+  var titleWeight = level === 1 ? 700 : (level === 2 ? 600 : 500);
+
+  return e('div', {
+    style: {
+      borderRadius: p.radius.lg,
+      border: '1px solid ' + (open ? accent + '30' : p.color.bg4),
+      background: open ? 'linear-gradient(180deg,' + p.color.bg2 + ',' + p.color.bg1 + ')' : p.color.bg2,
+      transition: 'border-color 240ms ' + p.ease.standard + ', background-color 240ms ease',
+      overflow: 'hidden',
+      marginBottom: p.space.md
+    }
+  },
+    e('button', {
+      onClick: function() { setOpen(!open); },
+      style: {
+        width: '100%',
+        textAlign: 'left',
+        background: 'none',
+        border: 'none',
+        cursor: 'pointer',
+        padding: p.space.lg + ' ' + p.space.xl,
+        display: 'flex',
+        alignItems: 'center',
+        gap: p.space.md,
+        color: p.color.text
+      }
+    },
+      e('span', {
+        style: {
+          color: accent,
+          fontSize: 14,
+          transform: open ? 'rotate(90deg)' : 'rotate(0deg)',
+          transition: 'transform 280ms ' + p.ease.standard,
+          display: 'inline-block',
+          flexShrink: 0
+        }
+      }, '▶'),
+      e('span', { style: { fontSize: titleSize, fontWeight: titleWeight, letterSpacing: '-0.01em', flex: 1 } }, props.title),
+      props.badge && e('span', { style: { fontSize: p.font.micro.size, padding: '2px 8px', borderRadius: p.radius.pill, background: accent + '18', color: accent, fontWeight: 700 } }, props.badge)
+    ),
+    open && e('div', {
+      style: {
+        padding: '0 ' + p.space.xl + ' ' + p.space.lg,
+        animation: 'ecept_fadeSlideDown 280ms ' + p.ease.out
+      }
+    }, props.children)
+  );
+}
+window.CollapsibleSection = CollapsibleSection;
+
+// ─── Detail ────────────────────────────────────────────────
+function Detail(props) {
+  var p = T;
+  var s = useState(false);
+  var open = s[0];
+  var setOpen = s[1];
+
+  return e('span', { style: { display: 'inline' } },
+    e('button', {
+      onClick: function() { setOpen(!open); },
+      style: {
+        background: 'none',
+        border: 'none',
+        color: p.color.primaryHi,
+        cursor: 'pointer',
+        fontSize: 'inherit',
+        padding: 0,
+        textDecoration: 'underline',
+        textDecorationStyle: 'dotted',
+        textUnderlineOffset: 3
+      }
+    }, props.summary),
+    open && e('span', {
+      style: {
+        display: 'block',
+        marginTop: p.space.xs,
+        padding: p.space.sm + ' ' + p.space.md,
+        background: p.color.primarySoft,
+        borderLeft: '2px solid ' + p.color.primaryHi,
+        borderRadius: '0 ' + p.radius.sm + ' ' + p.radius.sm + ' 0',
+        color: p.color.text,
+        fontSize: p.font.bodySm.size,
+        lineHeight: 1.55,
+        animation: 'ecept_fadeSlideDown 240ms ' + p.ease.out
+      }
+    }, props.children)
+  );
+}
+window.Detail = Detail;
+
+// ─── LayeredCard ────────────────────────────────────────────
+function LayeredCard(props) {
+  var p = T;
+  var sExp = useState(false);
+  var expanded = sExp[0];
+  var setExpanded = sExp[1];
+  var sLayer = useState(false);
+  var layerOpen = sLayer[0];
+  var setLayerOpen = sLayer[1];
+  var accent = props.accent || p.color.primaryHi;
+
+  return e('div', {
+    style: {
+      background: p.color.gradSurface,
+      border: '1px solid ' + (expanded ? accent + '40' : p.color.bg4),
+      borderRadius: p.radius.xl,
+      padding: p.space.lg + ' ' + p.space.xl,
+      transition: 'all 240ms ' + p.ease.standard,
+      boxShadow: expanded ? p.shadow.md : 'none'
+    }
+  },
+    // Top: icon + title + summary
+    e('div', { style: { display: 'flex', alignItems: 'flex-start', gap: p.space.md } },
+      props.icon && e('span', {
+        style: {
+          fontSize: 22,
+          width: 44,
+          height: 44,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: accent + '14',
+          border: '1px solid ' + accent + '24',
+          borderRadius: p.radius.md,
+          flexShrink: 0
+        }
+      }, props.icon),
+      e('div', { style: { flex: 1, minWidth: 0 } },
+        e('div', { style: { fontSize: p.font.h3.size, fontWeight: 600, color: p.color.text, marginBottom: 2 } }, props.title),
+        props.summary && e('div', { style: { fontSize: p.font.bodySm.size, color: p.color.textMuted, lineHeight: 1.5 } }, props.summary)
+      ),
+      // Toggle expand
+      props.details && e('button', {
+        onClick: function() { setExpanded(!expanded); },
+        'aria-label': expanded ? 'Contraer' : 'Expandir',
+        style: {
+          background: 'none',
+          border: '1px solid ' + p.color.bg4,
+          borderRadius: p.radius.sm,
+          color: p.color.textMuted,
+          fontSize: 13,
+          width: 32,
+          height: 32,
+          cursor: 'pointer',
+          flexShrink: 0,
+          transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+          transition: 'transform 280ms ' + p.ease.standard
+        }
+      }, '▾')
+    ),
+    // Mid: details
+    expanded && props.details && e('div', {
+      style: {
+        marginTop: p.space.lg,
+        paddingTop: p.space.lg,
+        borderTop: '1px solid ' + p.color.bg4,
+        animation: 'ecept_fadeSlideDown 280ms ' + p.ease.out
+      }
+    }, props.details),
+    // Bottom: deepDive trigger
+    expanded && props.deepDive && e('button', {
+      onClick: function() { setLayerOpen(true); },
+      style: {
+        marginTop: p.space.md,
+        background: 'none',
+        border: 'none',
+        color: accent,
+        cursor: 'pointer',
+        fontSize: p.font.bodySm.size,
+        fontWeight: 600,
+        padding: '4px 0',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6
+      }
+    }, 'Profundizar', e('span', null, '→')),
+    // Side panel
+    layerOpen && props.deepDive && e(InfoLayer, {
+      open: layerOpen,
+      onClose: function() { setLayerOpen(false); },
+      title: props.title,
+      accent: accent
+    }, props.deepDive)
+  );
+}
+window.LayeredCard = LayeredCard;
+
+// ─── InfoLayer ──────────────────────────────────────────────
+function InfoLayer(props) {
+  var p = T;
+  if (!props.open) return null;
+  var accent = props.accent || p.color.primaryHi;
+
+  return e('div', {
+    style: {
+      position: 'fixed',
+      inset: 0,
+      zIndex: p.z.modal,
+      animation: 'ecept_fadeIn 240ms ' + p.ease.out
+    }
+  },
+    // Backdrop
+    e('div', {
+      onClick: props.onClose,
+      style: {
+        position: 'absolute',
+        inset: 0,
+        background: 'rgba(6,10,20,0.4)',
+        backdropFilter: 'blur(4px)',
+        WebkitBackdropFilter: 'blur(4px)'
+      }
+    }),
+    // Panel
+    e('div', {
+      style: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        width: '100%',
+        maxWidth: 480,
+        background: 'linear-gradient(180deg,' + p.color.bg2 + ' 0%,' + p.color.bg1 + ' 100%)',
+        borderLeft: '1px solid ' + accent + '30',
+        boxShadow: '-20px 0 48px rgba(0,0,0,0.4)',
+        display: 'flex',
+        flexDirection: 'column',
+        animation: 'ecept_fadeSlideUp 320ms ' + p.ease.out
+      }
+    },
+      // Header
+      e('div', {
+        style: {
+          padding: p.space.lg + ' ' + p.space.xl,
+          borderBottom: '1px solid ' + p.color.bg4,
+          display: 'flex',
+          alignItems: 'center',
+          gap: p.space.md
+        }
+      },
+        e('div', {
+          style: {
+            width: 4,
+            height: 28,
+            background: accent,
+            borderRadius: p.radius.pill
+          }
+        }),
+        e('h2', { style: { flex: 1, fontSize: p.font.h3.size, fontWeight: 700, color: p.color.text, margin: 0, letterSpacing: '-0.015em' } }, props.title),
+        e('button', {
+          onClick: props.onClose,
+          'aria-label': 'Cerrar',
+          style: {
+            background: 'none',
+            border: 'none',
+            color: p.color.textMuted,
+            fontSize: 24,
+            cursor: 'pointer',
+            width: 36,
+            height: 36,
+            borderRadius: p.radius.md
+          }
+        }, '×')
+      ),
+      // Content
+      e('div', {
+        style: {
+          flex: 1,
+          overflowY: 'auto',
+          padding: p.space.xl
+        }
+      }, props.children)
+    )
+  );
+}
+window.InfoLayer = InfoLayer;
+
+// ══════════════════════════════════════════════════════════════
+// Toast — sistema de notificaciones premium ECEPT
+// ══════════════════════════════════════════════════════════════
+// API:
+//   showToast({ message, variant, duration })
+//   variant: 'success' | 'error' | 'info' | 'warning' | 'premium'
+//
+// Uso:
+//   window.ECEPT_toast('Guardado ✓', 'success')
+//   window.ECEPT_toast('Error de red', 'error')
+//
+// El componente <ToastHost /> debe montarse una sola vez en App.
+// ══════════════════════════════════════════════════════════════
+
+var ECEPT_TOASTS = [];
+var ECEPT_TOAST_LISTENERS = [];
+var ECEPT_TOAST_NEXT_ID = 1;
+
+function ECEPT_toast_emit() {
+  for (var i = 0; i < ECEPT_TOAST_LISTENERS.length; i++) {
+    try { ECEPT_TOAST_LISTENERS[i](); } catch (e2) {}
+  }
+}
+
+window.ECEPT_toast = function(message, variant, duration) {
+  var id = ECEPT_TOAST_NEXT_ID++;
+  var v = variant || 'info';
+  var d = duration || (v === 'error' ? 8000 : 4000);
+  ECEPT_TOASTS.push({ id: id, message: message, variant: v, t: Date.now() });
+  ECEPT_toast_emit();
+  setTimeout(function() {
+    ECEPT_TOASTS = ECEPT_TOASTS.filter(function(t){ return t.id !== id; });
+    ECEPT_toast_emit();
+  }, d);
+  return id;
+};
+
+function ToastHost() {
+  var p = T;
+  var s = useState(0);
+  var setTick = s[1];
+  useEffect(function() {
+    function onChange() { setTick(function(x){ return x + 1; }); }
+    ECEPT_TOAST_LISTENERS.push(onChange);
+    return function() {
+      ECEPT_TOAST_LISTENERS = ECEPT_TOAST_LISTENERS.filter(function(f){ return f !== onChange; });
+    };
+  }, []);
+
+  var variants = {
+    success: { color: p.color.success, icon: '✓', bg: 'rgba(52,211,153,0.10)' },
+    error:   { color: p.color.danger,  icon: '✕', bg: 'rgba(239,68,68,0.10)' },
+    info:    { color: p.color.primaryHi, icon: 'ℹ', bg: 'rgba(96,165,250,0.10)' },
+    warning: { color: p.color.warning, icon: '!', bg: 'rgba(251,191,36,0.10)' },
+    premium: { color: p.color.gold,    icon: '★', bg: 'rgba(251,191,36,0.10)' }
+  };
+
+  return e('div', {
+    style: {
+      position: 'fixed',
+      bottom: 24,
+      right: 24,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 8,
+      zIndex: p.z.toast,
+      pointerEvents: 'none',
+      maxWidth: 'calc(100vw - 48px)'
+    }
+  },
+    ECEPT_TOASTS.map(function(t) {
+      var v = variants[t.variant] || variants.info;
+      var isPremium = t.variant === 'premium';
+      return e('div', {
+        key: t.id,
+        style: {
+          background: 'rgba(17,23,58,0.92)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          border: '1px solid ' + p.color.bg4,
+          borderLeft: '3px solid ' + v.color,
+          borderRadius: p.radius.lg,
+          padding: '14px 18px',
+          maxWidth: 360,
+          minWidth: 240,
+          boxShadow: isPremium ? p.shadow.glow_premium : p.shadow.lg,
+          color: p.color.text,
+          fontSize: p.font.bodySm.size,
+          lineHeight: 1.5,
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: 10,
+          pointerEvents: 'auto',
+          animation: 'ecept_fadeSlideUp 320ms ' + p.ease.out
+        }
+      },
+        e('span', {
+          style: {
+            color: v.color,
+            fontWeight: 700,
+            fontSize: 14,
+            width: 20,
+            height: 20,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            marginTop: 1
+          }
+        }, v.icon),
+        e('span', { style: { flex: 1, wordBreak: 'break-word' } }, t.message)
+      );
+    })
+  );
+}
+
+window.ToastHost = ToastHost;
+
+// ══════════════════════════════════════════════════════════════
+// Button — sistema unificado de botones premium ECEPT
+// ══════════════════════════════════════════════════════════════
+// Props:
+//   variant: 'primary' | 'secondary' | 'ghost' | 'danger' | 'premium'
+//   size:    'sm' (32px) | 'md' (40px) | 'lg' (48px)
+//   icon:    string opcional (emoji o ReactElement)
+//   iconRight: boolean (icon a la derecha)
+//   loading: boolean
+//   disabled: boolean
+//   onClick: fn
+//   children: label
+// ══════════════════════════════════════════════════════════════
+
+function Button(props) {
+  var p = T;
+  var variant = props.variant || 'primary';
+  var size = props.size || 'md';
+  var disabled = props.disabled || props.loading;
+
+  var heights = { sm: 32, md: 40, lg: 48 };
+  var paddings = { sm: '0 12px', md: '0 18px', lg: '0 24px' };
+  var fontSizes = { sm: p.font.bodySm.size, md: p.font.body.size, lg: p.font.body.size };
+
+  var styles = {
+    primary: {
+      background: 'linear-gradient(135deg,#60a5fa,#a78bfa)',
+      color: '#fff',
+      border: 'none',
+      boxShadow: '0 4px 12px rgba(167,139,250,0.25)'
+    },
+    secondary: {
+      background: p.color.bg2,
+      color: p.color.text,
+      border: '1px solid ' + p.color.bg4,
+      boxShadow: 'none'
+    },
+    ghost: {
+      background: 'transparent',
+      color: p.color.textMuted,
+      border: '1px solid transparent',
+      boxShadow: 'none'
+    },
+    danger: {
+      background: 'rgba(239,68,68,0.12)',
+      color: p.color.danger,
+      border: '1px solid rgba(239,68,68,0.30)',
+      boxShadow: 'none'
+    },
+    premium: {
+      background: p.color.gradPremium,
+      color: '#0a0e1f',
+      border: 'none',
+      boxShadow: p.shadow.glow_premium
+    }
+  };
+  var st = styles[variant] || styles.primary;
+
+  return e('button', {
+    onClick: disabled ? undefined : props.onClick,
+    disabled: disabled,
+    'aria-label': props['aria-label'],
+    style: Object.assign({
+      height: heights[size],
+      minWidth: heights[size],
+      padding: paddings[size],
+      borderRadius: p.radius.lg,
+      fontSize: fontSizes[size],
+      fontWeight: 600,
+      letterSpacing: '-0.01em',
+      cursor: disabled ? 'not-allowed' : 'pointer',
+      opacity: disabled ? 0.55 : 1,
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      transition: 'transform 200ms ' + p.ease.standard + ', box-shadow 200ms ease-out, opacity 180ms ease',
+      flexShrink: 0
+    }, st),
+    onMouseEnter: function(ev) {
+      if (disabled) return;
+      if (variant === 'primary' || variant === 'premium') {
+        ev.currentTarget.style.transform = 'translateY(-1px)';
+      } else if (variant === 'ghost') {
+        ev.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+      } else if (variant === 'secondary') {
+        ev.currentTarget.style.borderColor = p.color.primaryHi;
+      } else if (variant === 'danger') {
+        ev.currentTarget.style.background = 'rgba(239,68,68,0.20)';
+      }
+    },
+    onMouseLeave: function(ev) {
+      if (disabled) return;
+      ev.currentTarget.style.transform = 'translateY(0)';
+      if (variant === 'ghost') ev.currentTarget.style.background = 'transparent';
+      if (variant === 'secondary') ev.currentTarget.style.borderColor = p.color.bg4;
+      if (variant === 'danger') ev.currentTarget.style.background = 'rgba(239,68,68,0.12)';
+    }
+  },
+    props.loading
+      ? e('span', { style: { animation: 'ecept_logoSpin 800ms linear infinite', display: 'inline-block' } }, '⟳')
+      : (props.icon && !props.iconRight ? e('span', null, props.icon) : null),
+    props.children && e('span', null, props.children),
+    !props.loading && props.icon && props.iconRight ? e('span', null, props.icon) : null
+  );
+}
+
+window.Button = Button;
+
+// ══════════════════════════════════════════════════════════════
 // CHATBOT — Elion AI assistant for ECEPT
 // ES5 estricto: solo declaraciones var y function. Nada de ES6+.
 // React.createElement vía alias global `e`. Sin JSX.
@@ -13117,12 +14506,14 @@ var CB_CALLOUTS = {
 };
 
 function CB_elionAvatar(sz) {
+  // Avatar premium: Logo SVG hélice doble en círculo gradiente sutil
   return e('div', { style:{
     width:sz+'px', height:sz+'px', flexShrink:0, borderRadius:'50%',
-    background:'rgba(59,130,246,.15)', border:'1px solid rgba(59,130,246,.3)',
+    background:'linear-gradient(135deg,rgba(96,165,250,0.18),rgba(167,139,250,0.10))',
+    border:'1px solid rgba(167,139,250,0.30)',
     display:'flex', alignItems:'center', justifyContent:'center',
-    fontSize:Math.round(sz*0.52)+'px', userSelect:'none'
-  }}, '🧬');
+    boxShadow:'0 0 12px rgba(167,139,250,0.18)', userSelect:'none', overflow:'hidden'
+  }}, e(window.Logo || 'span', { size: Math.round(sz * 0.78), idSuffix:'av_'+sz }));
 }
 
 // ── Inline markdown: [link](url), **bold**, `code`, *italic* ─
@@ -13656,7 +15047,7 @@ function ChatBot(props) {
   } else if (CB_fullscreen) {
     panelStyle = { position:'fixed', inset:0, background:C.bg, zIndex:9999, display:'flex', flexDirection:'row', overflow:'hidden', animation:'CB_panelIn 280ms cubic-bezier(0.32,0.72,0,1)' };
   } else {
-    panelStyle = { position:'fixed', top:16, left:16, bottom:16, width:'440px', borderRadius:20, background:'linear-gradient(180deg,#0d1224 0%,#060a14 100%)', border:'1px solid rgba(59,130,246,.25)', boxShadow:'0 20px 60px rgba(0,0,0,.6),0 0 0 1px rgba(59,130,246,.1) inset', zIndex:9999, display:'flex', flexDirection:'column', overflow:'hidden', animation:'CB_panelIn 280ms cubic-bezier(0.32,0.72,0,1)' };
+    panelStyle = { position:'fixed', top:24, left:24, bottom:24, width:'460px', borderRadius:28, background:'linear-gradient(180deg,#0d1224 0%,#060a14 100%)', border:'1px solid rgba(96,165,250,.20)', boxShadow:'0 20px 48px rgba(0,0,0,0.4), 0 8px 16px rgba(0,0,0,0.25), 0 0 0 1px rgba(96,165,250,.08) inset', zIndex:9999, display:'flex', flexDirection:'column', overflow:'hidden', animation:'CB_panelIn 320ms cubic-bezier(0.16,1,0.3,1)' };
   }
 
   var inputContainerStyle = {
@@ -13927,8 +15318,16 @@ function ChatBot(props) {
         else { CB_setOpen(true); CB_setConnErr(''); }
       },
       'aria-label':'Abrir asistente Elion',
-      style:{ position:'fixed', bottom:20, right:20, width:52, height:52, minWidth:44, minHeight:44, borderRadius:'50%', background:'linear-gradient(135deg,#60a5fa,#a78bfa)', border:'none', color:'#fff', fontSize:20, cursor:'pointer', boxShadow:'0 4px 20px rgba(96,165,250,.45)', zIndex:95, display:'flex', alignItems:'center', justifyContent:'center' }
-    }, '🧬'),
+      style:{ position:'fixed', bottom:24, right:24, width:60, height:60, minWidth:44, minHeight:44, borderRadius:'50%', background:'linear-gradient(135deg,#60a5fa 0%,#a78bfa 100%)', border:'none', color:'#fff', cursor:'pointer', boxShadow:'0 0 32px rgba(167,139,250,0.35), 0 8px 24px rgba(0,0,0,0.3)', zIndex:95, display:'flex', alignItems:'center', justifyContent:'center', transition:'transform 240ms cubic-bezier(0.32,0.72,0,1), box-shadow 240ms ease-out', animation:'ecept_scaleIn 360ms cubic-bezier(0.34,1.56,0.64,1) 600ms both' },
+      onMouseEnter: function(ev) {
+        ev.currentTarget.style.transform = 'scale(1.06)';
+        ev.currentTarget.style.boxShadow = '0 0 40px rgba(167,139,250,0.5), 0 12px 28px rgba(0,0,0,0.35)';
+      },
+      onMouseLeave: function(ev) {
+        ev.currentTarget.style.transform = 'scale(1)';
+        ev.currentTarget.style.boxShadow = '0 0 32px rgba(167,139,250,0.35), 0 8px 24px rgba(0,0,0,0.3)';
+      }
+    }, e(window.Logo || 'span', { size: 32, idSuffix:'fab' })),
 
     // ── Backdrop ──
     CB_open && (isMobile || CB_fullscreen) && e('div', {
@@ -14032,14 +15431,33 @@ function ChatBot(props) {
                   style:{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flex:1, gap:14, minHeight:200, paddingTop:20 }
                 },
                   e('div', { style:{ width:64, height:64, borderRadius:'50%', background:'rgba(59,130,246,.12)', border:'1px solid rgba(59,130,246,.25)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:30, boxShadow:'0 0 40px rgba(59,130,246,.3)' } }, '🧬'),
-                  e('div', { style:{ fontWeight:700, fontSize:20, background:'linear-gradient(135deg,#60a5fa,#a78bfa)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' } }, 'Hola, soy Elion'),
-                  e('div', { style:{ color:C.mt, fontSize:13 } }, '¿Con qué te ayudo hoy?'),
-                  e('div', { style:{ display:'flex', flexDirection:'column', gap:8, width:'100%', maxWidth:300, marginTop:4 } },
+                  e('div', { style:{ marginBottom: 4 } }, e(window.Logo || 'span', { size: 72, glow: true, float: true, idSuffix:'empty' })),
+                  e('div', { style:{ fontWeight:800, fontSize:26, letterSpacing:'-0.02em', background:'linear-gradient(135deg,#60a5fa,#a78bfa)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text', lineHeight:1.1 } }, '¿Cómo te ayudo hoy?'),
+                  e('div', { style:{ color:C.mt, fontSize:13, marginTop:-4 } }, 'Soy Elion · tu asistente médico'),
+                  e('div', { style:{ display:'flex', flexDirection:'column', gap:10, width:'100%', maxWidth:340, marginTop:12 } },
                     quickPrompts.map(function(qp, qi) {
                       return e('button', {
                         key:qi,
                         onClick: function() { CB_setInput(qp); if (CB_inputRef.current) CB_inputRef.current.focus(); },
-                        style:{ minHeight:44, padding:'12px 14px', borderRadius:12, background:C.cd, border:'1px solid '+C.bd, color:C.tx, fontSize:13, cursor:'pointer', textAlign:'left', lineHeight:1.4 }
+                        style:{
+                          minHeight:48, padding:'14px 18px', borderRadius:14,
+                          background:'linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)',
+                          border:'1px solid '+C.bd, color:C.tx, fontSize:13, cursor:'pointer',
+                          textAlign:'left', lineHeight:1.45,
+                          transition:'all 220ms cubic-bezier(0.16,1,0.3,1)',
+                          animation:'ecept_fadeSlideUp 480ms cubic-bezier(0.16,1,0.3,1) '+(200+qi*80)+'ms both',
+                          boxShadow:'0 1px 2px rgba(0,0,0,0.2)'
+                        },
+                        onMouseEnter: function(ev) {
+                          ev.currentTarget.style.borderColor = 'rgba(96,165,250,0.4)';
+                          ev.currentTarget.style.transform = 'translateY(-1px)';
+                          ev.currentTarget.style.boxShadow = '0 4px 14px rgba(96,165,250,0.15)';
+                        },
+                        onMouseLeave: function(ev) {
+                          ev.currentTarget.style.borderColor = C.bd;
+                          ev.currentTarget.style.transform = 'translateY(0)';
+                          ev.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.2)';
+                        }
                       }, qp);
                     })
                   )
@@ -14047,12 +15465,12 @@ function ChatBot(props) {
 
                 CB_msgs.map(function(m, i) {
                   var isUser = m.role === 'user';
-                  return e('div', { key:i, style:{ display:'flex', flexDirection:'column', alignItems:isUser?'flex-end':'flex-start', gap:4 } },
+                  return e('div', { key:i, style:{ display:'flex', flexDirection:'column', alignItems:isUser?'flex-end':'flex-start', gap:4, animation:'ecept_messageIn 320ms cubic-bezier(0.32,0.72,0,1)' } },
                     isUser
-                      ? e('div', { style:{ maxWidth:'85%', padding:'14px 16px', borderRadius:'18px 18px 4px 18px', background:'linear-gradient(135deg,rgba(59,130,246,.18),rgba(96,165,250,.12))', border:'1px solid rgba(96,165,250,.25)', color:C.tx, fontSize:13, lineHeight:1.55, wordBreak:'break-word', whiteSpace:'pre-wrap' } }, m.text)
-                      : e('div', { style:{ display:'flex', alignItems:'flex-start', gap:8, maxWidth:'92%' } },
-                          CB_elionAvatar(28),
-                          e('div', { style:{ padding:'14px 16px', borderRadius:'4px 18px 18px 18px', background:m.error?'rgba(239,68,68,.08)':'#0d1224', border:'1px solid '+(m.error?'rgba(239,68,68,.25)':'#1a2040'), boxShadow:m.error?'none':'0 2px 8px rgba(0,0,0,.2)', color:m.error?'#ef4444':C.tx, fontSize:13, lineHeight:1.55, wordBreak:'break-word' } },
+                      ? e('div', { style:{ maxWidth:'85%', padding:'13px 18px', borderRadius:'20px 20px 6px 20px', background:'linear-gradient(135deg,rgba(59,130,246,.20),rgba(96,165,250,.10))', border:'1px solid rgba(96,165,250,.28)', color:C.tx, fontSize:14, lineHeight:1.55, wordBreak:'break-word', whiteSpace:'pre-wrap', boxShadow:'0 1px 2px rgba(0,0,0,0.2)' } }, m.text)
+                      : e('div', { style:{ display:'flex', alignItems:'flex-start', gap:10, maxWidth:'92%' } },
+                          CB_elionAvatar(30),
+                          e('div', { style:{ padding:'14px 18px', borderRadius:'20px 20px 20px 6px', background:m.error?'rgba(239,68,68,.08)':'linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)', border:'1px solid '+(m.error?'rgba(239,68,68,.25)':'#1a2040'), boxShadow:m.error?'none':'0 2px 8px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.15)', color:m.error?'#ef4444':C.tx, fontSize:14, lineHeight:1.55, wordBreak:'break-word' } },
                             m.error ? e('span', null, m.text) : CB_renderMarkdown(m.text)
                           )
                         )
@@ -14096,7 +15514,7 @@ function ChatBot(props) {
                     onClick:CB_send,
                     disabled:CB_loading||(!CB_input.trim()&&CB_pendingFiles.length===0),
                     'aria-label':CB_loading?'Cargando':'Enviar',
-                    style:{ width:36, height:36, flexShrink:0, borderRadius:10, border:'none', background:(CB_loading||(!CB_input.trim()&&CB_pendingFiles.length===0))?'#1a2040':C.ac, color:'#fff', cursor:(CB_loading||(!CB_input.trim()&&CB_pendingFiles.length===0))?'default':'pointer', fontSize:14, fontWeight:700, display:'flex', alignItems:'center', justifyContent:'center', transition:'background .2s', padding:0 }
+                    style:{ width:40, height:40, flexShrink:0, borderRadius:'50%', border:'none', background:(CB_loading||(!CB_input.trim()&&CB_pendingFiles.length===0))?'#1a2040':'linear-gradient(135deg,#60a5fa,#a78bfa)', color:'#fff', cursor:(CB_loading||(!CB_input.trim()&&CB_pendingFiles.length===0))?'default':'pointer', fontSize:15, fontWeight:700, display:'flex', alignItems:'center', justifyContent:'center', transition:'all 240ms cubic-bezier(0.34,1.56,0.64,1)', padding:0, boxShadow:(CB_loading||(!CB_input.trim()&&CB_pendingFiles.length===0))?'none':'0 4px 12px rgba(167,139,250,0.30)' }
                   }, CB_loading
                     ? e('span', { style:{ display:'inline-block', animation:'CB_spin .8s linear infinite' } }, '⟳')
                     : '➤'
@@ -14280,17 +15698,17 @@ function AuthModal(props){
     style:{
       position:"fixed",
       top:0, left:0, right:0, bottom:0,
-      background:"rgba(6,10,20,.78)",
-      backdropFilter:"blur(4px)",
-      WebkitBackdropFilter:"blur(4px)",
+      background:"rgba(6,10,20,.85)",
+      backdropFilter:"blur(12px)",
+      WebkitBackdropFilter:"blur(12px)",
       display:"flex",
       alignItems:"flex-start",
       justifyContent:"center",
-      padding:"20px",
+      padding:"24px",
       overflowY:"auto",
       WebkitOverflowScrolling:"touch",
       zIndex:200,
-      animation:"fadeIn .18s ease-out"
+      animation:"ecept_fadeIn .24s cubic-bezier(0.16,1,0.3,1)"
     }
   },
     e("div",{
@@ -14298,20 +15716,24 @@ function AuthModal(props){
       style:{
         minWidth:"320px",
         width:"100%",
-        maxWidth:"380px",
-        background:C.cd,
+        maxWidth:"440px",
+        background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",
         border:"1px solid "+C.bd,
-        borderRadius:"16px",
-        boxShadow:"0 12px 40px rgba(0,0,0,.6)",
-        padding:"20px 18px 18px",
-        animation:"slideUp .25s ease-out",
+        borderRadius:"24px",
+        boxShadow:"0 20px 48px rgba(0,0,0,0.4), 0 8px 16px rgba(0,0,0,0.25)",
+        padding:"36px 32px 28px",
+        animation:"ecept_modalIn .32s cubic-bezier(0.16,1,0.3,1)",
         boxSizing:"border-box",
-        marginTop:"20px",marginBottom:"20px"
+        marginTop:"40px",marginBottom:"40px"
       }
     },
+      // ── Premium logo header ──
+      !AU_signupDone && e("div",{style:{display:"flex",justifyContent:"center",marginBottom:"20px"}},
+        e(window.Logo || "span",{ size: 56, glow: true, idSuffix:"auth" })
+      ),
       // ── Header ──
-      e("div",{style:{display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:"14px"}},
-        e("div",{style:{fontSize:"16px", fontWeight:700, color:C.tx}}, AU_signupDone?"¡Cuenta creada!":isSignup?"Crear cuenta":"Iniciar sesión"),
+      e("div",{style:{display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:"20px"}},
+        e("div",{style:{fontSize:"22px", fontWeight:800, letterSpacing:"-0.02em", background:"linear-gradient(135deg,#60a5fa,#a78bfa)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text"}}, AU_signupDone?"¡Cuenta creada!":isSignup?"Crear cuenta":"Bienvenido a ECEPT"),
         e("button",{
           onClick:AU_onClose,
           "aria-label":"Cerrar",
@@ -14460,16 +15882,19 @@ function AuthModal(props){
               disabled:AU_busy,
               style:{
                 width:"100%",
-                minHeight:"44px",
-                padding:"12px 14px",
-                borderRadius:"10px",
-                background:AU_busy?C.bd:C.ac,
+                minHeight:"48px",
+                padding:"14px 18px",
+                borderRadius:"14px",
+                background:AU_busy?C.bd:"linear-gradient(135deg,#60a5fa,#a78bfa)",
                 color:"#fff",
                 border:"none",
                 cursor:AU_busy?"default":"pointer",
-                fontSize:"14px",
+                fontSize:"15px",
                 fontWeight:700,
-                marginBottom:"12px"
+                letterSpacing:"-0.01em",
+                marginBottom:"14px",
+                boxShadow:AU_busy?"none":"0 4px 16px rgba(167,139,250,0.25)",
+                transition:"all 240ms cubic-bezier(0.32,0.72,0,1)"
               }
             }, AU_loading?"Cargando...":(isSignup?"Crear cuenta":"Entrar")),
 
@@ -14758,10 +16183,10 @@ function ProfileView(props){
     }, loading?loadLabel:label);
   }
 
-  return e("div",{style:{maxWidth:"540px",margin:"0 auto",padding:"20px 16px 80px"}},
+  return e("div",{style:{maxWidth:"640px",margin:"0 auto",padding:"32px 20px 80px",animation:"ecept_fadeSlideUp 420ms cubic-bezier(0.16,1,0.3,1)"}},
 
     // ── Back + title ──
-    e("div",{style:{display:"flex",alignItems:"center",gap:"12px",marginBottom:"24px"}},
+    e("div",{style:{display:"flex",alignItems:"center",gap:"12px",marginBottom:"32px"}},
       e("button",{
         onClick:props.onBack,
         style:{
@@ -14769,26 +16194,32 @@ function ProfileView(props){
           fontSize:"20px", cursor:"pointer",
           minWidth:"44px", minHeight:"44px",
           display:"flex", alignItems:"center", justifyContent:"center",
-          borderRadius:"10px"
-        }
+          borderRadius:"10px",
+          transition:"background-color 200ms ease-out"
+        },
+        onMouseEnter:function(ev){ ev.currentTarget.style.background="rgba(255,255,255,0.04)"; },
+        onMouseLeave:function(ev){ ev.currentTarget.style.background="none"; }
       },"←"),
-      e("div",{style:{fontSize:"18px",fontWeight:700,color:C.tx}},"Mi perfil")
+      e("div",{style:{fontSize:"24px",fontWeight:700,color:C.tx,letterSpacing:"-0.015em"}},"Mi perfil")
     ),
 
     // ── 1. HEADER: avatar + name + email + role ──
     e("div",{style:{
-      background:C.cd, border:"1px solid "+C.bd, borderRadius:"14px",
-      padding:"24px 16px 20px", marginBottom:"14px", textAlign:"center"
+      background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",
+      border:"1px solid "+C.bd, borderRadius:"20px",
+      padding:"32px 24px 24px", marginBottom:"20px", textAlign:"center",
+      boxShadow:"0 2px 8px rgba(0,0,0,0.25)"
     }},
       e("div",{style:{
-        width:"56px", height:"56px", borderRadius:"50%",
+        width:"72px", height:"72px", borderRadius:"50%",
         background:"linear-gradient(135deg,#60a5fa,#a78bfa)",
         display:"flex", alignItems:"center", justifyContent:"center",
-        fontSize:"22px", fontWeight:700, color:"#fff",
-        margin:"0 auto 12px"
+        fontSize:"28px", fontWeight:800, color:"#fff",
+        margin:"0 auto 14px",
+        boxShadow:"0 0 24px rgba(167,139,250,0.30), 0 4px 12px rgba(0,0,0,0.25)"
       }},initial),
-      e("div",{style:{fontSize:"16px",fontWeight:700,color:C.tx,marginBottom:"4px"}},displayName),
-      e("div",{style:{fontSize:"12px",color:C.dm,marginBottom:"10px"}},email),
+      e("div",{style:{fontSize:"20px",fontWeight:700,color:C.tx,marginBottom:"4px",letterSpacing:"-0.015em"}},displayName),
+      e("div",{style:{fontSize:"13px",color:C.dm,marginBottom:"12px"}},email),
       PV_roleBadge(role)
     ),
 
@@ -14928,8 +16359,8 @@ function DecksView(props){
       var st=document.createElement("style");
       st.textContent=
         "@keyframes DV_shimmer{0%{background-position:-300px 0}100%{background-position:300px 0}}" +
-        ".dv-card{transition:transform .15s ease-out,border-color .15s ease-out}" +
-        ".dv-card:hover{transform:translateY(-2px)}" +
+        ".dv-card{transition:transform 240ms cubic-bezier(0.32,0.72,0,1),border-color 240ms cubic-bezier(0.32,0.72,0,1),box-shadow 240ms ease-out}" +
+        ".dv-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.30), 0 2px 8px rgba(0,0,0,0.20)}" +
         ".dv-skel{background:linear-gradient(90deg,rgba(255,255,255,.03) 25%,rgba(255,255,255,.08) 50%,rgba(255,255,255,.03) 75%);background-size:600px 100%;animation:DV_shimmer 1.4s ease-in-out infinite;border-radius:6px}";
       document.head.appendChild(st);
       DV_styleInjected=true;
@@ -19376,11 +20807,12 @@ function StudyView(props){
       "@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}" +
       ".sv-wrap-out{animation:SV_slideOut .32s ease-in both}" +
       ".sv-wrap-in{animation:SV_slideIn .32s ease-out both}" +
-      ".sv-rating-btn{transition:transform .1s ease,opacity .15s ease}" +
-      ".sv-rating-btn:active{transform:scale(0.93)!important}" +
+      ".sv-rating-btn{transition:transform 200ms cubic-bezier(0.32,0.72,0,1),opacity .15s ease,background-color 240ms ease-out,box-shadow 240ms ease-out}" +
+      ".sv-rating-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02)!important}" +
+      ".sv-rating-btn:active{transform:scale(0.96)!important}" +
       ".sv-face{-webkit-backface-visibility:hidden;backface-visibility:hidden;" +
         "position:absolute;top:0;left:0;right:0;min-height:100%;" +
-        "border-radius:16px;padding:28px 24px;" +
+        "border-radius:24px;padding:48px 36px;" +
         "display:flex;flex-direction:column;justify-content:center;" +
         "box-sizing:border-box;overflow-y:auto}";
     document.head.appendChild(st);
@@ -19955,15 +21387,18 @@ function StudyView(props){
             onClick:function(){ if(!SV_rated) SV_setFlipped(!SV_flipped); },
             style:{
               position:"relative",
-              minHeight:"240px",
+              minHeight:"320px",
+              maxWidth:"680px",
+              margin:"0 auto",
+              perspective:"1200px",
               WebkitTransformStyle:"preserve-3d",
               transformStyle:"preserve-3d",
               transform:SV_flipped?"rotateY(180deg)":"rotateY(0deg)",
-              transition:"transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 300ms ease",
+              transition:"transform 600ms cubic-bezier(0.32, 0.72, 0, 1), box-shadow 320ms ease",
               cursor:SV_rated?"default":"pointer",
               boxShadow:SV_flipped
-                ?"0 24px 48px rgba(0,0,0,.45), 0 0 32px "+deckCol+"25"
-                :"0 4px 18px rgba(0,0,0,.22)"
+                ?"0 28px 56px rgba(0,0,0,0.5), 0 0 48px "+deckCol+"30, 0 8px 16px rgba(0,0,0,0.25)"
+                :"0 8px 24px rgba(0,0,0,0.30), 0 2px 8px rgba(0,0,0,0.20)"
             }
           },
 
@@ -20044,8 +21479,8 @@ function StudyView(props){
       },"Mostrar respuesta") : null,
 
       // ── Rating buttons ──
-      SV_flipped ? e("div",{style:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"8px"}},
-        ratingBtns.map(function(rb){
+      SV_flipped ? e("div",{style:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"10px",maxWidth:"680px",margin:"0 auto"}},
+        ratingBtns.map(function(rb,bi){
           return e("button",{
             key:rb.rating,
             className:"sv-rating-btn",
@@ -20053,15 +21488,17 @@ function StudyView(props){
             disabled:SV_rated||SV_sliding,
             style:{
               display:"flex",flexDirection:"column",alignItems:"center",
-              gap:"4px",padding:"12px 8px",borderRadius:"12px",
-              border:"1px solid "+rb.color+"40",
-              background:"rgba(0,0,0,.2)",
+              gap:"5px",padding:"16px 10px",borderRadius:"14px",
+              border:"1px solid "+rb.color+"55",
+              background:rb.color+"15",
+              boxShadow:"0 2px 8px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04)",
               cursor:SV_rated||SV_sliding?"not-allowed":"pointer",
-              opacity:SV_rated||SV_sliding?0.45:1
+              opacity:SV_rated||SV_sliding?0.45:1,
+              animation:"SV_slideIn 280ms cubic-bezier(0.16,1,0.3,1) "+(80+bi*40)+"ms both"
             }
           },
-            e("span",{style:{fontSize:"13px",fontWeight:700,color:rb.color}},rb.label),
-            e("span",{style:{fontSize:"11px",color:C.dm}},SV_intervalLabel(currentProg,rb.rating))
+            e("span",{style:{fontSize:"14px",fontWeight:700,color:rb.color,letterSpacing:"-0.01em"}},rb.label),
+            e("span",{style:{fontSize:"11px",color:C.dm,letterSpacing:"0.04em"}},SV_intervalLabel(currentProg,rb.rating))
           );
         })
       ) : null
@@ -20731,6 +22168,12 @@ function App(){
   var vi=s[0],setVi=s[1];
   useEffect(function(){try{localStorage.setItem("ecept_v1",JSON.stringify(vi))}catch(e2){}},[vi]);
 
+  // ─── INITIAL LOADER DISMISS ─── señalá al loader inline de index.html
+  // que React montó. El listener fade-out remueve #initial-loader.
+  useEffect(function(){
+    try { window.dispatchEvent(new Event('ECEPT_READY')); } catch(e2) {}
+  },[]);
+
   // ─── AUTH SESSION ─── restore on mount + keep in sync via onAuthStateChange
   useEffect(function(){
     if(!window.ECEPT_SUPABASE) return;
@@ -20913,7 +22356,9 @@ function App(){
   }
 
   // ═══ RENDER ═══
-  return e("div",{style:{background:C.bg,minHeight:"100vh",fontFamily:"'DM Sans',sans-serif",color:C.tx}},
+  return e("div",{style:{background:C.bg,minHeight:"100vh",fontFamily:"'Inter','DM Sans',sans-serif",color:C.tx}},
+    // Toast host (montado una sola vez)
+    typeof ToastHost === 'function' && e(ToastHost),
     // HEADER
     e("div",{style:{background:"linear-gradient(180deg,rgba(13,18,36,.98),rgba(6,10,20,.95))",borderBottom:"1px solid "+C.bd,padding:"12px 16px",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)"}},
       e("div",{style:{maxWidth:"900px",margin:"0 auto",display:"flex",alignItems:"center",gap:"10px"}},
@@ -21107,89 +22552,7 @@ function App(){
     e("div",{style:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
 
     // ════════════ HOME ════════════
-    vista==="home"&&e(F,null,
-      e("div",{style:{textAlign:"center",padding:"40px 20px 32px",marginBottom:"32px",background:"radial-gradient(ellipse at center top,rgba(59,130,246,.06) 0%,transparent 70%)",borderRadius:"20px"}},
-        e("div",{style:{fontSize:"48px",marginBottom:"12px",animation:"float 3s ease-in-out infinite"}},"🧬"),
-        e("h1",{style:{fontFamily:"'Playfair Display',serif",fontSize:"clamp(28px,6vw,42px)",fontWeight:900,background:"linear-gradient(135deg,#3b82f6,#8b5cf6,#f472b6,#fbbf24)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginBottom:"8px",letterSpacing:"3px"}},"ECEPT"),
-        e("p",{style:{fontFamily:"'Playfair Display',serif",fontSize:"14px",color:C.mt,fontWeight:700,letterSpacing:"1px"}},"El Conocimiento Es Para Todos"),
-        // Stats row
-        e("div",{style:{display:"flex",justifyContent:"center",gap:"16px",marginTop:"20px",flexWrap:"wrap"}},
-          e("div",{style:{textAlign:"center",padding:"10px 18px",background:"rgba(59,130,246,.08)",borderRadius:"12px",border:"1px solid rgba(59,130,246,.15)"}},
-            e("div",{style:{fontSize:"22px",fontWeight:800,color:C.ac,fontFamily:"monospace"}},vi.length+"/"+RD.length),
-            e("div",{style:{fontSize:"10px",color:C.dm,marginTop:"2px"}},"Revisadas")
-          ),
-          e("div",{style:{textAlign:"center",padding:"10px 18px",background:"rgba(245,158,11,.08)",borderRadius:"12px",border:"1px solid rgba(245,158,11,.15)"}},
-            e("div",{style:{fontSize:"22px",fontWeight:800,color:"#f59e0b",fontFamily:"monospace"}},favs.length),
-            e("div",{style:{fontSize:"10px",color:C.dm,marginTop:"2px"}},"Favoritos")
-          ),
-          e("div",{style:{textAlign:"center",padding:"10px 18px",background:"rgba(52,211,153,.08)",borderRadius:"12px",border:"1px solid rgba(52,211,153,.15)"}},
-            e("div",{style:{fontSize:"22px",fontWeight:800,color:"#34d399",fontFamily:"monospace"}},bestStreak),
-            e("div",{style:{fontSize:"10px",color:C.dm,marginTop:"2px"}},"Mejor racha")
-          )
-        ),
-        // Progress bar
-        e("div",{style:{maxWidth:"300px",margin:"16px auto 0"}},
-          e("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:"5px"}},
-            e("span",{style:{fontSize:"10px",color:C.dm}},"Progreso Reumatología"),
-            e("span",{style:{fontSize:"10px",color:C.ac,fontWeight:700}},Math.round(vi.length/RD.length*100)+"%")
-          ),
-          e("div",{style:{height:"4px",background:"rgba(255,255,255,.06)",borderRadius:"2px",overflow:"hidden"}},
-            e("div",{style:{width:Math.round(vi.length/RD.length*100)+"%",height:"100%",background:"linear-gradient(90deg,#3b82f6,#8b5cf6)",borderRadius:"2px",transition:"width .5s"}})
-          )
-        )
-      ),
-      // Favorites section (only if there are favorites)
-      favs.length>0&&e("div",{style:{marginBottom:"24px",padding:"16px 18px",background:"linear-gradient(135deg,"+C.cd+",rgba(245,158,11,.04))",border:"1px solid rgba(245,158,11,.2)",borderRadius:"16px"}},
-        e("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"12px"}},e("span",{style:{fontSize:"18px"}},"⭐"),e("h3",{style:{fontSize:"14px",fontWeight:700,color:"#f59e0b"}},"Tus Favoritos")),
-        e("div",{style:{display:"flex",flexWrap:"wrap",gap:"8px"}},
-          favs.map(function(fid){
-            var enf=RD.find(function(d){return d.id===fid});
-            if(!enf) return null;
-            return e("div",{key:fid,onClick:function(){go("reuma_dis",enf.s,enf.id)},style:{padding:"8px 14px",background:"rgba(255,255,255,.04)",border:"1px solid "+C.bd,borderRadius:"10px",cursor:"pointer",fontSize:"12px",fontWeight:600,color:C.tx,display:"flex",alignItems:"center",gap:"6px"}},
-              e("span",{style:{fontSize:"14px"}},"⭐"),enf.n
-            )
-          })
-        )
-      ),
-      e("div",{style:{marginBottom:"36px"}},
-        e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"16px",fontWeight:800,color:C.mt,marginBottom:"14px",display:"flex",alignItems:"center",gap:"8px",textTransform:"uppercase",letterSpacing:"1px",fontSize:"12px"}},"⚡ Secciones Especiales"),
-        e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))",gap:"12px"}},
-          MODS.filter(function(m){return["triadas","labs","imagenes","general","flashcards"].indexOf(m.id)>-1}).map(function(m,i){
-            var lleno=m.st==="lleno";
-            return e("div",{key:m.id,onClick:function(){if(lleno)go(m.id)},style:{
-              background:"linear-gradient(135deg,"+C.cd+","+m.col+"06)",border:"1px solid "+m.col+"25",borderRadius:"14px",padding:"16px",
-              cursor:lleno?"pointer":"default",opacity:lleno?1:.4,transition:"all .2s",
-              animation:"slideUp .4s ease-out "+(i*0.05)+"s both"
-            }},
-              e("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"8px"}},
-                e("span",{style:{fontSize:"24px"}},m.ic),
-                e("h3",{style:{fontSize:"14px",fontWeight:700}},m.n)
-              ),
-              e("p",{style:{fontSize:"11px",color:C.dm,lineHeight:1.4}},m.d),
-              !lleno&&e("span",{style:{display:"inline-block",marginTop:"6px",fontSize:"9px",padding:"3px 8px",borderRadius:"6px",background:"rgba(255,255,255,.05)",color:C.dm}},"Próximamente")
-            )
-          })
-        )
-      ),
-      e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"12px",fontWeight:800,color:C.mt,marginBottom:"14px",display:"flex",alignItems:"center",gap:"8px",textTransform:"uppercase",letterSpacing:"1px"}},"📋 Materias"),
-      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:"14px"}},
-        MODS.filter(function(m){return["triadas","labs","imagenes","general","flashcards"].indexOf(m.id)===-1}).map(function(m,i){
-          var lleno=m.st==="lleno";
-          return e("div",{key:m.id,onClick:function(){if(lleno)go(m.id==="cirugia"?"cir_menu":m.id==="anatomia"?"anat_menu":m.id==="labs"?"labs":m.id==="epid"?"epid":m.id==="emergen"?"emergen_menu":m.id==="fisio"?"fisio":m.id)},style:{
-            background:C.cd,border:"1px solid "+(lleno?m.col+"30":C.bd),borderRadius:"16px",padding:"20px",
-            cursor:lleno?"pointer":"default",opacity:lleno?1:.4,transition:"all .2s",
-            animation:"slideUp .4s ease-out "+(i*0.04)+"s both"
-          }},
-            e("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"10px"}},
-              e("span",{style:{fontSize:"28px",width:"46px",height:"46px",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"12px",background:m.col+"10"}},m.ic),
-              lleno?e("span",{style:{fontSize:"9px",padding:"3px 8px",borderRadius:"6px",background:m.col+"15",color:m.col,fontWeight:700}},"Activo"):e("span",{style:{fontSize:"9px",padding:"3px 8px",borderRadius:"6px",background:"rgba(255,255,255,.05)",color:C.dm}},"Pronto")
-            ),
-            e("h3",{style:{fontSize:"15px",fontWeight:700,marginBottom:"4px"}},m.n),
-            e("p",{style:{fontSize:"11px",color:C.dm,lineHeight:1.5}},m.d)
-          )
-        })
-      )
-    ),
+    vista==="home"&&e(HomeView,{user:ecuUser,vi:vi,favs:favs,bestStreak:bestStreak,go:go}),
 
     // ════════════ CIRUGÍA MENÚ ════════════
     vista==="cir_menu"&&e(F,null,

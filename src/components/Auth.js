@@ -155,17 +155,17 @@ function AuthModal(props){
     style:{
       position:"fixed",
       top:0, left:0, right:0, bottom:0,
-      background:"rgba(6,10,20,.78)",
-      backdropFilter:"blur(4px)",
-      WebkitBackdropFilter:"blur(4px)",
+      background:"rgba(6,10,20,.85)",
+      backdropFilter:"blur(12px)",
+      WebkitBackdropFilter:"blur(12px)",
       display:"flex",
       alignItems:"flex-start",
       justifyContent:"center",
-      padding:"20px",
+      padding:"24px",
       overflowY:"auto",
       WebkitOverflowScrolling:"touch",
       zIndex:200,
-      animation:"fadeIn .18s ease-out"
+      animation:"ecept_fadeIn .24s cubic-bezier(0.16,1,0.3,1)"
     }
   },
     e("div",{
@@ -173,20 +173,24 @@ function AuthModal(props){
       style:{
         minWidth:"320px",
         width:"100%",
-        maxWidth:"380px",
-        background:C.cd,
+        maxWidth:"440px",
+        background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",
         border:"1px solid "+C.bd,
-        borderRadius:"16px",
-        boxShadow:"0 12px 40px rgba(0,0,0,.6)",
-        padding:"20px 18px 18px",
-        animation:"slideUp .25s ease-out",
+        borderRadius:"24px",
+        boxShadow:"0 20px 48px rgba(0,0,0,0.4), 0 8px 16px rgba(0,0,0,0.25)",
+        padding:"36px 32px 28px",
+        animation:"ecept_modalIn .32s cubic-bezier(0.16,1,0.3,1)",
         boxSizing:"border-box",
-        marginTop:"20px",marginBottom:"20px"
+        marginTop:"40px",marginBottom:"40px"
       }
     },
+      // ── Premium logo header ──
+      !AU_signupDone && e("div",{style:{display:"flex",justifyContent:"center",marginBottom:"20px"}},
+        e(window.Logo || "span",{ size: 56, glow: true, idSuffix:"auth" })
+      ),
       // ── Header ──
-      e("div",{style:{display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:"14px"}},
-        e("div",{style:{fontSize:"16px", fontWeight:700, color:C.tx}}, AU_signupDone?"¡Cuenta creada!":isSignup?"Crear cuenta":"Iniciar sesión"),
+      e("div",{style:{display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:"20px"}},
+        e("div",{style:{fontSize:"22px", fontWeight:800, letterSpacing:"-0.02em", background:"linear-gradient(135deg,#60a5fa,#a78bfa)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text"}}, AU_signupDone?"¡Cuenta creada!":isSignup?"Crear cuenta":"Bienvenido a ECEPT"),
         e("button",{
           onClick:AU_onClose,
           "aria-label":"Cerrar",
@@ -335,16 +339,19 @@ function AuthModal(props){
               disabled:AU_busy,
               style:{
                 width:"100%",
-                minHeight:"44px",
-                padding:"12px 14px",
-                borderRadius:"10px",
-                background:AU_busy?C.bd:C.ac,
+                minHeight:"48px",
+                padding:"14px 18px",
+                borderRadius:"14px",
+                background:AU_busy?C.bd:"linear-gradient(135deg,#60a5fa,#a78bfa)",
                 color:"#fff",
                 border:"none",
                 cursor:AU_busy?"default":"pointer",
-                fontSize:"14px",
+                fontSize:"15px",
                 fontWeight:700,
-                marginBottom:"12px"
+                letterSpacing:"-0.01em",
+                marginBottom:"14px",
+                boxShadow:AU_busy?"none":"0 4px 16px rgba(167,139,250,0.25)",
+                transition:"all 240ms cubic-bezier(0.32,0.72,0,1)"
               }
             }, AU_loading?"Cargando...":(isSignup?"Crear cuenta":"Entrar")),
 

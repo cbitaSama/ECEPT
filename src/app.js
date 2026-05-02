@@ -29,6 +29,12 @@ function App(){
   var vi=s[0],setVi=s[1];
   useEffect(function(){try{localStorage.setItem("ecept_v1",JSON.stringify(vi))}catch(e2){}},[vi]);
 
+  // ─── INITIAL LOADER DISMISS ─── señalá al loader inline de index.html
+  // que React montó. El listener fade-out remueve #initial-loader.
+  useEffect(function(){
+    try { window.dispatchEvent(new Event('ECEPT_READY')); } catch(e2) {}
+  },[]);
+
   // ─── AUTH SESSION ─── restore on mount + keep in sync via onAuthStateChange
   useEffect(function(){
     if(!window.ECEPT_SUPABASE) return;
@@ -211,7 +217,9 @@ function App(){
   }
 
   // ═══ RENDER ═══
-  return e("div",{style:{background:C.bg,minHeight:"100vh",fontFamily:"'DM Sans',sans-serif",color:C.tx}},
+  return e("div",{style:{background:C.bg,minHeight:"100vh",fontFamily:"'Inter','DM Sans',sans-serif",color:C.tx}},
+    // Toast host (montado una sola vez)
+    typeof ToastHost === 'function' && e(ToastHost),
     // HEADER
     e("div",{style:{background:"linear-gradient(180deg,rgba(13,18,36,.98),rgba(6,10,20,.95))",borderBottom:"1px solid "+C.bd,padding:"12px 16px",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)"}},
       e("div",{style:{maxWidth:"900px",margin:"0 auto",display:"flex",alignItems:"center",gap:"10px"}},
@@ -405,89 +413,7 @@ function App(){
     e("div",{style:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
 
     // ════════════ HOME ════════════
-    vista==="home"&&e(F,null,
-      e("div",{style:{textAlign:"center",padding:"40px 20px 32px",marginBottom:"32px",background:"radial-gradient(ellipse at center top,rgba(59,130,246,.06) 0%,transparent 70%)",borderRadius:"20px"}},
-        e("div",{style:{fontSize:"48px",marginBottom:"12px",animation:"float 3s ease-in-out infinite"}},"🧬"),
-        e("h1",{style:{fontFamily:"'Playfair Display',serif",fontSize:"clamp(28px,6vw,42px)",fontWeight:900,background:"linear-gradient(135deg,#3b82f6,#8b5cf6,#f472b6,#fbbf24)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginBottom:"8px",letterSpacing:"3px"}},"ECEPT"),
-        e("p",{style:{fontFamily:"'Playfair Display',serif",fontSize:"14px",color:C.mt,fontWeight:700,letterSpacing:"1px"}},"El Conocimiento Es Para Todos"),
-        // Stats row
-        e("div",{style:{display:"flex",justifyContent:"center",gap:"16px",marginTop:"20px",flexWrap:"wrap"}},
-          e("div",{style:{textAlign:"center",padding:"10px 18px",background:"rgba(59,130,246,.08)",borderRadius:"12px",border:"1px solid rgba(59,130,246,.15)"}},
-            e("div",{style:{fontSize:"22px",fontWeight:800,color:C.ac,fontFamily:"monospace"}},vi.length+"/"+RD.length),
-            e("div",{style:{fontSize:"10px",color:C.dm,marginTop:"2px"}},"Revisadas")
-          ),
-          e("div",{style:{textAlign:"center",padding:"10px 18px",background:"rgba(245,158,11,.08)",borderRadius:"12px",border:"1px solid rgba(245,158,11,.15)"}},
-            e("div",{style:{fontSize:"22px",fontWeight:800,color:"#f59e0b",fontFamily:"monospace"}},favs.length),
-            e("div",{style:{fontSize:"10px",color:C.dm,marginTop:"2px"}},"Favoritos")
-          ),
-          e("div",{style:{textAlign:"center",padding:"10px 18px",background:"rgba(52,211,153,.08)",borderRadius:"12px",border:"1px solid rgba(52,211,153,.15)"}},
-            e("div",{style:{fontSize:"22px",fontWeight:800,color:"#34d399",fontFamily:"monospace"}},bestStreak),
-            e("div",{style:{fontSize:"10px",color:C.dm,marginTop:"2px"}},"Mejor racha")
-          )
-        ),
-        // Progress bar
-        e("div",{style:{maxWidth:"300px",margin:"16px auto 0"}},
-          e("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:"5px"}},
-            e("span",{style:{fontSize:"10px",color:C.dm}},"Progreso Reumatología"),
-            e("span",{style:{fontSize:"10px",color:C.ac,fontWeight:700}},Math.round(vi.length/RD.length*100)+"%")
-          ),
-          e("div",{style:{height:"4px",background:"rgba(255,255,255,.06)",borderRadius:"2px",overflow:"hidden"}},
-            e("div",{style:{width:Math.round(vi.length/RD.length*100)+"%",height:"100%",background:"linear-gradient(90deg,#3b82f6,#8b5cf6)",borderRadius:"2px",transition:"width .5s"}})
-          )
-        )
-      ),
-      // Favorites section (only if there are favorites)
-      favs.length>0&&e("div",{style:{marginBottom:"24px",padding:"16px 18px",background:"linear-gradient(135deg,"+C.cd+",rgba(245,158,11,.04))",border:"1px solid rgba(245,158,11,.2)",borderRadius:"16px"}},
-        e("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"12px"}},e("span",{style:{fontSize:"18px"}},"⭐"),e("h3",{style:{fontSize:"14px",fontWeight:700,color:"#f59e0b"}},"Tus Favoritos")),
-        e("div",{style:{display:"flex",flexWrap:"wrap",gap:"8px"}},
-          favs.map(function(fid){
-            var enf=RD.find(function(d){return d.id===fid});
-            if(!enf) return null;
-            return e("div",{key:fid,onClick:function(){go("reuma_dis",enf.s,enf.id)},style:{padding:"8px 14px",background:"rgba(255,255,255,.04)",border:"1px solid "+C.bd,borderRadius:"10px",cursor:"pointer",fontSize:"12px",fontWeight:600,color:C.tx,display:"flex",alignItems:"center",gap:"6px"}},
-              e("span",{style:{fontSize:"14px"}},"⭐"),enf.n
-            )
-          })
-        )
-      ),
-      e("div",{style:{marginBottom:"36px"}},
-        e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"16px",fontWeight:800,color:C.mt,marginBottom:"14px",display:"flex",alignItems:"center",gap:"8px",textTransform:"uppercase",letterSpacing:"1px",fontSize:"12px"}},"⚡ Secciones Especiales"),
-        e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))",gap:"12px"}},
-          MODS.filter(function(m){return["triadas","labs","imagenes","general","flashcards"].indexOf(m.id)>-1}).map(function(m,i){
-            var lleno=m.st==="lleno";
-            return e("div",{key:m.id,onClick:function(){if(lleno)go(m.id)},style:{
-              background:"linear-gradient(135deg,"+C.cd+","+m.col+"06)",border:"1px solid "+m.col+"25",borderRadius:"14px",padding:"16px",
-              cursor:lleno?"pointer":"default",opacity:lleno?1:.4,transition:"all .2s",
-              animation:"slideUp .4s ease-out "+(i*0.05)+"s both"
-            }},
-              e("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"8px"}},
-                e("span",{style:{fontSize:"24px"}},m.ic),
-                e("h3",{style:{fontSize:"14px",fontWeight:700}},m.n)
-              ),
-              e("p",{style:{fontSize:"11px",color:C.dm,lineHeight:1.4}},m.d),
-              !lleno&&e("span",{style:{display:"inline-block",marginTop:"6px",fontSize:"9px",padding:"3px 8px",borderRadius:"6px",background:"rgba(255,255,255,.05)",color:C.dm}},"Próximamente")
-            )
-          })
-        )
-      ),
-      e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"12px",fontWeight:800,color:C.mt,marginBottom:"14px",display:"flex",alignItems:"center",gap:"8px",textTransform:"uppercase",letterSpacing:"1px"}},"📋 Materias"),
-      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:"14px"}},
-        MODS.filter(function(m){return["triadas","labs","imagenes","general","flashcards"].indexOf(m.id)===-1}).map(function(m,i){
-          var lleno=m.st==="lleno";
-          return e("div",{key:m.id,onClick:function(){if(lleno)go(m.id==="cirugia"?"cir_menu":m.id==="anatomia"?"anat_menu":m.id==="labs"?"labs":m.id==="epid"?"epid":m.id==="emergen"?"emergen_menu":m.id==="fisio"?"fisio":m.id)},style:{
-            background:C.cd,border:"1px solid "+(lleno?m.col+"30":C.bd),borderRadius:"16px",padding:"20px",
-            cursor:lleno?"pointer":"default",opacity:lleno?1:.4,transition:"all .2s",
-            animation:"slideUp .4s ease-out "+(i*0.04)+"s both"
-          }},
-            e("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"10px"}},
-              e("span",{style:{fontSize:"28px",width:"46px",height:"46px",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"12px",background:m.col+"10"}},m.ic),
-              lleno?e("span",{style:{fontSize:"9px",padding:"3px 8px",borderRadius:"6px",background:m.col+"15",color:m.col,fontWeight:700}},"Activo"):e("span",{style:{fontSize:"9px",padding:"3px 8px",borderRadius:"6px",background:"rgba(255,255,255,.05)",color:C.dm}},"Pronto")
-            ),
-            e("h3",{style:{fontSize:"15px",fontWeight:700,marginBottom:"4px"}},m.n),
-            e("p",{style:{fontSize:"11px",color:C.dm,lineHeight:1.5}},m.d)
-          )
-        })
-      )
-    ),
+    vista==="home"&&e(HomeView,{user:ecuUser,vi:vi,favs:favs,bestStreak:bestStreak,go:go}),
 
     // ════════════ CIRUGÍA MENÚ ════════════
     vista==="cir_menu"&&e(F,null,

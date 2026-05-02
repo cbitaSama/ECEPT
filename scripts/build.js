@@ -16,6 +16,7 @@ var shell = fs.readFileSync('src/index.html', 'utf8');
 var parts = [
   // styles
   'src/styles/theme.js',
+  'src/styles/tokens.js',
   // data (order matters: triadas before links)
   'src/data/reuma.js',
   'src/data/inmuno.js',
@@ -97,6 +98,14 @@ var parts = [
   'src/components/salud_mental/70-app.js',
   'src/components/salud_mental/_exposures.js',
   'src/components/salud_mental/_iife-close.js',
+  // logo + loading screen (premium primitives — must precede everything that consumes them)
+  'src/components/Logo.js',
+  'src/components/LoadingScreen.js',
+  'src/components/HomeView.js',
+  'src/components/ModuleShell.js',
+  'src/components/Layered.js',
+  'src/components/Toast.js',
+  'src/components/Button.js',
   // chatbot (must come after App? no — function hoisted; keep with components)
   'src/components/ChatBot.js',
   // supabase client (reads window.__ECEPT_ENV; exposes window.ECEPT_SUPABASE)
@@ -141,6 +150,8 @@ var errors = [];
 var expectedGlobals = [
   // core data + existing modules
   'RD=', 'REUMA_SECS', 'SUB=', 'TR=', 'TC=',
+  // design tokens
+  'ECEPT_TOKENS', 'window.T',
   'ABD_DATA', 'QUEM_PASOS', 'ING_',
   'PIRAMIDE', 'ESTUDIOS', 'SESGOS', 'MEDIDAS_EPI', 'CHECKLIST_LC',
   'LAB_SECTIONS', 'var ADR', 'RECEPTOR_FAMILIES', 'RECEPTOR_QUIZZES', 'RECEPTOR_PEARLS', 'RECEPTOR_PROT_G',
@@ -173,6 +184,16 @@ var expectedGlobals = [
   'function PerView', 'function ImpView', 'function DprView',
   'function IntroView', 'function RootHub', 'function NeurosisHub',
   'window.SaludMentalView', 'window.SM_SEARCH_INDEX',
+  // logo + loading screen + home view
+  'function Logo', 'window.Logo', 'function LoadingScreen', 'window.LoadingScreen',
+  'function HomeView', 'window.HomeView',
+  'function ModuleShell', 'window.ModuleShell',
+  'function CollapsibleSection', 'window.CollapsibleSection',
+  'function ToastHost', 'window.ToastHost', 'window.ECEPT_toast',
+  'function Button', 'window.Button',
+  'function LayeredCard', 'window.LayeredCard',
+  'function InfoLayer', 'window.InfoLayer',
+  'function Detail', 'window.Detail',
   // chatbot
   'function ChatBot', 'window.ChatBot',
   // supabase client
