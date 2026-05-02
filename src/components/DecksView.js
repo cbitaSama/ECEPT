@@ -32,8 +32,9 @@ function DecksView(props){
   s=useState("");      var DV_mErr=s[0],      DV_setMErr=s[1];
 
   // Card menu / delete confirm
-  s=useState(null); var DV_menuOpenId=s[0],     DV_setMenuOpenId=s[1];
-  s=useState(null); var DV_deleteConfirmId=s[0], DV_setDeleteConfirmId=s[1];
+  s=useState(null);  var DV_menuOpenId=s[0],     DV_setMenuOpenId=s[1];
+  s=useState(null);  var DV_deleteConfirmId=s[0], DV_setDeleteConfirmId=s[1];
+  s=useState(false); var DV_tagMgrOpen=s[0],     DV_setTagMgrOpen=s[1];
 
   // ── Inject CSS once ──
   useEffect(function(){
@@ -396,7 +397,18 @@ function DecksView(props){
           color:"#a78bfa",
           fontSize:"14px",fontWeight:700,cursor:"pointer"
         }
-      },"+ Crear baraja")
+      },"+ Crear baraja"),
+      user&&e("button",{
+        onClick:function(){ DV_setTagMgrOpen(true); },
+        style:{
+          flex:"0 0 auto",minHeight:"52px",padding:"14px 18px",
+          borderRadius:"14px",
+          background:"none",
+          border:"1.5px solid rgba(167,139,250,.25)",
+          color:C.dm,
+          fontSize:"14px",fontWeight:700,cursor:"pointer"
+        }
+      },"🏷️ Etiquetas")
     ),
 
     // ── Load error ──
@@ -679,7 +691,13 @@ function DecksView(props){
           },"Eliminar")
         )
       )
-    )
+    ),
+
+    DV_tagMgrOpen && e(TagManager,{
+      user:user,
+      supabase:window.ECEPT_SUPABASE,
+      onClose:function(){ DV_setTagMgrOpen(false); }
+    })
   );
 }
 
