@@ -185,8 +185,10 @@ function AuthModal(props){
       }
     },
       // ── Premium logo header ──
-      !AU_signupDone && e("div",{style:{display:"flex",justifyContent:"center",marginBottom:"20px"}},
-        e(window.Logo || "span",{ size: 56, glow: true, idSuffix:"auth" })
+      // Container con altura fija = al size del logo + breathing room para
+      // el drop-shadow del glow. NO usar overflow:hidden ni padding negativo.
+      !AU_signupDone && e("div",{style:{display:"flex",justifyContent:"center",alignItems:"center",width:"100%",height:"80px",marginBottom:"20px",overflow:"visible"}},
+        e(window.Logo || "span",{ size: 64, glow: true, animated: true, idSuffix:"auth" })
       ),
       // ── Header ──
       e("div",{style:{display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:"20px"}},
