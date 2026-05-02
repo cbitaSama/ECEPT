@@ -172,4 +172,82 @@ Reglas:
 3. Para una vista nueva: empezá con `ModuleShell` + `HomeView`-style hero si aplica.
 4. Para listas densas: usá `LayeredCard`.
 5. Para feedback al usuario: `window.ECEPT_toast(msg, variant)` en lugar de alerts.
+6. Para loading states: usá `SkeletonList`/`SkeletonCard`/`SkeletonRow` en lugar de "Cargando…".
+
+---
+
+## 11. Fixes post-deployment (sesión Mayo 2026)
+
+Commits adicionales sobre el rediseño base. Todos en `Alpha25-elion-flashcards`.
+
+| # | Hash      | Bug / Feature              | Resumen                                                          |
+|---|-----------|----------------------------|------------------------------------------------------------------|
+| 1 | `a91620e` | Bug 1: Loading invisible   | Initial loader inline robusto + min-time 800ms.                  |
+| 2 | `7bf050c` | Bug 2: Home no aprovecha viewport | Wrapper main full-width + grid auto-fit; padding fluido hasta 1400px. |
+| 3 | `3f833cc` | Bug 3: Logo cortado/feo    | viewBox 100x100 con padding interno; endpoint circles; container Auth fix. |
+| 4 | `03c43bf` | DeckDetailView refinado    | Grid responsive auto-fit + cards minHeight 110.                  |
+| 5 | `e6b9664` | DecksView grid wide        | maxWidth 1400, minmax(280), cards minHeight 160.                 |
+| 6 | `db15f24` | ModuleShell en Reuma (test) | Vista 'reuma' usa ModuleShell + grid de secciones premium.      |
+| 7 | `0afed25` | Skeleton loaders           | Sistema unificado SkeletonBase/Text/Avatar/Card/List/Row.        |
+
+### Bug 1 — Loading screen invisible
+**Causa raíz**: El initial-loader inline en `src/index.html` dependía de keyframes
+del bundle (`ecept_logoFloat`). Cuando React montaba rápidamente, el dispatch de
+`ECEPT_READY` ocurría antes de que el usuario percibiera el loader.
+
+**Solución**:
+- `window._ECEPT_START` capturado en el primer `<script>` del `<head>`.
+- Initial-loader inline con keyframes propios (`ecept_il_*`) y SVG completo
+  embebido — no depende de nada del bundle.
+- En `src/app.js`, el dispatch de `ECEPT_READY` ahora espera
+  `max(0, 800 - elapsed)` ms para garantizar visibilidad mínima.
+- Fail-safe: si pasaron 12s sin `ECEPT_READY`, el tagline se vuelve clickable
+  con texto "tocá para recargar" en amarillo.
+
+### Bug 2 — Home no aprovecha viewport
+**Causa raíz**: `src/app.js` línea 421 tenía wrapper con `maxWidth:'900px'` que
+limitaba TODA la app, incluido el home recién rediseñado.
+
+**Solución**:
+- Wrapper main ahora condicional: `vista==='home' || vista==='reuma'` usa
+  `width:100%` sin padding lateral. Resto sigue con `maxWidth:900px`.
+- HomeView container: `padding:'0 max(32px, calc((100vw - 1400px) / 2))'`.
+  En pantallas <1400px usa 32px lateral; en >1400px centra el contenido a
+  1400px de ancho útil con padding lateral creciente.
+- Grid auto-fit `repeat(auto-fit, minmax(280px, 1fr))` reemplaza los breakpoints
+  rígidos previos (3-col desktop, 4-col wide). Ahora es responsive real:
+  mobile 1-col → tablet 2-3 → desktop 3-4 → wide 4-5 según viewport real.
+
+### Bug 3 — Logo cortado y feo
+**Causa raíz**: viewBox era `0 0 64 64` con paths que llegaban a y=70 (afuera
+del viewBox → corte). Curvas Bézier esquemáticas sin refinamiento.
+
+**Solución**:
+- viewBox `0 0 100 100` con padding interno 12px (strands en y 12-84, x 22-78).
+  Garantiza que NUNCA se corte, ni con strokeWidth grande.
+- Strand 1 + Strand 2 con curvas Bézier sinusoidales opuestas (efecto DNA real).
+- 4 rungs con opacity gradient (0.7 extremos → 0.55 centro).
+- 4 endpoint circles (r:3) en cada extremo — detalle premium.
+- Container del Logo en Auth.js con `height:80px`, `overflow:visible`.
+
+### Pendientes documentados (TODOs)
+
+- Aplicar `ModuleShell` a `cir_menu`, `anat_menu`, `emergen_menu`, `fisio` (Reuma
+  ya está hecho como test).
+- DeckDetailView: header del deck (nombre + acciones) podría rediseñarse con
+  ModuleShell premium si pasa el test de Reuma.
+- Migrar inline-styled buttons en DecksView/DeckDetailView a `<Button>`.
+- Empty states de DecksView y DeckDetailView mantienen el viejo styling (no se
+  tocaron esta sesión por riesgo).
+- Skeleton para StudyView (durante carga inicial de cards SRS).
+- Toast para feedback de actions (export, import, generate, delete) — actualmente
+  hay `alert()` y mensajes inline.
+
+### Verificación final (sesión Mayo 2026)
+
+- 0 ocurrencias de `const`/`let`/`=>` en archivos modificados.
+- Build: `✓ build OK (148 integrity checks passed)`.
+- `src/data/*` intacto.
+- `api/*` intacto.
+- 8 commits secuenciales, todos en `Alpha25-elion-flashcards`.
 6. Para CTAs: `<Button variant="primary">` o `variant="premium"` según contexto.
