@@ -190,12 +190,6 @@ function DecksView(props){
   // ── Gate: sin sesión activa ──
   if(!user&&!DV_guestMode){
     return e("div",{style:{maxWidth:"540px",margin:"0 auto",padding:"20px 20px 60px"}},
-      e("div",{style:{marginBottom:"32px"}},
-        e("button",{onClick:props.onBack,"aria-label":"Volver",style:{
-          background:"none",border:"none",color:C.mt,fontSize:"20px",cursor:"pointer",
-          minWidth:"44px",minHeight:"44px",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"10px"
-        }},"←")
-      ),
       e("div",{style:{textAlign:"center",padding:"20px 0"}},
         e("div",{style:{fontSize:"56px",marginBottom:"16px"}},"🎴"),
         e("h2",{style:{fontSize:"22px",fontWeight:800,color:C.tx,fontFamily:"'Playfair Display',serif",marginBottom:"12px"}},"Flashcards"),
@@ -339,18 +333,7 @@ function DecksView(props){
   return e("div",{style:{maxWidth:"960px",margin:"0 auto",padding:"20px 16px 80px",position:"relative"}},
 
     // ── Header ──
-    e("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"4px"}},
-      e("button",{
-        onClick:props.onBack,
-        "aria-label":"Volver",
-        style:{
-          background:"none",border:"none",color:C.mt,
-          fontSize:"20px",cursor:"pointer",
-          minWidth:"44px",minHeight:"44px",
-          display:"flex",alignItems:"center",justifyContent:"center",
-          borderRadius:"10px"
-        }
-      },"←"),
+    e("div",{style:{marginBottom:"4px"}},
       e("div",{style:{fontSize:"22px",fontWeight:800,color:C.tx,fontFamily:"'Playfair Display',serif"}},"🎴 Flashcards")
     ),
     e("div",{style:{fontSize:"13px",color:C.dm,marginLeft:"54px",marginBottom:"22px"}},DV_guestMode?"Barajas oficiales":"Tus barajas de estudio"),

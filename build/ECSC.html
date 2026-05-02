@@ -13577,9 +13577,11 @@ function AuthModal(props){
       backdropFilter:"blur(4px)",
       WebkitBackdropFilter:"blur(4px)",
       display:"flex",
-      alignItems:"center",
+      alignItems:"flex-start",
       justifyContent:"center",
-      padding:"16px",
+      padding:"20px",
+      overflowY:"auto",
+      WebkitOverflowScrolling:"touch",
       zIndex:200,
       animation:"fadeIn .18s ease-out"
     }
@@ -13596,7 +13598,8 @@ function AuthModal(props){
         boxShadow:"0 12px 40px rgba(0,0,0,.6)",
         padding:"20px 18px 18px",
         animation:"slideUp .25s ease-out",
-        boxSizing:"border-box"
+        boxSizing:"border-box",
+        marginTop:"20px",marginBottom:"20px"
       }
     },
       // ── Header ──
@@ -14358,12 +14361,6 @@ function DecksView(props){
   // ── Gate: sin sesión activa ──
   if(!user&&!DV_guestMode){
     return e("div",{style:{maxWidth:"540px",margin:"0 auto",padding:"20px 20px 60px"}},
-      e("div",{style:{marginBottom:"32px"}},
-        e("button",{onClick:props.onBack,"aria-label":"Volver",style:{
-          background:"none",border:"none",color:C.mt,fontSize:"20px",cursor:"pointer",
-          minWidth:"44px",minHeight:"44px",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"10px"
-        }},"←")
-      ),
       e("div",{style:{textAlign:"center",padding:"20px 0"}},
         e("div",{style:{fontSize:"56px",marginBottom:"16px"}},"🎴"),
         e("h2",{style:{fontSize:"22px",fontWeight:800,color:C.tx,fontFamily:"'Playfair Display',serif",marginBottom:"12px"}},"Flashcards"),
@@ -14507,18 +14504,7 @@ function DecksView(props){
   return e("div",{style:{maxWidth:"960px",margin:"0 auto",padding:"20px 16px 80px",position:"relative"}},
 
     // ── Header ──
-    e("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"4px"}},
-      e("button",{
-        onClick:props.onBack,
-        "aria-label":"Volver",
-        style:{
-          background:"none",border:"none",color:C.mt,
-          fontSize:"20px",cursor:"pointer",
-          minWidth:"44px",minHeight:"44px",
-          display:"flex",alignItems:"center",justifyContent:"center",
-          borderRadius:"10px"
-        }
-      },"←"),
+    e("div",{style:{marginBottom:"4px"}},
       e("div",{style:{fontSize:"22px",fontWeight:800,color:C.tx,fontFamily:"'Playfair Display',serif"}},"🎴 Flashcards")
     ),
     e("div",{style:{fontSize:"13px",color:C.dm,marginLeft:"54px",marginBottom:"22px"}},DV_guestMode?"Barajas oficiales":"Tus barajas de estudio"),
@@ -15160,7 +15146,7 @@ function FlashcardEditor(props){
       background:"rgba(6,10,20,.85)",
       backdropFilter:"blur(4px)",WebkitBackdropFilter:"blur(4px)",
       display:"flex",alignItems:"flex-start",justifyContent:"center",
-      padding:"16px",overflowY:"auto"
+      padding:"20px",overflowY:"auto",WebkitOverflowScrolling:"touch"
     }
   },
     e("div",{
@@ -15173,7 +15159,8 @@ function FlashcardEditor(props){
         boxShadow:"0 16px 48px rgba(0,0,0,.7)",
         padding:"22px 20px 20px",
         boxSizing:"border-box",
-        marginTop:"20px",marginBottom:"20px"
+        marginTop:"20px",marginBottom:"20px",
+        maxHeight:"calc(100vh - 40px)",overflowY:"auto"
       }
     },
 
@@ -15416,10 +15403,25 @@ function FlashcardEditor(props){
             onKeyDown:FE_tagKeyDown,
             placeholder:FE_tags.length===0?"Agregar etiqueta...":"",
             style:{
-              flex:1,minWidth:"100px",border:"none",background:"none",
+              flex:1,minWidth:"80px",border:"none",background:"none",
               color:C.tx,fontSize:"12px",outline:"none",padding:"2px 0"
             }
-          })
+          }),
+          e("button",{
+            onClick:function(){
+              if(FE_tagIn.trim()){ FE_addTag(FE_tagIn); FE_setTagIn(""); }
+            },
+            disabled:!FE_tagIn.trim()||FE_saving,
+            style:{
+              background:"none",border:"1px solid "+C.bd,
+              color:FE_tagIn.trim()?"#a78bfa":C.dm,
+              cursor:FE_tagIn.trim()&&!FE_saving?"pointer":"default",
+              borderRadius:"6px",padding:"2px 9px",
+              fontSize:"15px",fontWeight:700,flexShrink:0,
+              opacity:FE_tagIn.trim()?1:0.35,lineHeight:1.2,
+              transition:"all .15s"
+            }
+          },"+")
         ),
         FE_sugg.filter(function(t){ return FE_tags.indexOf(t)===-1; }).length>0 &&
           e("div",{style:{display:"flex",flexWrap:"wrap",gap:"5px",marginTop:"7px"}},
@@ -15642,38 +15644,17 @@ function DeckDetailView(props){
     return e("div",{style:{maxWidth:"540px",margin:"0 auto",padding:"40px 20px",textAlign:"center"}},
       e("div",{style:{fontSize:"40px",marginBottom:"12px"}},"🤷"),
       e("p",{style:{color:C.tx,fontSize:"15px",fontWeight:600,marginBottom:"6px"}},"No hay baraja seleccionada"),
-      e("p",{style:{color:C.dm,fontSize:"12px",marginBottom:"22px",lineHeight:1.5}},"Volvé a la lista de barajas para elegir una."),
-      e("button",{
-        onClick:props.onBack,
-        style:{
-          minWidth:"44px",minHeight:"44px",padding:"12px 18px",
-          borderRadius:"10px",
-          background:"linear-gradient(135deg,#a78bfa,#60a5fa)",
-          color:"#fff",border:"none",fontSize:"14px",fontWeight:700,
-          cursor:"pointer"
-        }
-      },"← Volver a Flashcards")
+      e("p",{style:{color:C.dm,fontSize:"12px",marginBottom:"22px",lineHeight:1.5}},"Volvé a la lista de barajas para elegir una.")
     );
   }
 
   // ── Baraja privada sin sesión ──
   if(!user&&!deck.is_official){
     return e("div",{style:{maxWidth:"540px",margin:"0 auto",padding:"20px 20px 60px"}},
-      e("div",{style:{marginBottom:"32px"}},
-        e("button",{onClick:props.onBack,"aria-label":"Volver",style:{
-          background:"none",border:"none",color:C.mt,fontSize:"20px",cursor:"pointer",
-          minWidth:"44px",minHeight:"44px",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"10px"
-        }},"←")
-      ),
       e("div",{style:{textAlign:"center",padding:"20px 0"}},
         e("div",{style:{fontSize:"48px",marginBottom:"12px"}},"🔒"),
         e("p",{style:{fontSize:"15px",color:C.tx,fontWeight:700,marginBottom:"8px"}},"Esta baraja requiere cuenta"),
-        e("p",{style:{fontSize:"13px",color:C.dm,lineHeight:1.5,marginBottom:"22px"}},"Iniciá sesión para ver y crear tus barajas personales."),
-        e("button",{onClick:props.onBack,style:{
-          padding:"10px 20px",borderRadius:"10px",background:"none",
-          border:"1px solid "+C.bd,color:C.tx,fontSize:"13px",fontWeight:600,
-          cursor:"pointer",minHeight:"44px"
-        }},"← Volver a Flashcards")
+        e("p",{style:{fontSize:"13px",color:C.dm,lineHeight:1.5,marginBottom:"22px"}},"Iniciá sesión para ver y crear tus barajas personales.")
       )
     );
   }
@@ -15861,17 +15842,6 @@ function DeckDetailView(props){
 
     // ── Header ──
     e("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"14px"}},
-      e("button",{
-        onClick:props.onBack,
-        "aria-label":"Volver",
-        style:{
-          background:"none",border:"none",color:C.mt,
-          fontSize:"20px",cursor:"pointer",
-          minWidth:"44px",minHeight:"44px",
-          display:"flex",alignItems:"center",justifyContent:"center",
-          borderRadius:"10px",flexShrink:0
-        }
-      },"←"),
       e("div",{style:{
         fontSize:"28px",width:"50px",height:"50px",flexShrink:0,
         display:"flex",alignItems:"center",justifyContent:"center",
@@ -16512,11 +16482,7 @@ function StudyView(props){
             padding:"12px 28px",fontSize:"15px",fontWeight:600,
             cursor:"pointer",marginBottom:"14px",display:"block",width:"100%"
           }
-        },"Iniciar sesión"),
-        e("button",{
-          onClick:function(){ if(props.onBack) props.onBack(); },
-          style:{background:"none",border:"none",color:C.mt,fontSize:"14px",cursor:"pointer",padding:"8px"}
-        },"← Volver")
+        },"Iniciar sesión")
       )
     );
   }
@@ -16535,11 +16501,6 @@ function StudyView(props){
 
     return e("div",{style:{maxWidth:"760px",margin:"0 auto",padding:"20px 16px 80px"}},
       e("div",{style:{display:"flex",alignItems:"center",gap:"12px",marginBottom:"24px"}},
-        e("button",{
-          onClick:function(){ if(props.onBack) props.onBack(); },
-          style:{background:"none",border:"none",color:C.mt,fontSize:"14px",cursor:"pointer",
-            padding:"6px 10px",borderRadius:"8px",flexShrink:0}
-        },"← Volver"),
         e("h1",{style:{fontSize:"22px",fontWeight:700,color:C.tx,margin:0,flex:1}},"Modo estudio"),
         e("div",{style:{fontSize:"28px"}},"🎯")
       ),
@@ -16724,12 +16685,6 @@ function StudyView(props){
       e("div",{style:{marginBottom:"18px"}},
         e("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",
           marginBottom:"10px",flexWrap:"wrap",gap:"8px"}},
-
-          e("button",{
-            onClick:function(){ SV_setPhase("setup"); SV_setSliding(false); },
-            style:{background:"none",border:"none",color:C.mt,fontSize:"14px",
-              cursor:"pointer",padding:"6px 10px",borderRadius:"8px",flexShrink:0}
-          },"← Salir"),
 
           // Nav controls + count
           e("div",{style:{display:"flex",alignItems:"center",gap:"6px"}},
@@ -17049,13 +17004,7 @@ function StudyView(props){
             background:"linear-gradient(135deg,#a78bfa,#60a5fa)",
             border:"none",color:"#fff",fontSize:"15px",fontWeight:700,
             cursor:"pointer",marginBottom:"12px"}
-        },"Estudiar de nuevo"),
-        e("button",{
-          onClick:function(){ if(props.onBack) props.onBack(); },
-          style:{width:"100%",padding:"14px",borderRadius:"12px",
-            background:"none",border:"1px solid "+C.bd,
-            color:C.mt,fontSize:"15px",fontWeight:500,cursor:"pointer"}
-        },"← Volver a Flashcards")
+        },"Estudiar de nuevo")
       )
     );
   }

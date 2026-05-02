@@ -159,38 +159,17 @@ function DeckDetailView(props){
     return e("div",{style:{maxWidth:"540px",margin:"0 auto",padding:"40px 20px",textAlign:"center"}},
       e("div",{style:{fontSize:"40px",marginBottom:"12px"}},"🤷"),
       e("p",{style:{color:C.tx,fontSize:"15px",fontWeight:600,marginBottom:"6px"}},"No hay baraja seleccionada"),
-      e("p",{style:{color:C.dm,fontSize:"12px",marginBottom:"22px",lineHeight:1.5}},"Volvé a la lista de barajas para elegir una."),
-      e("button",{
-        onClick:props.onBack,
-        style:{
-          minWidth:"44px",minHeight:"44px",padding:"12px 18px",
-          borderRadius:"10px",
-          background:"linear-gradient(135deg,#a78bfa,#60a5fa)",
-          color:"#fff",border:"none",fontSize:"14px",fontWeight:700,
-          cursor:"pointer"
-        }
-      },"← Volver a Flashcards")
+      e("p",{style:{color:C.dm,fontSize:"12px",marginBottom:"22px",lineHeight:1.5}},"Volvé a la lista de barajas para elegir una.")
     );
   }
 
   // ── Baraja privada sin sesión ──
   if(!user&&!deck.is_official){
     return e("div",{style:{maxWidth:"540px",margin:"0 auto",padding:"20px 20px 60px"}},
-      e("div",{style:{marginBottom:"32px"}},
-        e("button",{onClick:props.onBack,"aria-label":"Volver",style:{
-          background:"none",border:"none",color:C.mt,fontSize:"20px",cursor:"pointer",
-          minWidth:"44px",minHeight:"44px",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"10px"
-        }},"←")
-      ),
       e("div",{style:{textAlign:"center",padding:"20px 0"}},
         e("div",{style:{fontSize:"48px",marginBottom:"12px"}},"🔒"),
         e("p",{style:{fontSize:"15px",color:C.tx,fontWeight:700,marginBottom:"8px"}},"Esta baraja requiere cuenta"),
-        e("p",{style:{fontSize:"13px",color:C.dm,lineHeight:1.5,marginBottom:"22px"}},"Iniciá sesión para ver y crear tus barajas personales."),
-        e("button",{onClick:props.onBack,style:{
-          padding:"10px 20px",borderRadius:"10px",background:"none",
-          border:"1px solid "+C.bd,color:C.tx,fontSize:"13px",fontWeight:600,
-          cursor:"pointer",minHeight:"44px"
-        }},"← Volver a Flashcards")
+        e("p",{style:{fontSize:"13px",color:C.dm,lineHeight:1.5,marginBottom:"22px"}},"Iniciá sesión para ver y crear tus barajas personales.")
       )
     );
   }
@@ -378,17 +357,6 @@ function DeckDetailView(props){
 
     // ── Header ──
     e("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"14px"}},
-      e("button",{
-        onClick:props.onBack,
-        "aria-label":"Volver",
-        style:{
-          background:"none",border:"none",color:C.mt,
-          fontSize:"20px",cursor:"pointer",
-          minWidth:"44px",minHeight:"44px",
-          display:"flex",alignItems:"center",justifyContent:"center",
-          borderRadius:"10px",flexShrink:0
-        }
-      },"←"),
       e("div",{style:{
         fontSize:"28px",width:"50px",height:"50px",flexShrink:0,
         display:"flex",alignItems:"center",justifyContent:"center",

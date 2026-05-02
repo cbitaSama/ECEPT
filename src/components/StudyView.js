@@ -401,11 +401,7 @@ function StudyView(props){
             padding:"12px 28px",fontSize:"15px",fontWeight:600,
             cursor:"pointer",marginBottom:"14px",display:"block",width:"100%"
           }
-        },"Iniciar sesión"),
-        e("button",{
-          onClick:function(){ if(props.onBack) props.onBack(); },
-          style:{background:"none",border:"none",color:C.mt,fontSize:"14px",cursor:"pointer",padding:"8px"}
-        },"← Volver")
+        },"Iniciar sesión")
       )
     );
   }
@@ -424,11 +420,6 @@ function StudyView(props){
 
     return e("div",{style:{maxWidth:"760px",margin:"0 auto",padding:"20px 16px 80px"}},
       e("div",{style:{display:"flex",alignItems:"center",gap:"12px",marginBottom:"24px"}},
-        e("button",{
-          onClick:function(){ if(props.onBack) props.onBack(); },
-          style:{background:"none",border:"none",color:C.mt,fontSize:"14px",cursor:"pointer",
-            padding:"6px 10px",borderRadius:"8px",flexShrink:0}
-        },"← Volver"),
         e("h1",{style:{fontSize:"22px",fontWeight:700,color:C.tx,margin:0,flex:1}},"Modo estudio"),
         e("div",{style:{fontSize:"28px"}},"🎯")
       ),
@@ -613,12 +604,6 @@ function StudyView(props){
       e("div",{style:{marginBottom:"18px"}},
         e("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",
           marginBottom:"10px",flexWrap:"wrap",gap:"8px"}},
-
-          e("button",{
-            onClick:function(){ SV_setPhase("setup"); SV_setSliding(false); },
-            style:{background:"none",border:"none",color:C.mt,fontSize:"14px",
-              cursor:"pointer",padding:"6px 10px",borderRadius:"8px",flexShrink:0}
-          },"← Salir"),
 
           // Nav controls + count
           e("div",{style:{display:"flex",alignItems:"center",gap:"6px"}},
@@ -938,13 +923,7 @@ function StudyView(props){
             background:"linear-gradient(135deg,#a78bfa,#60a5fa)",
             border:"none",color:"#fff",fontSize:"15px",fontWeight:700,
             cursor:"pointer",marginBottom:"12px"}
-        },"Estudiar de nuevo"),
-        e("button",{
-          onClick:function(){ if(props.onBack) props.onBack(); },
-          style:{width:"100%",padding:"14px",borderRadius:"12px",
-            background:"none",border:"1px solid "+C.bd,
-            color:C.mt,fontSize:"15px",fontWeight:500,cursor:"pointer"}
-        },"← Volver a Flashcards")
+        },"Estudiar de nuevo")
       )
     );
   }

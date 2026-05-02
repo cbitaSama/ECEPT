@@ -288,7 +288,7 @@ function FlashcardEditor(props){
       background:"rgba(6,10,20,.85)",
       backdropFilter:"blur(4px)",WebkitBackdropFilter:"blur(4px)",
       display:"flex",alignItems:"flex-start",justifyContent:"center",
-      padding:"16px",overflowY:"auto"
+      padding:"20px",overflowY:"auto",WebkitOverflowScrolling:"touch"
     }
   },
     e("div",{
@@ -301,7 +301,8 @@ function FlashcardEditor(props){
         boxShadow:"0 16px 48px rgba(0,0,0,.7)",
         padding:"22px 20px 20px",
         boxSizing:"border-box",
-        marginTop:"20px",marginBottom:"20px"
+        marginTop:"20px",marginBottom:"20px",
+        maxHeight:"calc(100vh - 40px)",overflowY:"auto"
       }
     },
 
@@ -544,10 +545,25 @@ function FlashcardEditor(props){
             onKeyDown:FE_tagKeyDown,
             placeholder:FE_tags.length===0?"Agregar etiqueta...":"",
             style:{
-              flex:1,minWidth:"100px",border:"none",background:"none",
+              flex:1,minWidth:"80px",border:"none",background:"none",
               color:C.tx,fontSize:"12px",outline:"none",padding:"2px 0"
             }
-          })
+          }),
+          e("button",{
+            onClick:function(){
+              if(FE_tagIn.trim()){ FE_addTag(FE_tagIn); FE_setTagIn(""); }
+            },
+            disabled:!FE_tagIn.trim()||FE_saving,
+            style:{
+              background:"none",border:"1px solid "+C.bd,
+              color:FE_tagIn.trim()?"#a78bfa":C.dm,
+              cursor:FE_tagIn.trim()&&!FE_saving?"pointer":"default",
+              borderRadius:"6px",padding:"2px 9px",
+              fontSize:"15px",fontWeight:700,flexShrink:0,
+              opacity:FE_tagIn.trim()?1:0.35,lineHeight:1.2,
+              transition:"all .15s"
+            }
+          },"+")
         ),
         FE_sugg.filter(function(t){ return FE_tags.indexOf(t)===-1; }).length>0 &&
           e("div",{style:{display:"flex",flexWrap:"wrap",gap:"5px",marginTop:"7px"}},
