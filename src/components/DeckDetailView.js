@@ -7,6 +7,7 @@
 // Props: user, deck, onBack, go
 // ══════════════════════════════════════════════════════════════
 var DD_styleInjected=false;
+var DD_DECK_COLORS=["#a78bfa","#60a5fa","#34d399","#fbbf24","#f472b6","#ef4444","#06b6d4","#fb923c","#8b5cf6","#10b981","#ec4899","#84cc16"];
 
 function DD_previewText(text,type){
   if(!text) return "";
@@ -105,6 +106,27 @@ function DeckDetailView(props){
   s=useState('select');var DD_copyMode=s[0],      DD_setCopyMode=s[1];
   s=useState(false);   var DD_copyLoading=s[0],   DD_setCopyLoading=s[1];
   s=useState(false);   var DD_copySuccess=s[0],   DD_setCopySuccess=s[1];
+  s=useState(false);   var DD_selectMode=s[0],    DD_setSelectMode=s[1];
+  s=useState({});      var DD_selectedIds=s[0],   DD_setSelectedIds=s[1];
+  s=useState(false);   var DD_bulkDelConfirm=s[0],DD_setBulkDelConfirm=s[1];
+  s=useState("");      var DD_bulkMsg=s[0],        DD_setBulkMsg=s[1];
+  s=useState(null);    var DD_bulkAction=s[0],     DD_setBulkAction=s[1];
+  s=useState("");      var DD_bulkTargetDeckId=s[0],DD_setBulkTargetDeckId=s[1];
+  s=useState(false);   var DD_bulkLoading=s[0],    DD_setBulkLoading=s[1];
+  s=useState("");      var DD_bulkErrMsg=s[0],     DD_setBulkErrMsg=s[1];
+  s=useState(null);    var DD_deckMeta=s[0],       DD_setDeckMeta=s[1];
+  s=useState(false);   var DD_editDeckOpen=s[0],   DD_setEditDeckOpen=s[1];
+  s=useState("");      var DD_editDeckName=s[0],   DD_setEditDeckName=s[1];
+  s=useState("");      var DD_editDeckDesc=s[0],   DD_setEditDeckDesc=s[1];
+  s=useState("#a78bfa");var DD_editDeckColor=s[0], DD_setEditDeckColor=s[1];
+  s=useState("📚");   var DD_editDeckIcon=s[0],   DD_setEditDeckIcon=s[1];
+  s=useState(false);   var DD_editDeckLoading=s[0],DD_setEditDeckLoading=s[1];
+  s=useState("");      var DD_editDeckErr=s[0],    DD_setEditDeckErr=s[1];
+  s=useState(false);   var DD_tagBulkOpen=s[0],    DD_setTagBulkOpen=s[1];
+  s=useState("");      var DD_tagBulkInput=s[0],   DD_setTagBulkInput=s[1];
+  s=useState(false);   var DD_tagBulkLoading=s[0], DD_setTagBulkLoading=s[1];
+  s=useState("");      var DD_tagBulkErrMsg=s[0],  DD_setTagBulkErrMsg=s[1];
+  var DD_pressTimer=useRef(null);
 
   // ── Inject CSS once ──
   useEffect(function(){
@@ -214,7 +236,7 @@ function DeckDetailView(props){
   },[DD_previewIdx]);
 
   useEffect(function(){
-    if(!deck||!deck.is_official||!user||!window.ECEPT_SUPABASE) return;
+    if(!deck||!user||!window.ECEPT_SUPABASE) return;
     window.ECEPT_SUPABASE
       .from("decks")
       .select("id,name,color,icon")
@@ -223,6 +245,13 @@ function DeckDetailView(props){
       .order("sort_order",{ascending:true,nullsFirst:false})
       .order("name",{ascending:true})
       .then(function(res){ if(!res.error) DD_setOwnDecks(res.data||[]); });
+  },[]);
+
+  useEffect(function(){
+    if(!user||!window.ECEPT_SUPABASE) return;
+    window.ECEPT_SUPABASE.from("user_tags")
+      .select("id,name,color").eq("user_id",user.id).order("name")
+      .then(function(res){ if(!res.error) DD_setUserTagsList(res.data||[]); });
   },[]);
 
   function DD_handleDelete(cardId){
@@ -257,6 +286,191 @@ function DeckDetailView(props){
     var next=!DD_showAnswers;
     DD_setShowAnswers(next);
     try{ localStorage.setItem(DD_storageKey,String(next)); }catch(ex){}
+  }
+
+  function DD_onPressStart(cardId){
+    if(DD_selectMode) return;
+    DD_pressTimer.current=setTimeout(function(){
+      var sel={};
+      sel[cardId]=true;
+      DD_setSelectMode(true);
+      DD_setSelectedIds(sel);
+    },500);
+  }
+  function DD_onPressEnd(){
+    clearTimeout(DD_pressTimer.current);
+  }
+  function DD_toggleSelect(cardId){
+    var next={};
+    for(var tsk in DD_selectedIds){ if(DD_selectedIds.hasOwnProperty(tsk)) next[tsk]=true; }
+    if(next[cardId]) delete next[cardId];
+    else next[cardId]=true;
+    DD_setSelectedIds(next);
+  }
+  function DD_selectAll(){
+    var next={};
+    for(var sai=0;sai<DD_cards.length;sai++){
+      if(!DD_cards[sai].is_official) next[DD_cards[sai].id]=true;
+    }
+    DD_setSelectedIds(next);
+  }
+  function DD_cancelSelect(){
+    DD_setSelectMode(false);
+    DD_setSelectedIds({});
+    DD_setBulkDelConfirm(false);
+    DD_setBulkMsg("");
+  }
+  async function DD_bulkDelete(){
+    var ids=Object.keys(DD_selectedIds);
+    var snap=DD_selectedIds;
+    if(!ids.length||!user||!window.ECEPT_SUPABASE) return;
+    DD_setBulkMsg("");
+    try{
+      var res=await window.ECEPT_SUPABASE.from("flashcards")
+        .delete().in("id",ids).eq("user_id",user.id);
+      if(res.error) throw res.error;
+      var next=[];
+      for(var bdi=0;bdi<DD_cards.length;bdi++){
+        if(!snap[DD_cards[bdi].id]) next.push(DD_cards[bdi]);
+      }
+      DD_setCards(next);
+      DD_cancelSelect();
+    }catch(err){
+      console.error("bulk delete error",err);
+      DD_setBulkMsg("Error al eliminar. Intentá de nuevo.");
+    }
+  }
+
+  async function DD_execBulkMove(){
+    var snap=DD_selectedIds;
+    var ids=Object.keys(snap);
+    if(!ids.length||!user||!window.ECEPT_SUPABASE||!DD_bulkTargetDeckId) return;
+    DD_setBulkLoading(true); DD_setBulkErrMsg("");
+    try{
+      var res=await window.ECEPT_SUPABASE.from("flashcards")
+        .update({deck_id:DD_bulkTargetDeckId})
+        .in("id",ids).eq("user_id",user.id);
+      if(res.error) throw res.error;
+      var next=[];
+      for(var bmi=0;bmi<DD_cards.length;bmi++){
+        if(!snap[DD_cards[bmi].id]) next.push(DD_cards[bmi]);
+      }
+      DD_setCards(next);
+      DD_setSelectMode(false);
+      DD_setSelectedIds({});
+      DD_setBulkDelConfirm(false);
+      DD_setBulkMsg("");
+      DD_setBulkAction(null);
+      DD_setBulkTargetDeckId("");
+    }catch(err){
+      console.error("bulk move error",err);
+      DD_setBulkErrMsg("Error al mover. Intentá de nuevo.");
+    }finally{
+      DD_setBulkLoading(false);
+    }
+  }
+  async function DD_execBulkCopy(){
+    var snap=DD_selectedIds;
+    if(!Object.keys(snap).length||!user||!window.ECEPT_SUPABASE||!DD_bulkTargetDeckId) return;
+    var cardsToCopy=[];
+    for(var bci=0;bci<DD_cards.length;bci++){
+      if(snap[DD_cards[bci].id]) cardsToCopy.push(DD_cards[bci]);
+    }
+    var newCards=[];
+    for(var bcj=0;bcj<cardsToCopy.length;bcj++){
+      var bcc=cardsToCopy[bcj];
+      newCards.push({
+        deck_id:DD_bulkTargetDeckId,user_id:user.id,is_official:false,
+        card_type:bcc.card_type,front:bcc.front,back:bcc.back,tags:bcc.tags||[]
+      });
+    }
+    DD_setBulkLoading(true); DD_setBulkErrMsg("");
+    try{
+      var res2=await window.ECEPT_SUPABASE.from("flashcards").insert(newCards);
+      if(res2.error) throw res2.error;
+      var targetDeck=null;
+      for(var bck=0;bck<DD_ownDecks.length;bck++){
+        if(DD_ownDecks[bck].id===DD_bulkTargetDeckId){ targetDeck=DD_ownDecks[bck]; break; }
+      }
+      DD_setSelectMode(false);
+      DD_setSelectedIds({});
+      DD_setBulkDelConfirm(false);
+      DD_setBulkAction(null);
+      DD_setBulkTargetDeckId("");
+      var n=newCards.length;
+      DD_setBulkMsg(n+" card"+(n===1?"":"s")+" copiada"+(n===1?"":"s")+(targetDeck?" a "+targetDeck.name:""));
+      setTimeout(function(){ DD_setBulkMsg(""); },3000);
+    }catch(err){
+      console.error("bulk copy error",err);
+      DD_setBulkErrMsg("Error al copiar. Intentá de nuevo.");
+    }finally{
+      DD_setBulkLoading(false);
+    }
+  }
+
+  async function DD_execBulkTag(){
+    var tag=DD_tagBulkInput.trim().toLowerCase().replace(/[^a-z0-9\-_áéíóúñü]/g,"");
+    if(!tag||!user||!window.ECEPT_SUPABASE) return;
+    var snap=DD_selectedIds;
+    var selectedCards=[];
+    for(var bti=0;bti<DD_cards.length;bti++){
+      if(snap[DD_cards[bti].id]) selectedCards.push(DD_cards[bti]);
+    }
+    if(!selectedCards.length) return;
+    DD_setTagBulkLoading(true); DD_setTagBulkErrMsg("");
+    try{
+      var promises=[];
+      for(var btj=0;btj<selectedCards.length;btj++){
+        var btc=selectedCards[btj];
+        var curTags=btc.tags||[];
+        if(curTags.indexOf(tag)!==-1){ promises.push(Promise.resolve()); continue; }
+        promises.push(
+          window.ECEPT_SUPABASE.from("flashcards")
+            .update({tags:curTags.concat([tag])})
+            .eq("id",btc.id).eq("user_id",user.id)
+        );
+      }
+      var results=await Promise.all(promises);
+      for(var btr=0;btr<results.length;btr++){
+        if(results[btr]&&results[btr].error) throw results[btr].error;
+      }
+      DD_setCards(function(prev){
+        return prev.map(function(c){
+          if(!snap[c.id]) return c;
+          var cur=c.tags||[];
+          if(cur.indexOf(tag)!==-1) return c;
+          var updated={};
+          updated.id=c.id; updated.deck_id=c.deck_id; updated.user_id=c.user_id;
+          updated.is_official=c.is_official; updated.card_type=c.card_type;
+          updated.front=c.front; updated.back=c.back; updated.created_at=c.created_at;
+          updated.tags=cur.concat([tag]);
+          return updated;
+        });
+      });
+      var tagExists=false;
+      for(var btk=0;btk<DD_userTagsList.length;btk++){
+        if(DD_userTagsList[btk].name===tag){ tagExists=true; break; }
+      }
+      if(!tagExists&&user){
+        try{
+          await window.ECEPT_SUPABASE.from("user_tags")
+            .insert({user_id:user.id,name:tag,color:"#a78bfa"});
+        }catch(e){ console.warn("user_tags insert warn",e); }
+      }
+      var n=selectedCards.length;
+      DD_setTagBulkOpen(false);
+      DD_setTagBulkInput("");
+      DD_setSelectMode(false);
+      DD_setSelectedIds({});
+      DD_setBulkDelConfirm(false);
+      DD_setBulkMsg("Etiqueta '#"+tag+"' agregada a "+n+" card"+(n===1?"":"s"));
+      setTimeout(function(){ DD_setBulkMsg(""); },3000);
+    }catch(err){
+      console.error("bulk tag error",err);
+      DD_setTagBulkErrMsg("Error al etiquetar. Intentá de nuevo.");
+    }finally{
+      DD_setTagBulkLoading(false);
+    }
   }
 
   async function DD_execCopy(){
@@ -335,6 +549,58 @@ function DeckDetailView(props){
     if(typeof go==="function") go("flashcards_study");
   }
 
+  function DD_exportDeck(){
+    var exportData={
+      version:1,
+      exportedAt:new Date().toISOString(),
+      deck:{
+        name:deck.name,
+        description:deck.description||"",
+        color:deck.color||"#3b82f6",
+        icon:deck.icon||"📚"
+      },
+      cards:[]
+    };
+    for(var ei=0;ei<DD_cards.length;ei++){
+      var ec=DD_cards[ei];
+      exportData.cards.push({
+        card_type:ec.card_type,
+        front:ec.front,
+        back:ec.back||"",
+        tags:ec.tags||[]
+      });
+    }
+    var blob=new Blob([JSON.stringify(exportData,null,2)],{type:"application/json"});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement("a");
+    a.href=url;
+    a.download=(deck.name||"baraja").replace(/[^a-z0-9]/gi,"_")+"_ecept.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  async function DD_execEditDeck(){
+    var name=DD_editDeckName.trim();
+    if(!name||!user||!window.ECEPT_SUPABASE) return;
+    DD_setEditDeckLoading(true); DD_setEditDeckErr("");
+    try{
+      var icon=DD_editDeckIcon.trim()||"📚";
+      var res=await window.ECEPT_SUPABASE.from("decks")
+        .update({name:name,description:DD_editDeckDesc.trim(),color:DD_editDeckColor,icon:icon})
+        .eq("id",deck.id).eq("user_id",user.id);
+      if(res.error) throw res.error;
+      DD_setDeckMeta({name:name,description:DD_editDeckDesc.trim(),color:DD_editDeckColor,icon:icon});
+      DD_setEditDeckOpen(false);
+    }catch(err){
+      console.error("edit deck error",err);
+      DD_setEditDeckErr("Error al guardar. Intentá de nuevo.");
+    }finally{
+      DD_setEditDeckLoading(false);
+    }
+  }
+
   // ── Deck no seleccionado: fallback ──
   if(!deck){
     return e("div",{style:{maxWidth:"540px",margin:"0 auto",padding:"40px 20px",textAlign:"center"}},
@@ -356,8 +622,11 @@ function DeckDetailView(props){
   }
 
   // ── Derived ──
-  var deckCol=deck.color||"#a78bfa";
-  var deckIcon=deck.icon||"🎴";
+  var _dm=DD_deckMeta||deck;
+  var deckCol=_dm.color||"#a78bfa";
+  var deckIcon=_dm.icon||"🎴";
+  var _deckName=_dm.name||"Sin nombre";
+  var _deckDesc=_dm.description||"";
   var isOfficial=!!deck.is_official;
   var canEdit=!isOfficial && user && deck.user_id===user.id;
   var DD_userTagColorMap={};
@@ -402,6 +671,7 @@ function DeckDetailView(props){
   DD_filteredRef.current=filteredCards;
 
   var hasFilters=q.length>0 || DD_selectedTags.length>0;
+  var DD_selectCount=Object.keys(DD_selectedIds).length;
 
   // ── Helpers ──
   function DD_skeletonCard(key){
@@ -457,26 +727,44 @@ function DeckDetailView(props){
       }
     }
 
+    var isSelected=!!DD_selectedIds[c.id];
     return e("div",{
       key:c.id,
       className:"dd-card-item",
-      onClick:function(){ DD_setPreviewIdx(i); DD_setPreviewFlipped(false); },
+      onClick:function(){
+        if(DD_selectMode&&!isOfficial){ DD_toggleSelect(c.id); }
+        else if(!DD_selectMode){ DD_setPreviewIdx(i); DD_setPreviewFlipped(false); }
+      },
+      onPointerDown:!isOfficial?function(ev){ ev.stopPropagation(); DD_onPressStart(c.id); }:null,
+      onPointerUp:!isOfficial?DD_onPressEnd:null,
+      onPointerLeave:!isOfficial?DD_onPressEnd:null,
+      onPointerCancel:!isOfficial?DD_onPressEnd:null,
       style:{
         position:"relative",cursor:"pointer",
-        background:C.cd,border:"1px solid "+C.bd,
+        background:isSelected?"rgba(167,139,250,.10)":C.cd,
+        border:"1px solid "+(isSelected?"rgba(167,139,250,.50)":C.bd),
         borderRadius:"12px",padding:"14px 14px 12px",
         marginBottom:"8px"
       }
     },
       // Main row: icon + content + menu button
       e("div",{style:{display:"flex",gap:"12px",alignItems:"flex-start"}},
-        // Type icon circle
-        e("div",{style:{
-          width:"34px",height:"34px",flexShrink:0,
-          borderRadius:"8px",marginTop:"1px",
-          background:isCloze?"rgba(251,191,36,.12)":"rgba(96,165,250,.12)",
-          display:"flex",alignItems:"center",justifyContent:"center",fontSize:"14px"
-        }},isCloze?"✂️":"📝"),
+        // Type icon circle or selection checkbox
+        DD_selectMode&&!isOfficial
+          ?e("div",{style:{
+              width:"34px",height:"34px",flexShrink:0,
+              borderRadius:"50%",marginTop:"1px",
+              border:"2px solid "+(isSelected?"#a78bfa":C.bd),
+              background:isSelected?"rgba(167,139,250,.20)":"rgba(255,255,255,.04)",
+              display:"flex",alignItems:"center",justifyContent:"center",fontSize:"16px",
+              color:"#a78bfa"
+            }},isSelected?"✓":"")
+          :e("div",{style:{
+              width:"34px",height:"34px",flexShrink:0,
+              borderRadius:"8px",marginTop:"1px",
+              background:isCloze?"rgba(251,191,36,.12)":"rgba(96,165,250,.12)",
+              display:"flex",alignItems:"center",justifyContent:"center",fontSize:"14px"
+            }},isCloze?"✂️":"📝"),
         // Content
         e("div",{style:{flex:1,minWidth:0}},
           // Front (2 lines max)
@@ -586,7 +874,7 @@ function DeckDetailView(props){
           statsText&&e("div",{style:{fontSize:"10px",color:C.dm,marginTop:"5px"}},statsText)
         ),
         // ⋮ button or readonly badge
-        canEdit
+        !DD_selectMode&&(canEdit
           ? e("button",{
               onClick:function(ev){ ev.stopPropagation(); DD_setMenuOpenId(isMenuOpen?null:c.id); },
               "aria-label":"Opciones",
@@ -610,10 +898,10 @@ function DeckDetailView(props){
                 display:"flex",alignItems:"center",justifyContent:"center",
                 borderRadius:"6px",marginTop:"-2px"
               }
-            },"📥")
+            },"📥"))
       ),
       // ⋮ Dropdown
-      isMenuOpen&&e("div",{
+      !DD_selectMode&&isMenuOpen&&e("div",{
         onClick:function(ev){ ev.stopPropagation(); },
         style:{
           position:"absolute",top:"44px",right:"10px",
@@ -663,14 +951,14 @@ function DeckDetailView(props){
             fontFamily:"'Playfair Display',serif",
             overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
             margin:0
-          }},deck.name||"Sin nombre"),
+          }},_deckName),
           isOfficial && e("span",{style:{
             fontSize:"9px",padding:"3px 8px",borderRadius:"6px",
             background:deckCol+"22",color:deckCol,fontWeight:700,
             flexShrink:0,whiteSpace:"nowrap"
           }},"Oficial ⭐")
         ),
-        deck.description && e("p",{style:{fontSize:"12px",color:C.dm,lineHeight:1.4,margin:0}},deck.description)
+        _deckDesc && e("p",{style:{fontSize:"12px",color:C.dm,lineHeight:1.4,margin:0}},_deckDesc)
       )
     ),
 
@@ -717,29 +1005,124 @@ function DeckDetailView(props){
     ),
 
     // ── Action bar ──
-    e("div",{style:{display:"flex",gap:"8px",marginBottom:"22px",flexWrap:"wrap"}},
-      DD_cards.length>0 && e("button",{
-        onClick:DD_handleStudy,
-        style:{
-          flex:"1 1 200px",minHeight:"52px",padding:"14px 20px",
-          borderRadius:"14px",
-          background:"linear-gradient(135deg,"+deckCol+",#60a5fa)",
-          color:"#fff",border:"none",
-          fontSize:"15px",fontWeight:700,cursor:"pointer",
-          boxShadow:"0 4px 18px "+deckCol+"55"
-        }
-      },"🎯 Estudiar"),
-      canEdit && e("button",{
-        onClick:DD_handleNewCard,
-        style:{
-          flex:"1 1 160px",minHeight:"52px",padding:"14px 20px",
-          borderRadius:"14px",
-          background:"none",
-          border:"1.5px solid "+C.bd,color:C.tx,
-          fontSize:"14px",fontWeight:700,cursor:"pointer"
-        }
-      },"+ Nueva tarjeta")
-    ),
+    DD_selectMode
+      ?e("div",{style:{marginBottom:"22px"}},
+          // Count row
+          e("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"8px"}},
+            e("span",{style:{flex:1,fontSize:"14px",fontWeight:700,color:C.tx}},
+              DD_selectCount+" seleccionada"+(DD_selectCount===1?"":"s")
+            ),
+            e("button",{
+              onClick:DD_selectAll,
+              style:{padding:"6px 14px",borderRadius:"8px",background:"none",
+                border:"1px solid "+C.bd,color:C.dm,fontSize:"12px",fontWeight:600,cursor:"pointer"}
+            },"Todas"),
+            e("button",{
+              onClick:DD_cancelSelect,
+              style:{padding:"6px 14px",borderRadius:"8px",background:"none",
+                border:"1px solid "+C.bd,color:C.mt,fontSize:"12px",fontWeight:600,cursor:"pointer"}
+            },"Cancelar")
+          ),
+          // Action buttons or delete confirm
+          DD_bulkDelConfirm
+            ?e("div",{style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap"}},
+                e("span",{style:{fontSize:"13px",color:"#fca5a5",fontWeight:600}},
+                  "¿Eliminar "+DD_selectCount+" card"+(DD_selectCount===1?"":"s")+"?"
+                ),
+                e("button",{
+                  onClick:DD_bulkDelete,
+                  disabled:!DD_selectCount,
+                  style:{padding:"8px 18px",borderRadius:"10px",
+                    background:"#ef4444",border:"none",color:"#fff",
+                    fontSize:"13px",fontWeight:700,cursor:"pointer"}
+                },"Sí"),
+                e("button",{
+                  onClick:function(){ DD_setBulkDelConfirm(false); DD_setBulkMsg(""); },
+                  style:{padding:"8px 18px",borderRadius:"10px",background:"none",
+                    border:"1px solid "+C.bd,color:C.mt,
+                    fontSize:"13px",fontWeight:700,cursor:"pointer"}
+                },"No")
+              )
+            :e("div",{style:{display:"flex",gap:"8px",flexWrap:"wrap"}},
+                e("button",{
+                  onClick:function(){ DD_setBulkDelConfirm(true); DD_setBulkMsg(""); },
+                  disabled:!DD_selectCount,
+                  style:{padding:"10px 18px",borderRadius:"10px",
+                    background:DD_selectCount?"rgba(239,68,68,.15)":"rgba(255,255,255,.04)",
+                    border:"1px solid "+(DD_selectCount?"rgba(239,68,68,.40)":C.bd),
+                    color:DD_selectCount?"#fca5a5":C.dm,
+                    fontSize:"13px",fontWeight:700,cursor:DD_selectCount?"pointer":"default"}
+                },"🗑 Eliminar"),
+                e("button",{
+                  onClick:function(){ DD_setBulkAction("move"); DD_setBulkTargetDeckId(""); DD_setBulkErrMsg(""); },
+                  disabled:!DD_selectCount,
+                  style:{padding:"10px 18px",borderRadius:"10px",background:"none",
+                    border:"1px solid "+C.bd,color:DD_selectCount?C.tx:C.dm,
+                    fontSize:"13px",fontWeight:700,cursor:DD_selectCount?"pointer":"default"}
+                },"📦 Mover"),
+                e("button",{
+                  onClick:function(){ DD_setBulkAction("copy"); DD_setBulkTargetDeckId(""); DD_setBulkErrMsg(""); },
+                  disabled:!DD_selectCount,
+                  style:{padding:"10px 18px",borderRadius:"10px",background:"none",
+                    border:"1px solid "+C.bd,color:DD_selectCount?C.tx:C.dm,
+                    fontSize:"13px",fontWeight:700,cursor:DD_selectCount?"pointer":"default"}
+                },"📋 Copiar"),
+                e("button",{
+                  onClick:function(){ DD_setTagBulkOpen(true); DD_setTagBulkInput(""); DD_setTagBulkErrMsg(""); },
+                  disabled:!DD_selectCount,
+                  style:{padding:"10px 18px",borderRadius:"10px",background:"none",
+                    border:"1px solid "+C.bd,color:DD_selectCount?C.tx:C.dm,
+                    fontSize:"13px",fontWeight:700,cursor:DD_selectCount?"pointer":"default"}
+                },"🏷 Etiquetar")
+              ),
+          DD_bulkMsg&&e("div",{style:{marginTop:"8px",fontSize:"12px",
+            color:DD_bulkMsg.indexOf("Error")===0?"#fca5a5":"#a78bfa",fontWeight:600}},
+            DD_bulkMsg
+          )
+        )
+      :e("div",{style:{display:"flex",gap:"8px",marginBottom:"22px",flexWrap:"wrap"}},
+          DD_cards.length>0 && e("button",{
+            onClick:DD_handleStudy,
+            style:{
+              flex:"1 1 200px",minHeight:"52px",padding:"14px 20px",
+              borderRadius:"14px",
+              background:"linear-gradient(135deg,"+deckCol+",#60a5fa)",
+              color:"#fff",border:"none",
+              fontSize:"15px",fontWeight:700,cursor:"pointer",
+              boxShadow:"0 4px 18px "+deckCol+"55"
+            }
+          },"🎯 Estudiar"),
+          canEdit && e("button",{
+            onClick:DD_handleNewCard,
+            style:{
+              flex:"1 1 160px",minHeight:"52px",padding:"14px 20px",
+              borderRadius:"14px",
+              background:"none",
+              border:"1.5px solid "+C.bd,color:C.tx,
+              fontSize:"14px",fontWeight:700,cursor:"pointer"
+            }
+          },"+ Nueva tarjeta"),
+          canEdit&&DD_cards.length>0&&e("button",{
+            onClick:function(){ DD_setSelectMode(true); },
+            style:{
+              minHeight:"52px",padding:"14px 16px",
+              borderRadius:"14px",
+              background:"none",
+              border:"1.5px solid "+C.bd,color:C.dm,
+              fontSize:"14px",fontWeight:700,cursor:"pointer",flexShrink:0
+            }
+          },"☑ Seleccionar"),
+          canEdit&&DD_cards.length>0&&e("button",{
+            onClick:DD_exportDeck,
+            style:{
+              minHeight:"52px",padding:"14px 16px",
+              borderRadius:"14px",
+              background:"none",
+              border:"1.5px solid "+C.bd,color:C.dm,
+              fontSize:"14px",fontWeight:700,cursor:"pointer",flexShrink:0
+            }
+          },"⬇ Exportar")
+        ),
 
     // ── Search + tag filter ──
     !DD_loading && DD_cards.length>0 && e("div",{style:{marginBottom:"18px"}},
@@ -764,7 +1147,24 @@ function DeckDetailView(props){
             color:DD_showAnswers?C.ac2:C.mt,
             fontSize:"12px",fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"
           }
-        },DD_showAnswers?"👁 Ocultar respuestas":"👁 Mostrar respuestas")
+        },DD_showAnswers?"👁 Ocultar respuestas":"👁 Mostrar respuestas"),
+        canEdit&&e("button",{
+          onClick:function(){
+            var src=DD_deckMeta||deck;
+            DD_setEditDeckName(src.name||"");
+            DD_setEditDeckDesc(src.description||"");
+            DD_setEditDeckColor(src.color||"#a78bfa");
+            DD_setEditDeckIcon(src.icon||"📚");
+            DD_setEditDeckErr("");
+            DD_setEditDeckOpen(true);
+          },
+          style:{
+            flexShrink:0,minHeight:"44px",padding:"8px 14px",
+            borderRadius:"10px",background:"none",
+            border:"1px solid "+C.bd,
+            color:C.dm,fontSize:"12px",fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"
+          }
+        },"✏️ Editar baraja")
       ),
       allTags.length>0 && e("div",{style:{display:"flex",flexWrap:"wrap",gap:"6px",alignItems:"center"}},
         allTags.map(function(t){
@@ -1112,6 +1512,117 @@ function DeckDetailView(props){
         document.body
       );
     })(),
+    DD_editDeckOpen&&ReactDOM.createPortal(
+      e("div",{
+        onClick:function(){ if(!DD_editDeckLoading){ DD_setEditDeckOpen(false); } },
+        style:{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",
+          display:"flex",alignItems:"center",justifyContent:"center",
+          zIndex:1050,padding:"16px"}
+      },
+        e("div",{
+          onClick:function(ev){ ev.stopPropagation(); },
+          style:{width:"100%",maxWidth:"420px",background:C.cd,
+            border:"1px solid "+C.bd,borderRadius:"16px",
+            boxShadow:"0 12px 40px rgba(0,0,0,.6)",overflow:"hidden"}
+        },
+          e("div",{style:{
+            display:"flex",alignItems:"center",justifyContent:"space-between",
+            padding:"16px 18px",borderBottom:"1px solid "+C.bd
+          }},
+            e("span",{style:{fontSize:"14px",color:C.tx,fontWeight:700}},"✏️ Editar baraja"),
+            e("button",{
+              onClick:function(){ DD_setEditDeckOpen(false); },
+              disabled:DD_editDeckLoading,
+              style:{background:"none",border:"none",color:C.dm,fontSize:"20px",
+                cursor:"pointer",lineHeight:1,padding:"4px 8px"}
+            },"×")
+          ),
+          e("div",{style:{padding:"18px",display:"flex",flexDirection:"column",gap:"14px"}},
+            e("div",null,
+              e("div",{style:{fontSize:"12px",color:C.dm,fontWeight:600,marginBottom:"6px"}},"Nombre"),
+              e("input",{
+                type:"text",value:DD_editDeckName,autoFocus:true,
+                disabled:DD_editDeckLoading,
+                onChange:function(ev){ DD_setEditDeckName(ev.target.value); },
+                onKeyDown:function(ev){ if(ev.key==="Enter"&&DD_editDeckName.trim()) DD_execEditDeck(); },
+                style:{width:"100%",minHeight:"42px",padding:"8px 12px",
+                  borderRadius:"10px",border:"1px solid "+C.bd,
+                  background:C.bg,color:C.tx,fontSize:"13px",
+                  outline:"none",boxSizing:"border-box"}
+              })
+            ),
+            e("div",null,
+              e("div",{style:{fontSize:"12px",color:C.dm,fontWeight:600,marginBottom:"6px"}},"Descripción"),
+              e("input",{
+                type:"text",value:DD_editDeckDesc,
+                disabled:DD_editDeckLoading,
+                placeholder:"Opcional...",
+                onChange:function(ev){ DD_setEditDeckDesc(ev.target.value); },
+                style:{width:"100%",minHeight:"42px",padding:"8px 12px",
+                  borderRadius:"10px",border:"1px solid "+C.bd,
+                  background:C.bg,color:C.tx,fontSize:"13px",
+                  outline:"none",boxSizing:"border-box"}
+              })
+            ),
+            e("div",null,
+              e("div",{style:{fontSize:"12px",color:C.dm,fontWeight:600,marginBottom:"8px"}},"Color"),
+              e("div",{style:{display:"flex",flexWrap:"wrap",gap:"8px"}},
+                DD_DECK_COLORS.map(function(col){
+                  var isSel=DD_editDeckColor===col;
+                  return e("button",{key:col,
+                    onClick:function(){ DD_setEditDeckColor(col); },
+                    style:{
+                      width:"28px",height:"28px",borderRadius:"50%",
+                      background:col,border:isSel?"3px solid #fff":"2px solid transparent",
+                      cursor:"pointer",boxSizing:"border-box",
+                      boxShadow:isSel?"0 0 0 2px "+col:""
+                    }
+                  });
+                })
+              )
+            ),
+            e("div",null,
+              e("div",{style:{fontSize:"12px",color:C.dm,fontWeight:600,marginBottom:"6px"}},"Ícono (emoji)"),
+              e("input",{
+                type:"text",value:DD_editDeckIcon,
+                disabled:DD_editDeckLoading,
+                maxLength:2,
+                onChange:function(ev){ DD_setEditDeckIcon(ev.target.value); },
+                style:{width:"70px",minHeight:"42px",padding:"8px 12px",
+                  borderRadius:"10px",border:"1px solid "+C.bd,
+                  background:C.bg,color:C.tx,fontSize:"22px",textAlign:"center",
+                  outline:"none",boxSizing:"border-box"}
+              })
+            ),
+            DD_editDeckErr&&e("div",{style:{fontSize:"12px",color:"#fca5a5",fontWeight:600}},DD_editDeckErr)
+          ),
+          e("div",{style:{
+            padding:"14px 18px",borderTop:"1px solid "+C.bd,
+            display:"flex",gap:"8px"
+          }},
+            e("button",{
+              onClick:DD_execEditDeck,
+              disabled:!DD_editDeckName.trim()||DD_editDeckLoading,
+              style:{
+                flex:1,minHeight:"44px",padding:"12px",borderRadius:"12px",border:"none",
+                background:(DD_editDeckName.trim()&&!DD_editDeckLoading)?"#a78bfa":"rgba(255,255,255,.08)",
+                color:(DD_editDeckName.trim()&&!DD_editDeckLoading)?"#fff":C.mt,
+                fontSize:"14px",fontWeight:700,
+                cursor:(DD_editDeckName.trim()&&!DD_editDeckLoading)?"pointer":"default"
+              }
+            },DD_editDeckLoading?"Guardando...":"Guardar"),
+            e("button",{
+              onClick:function(){ DD_setEditDeckOpen(false); },
+              disabled:DD_editDeckLoading,
+              style:{minHeight:"44px",padding:"12px 18px",borderRadius:"12px",
+                background:"none",border:"1px solid "+C.bd,
+                color:C.mt,fontSize:"14px",fontWeight:700,cursor:"pointer"}
+            },"Cancelar")
+          )
+        )
+      ),
+      document.body
+    ),
     DD_copySuccess&&ReactDOM.createPortal(
       e("div",{style:{
         position:"fixed",bottom:"80px",left:"50%",transform:"translateX(-50%)",
@@ -1121,7 +1632,208 @@ function DeckDetailView(props){
         whiteSpace:"nowrap",pointerEvents:"none"
       }},"✓ Card agregada a tu baraja"),
       document.body
-    )
+    ),
+    DD_tagBulkOpen&&(function(){
+      var tbTag=DD_tagBulkInput.trim().toLowerCase().replace(/[^a-z0-9\-_áéíóúñü]/g,"");
+      var canAdd=!!tbTag&&!DD_tagBulkLoading;
+      var tbSuggs=[];
+      for(var tbs=0;tbs<DD_userTagsList.length;tbs++){
+        var tbsn=DD_userTagsList[tbs].name;
+        var tbq=DD_tagBulkInput.trim().toLowerCase();
+        if(!tbq||tbsn.indexOf(tbq)>=0) tbSuggs.push(tbsn);
+      }
+      return ReactDOM.createPortal(
+        e("div",{
+          onClick:function(){ if(!DD_tagBulkLoading){ DD_setTagBulkOpen(false); DD_setTagBulkInput(""); DD_setTagBulkErrMsg(""); } },
+          style:{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",
+            display:"flex",alignItems:"center",justifyContent:"center",
+            zIndex:1050,padding:"16px"}
+        },
+          e("div",{
+            onClick:function(ev){ ev.stopPropagation(); },
+            style:{width:"100%",maxWidth:"400px",background:C.cd,
+              border:"1px solid "+C.bd,borderRadius:"16px",
+              boxShadow:"0 12px 40px rgba(0,0,0,.6)",overflow:"hidden"}
+          },
+            e("div",{style:{
+              display:"flex",alignItems:"center",justifyContent:"space-between",
+              padding:"16px 18px",borderBottom:"1px solid "+C.bd
+            }},
+              e("span",{style:{fontSize:"14px",color:C.tx,fontWeight:700}},
+                "🏷 Agregar etiqueta a "+DD_selectCount+" card"+(DD_selectCount===1?"":"s")
+              ),
+              e("button",{
+                onClick:function(){ DD_setTagBulkOpen(false); DD_setTagBulkInput(""); DD_setTagBulkErrMsg(""); },
+                disabled:DD_tagBulkLoading,
+                style:{background:"none",border:"none",color:C.dm,fontSize:"20px",
+                  cursor:"pointer",lineHeight:1,padding:"4px 8px"}
+              },"×")
+            ),
+            e("div",{style:{padding:"14px 18px 0"}},
+              e("input",{
+                type:"text",value:DD_tagBulkInput,
+                autoFocus:true,disabled:DD_tagBulkLoading,
+                placeholder:"Nombre del tag...",
+                onChange:function(ev){ DD_setTagBulkInput(ev.target.value); },
+                onKeyDown:function(ev){
+                  if(ev.key==="Enter"&&canAdd) DD_execBulkTag();
+                  if(ev.key==="Escape"){ DD_setTagBulkOpen(false); DD_setTagBulkInput(""); DD_setTagBulkErrMsg(""); }
+                },
+                style:{
+                  width:"100%",minHeight:"44px",padding:"10px 14px",
+                  borderRadius:"10px",border:"1px solid "+C.bd,
+                  background:C.bg,color:C.tx,fontSize:"13px",
+                  outline:"none",boxSizing:"border-box"
+                }
+              }),
+              tbSuggs.length>0&&e("div",{style:{
+                display:"flex",flexWrap:"wrap",gap:"6px",marginTop:"10px"
+              }},
+                tbSuggs.map(function(tag){
+                  var col=DD_userTagColorMap[tag]||"#a78bfa";
+                  return e("button",{key:tag,
+                    onClick:function(){ DD_setTagBulkInput(tag); },
+                    style:{padding:"4px 12px",borderRadius:"999px",
+                      background:col+"14",border:"1px solid "+col+"38",
+                      color:col,fontSize:"11px",fontWeight:600,cursor:"pointer",minHeight:"28px"}
+                  },"#"+tag);
+                })
+              )
+            ),
+            DD_tagBulkErrMsg&&e("div",{style:{margin:"10px 18px 0",fontSize:"12px",
+              color:"#fca5a5",fontWeight:600}},DD_tagBulkErrMsg),
+            e("div",{style:{
+              padding:"14px 18px",borderTop:"1px solid "+C.bd,
+              display:"flex",gap:"8px",marginTop:"14px"
+            }},
+              e("button",{
+                onClick:DD_execBulkTag,
+                disabled:!canAdd,
+                style:{
+                  flex:1,minHeight:"44px",padding:"12px",borderRadius:"12px",
+                  border:"none",
+                  background:canAdd?"#a78bfa":"rgba(255,255,255,.08)",
+                  color:canAdd?"#fff":C.mt,
+                  fontSize:"14px",fontWeight:700,
+                  cursor:canAdd?"pointer":"default"
+                }
+              },DD_tagBulkLoading?"Agregando...":"Agregar"),
+              e("button",{
+                onClick:function(){ DD_setTagBulkOpen(false); DD_setTagBulkInput(""); DD_setTagBulkErrMsg(""); },
+                disabled:DD_tagBulkLoading,
+                style:{
+                  minHeight:"44px",padding:"12px 18px",borderRadius:"12px",
+                  background:"none",border:"1px solid "+C.bd,
+                  color:C.mt,fontSize:"14px",fontWeight:700,cursor:"pointer"
+                }
+              },"Cancelar")
+            )
+          )
+        ),
+        document.body
+      );
+    })(),
+    DD_bulkAction&&(function(){
+      var isMove=DD_bulkAction==="move";
+      var otherDecks=[];
+      for(var bdo=0;bdo<DD_ownDecks.length;bdo++){
+        if(DD_ownDecks[bdo].id!==deck.id) otherDecks.push(DD_ownDecks[bdo]);
+      }
+      var canConfirm=!!DD_bulkTargetDeckId&&!DD_bulkLoading;
+      return ReactDOM.createPortal(
+        e("div",{
+          onClick:function(){ if(!DD_bulkLoading){ DD_setBulkAction(null); DD_setBulkTargetDeckId(""); DD_setBulkErrMsg(""); } },
+          style:{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",
+            display:"flex",alignItems:"center",justifyContent:"center",
+            zIndex:1050,padding:"16px"}
+        },
+          e("div",{
+            onClick:function(ev){ ev.stopPropagation(); },
+            style:{width:"100%",maxWidth:"440px",background:C.cd,
+              border:"1px solid "+C.bd,borderRadius:"16px",
+              boxShadow:"0 12px 40px rgba(0,0,0,.6)",overflow:"hidden"}
+          },
+            e("div",{style:{
+              display:"flex",alignItems:"center",justifyContent:"space-between",
+              padding:"16px 18px",borderBottom:"1px solid "+C.bd
+            }},
+              e("span",{style:{fontSize:"14px",color:C.tx,fontWeight:700}},
+                (isMove?"📦 Mover ":"📋 Copiar ")+DD_selectCount+" card"+(DD_selectCount===1?"":"s")
+              ),
+              e("button",{
+                onClick:function(){ DD_setBulkAction(null); DD_setBulkTargetDeckId(""); DD_setBulkErrMsg(""); },
+                disabled:DD_bulkLoading,
+                style:{background:"none",border:"none",color:C.dm,fontSize:"20px",
+                  cursor:"pointer",lineHeight:1,padding:"4px 8px"}
+              },"×")
+            ),
+            e("div",{style:{padding:"14px 18px 0"}},
+              otherDecks.length===0
+                ?e("div",{style:{
+                    padding:"20px",textAlign:"center",
+                    fontSize:"13px",color:C.dm,lineHeight:1.5
+                  }},
+                    e("div",{style:{fontSize:"28px",marginBottom:"8px"}},"📭"),
+                    "No tenés otras barajas. Creá una desde la pantalla principal."
+                  )
+                :e("div",null,
+                    e("div",{style:{fontSize:"12px",color:C.dm,marginBottom:"8px",fontWeight:600}},
+                      "Seleccionar baraja destino"
+                    ),
+                    e("div",{style:{display:"flex",flexDirection:"column",gap:"6px",maxHeight:"240px",overflowY:"auto"}},
+                      otherDecks.map(function(d){
+                        var isSel=DD_bulkTargetDeckId===d.id;
+                        return e("button",{key:d.id,
+                          onClick:function(){ DD_setBulkTargetDeckId(d.id); },
+                          style:{
+                            display:"flex",alignItems:"center",gap:"10px",
+                            padding:"10px 14px",borderRadius:"10px",
+                            border:"1px solid "+(isSel?C.ac:C.bd),
+                            background:isSel?"rgba(96,165,250,.12)":"rgba(255,255,255,.03)",
+                            color:isSel?C.ac:C.tx,fontSize:"13px",fontWeight:600,
+                            cursor:"pointer",textAlign:"left"
+                          }
+                        },
+                          e("span",null,(d.icon||"📚")),
+                          e("span",{style:{flex:1}},d.name||"Sin nombre")
+                        );
+                      })
+                    )
+                  )
+            ),
+            DD_bulkErrMsg&&e("div",{style:{margin:"10px 18px 0",fontSize:"12px",
+              color:"#fca5a5",fontWeight:600}},DD_bulkErrMsg),
+            e("div",{style:{
+              padding:"14px 18px",borderTop:"1px solid "+C.bd,
+              display:"flex",gap:"8px",marginTop:"14px"
+            }},
+              otherDecks.length>0&&e("button",{
+                onClick:isMove?DD_execBulkMove:DD_execBulkCopy,
+                disabled:!canConfirm,
+                style:{
+                  flex:1,minHeight:"44px",padding:"12px",borderRadius:"12px",
+                  border:"none",
+                  background:canConfirm?"#3b82f6":"rgba(255,255,255,.08)",
+                  color:canConfirm?"#fff":C.mt,
+                  fontSize:"14px",fontWeight:700,
+                  cursor:canConfirm?"pointer":"default"
+                }
+              },DD_bulkLoading?(isMove?"Moviendo...":"Copiando..."):(isMove?"Mover":"Copiar")),
+              e("button",{
+                onClick:function(){ DD_setBulkAction(null); DD_setBulkTargetDeckId(""); DD_setBulkErrMsg(""); },
+                disabled:DD_bulkLoading,
+                style:{
+                  minHeight:"44px",padding:"12px 18px",borderRadius:"12px",
+                  background:"none",border:"1px solid "+C.bd,
+                  color:C.mt,fontSize:"14px",fontWeight:700,cursor:"pointer"
+                }
+              },"Cancelar")
+            )
+          )
+        ),
+        document.body
+      );
+    })()
   ));
 }
 

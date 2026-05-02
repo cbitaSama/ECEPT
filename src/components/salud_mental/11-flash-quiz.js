@@ -1,6 +1,9 @@
 // Flashcards de estudio · tarjeta con pregunta, toca para voltear y ver respuesta
 // Soporta añadir/editar/eliminar tarjetas del usuario con persistencia en localStorage
 function FlashDeck(p){
+  if(SM_goFlashcards&&SM_SUPABASE_DECKS&&SM_SUPABASE_DECKS[p.deckId]){
+    return e(SM_FlashBridge,{deckId:p.deckId,goFlashcards:SM_goFlashcards});
+  }
   var c=p.c||C.anx;
   var storageKey=p.storageKey||("flashcards_"+(p.deckId||"default"));
 

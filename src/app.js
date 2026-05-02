@@ -585,7 +585,7 @@ function App(){
     // onViewChange — SM calls this on every internal view change so ECEPT can
     //                render the deeper breadcrumb. Module itself is headless.
     // className "sm-root" scopes the SM-specific CSS (.prose + button resets).
-    vista==="salud_mental"&&e("div",{className:"sm-root"},e(SaludMentalView,{onHome:function(){go("home")},onBackRef:smBackRef,onViewChange:onSmViewChange})),
+    vista==="salud_mental"&&e("div",{className:"sm-root"},e(SaludMentalView,{onHome:function(){go("home")},onBackRef:smBackRef,onViewChange:onSmViewChange,goFlashcards:function(deck){if(deck){window.ECEPT_DECK_SELECTED=deck;go("flashcards_deck");}else{go("flashcards");}}})),
 
     // ════════════ QUEMADURAS ════════════
     vista==="cir_quem"&&e(F,null,

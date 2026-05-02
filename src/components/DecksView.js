@@ -38,6 +38,10 @@ function DecksView(props){
   s=useState(null);  var DV_dragIdx=s[0],         DV_setDragIdx=s[1];
   s=useState(null);  var DV_dragOverIdx=s[0],     DV_setDragOverIdx=s[1];
   var DV_dragRef=useRef({idx:null,overIdx:null});
+  s=useState(false); var DV_importOpen=s[0],    DV_setImportOpen=s[1];
+  s=useState(null);  var DV_importData=s[0],    DV_setImportData=s[1];
+  s=useState("");    var DV_importError=s[0],   DV_setImportError=s[1];
+  s=useState(false); var DV_importLoading=s[0], DV_setImportLoading=s[1];
 
   // ── Inject CSS once ──
   useEffect(function(){
@@ -127,6 +131,93 @@ function DecksView(props){
     DV_setMIcon("🎴"); DV_setMColor("#a78bfa");
     DV_setMErr(""); DV_setMLoading(false);
     DV_setModalMode("create");
+  }
+
+  function DV_handleImportFile(ev){
+    var file=ev.target.files&&ev.target.files[0];
+    if(!file) return;
+    DV_setImportError(""); DV_setImportData(null);
+    var reader=new FileReader();
+    reader.onload=function(e2){
+      try{
+        var parsed=JSON.parse(e2.target.result);
+        if(!parsed.version||!parsed.deck||!parsed.deck.name||!Array.isArray(parsed.cards)){
+          DV_setImportError("Archivo inválido. Usá un JSON exportado desde ECEPT.");
+          return;
+        }
+        DV_setImportData(parsed);
+      }catch(ex){
+        DV_setImportError("Archivo inválido. Usá un JSON exportado desde ECEPT.");
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  async function DV_exportDeck(deck){
+    if(!user||!window.ECEPT_SUPABASE) return;
+    var res=await window.ECEPT_SUPABASE.from("flashcards")
+      .select("card_type,front,back,tags")
+      .eq("deck_id",deck.id).eq("user_id",user.id);
+    if(res.error||!res.data) return;
+    var exportData={
+      version:1,
+      exportedAt:new Date().toISOString(),
+      deck:{name:deck.name,description:deck.description||"",color:deck.color||"#3b82f6",icon:deck.icon||"📚"},
+      cards:res.data
+    };
+    var blob=new Blob([JSON.stringify(exportData,null,2)],{type:"application/json"});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement("a");
+    a.href=url;
+    a.download=(deck.name||"baraja").replace(/[^a-z0-9]/gi,"_")+"_ecept.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  async function DV_importDeck(){
+    if(!DV_importData||!user||!window.ECEPT_SUPABASE) return;
+    DV_setImportLoading(true); DV_setImportError("");
+    try{
+      var deckRes=await window.ECEPT_SUPABASE.from("decks")
+        .insert({
+          user_id:user.id,
+          name:DV_importData.deck.name,
+          description:DV_importData.deck.description||"",
+          color:DV_importData.deck.color||"#3b82f6",
+          icon:DV_importData.deck.icon||"📚",
+          is_official:false
+        })
+        .select("id")
+        .single();
+      if(deckRes.error) throw deckRes.error;
+      var newDeckId=deckRes.data.id;
+      var allCards=[];
+      for(var ici=0;ici<DV_importData.cards.length;ici++){
+        var ic=DV_importData.cards[ici];
+        allCards.push({
+          deck_id:newDeckId,user_id:user.id,is_official:false,
+          card_type:ic.card_type||"basic",
+          front:ic.front||"",back:ic.back||"",tags:ic.tags||[]
+        });
+      }
+      var chunkSize=50;
+      for(var ics=0;ics<allCards.length;ics+=chunkSize){
+        var chunk=allCards.slice(ics,ics+chunkSize);
+        var res=await window.ECEPT_SUPABASE.from("flashcards").insert(chunk);
+        if(res.error) throw res.error;
+      }
+      DV_setImportOpen(false);
+      DV_setImportData(null);
+      DV_setImportError("");
+      DV_loadData();
+    }catch(err){
+      console.error("import error",err);
+      DV_setImportError("Error al importar. Intentá de nuevo.");
+    }finally{
+      DV_setImportLoading(false);
+    }
   }
 
   function DV_openEdit(deck){
@@ -379,6 +470,18 @@ function DecksView(props){
           onClick:function(ev){
             ev.stopPropagation();
             DV_setMenuOpenId(null);
+            DV_exportDeck(deck);
+          },
+          style:{display:"block",width:"100%",minHeight:"44px",
+            padding:"10px 14px",textAlign:"left",
+            background:"none",border:"none",color:C.tx,
+            fontSize:"13px",fontWeight:600,cursor:"pointer"}
+        },"⬇  Exportar"),
+        e("div",{style:{height:"1px",background:C.bd}}),
+        e("button",{
+          onClick:function(ev){
+            ev.stopPropagation();
+            DV_setMenuOpenId(null);
             setTimeout(function(){ DV_setDeleteConfirmId(deck.id); },0);
           },
           style:{display:"block",width:"100%",minHeight:"44px",
@@ -565,7 +668,18 @@ function DecksView(props){
           color:C.dm,
           fontSize:"14px",fontWeight:700,cursor:"pointer"
         }
-      },"🏷️ Etiquetas")
+      },"🏷️ Etiquetas"),
+      user&&e("button",{
+        onClick:function(){ DV_setImportOpen(true); DV_setImportData(null); DV_setImportError(""); },
+        style:{
+          flex:"0 0 auto",minHeight:"52px",padding:"14px 18px",
+          borderRadius:"14px",
+          background:"none",
+          border:"1.5px solid rgba(167,139,250,.25)",
+          color:C.dm,
+          fontSize:"14px",fontWeight:700,cursor:"pointer"
+        }
+      },"⬆ Importar")
     ),
 
     // ── Load error ──
@@ -854,7 +968,152 @@ function DecksView(props){
       user:user,
       supabase:window.ECEPT_SUPABASE,
       onClose:function(){ DV_setTagMgrOpen(false); }
-    })
+    }),
+
+    DV_importOpen&&ReactDOM.createPortal(
+      e("div",{
+        onClick:function(){ if(!DV_importLoading){ DV_setImportOpen(false); DV_setImportData(null); DV_setImportError(""); } },
+        style:{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",
+          display:"flex",alignItems:"center",justifyContent:"center",
+          zIndex:1050,padding:"16px"}
+      },
+        e("div",{
+          onClick:function(ev){ ev.stopPropagation(); },
+          style:{width:"100%",maxWidth:"440px",background:C.cd,
+            border:"1px solid "+C.bd,borderRadius:"16px",
+            boxShadow:"0 12px 40px rgba(0,0,0,.6)",overflow:"hidden"}
+        },
+          e("div",{style:{
+            display:"flex",alignItems:"center",justifyContent:"space-between",
+            padding:"16px 18px",borderBottom:"1px solid "+C.bd
+          }},
+            e("span",{style:{fontSize:"14px",color:C.tx,fontWeight:700}},"⬆ Importar baraja"),
+            e("button",{
+              onClick:function(){ DV_setImportOpen(false); DV_setImportData(null); DV_setImportError(""); },
+              disabled:DV_importLoading,
+              style:{background:"none",border:"none",color:C.dm,fontSize:"20px",
+                cursor:"pointer",lineHeight:1,padding:"4px 8px"}
+            },"×")
+          ),
+          e("div",{style:{padding:"18px"}},
+            !DV_importData
+              ?e("div",null,
+                  e("p",{style:{fontSize:"13px",color:C.dm,marginBottom:"14px",lineHeight:1.5}},
+                    "Seleccioná un archivo .json exportado desde ECEPT."
+                  ),
+                  e("label",{style:{
+                    display:"flex",alignItems:"center",justifyContent:"center",
+                    minHeight:"80px",borderRadius:"12px",cursor:"pointer",
+                    border:"2px dashed "+C.bd,background:"rgba(255,255,255,.02)",
+                    fontSize:"13px",color:C.dm,fontWeight:600,gap:"8px"
+                  }},
+                    e("span",null,"📂 Elegir archivo .json"),
+                    e("input",{
+                      type:"file",accept:".json",
+                      onChange:DV_handleImportFile,
+                      style:{display:"none"}
+                    })
+                  ),
+                  DV_importError&&e("div",{style:{marginTop:"10px",fontSize:"12px",
+                    color:"#fca5a5",fontWeight:600}},DV_importError)
+                )
+              :e("div",null,
+                  e("div",{style:{
+                    display:"flex",alignItems:"center",gap:"12px",
+                    padding:"14px 16px",borderRadius:"12px",
+                    background:"linear-gradient(135deg,"+C.cd+","+(DV_importData.deck.color||"#3b82f6")+"10)",
+                    border:"1px solid "+(DV_importData.deck.color||C.bd)+"40",
+                    marginBottom:"14px"
+                  }},
+                    e("div",{style:{
+                      fontSize:"26px",width:"48px",height:"48px",flexShrink:0,
+                      display:"flex",alignItems:"center",justifyContent:"center",
+                      borderRadius:"10px",
+                      background:(DV_importData.deck.color||"#3b82f6")+"18"
+                    }},(DV_importData.deck.icon||"📚")),
+                    e("div",{style:{flex:1,minWidth:0}},
+                      e("div",{style:{fontSize:"15px",color:C.tx,fontWeight:700,
+                        overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",marginBottom:"3px"}},
+                        DV_importData.deck.name
+                      ),
+                      DV_importData.deck.description&&e("div",{style:{
+                        fontSize:"11px",color:C.mt,lineHeight:1.4,marginBottom:"5px",
+                        overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"
+                      }},DV_importData.deck.description),
+                      e("span",{style:{
+                        fontSize:"10px",fontWeight:700,padding:"3px 8px",borderRadius:"999px",
+                        background:(C.ac||"#60a5fa")+"18",color:(C.ac||"#60a5fa"),
+                        border:"1px solid "+(C.ac||"#60a5fa")+"30"
+                      }},DV_importData.cards.length+" card"+(DV_importData.cards.length===1?"":"s"))
+                    )
+                  ),
+                  e("div",{style:{display:"flex",flexDirection:"column",gap:"6px",marginBottom:"6px"}},
+                    DV_importData.cards.slice(0,3).map(function(c,ci){
+                      var front=c.front||"";
+                      var isCloze=c.card_type==="cloze";
+                      var typCol=isCloze?"#fbbf24":"#60a5fa";
+                      return e("div",{key:ci,style:{
+                        padding:"8px 10px",borderRadius:"8px",
+                        background:C.cd,border:"1px solid "+C.bd
+                      }},
+                        e("div",{style:{display:"flex",alignItems:"center",gap:"7px",marginBottom:Array.isArray(c.tags)&&c.tags.length?"5px":0}},
+                          e("span",{style:{
+                            fontSize:"9px",fontWeight:700,padding:"2px 6px",borderRadius:"4px",
+                            background:typCol+"18",color:typCol,flexShrink:0
+                          }},isCloze?"CLOZE":"BASIC"),
+                          e("span",{style:{
+                            fontSize:"12px",color:C.tx,
+                            overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"
+                          }},front.length>60?front.slice(0,60)+"…":front)
+                        ),
+                        Array.isArray(c.tags)&&c.tags.length>0&&e("div",{style:{display:"flex",flexWrap:"wrap",gap:"3px"}},
+                          c.tags.map(function(t,ti){
+                            return e("span",{key:ti,style:{
+                              fontSize:"9px",fontWeight:700,padding:"1px 5px",borderRadius:"999px",
+                              background:"rgba(255,255,255,.04)",border:"1px solid "+C.bd,color:C.dm
+                            }},"#"+t);
+                          })
+                        )
+                      );
+                    })
+                  ),
+                  DV_importData.cards.length>3&&e("div",{style:{
+                    fontSize:"11px",color:C.mt,padding:"2px 10px",marginBottom:"4px"
+                  }},"… y "+(DV_importData.cards.length-3)+" card"+(DV_importData.cards.length-3===1?"":"s")+" más"),
+                  DV_importError&&e("div",{style:{marginTop:"10px",fontSize:"12px",
+                    color:"#fca5a5",fontWeight:600}},DV_importError)
+                )
+          ),
+          e("div",{style:{
+            padding:"14px 18px",borderTop:"1px solid "+C.bd,
+            display:"flex",gap:"8px"
+          }},
+            DV_importData&&e("button",{
+              onClick:DV_importDeck,
+              disabled:DV_importLoading,
+              style:{
+                flex:1,minHeight:"44px",padding:"12px",borderRadius:"12px",
+                border:"none",
+                background:DV_importLoading?"rgba(255,255,255,.08)":"#3b82f6",
+                color:DV_importLoading?C.mt:"#fff",
+                fontSize:"14px",fontWeight:700,
+                cursor:DV_importLoading?"default":"pointer"
+              }
+            },DV_importLoading?"Importando...":"Importar"),
+            e("button",{
+              onClick:function(){ DV_setImportOpen(false); DV_setImportData(null); DV_setImportError(""); },
+              disabled:DV_importLoading,
+              style:{
+                minHeight:"44px",padding:"12px 18px",borderRadius:"12px",
+                background:"none",border:"1px solid "+C.bd,
+                color:C.mt,fontSize:"14px",fontWeight:700,cursor:"pointer"
+              }
+            },"Cancelar")
+          )
+        )
+      ),
+      document.body
+    )
   );
 }
 
