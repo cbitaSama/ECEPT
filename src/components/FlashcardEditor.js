@@ -58,6 +58,7 @@ function FlashcardEditor(props){
   s=useState(initTags);   var FE_tags=s[0],     FE_setTags=s[1];
   s=useState("");         var FE_tagIn=s[0],    FE_setTagIn=s[1];
   s=useState([]);         var FE_sugg=s[0],     FE_setSugg=s[1];
+  s=useState({});         var FE_tagColors=s[0],FE_setTagColors=s[1];
   s=useState(false);      var FE_saving=s[0],   FE_setSaving=s[1];
   s=useState("");         var FE_err=s[0],      FE_setErr=s[1];
   s=useState(false);      var FE_ok=s[0],       FE_setOk=s[1];
@@ -112,26 +113,22 @@ function FlashcardEditor(props){
     return function(){ clearInterval(t); };
   },[]);
 
-  // ── Load tag suggestions (user's own cards only, sorted by frequency) ──
+  // ── Load tag suggestions from user_tags entity table ──
   useEffect(function(){
     if(!user||!window.ECEPT_SUPABASE) return;
     window.ECEPT_SUPABASE
-      .from("flashcards").select("tags")
-      .eq("user_id",user.id).eq("is_official",false)
+      .from("user_tags").select("name,color")
+      .eq("user_id",user.id).order("name")
       .then(function(res){
         if(!res||res.error) return;
-        var tc={};
         var rows=(res.data)||[];
+        var names=[],colorMap={};
         for(var i=0;i<rows.length;i++){
-          var ts=rows[i].tags;
-          if(Array.isArray(ts)){
-            for(var j=0;j<ts.length;j++){
-              if(ts[j]) tc[ts[j]]=(tc[ts[j]]||0)+1;
-            }
-          }
+          names.push(rows[i].name);
+          colorMap[rows[i].name]=rows[i].color||"#a78bfa";
         }
-        var sorted=Object.keys(tc).sort(function(a,b){ return tc[b]-tc[a]; });
-        FE_setSugg(sorted.slice(0,30));
+        FE_setSugg(names);
+        FE_setTagColors(colorMap);
       }).catch(function(){});
   },[]);
 
@@ -223,6 +220,22 @@ function FlashcardEditor(props){
       if(res&&res.error){ FE_setErr("No se pudo guardar la tarjeta."); return; }
       FE_clearDraft();
       FE_setOk(true);
+      // Upsert any tags not yet in user_tags
+      var newTagRows=[];
+      for(var ni=0;ni<FE_tags.length;ni++){
+        if(!FE_tagColors[FE_tags[ni]]){
+          newTagRows.push({user_id:user.id,name:FE_tags[ni],color:"#a78bfa"});
+        }
+      }
+      if(newTagRows.length>0){
+        try{
+          window.ECEPT_SUPABASE.from("user_tags")
+            .upsert(newTagRows,{onConflict:"user_id,name",ignoreDuplicates:true})
+            .catch(function(e){ console.warn("user_tags upsert:",e); });
+        }catch(e){
+          console.warn("user_tags upsert sync error:",e);
+        }
+      }
       setTimeout(function(){
         if(typeof props.onSaved==="function") props.onSaved();
         if(typeof props.onClose==="function") props.onClose();
@@ -527,7 +540,7 @@ function FlashcardEditor(props){
           borderRadius:"10px",border:"1px solid "+C.bd,background:C.bg
         }},
           FE_tags.map(function(t,i){
-            var tc=FE_tagColor(t);
+            var tc=FE_tagColors[t]||FE_tagColor(t);
             return e("span",{key:i,style:{
               display:"inline-flex",alignItems:"center",gap:"4px",
               padding:"3px 6px 3px 10px",borderRadius:"999px",
@@ -573,7 +586,7 @@ function FlashcardEditor(props){
         FE_sugg.filter(function(t){ return FE_tags.indexOf(t)===-1; }).length>0 &&
           e("div",{style:{display:"flex",flexWrap:"wrap",gap:"5px",marginTop:"7px"}},
             FE_sugg.filter(function(t){ return FE_tags.indexOf(t)===-1; }).map(function(t){
-              var tc=FE_tagColor(t);
+              var tc=FE_tagColors[t]||FE_tagColor(t);
               return e("button",{key:t,onClick:function(){ FE_addTag(t); },style:{
                 padding:"3px 10px",borderRadius:"999px",minHeight:"28px",
                 background:tc+"14",border:"1px solid "+tc+"38",

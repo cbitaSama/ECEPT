@@ -130,6 +130,7 @@ function StudyView(props){
   s=useState(true);     var SV_loadingSetup=s[0],  SV_setLoadingSetup=s[1];
   s=useState("");       var SV_loadErr=s[0],       SV_setLoadErr=s[1];
   s=useState(false);    var SV_sliding=s[0],       SV_setSliding=s[1];
+  s=useState({});       var SV_userCardTags=s[0],  SV_setUserCardTags=s[1];
 
   // ── Inject CSS once ──
   useEffect(function(){
@@ -206,7 +207,32 @@ function StudyView(props){
             for(var di=0;di<decksData.length;di++){ initSel[decksData[di].id]=true; }
           }
           SV_setSelIds(initSel);
-          SV_setLoadingSetup(false);
+          // Cargar user_card_tags para cards de barajas oficiales
+          if(user&&window.ECEPT_SUPABASE){
+            var deckOff={};
+            for(var di4=0;di4<decksData.length;di4++){ deckOff[decksData[di4].id]=!!decksData[di4].is_official; }
+            var offIds=[];
+            for(var ci2=0;ci2<cards.length;ci2++){ if(deckOff[cards[ci2].deck_id]) offIds.push(cards[ci2].id); }
+            if(offIds.length>0){
+              window.ECEPT_SUPABASE.from("user_card_tags").select("flashcard_id,tag")
+                .eq("user_id",user.id).in("flashcard_id",offIds)
+                .then(function(uctRes){
+                  var uctMap={};
+                  var uctRows=(uctRes&&!uctRes.error)?(uctRes.data||[]):[];
+                  for(var j=0;j<uctRows.length;j++){
+                    var fid=uctRows[j].flashcard_id;
+                    if(!uctMap[fid]) uctMap[fid]=[];
+                    uctMap[fid].push(uctRows[j].tag);
+                  }
+                  SV_setUserCardTags(uctMap);
+                  SV_setLoadingSetup(false);
+                }).catch(function(){ SV_setLoadingSetup(false); });
+            } else {
+              SV_setLoadingSetup(false);
+            }
+          } else {
+            SV_setLoadingSetup(false);
+          }
         }).catch(function(err){
           console.error("[StudyView] data load error:",err);
           SV_setLoadErr("Error cargando datos.");
@@ -232,18 +258,24 @@ function StudyView(props){
   for(var ci=0;ci<SV_allCards.length;ci++){
     var _c=SV_allCards[ci];
     if(!selDeckSet[_c.deck_id]) continue;
-    if(SV_deckOfficial[_c.deck_id]) continue;
-    var _ts=Array.isArray(_c.tags)?_c.tags:[];
-    for(var ti=0;ti<_ts.length;ti++){ if(_ts[ti]) tagMap[_ts[ti]]=true; }
+    if(SV_deckOfficial[_c.deck_id]){
+      var _uct=SV_userCardTags[_c.id];
+      if(Array.isArray(_uct)){ for(var uti=0;uti<_uct.length;uti++){ if(_uct[uti]) tagMap[_uct[uti]]=true; } }
+    } else {
+      var _ts=Array.isArray(_c.tags)?_c.tags:[];
+      for(var ti=0;ti<_ts.length;ti++){ if(_ts[ti]) tagMap[_ts[ti]]=true; }
+    }
   }
   var allTags=Object.keys(tagMap).sort();
 
   var availableCards=SV_allCards.filter(function(c){
     if(!selDeckSet[c.deck_id]) return false;
     if(SV_selTags.length>0){
+      var isOff=!!SV_deckOfficial[c.deck_id];
       var ct=Array.isArray(c.tags)?c.tags:[];
+      var uct=isOff?(SV_userCardTags[c.id]||[]):[];
       for(var si=0;si<SV_selTags.length;si++){
-        if(ct.indexOf(SV_selTags[si])===-1) return false;
+        if(ct.indexOf(SV_selTags[si])===-1&&uct.indexOf(SV_selTags[si])===-1) return false;
       }
     }
     var p=SV_progress[c.id];

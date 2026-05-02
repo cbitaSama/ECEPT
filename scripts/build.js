@@ -115,6 +115,8 @@ var parts = [
   'src/components/DeckDetailView.js',
   // study view (SM-2 spaced repetition study session; exposes window.StudyView)
   'src/components/StudyView.js',
+  // tag manager (user tag entities CRUD; exposes window.TagManager)
+  'src/components/TagManager.js',
   // app
   'src/app.js'
 ];
@@ -184,7 +186,9 @@ var expectedGlobals = [
   // deck detail view
   'function DeckDetailView', 'window.DeckDetailView',
   // study view
-  'function StudyView', 'window.StudyView'
+  'function StudyView', 'window.StudyView',
+  // tag manager
+  'function TagManager', 'window.TagManager'
 ];
 expectedGlobals.forEach(function(g) {
   if (output.indexOf(g) === -1) errors.push('missing global: ' + g);
