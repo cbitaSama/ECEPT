@@ -16744,14 +16744,17 @@ function DecksView(props){
       onClick:function(){ if(!isMenuOpen&&DV_dragIdx===null) DV_openDeck(deck); },
       style:{
         position:"relative",
-        background:"linear-gradient(135deg,"+C.cd+","+col+"08)",
-        border:"1px solid "+col+"35",
-        borderRadius:"12px",padding:"16px",
+        background:"linear-gradient(135deg,"+C.cd+","+col+"0a)",
+        border:"1px solid "+col+"38",
+        borderRadius:"16px",padding:"18px 20px",
+        minHeight:"160px",
         cursor:isDragging?"grabbing":"pointer",
         animation:"slideUp .4s ease-out "+(i*0.05)+"s both",
         opacity:isDragging?0.4:1,
         transition:"opacity .15s",
         boxSizing:"border-box",
+        display:"flex",
+        flexDirection:"column",
         boxShadow:isDropTarget?"inset 0 3px 0 #a78bfa":"none"
       }
     },
@@ -16890,10 +16893,12 @@ function DecksView(props){
       onClick:function(){ if(!isMenuOpen) DV_openDeck(deck); },
       style:{
         position:"relative",
-        background:"linear-gradient(135deg,"+C.cd+","+col+"08)",
-        border:"1px solid "+col+"35",
-        borderRadius:"12px",padding:"16px",cursor:"pointer",
-        animation:"slideUp .4s ease-out "+(i*0.05)+"s both"
+        background:"linear-gradient(135deg,"+C.cd+","+col+"0a)",
+        border:"1px solid "+col+"38",
+        borderRadius:"16px",padding:"18px 20px",cursor:"pointer",
+        minHeight:"160px",
+        animation:"slideUp .4s ease-out "+(i*0.05)+"s both",
+        display:"flex",flexDirection:"column",boxSizing:"border-box"
       }
     },
       // Header row: icon + name + (menu OR badge)
@@ -16977,7 +16982,7 @@ function DecksView(props){
   var officialDecks=DV_decks.filter(function(d){ return d.is_official; });
   var userDecks=DV_decks.filter(function(d){ return !d.is_official; });
 
-  return e("div",{style:{maxWidth:"960px",margin:"0 auto",padding:"20px 16px 80px",position:"relative"}},
+  return e("div",{style:{width:"100%",maxWidth:"1400px",margin:"0 auto",padding:"24px max(16px, calc((100vw - 1400px) / 2 + 24px)) 80px",position:"relative",boxSizing:"border-box"}},
 
     // ── Header ──
     e("div",{style:{marginBottom:"4px"}},
@@ -17088,7 +17093,7 @@ function DecksView(props){
 
     // ── Loading skeletons ──
     DV_loading && e("div",{style:{
-      display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:"12px"
+      display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:"16px"
     }},
       DV_skeletonCard("sk1"),DV_skeletonCard("sk2"),
       DV_skeletonCard("sk3"),DV_skeletonCard("sk4")
@@ -17097,7 +17102,7 @@ function DecksView(props){
     // ── Official decks section ──
     !DV_loading && officialDecks.length>0 && e("div",{style:{marginBottom:"28px"}},
       e("h2",{style:sectionTitleStyle},"Barajas oficiales de ECEPT"),
-      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:"12px"}},
+      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:"16px"}},
         officialDecks.map(function(d,i){ return DV_deckCard(d,i); })
       )
     ),
@@ -17131,7 +17136,7 @@ function DecksView(props){
                 e("p",{style:{fontSize:"14px",color:C.tx,fontWeight:600,marginBottom:"4px"}},"Aún no creaste ninguna baraja."),
                 e("p",{style:{fontSize:"12px",color:C.dm,lineHeight:1.5}},"¡Empezá ahora! Tocá «+ Crear baraja» arriba.")
               )
-            : e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:"12px"}},
+            : e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:"16px"}},
                 userDecks.map(function(d,i){ return DV_userDeckCard(d,i); })
               )
           )
