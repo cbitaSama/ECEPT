@@ -26,6 +26,7 @@ function ElionGenerator(props) {
   s=useState({});       var EG_cardStates=s[0],   EG_setCardStates=s[1];
   s=useState({});       var EG_editValues=s[0],   EG_setEditValues=s[1];
   s=useState('');       var EG_error=s[0],        EG_setError=s[1];
+  s=useState(null);     var EG_quota=s[0],        EG_setQuota=s[1];
 
   // ── Derived ──
   var EG_approvedCount = 0;
@@ -114,7 +115,7 @@ function ElionGenerator(props) {
         }
       }
     }
-    if (typeof onImport === 'function') onImport(approved);
+    if (typeof onImport === 'function') onImport(approved, EG_sourceName);
     if (typeof onClose === 'function') onClose();
   }
 
@@ -157,7 +158,11 @@ function ElionGenerator(props) {
       var data = await resp.json();
 
       if (!resp.ok) {
-        EG_setError(data.error === 'premium_required' ? 'premium_required' : (data.error || 'Error al generar. Intentá de nuevo.'));
+        if (data.error === 'insufficient_credits') {
+          EG_setError('insufficient_credits:' + (data.need||'?') + ':' + (data.have||'0'));
+        } else {
+          EG_setError(data.error === 'premium_required' ? 'premium_required' : (data.error || 'Error al generar. Intentá de nuevo.'));
+        }
         EG_setStep('input');
         return;
       }
@@ -166,6 +171,7 @@ function ElionGenerator(props) {
       for (var ii = 0; ii < data.cards.length; ii++) initialStates[ii] = 'approved';
       EG_setCards(data.cards);
       EG_setCardStates(initialStates);
+      if (data.quota) EG_setQuota(data.quota);
       EG_setStep('review');
 
     } catch(err) {
@@ -176,6 +182,21 @@ function ElionGenerator(props) {
 
   // ── Render: input step ──
   function renderInput() {
+    if (EG_error.indexOf('insufficient_credits:') === 0) {
+      var EG_icParts = EG_error.split(':');
+      return e('div', { style: { textAlign:'center', padding:'40px 24px' } },
+        e('div', { style: { fontSize:'48px', marginBottom:'16px' } }, '🪙'),
+        e('div', { style: { fontSize:'20px', fontWeight:700, color:C.tx, marginBottom:'8px' } }, 'Créditos insuficientes'),
+        e('div', { style: { fontSize:'14px', color:C.mt, marginBottom:'6px', lineHeight:1.5 } },
+          'Necesitás '+EG_icParts[1]+' créditos. Tenés '+EG_icParts[2]+'.'),
+        e('div', { style: { fontSize:'12px', color:C.dm, marginBottom:'24px' } },
+          'Recargá créditos — próximamente disponible en Update 27.'),
+        e('button', {
+          onClick: function() { EG_setError(''); },
+          style: { background:C.bd, color:C.tx, border:'none', borderRadius:'12px', padding:'12px 24px', fontSize:'14px', fontWeight:600, cursor:'pointer' }
+        }, '← Volver')
+      );
+    }
     if (EG_error === 'premium_required') {
       return e('div', { style: { textAlign:'center', padding:'40px 24px' } },
         e('div', { style: { fontSize:'48px', marginBottom:'16px' } }, '⭐'),
@@ -334,6 +355,17 @@ function ElionGenerator(props) {
   // ── Render: review step ──
   function renderReview() {
     return e('div', null,
+      EG_quota && e('div', { style: {
+        padding:'8px 12px', borderRadius:'10px', marginBottom:'14px',
+        background: EG_quota.paidWith==='quota' ? 'rgba(52,211,153,.08)' : 'rgba(251,191,36,.08)',
+        border: '1px solid '+(EG_quota.paidWith==='quota' ? 'rgba(52,211,153,.25)' : 'rgba(251,191,36,.25)'),
+        fontSize:'12px', color: EG_quota.paidWith==='quota' ? '#34d399' : '#fbbf24',
+        display:'flex', alignItems:'center', gap:'8px'
+      }},
+        EG_quota.paidWith === 'quota'
+          ? '🎁 Generación gratis · '+EG_quota.monthlyUsed+'/'+EG_quota.monthlyLimit+' este mes'
+          : '🪙 Se usaron '+EG_quota.spent+' créditos · Balance: '+EG_quota.credits
+      ),
       // Card list
       e('div', { style: { display:'flex', flexDirection:'column', gap:'10px', marginBottom:'16px' } },
         EG_cards.map(function(card, idx) {
@@ -486,8 +518,8 @@ function ElionGenerator(props) {
     e('div', {
       style: {
         position:'fixed', top:0, left:0, right:0, bottom:0, zIndex:300,
-        background:'rgba(6,10,20,.88)', backdropFilter:'blur(6px)',
-        WebkitBackdropFilter:'blur(6px)',
+        background:'rgba(6,10,20,0.85)', backdropFilter:'blur(8px)',
+        WebkitBackdropFilter:'blur(8px)',
         display:'flex', alignItems:'flex-start', justifyContent:'center',
         padding:'20px', overflowY:'auto', WebkitOverflowScrolling:'touch'
       },
@@ -496,20 +528,35 @@ function ElionGenerator(props) {
     e('div', {
       style: {
         width:'100%', maxWidth:'640px',
-        background:C.cd, border:'1px solid '+C.bd, borderRadius:'18px',
-        boxShadow:'0 16px 48px rgba(0,0,0,.7)',
-        padding:'22px 20px 20px', boxSizing:'border-box',
+        background:'linear-gradient(180deg,#0d1224 0%,#060a14 100%)',
+        border:'1px solid rgba(167,139,250,0.25)', borderRadius:'20px',
+        boxShadow:'0 20px 60px rgba(0,0,0,0.6)',
+        boxSizing:'border-box', overflow:'hidden',
         marginTop:'20px', marginBottom:'40px'
       },
       onClick: function(ev) { ev.stopPropagation(); }
     },
       // Header
-      e('div', { style: { display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'20px' } },
-        e('div', null,
-          e('h2', { style: { fontSize:'17px', fontWeight:800, color:C.tx, margin:0 } },
-            '✨ Generar flashcards con Elion'),
-          EG_step==='review' && e('p', { style: { fontSize:'11px', color:C.dm, margin:'3px 0 0' } },
-            EG_approvedCount+' aprobadas / '+EG_cards.length+' total'
+      e('div', { style: {
+        display:'flex', alignItems:'center', justifyContent:'space-between',
+        background:'linear-gradient(180deg,rgba(167,139,250,0.08),transparent)',
+        borderBottom:'1px solid rgba(167,139,250,0.15)', padding:'16px 20px'
+      }},
+        e('div', { style: { display:'flex', alignItems:'center', gap:'10px' } },
+          e('div', { style: {
+            width:'36px', height:'36px', borderRadius:'50%', flexShrink:0,
+            background:'rgba(167,139,250,0.15)', border:'1px solid rgba(167,139,250,0.3)',
+            display:'flex', alignItems:'center', justifyContent:'center', fontSize:'18px'
+          }}, '✨'),
+          e('div', null,
+            e('h2', { style: {
+              fontSize:'16px', fontWeight:800, margin:0,
+              background:'linear-gradient(135deg,#a78bfa,#60a5fa)',
+              WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent'
+            }}, 'Generar con Elion'),
+            EG_step==='review' && e('p', { style: { fontSize:'11px', color:C.dm, margin:'2px 0 0' } },
+              EG_approvedCount+' aprobadas / '+EG_cards.length+' total'
+            )
           )
         ),
         e('button', {
@@ -526,9 +573,11 @@ function ElionGenerator(props) {
       ),
 
       // Step content
-      EG_step==='input'   && renderInput(),
-      EG_step==='loading' && renderLoading(),
-      EG_step==='review'  && renderReview()
+      e('div', { style: { padding:'20px' } },
+        EG_step==='input'   && renderInput(),
+        EG_step==='loading' && renderLoading(),
+        EG_step==='review'  && renderReview()
+      )
     )
     ),
     document.body

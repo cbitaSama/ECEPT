@@ -126,6 +126,7 @@ function DeckDetailView(props){
   s=useState("");      var DD_tagBulkInput=s[0],   DD_setTagBulkInput=s[1];
   s=useState(false);   var DD_tagBulkLoading=s[0], DD_setTagBulkLoading=s[1];
   s=useState("");      var DD_tagBulkErrMsg=s[0],  DD_setTagBulkErrMsg=s[1];
+  s=useState(false);   var DD_elionOpen=s[0],      DD_setElionOpen=s[1];
   var DD_pressTimer=useRef(null);
 
   // ── Inject CSS once ──
@@ -1102,6 +1103,17 @@ function DeckDetailView(props){
               fontSize:"14px",fontWeight:700,cursor:"pointer"
             }
           },"+ Nueva tarjeta"),
+          canEdit&&e("button",{
+            onClick:function(){ DD_setElionOpen(true); },
+            style:{
+              flex:"0 0 auto",minHeight:"52px",padding:"14px 18px",
+              borderRadius:"14px",
+              background:"linear-gradient(135deg,#a78bfa,#60a5fa)",
+              border:"none",color:"#fff",
+              fontSize:"14px",fontWeight:700,cursor:"pointer",
+              boxShadow:"0 4px 12px rgba(167,139,250,0.3)"
+            }
+          },"✨ Generar con IA"),
           canEdit&&DD_cards.length>0&&e("button",{
             onClick:function(){ DD_setSelectMode(true); },
             style:{
@@ -1833,7 +1845,30 @@ function DeckDetailView(props){
         ),
         document.body
       );
-    })()
+    })(),
+    DD_elionOpen&&user&&deck&&e(ElionGenerator,{
+      user:user,
+      supabase:window.ECEPT_SUPABASE,
+      deckId:deck.id,
+      onImport:async function(cards){
+        var inserts=[];
+        for(var ni=0;ni<cards.length;ni++){
+          inserts.push({
+            deck_id:deck.id,
+            user_id:user.id,
+            is_official:false,
+            card_type:cards[ni].card_type,
+            front:cards[ni].front,
+            back:cards[ni].back||"",
+            tags:cards[ni].tags||[]
+          });
+        }
+        await window.ECEPT_SUPABASE.from("flashcards").insert(inserts);
+        DD_setElionOpen(false);
+        DD_loadCards();
+      },
+      onClose:function(){ DD_setElionOpen(false); }
+    })
   ));
 }
 

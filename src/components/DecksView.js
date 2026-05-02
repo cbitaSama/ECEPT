@@ -42,6 +42,7 @@ function DecksView(props){
   s=useState(null);  var DV_importData=s[0],    DV_setImportData=s[1];
   s=useState("");    var DV_importError=s[0],   DV_setImportError=s[1];
   s=useState(false); var DV_importLoading=s[0], DV_setImportLoading=s[1];
+  s=useState({open:false,deckId:null,mode:null}); var DV_elionFlow=s[0], DV_setElionFlow=s[1];
 
   // ── Inject CSS once ──
   useEffect(function(){
@@ -679,7 +680,18 @@ function DecksView(props){
           color:C.dm,
           fontSize:"14px",fontWeight:700,cursor:"pointer"
         }
-      },"⬆ Importar")
+      },"⬆ Importar"),
+      user&&e("button",{
+        onClick:function(){ DV_setElionFlow({open:true,deckId:null,mode:"new"}); },
+        style:{
+          flex:"0 0 auto",minHeight:"52px",padding:"14px 18px",
+          borderRadius:"14px",
+          background:"linear-gradient(135deg,#a78bfa,#60a5fa)",
+          border:"none",color:"#fff",
+          fontSize:"14px",fontWeight:700,cursor:"pointer",
+          boxShadow:"0 4px 12px rgba(167,139,250,0.3)"
+        }
+      },"✨ Crear con IA")
     ),
 
     // ── Load error ──
@@ -1113,7 +1125,42 @@ function DecksView(props){
         )
       ),
       document.body
-    )
+    ),
+    DV_elionFlow.open&&user&&e(ElionGenerator,{
+      user:user,
+      supabase:window.ECEPT_SUPABASE,
+      deckId:DV_elionFlow.deckId||null,
+      onImport:async function(cards,sourceName){
+        var targetDeckId=DV_elionFlow.deckId;
+        if(!targetDeckId){
+          var deckRes=await window.ECEPT_SUPABASE.from("decks").insert({
+            user_id:user.id,
+            name:sourceName||"Generado con IA",
+            is_official:false,
+            color:"#a78bfa",
+            icon:"✨"
+          }).select("id").single();
+          if(deckRes.error) return;
+          targetDeckId=deckRes.data.id;
+        }
+        var inserts=[];
+        for(var ni=0;ni<cards.length;ni++){
+          inserts.push({
+            deck_id:targetDeckId,
+            user_id:user.id,
+            is_official:false,
+            card_type:cards[ni].card_type,
+            front:cards[ni].front,
+            back:cards[ni].back||"",
+            tags:cards[ni].tags||[]
+          });
+        }
+        await window.ECEPT_SUPABASE.from("flashcards").insert(inserts);
+        DV_setElionFlow({open:false,deckId:null,mode:null});
+        DV_loadData();
+      },
+      onClose:function(){ DV_setElionFlow({open:false,deckId:null,mode:null}); }
+    })
   );
 }
 
