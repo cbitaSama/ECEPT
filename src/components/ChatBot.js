@@ -381,32 +381,42 @@ function ChatBot(props) {
   // ── Conversation loaders ──
   async function CB_loadConversations() {
     CB_setLoadingConvs(true);
+    var CB_loadStart = Date.now();
+    function CB_finish(fn) {
+      var elapsed = Date.now() - CB_loadStart;
+      var remaining = Math.max(0, 400 - elapsed);
+      setTimeout(fn, remaining);
+    }
     try {
       var sess = await window.ECEPT_SUPABASE.auth.getSession();
       var token = sess && sess.data && sess.data.session && sess.data.session.access_token;
-      if (!token) { CB_setLoadingConvs(false); return; }
+      if (!token) { CB_finish(function(){ CB_setLoadingConvs(false); }); return; }
       var r = await fetch('/api/conversations', {
         headers: { 'Authorization':'Bearer '+token }
       });
-      if (!r.ok) { CB_setLoadingConvs(false); return; }
+      if (!r.ok) { CB_finish(function(){ CB_setLoadingConvs(false); }); return; }
       var convs = await r.json();
-      CB_setConversations(Array.isArray(convs) ? convs : []);
+      var convsList = Array.isArray(convs) ? convs : [];
 
-      // Restore last active conv
+      var pendingActiveId = null;
       try {
         var lastId = localStorage.getItem('ECEPT_CHAT_LAST_CONV');
         if (lastId) {
-          var found = false;
-          for (var _i = 0; _i < convs.length; _i++) {
-            if (convs[_i].id === lastId) { found = true; break; }
+          for (var _i = 0; _i < convsList.length; _i++) {
+            if (convsList[_i].id === lastId) { pendingActiveId = lastId; break; }
           }
-          if (found) CB_setActiveConvId(lastId);
         }
       } catch(e) {}
+
+      CB_finish(function(){
+        CB_setConversations(convsList);
+        if (pendingActiveId) CB_setActiveConvId(pendingActiveId);
+        CB_setLoadingConvs(false);
+      });
     } catch(err) {
       console.error('CB_loadConversations:', err.message);
+      CB_finish(function(){ CB_setLoadingConvs(false); });
     }
-    CB_setLoadingConvs(false);
   }
 
   async function CB_loadConvMessages(convId) {

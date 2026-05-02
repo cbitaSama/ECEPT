@@ -61,6 +61,13 @@ function DecksView(props){
   function DV_loadData(){
     if((!user&&!DV_guestMode)||!window.ECEPT_SUPABASE){ DV_setLoading(false); return; }
     DV_setLoading(true); DV_setLoadErr("");
+    var DV_loadStart=Date.now();
+    var DV_minLoading=400;
+    function DV_finishLoading(fn){
+      var elapsed=Date.now()-DV_loadStart;
+      var remaining=Math.max(0,DV_minLoading-elapsed);
+      setTimeout(fn,remaining);
+    }
 
     var deckPromise;
     if(user&&!DV_guestMode){
@@ -95,24 +102,30 @@ function DecksView(props){
     Promise.all([deckPromise,cardsPromise,duePromise]).then(function(results){
       var deckRes=results[0], cardRes=results[1], dueRes=results[2];
       if(deckRes&&deckRes.error){
-        DV_setLoading(false);
-        DV_setLoadErr("No se pudieron cargar las barajas.");
+        DV_finishLoading(function(){
+          DV_setLoading(false);
+          DV_setLoadErr("No se pudieron cargar las barajas.");
+        });
         return;
       }
-      DV_setDecks((deckRes&&deckRes.data)||[]);
-
       var counts={};
       var cards=(cardRes&&cardRes.data)?cardRes.data:[];
       for(var i=0;i<cards.length;i++){
         var did=cards[i].deck_id;
         counts[did]=(counts[did]||0)+1;
       }
-      DV_setCounts(counts);
-      DV_setDueToday((dueRes&&typeof dueRes.count==="number")?dueRes.count:0);
-      DV_setLoading(false);
+      var dueCount=(dueRes&&typeof dueRes.count==="number")?dueRes.count:0;
+      DV_finishLoading(function(){
+        DV_setDecks((deckRes&&deckRes.data)||[]);
+        DV_setCounts(counts);
+        DV_setDueToday(dueCount);
+        DV_setLoading(false);
+      });
     }).catch(function(){
-      DV_setLoading(false);
-      DV_setLoadErr("Error de conexión.");
+      DV_finishLoading(function(){
+        DV_setLoading(false);
+        DV_setLoadErr("Error de conexión.");
+      });
     });
   }
 

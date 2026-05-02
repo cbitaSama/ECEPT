@@ -149,6 +149,12 @@ function DeckDetailView(props){
       return;
     }
     DD_setLoading(true); DD_setLoadErr("");
+    var DD_loadStart=Date.now();
+    function DD_finish(fn){
+      var elapsed=Date.now()-DD_loadStart;
+      var remaining=Math.max(0,400-elapsed);
+      setTimeout(fn,remaining);
+    }
 
     var cardsPromise=window.ECEPT_SUPABASE
       .from("flashcards")
@@ -166,19 +172,19 @@ function DeckDetailView(props){
     Promise.all([cardsPromise,progressPromise]).then(function(results){
       var cardRes=results[0], progRes=results[1];
       if(cardRes&&cardRes.error){
-        DD_setLoading(false);
-        DD_setLoadErr("No se pudieron cargar las tarjetas.");
+        DD_finish(function(){
+          DD_setLoading(false);
+          DD_setLoadErr("No se pudieron cargar las tarjetas.");
+        });
         return;
       }
       var allCards=(cardRes&&cardRes.data)||[];
-      DD_setCards(allCards);
 
       var progMap={};
       var progRows=(progRes&&progRes.data)||[];
       for(var i=0;i<progRows.length;i++){
         progMap[progRows[i].flashcard_id]=progRows[i];
       }
-      DD_setProgress(progMap);
       // Para barajas oficiales con sesión: cargar user_tags + user_card_tags
       if(deck.is_official&&user&&window.ECEPT_SUPABASE){
         var cids=[];
@@ -188,7 +194,7 @@ function DeckDetailView(props){
           ?window.ECEPT_SUPABASE.from("user_card_tags").select("flashcard_id,tag").eq("user_id",user.id).in("flashcard_id",cids)
           :Promise.resolve({data:[],error:null});
         Promise.all([utP,uctP]).then(function(r2){
-          DD_setUserTagsList((r2[0]&&!r2[0].error)?(r2[0].data||[]):[]);
+          var uTagsList=(r2[0]&&!r2[0].error)?(r2[0].data||[]):[];
           var uctMap={};
           var uctRows=(r2[1]&&!r2[1].error)?(r2[1].data||[]):[];
           for(var j=0;j<uctRows.length;j++){
@@ -196,15 +202,32 @@ function DeckDetailView(props){
             if(!uctMap[fid2]) uctMap[fid2]=[];
             uctMap[fid2].push(uctRows[j].tag);
           }
-          DD_setUserCardTags(uctMap);
-          DD_setLoading(false);
-        }).catch(function(){ DD_setLoading(false); });
+          DD_finish(function(){
+            DD_setCards(allCards);
+            DD_setProgress(progMap);
+            DD_setUserTagsList(uTagsList);
+            DD_setUserCardTags(uctMap);
+            DD_setLoading(false);
+          });
+        }).catch(function(){
+          DD_finish(function(){
+            DD_setCards(allCards);
+            DD_setProgress(progMap);
+            DD_setLoading(false);
+          });
+        });
       } else {
-        DD_setLoading(false);
+        DD_finish(function(){
+          DD_setCards(allCards);
+          DD_setProgress(progMap);
+          DD_setLoading(false);
+        });
       }
     }).catch(function(){
-      DD_setLoading(false);
-      DD_setLoadErr("Error de conexión.");
+      DD_finish(function(){
+        DD_setLoading(false);
+        DD_setLoadErr("Error de conexión.");
+      });
     });
   }
 

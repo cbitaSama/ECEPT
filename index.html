@@ -15044,32 +15044,42 @@ function ChatBot(props) {
   // ── Conversation loaders ──
   async function CB_loadConversations() {
     CB_setLoadingConvs(true);
+    var CB_loadStart = Date.now();
+    function CB_finish(fn) {
+      var elapsed = Date.now() - CB_loadStart;
+      var remaining = Math.max(0, 400 - elapsed);
+      setTimeout(fn, remaining);
+    }
     try {
       var sess = await window.ECEPT_SUPABASE.auth.getSession();
       var token = sess && sess.data && sess.data.session && sess.data.session.access_token;
-      if (!token) { CB_setLoadingConvs(false); return; }
+      if (!token) { CB_finish(function(){ CB_setLoadingConvs(false); }); return; }
       var r = await fetch('/api/conversations', {
         headers: { 'Authorization':'Bearer '+token }
       });
-      if (!r.ok) { CB_setLoadingConvs(false); return; }
+      if (!r.ok) { CB_finish(function(){ CB_setLoadingConvs(false); }); return; }
       var convs = await r.json();
-      CB_setConversations(Array.isArray(convs) ? convs : []);
+      var convsList = Array.isArray(convs) ? convs : [];
 
-      // Restore last active conv
+      var pendingActiveId = null;
       try {
         var lastId = localStorage.getItem('ECEPT_CHAT_LAST_CONV');
         if (lastId) {
-          var found = false;
-          for (var _i = 0; _i < convs.length; _i++) {
-            if (convs[_i].id === lastId) { found = true; break; }
+          for (var _i = 0; _i < convsList.length; _i++) {
+            if (convsList[_i].id === lastId) { pendingActiveId = lastId; break; }
           }
-          if (found) CB_setActiveConvId(lastId);
         }
       } catch(e) {}
+
+      CB_finish(function(){
+        CB_setConversations(convsList);
+        if (pendingActiveId) CB_setActiveConvId(pendingActiveId);
+        CB_setLoadingConvs(false);
+      });
     } catch(err) {
       console.error('CB_loadConversations:', err.message);
+      CB_finish(function(){ CB_setLoadingConvs(false); });
     }
-    CB_setLoadingConvs(false);
   }
 
   async function CB_loadConvMessages(convId) {
@@ -16586,6 +16596,13 @@ function DecksView(props){
   function DV_loadData(){
     if((!user&&!DV_guestMode)||!window.ECEPT_SUPABASE){ DV_setLoading(false); return; }
     DV_setLoading(true); DV_setLoadErr("");
+    var DV_loadStart=Date.now();
+    var DV_minLoading=400;
+    function DV_finishLoading(fn){
+      var elapsed=Date.now()-DV_loadStart;
+      var remaining=Math.max(0,DV_minLoading-elapsed);
+      setTimeout(fn,remaining);
+    }
 
     var deckPromise;
     if(user&&!DV_guestMode){
@@ -16620,24 +16637,30 @@ function DecksView(props){
     Promise.all([deckPromise,cardsPromise,duePromise]).then(function(results){
       var deckRes=results[0], cardRes=results[1], dueRes=results[2];
       if(deckRes&&deckRes.error){
-        DV_setLoading(false);
-        DV_setLoadErr("No se pudieron cargar las barajas.");
+        DV_finishLoading(function(){
+          DV_setLoading(false);
+          DV_setLoadErr("No se pudieron cargar las barajas.");
+        });
         return;
       }
-      DV_setDecks((deckRes&&deckRes.data)||[]);
-
       var counts={};
       var cards=(cardRes&&cardRes.data)?cardRes.data:[];
       for(var i=0;i<cards.length;i++){
         var did=cards[i].deck_id;
         counts[did]=(counts[did]||0)+1;
       }
-      DV_setCounts(counts);
-      DV_setDueToday((dueRes&&typeof dueRes.count==="number")?dueRes.count:0);
-      DV_setLoading(false);
+      var dueCount=(dueRes&&typeof dueRes.count==="number")?dueRes.count:0;
+      DV_finishLoading(function(){
+        DV_setDecks((deckRes&&deckRes.data)||[]);
+        DV_setCounts(counts);
+        DV_setDueToday(dueCount);
+        DV_setLoading(false);
+      });
     }).catch(function(){
-      DV_setLoading(false);
-      DV_setLoadErr("Error de conexión.");
+      DV_finishLoading(function(){
+        DV_setLoading(false);
+        DV_setLoadErr("Error de conexión.");
+      });
     });
   }
 
@@ -19153,6 +19176,12 @@ function DeckDetailView(props){
       return;
     }
     DD_setLoading(true); DD_setLoadErr("");
+    var DD_loadStart=Date.now();
+    function DD_finish(fn){
+      var elapsed=Date.now()-DD_loadStart;
+      var remaining=Math.max(0,400-elapsed);
+      setTimeout(fn,remaining);
+    }
 
     var cardsPromise=window.ECEPT_SUPABASE
       .from("flashcards")
@@ -19170,19 +19199,19 @@ function DeckDetailView(props){
     Promise.all([cardsPromise,progressPromise]).then(function(results){
       var cardRes=results[0], progRes=results[1];
       if(cardRes&&cardRes.error){
-        DD_setLoading(false);
-        DD_setLoadErr("No se pudieron cargar las tarjetas.");
+        DD_finish(function(){
+          DD_setLoading(false);
+          DD_setLoadErr("No se pudieron cargar las tarjetas.");
+        });
         return;
       }
       var allCards=(cardRes&&cardRes.data)||[];
-      DD_setCards(allCards);
 
       var progMap={};
       var progRows=(progRes&&progRes.data)||[];
       for(var i=0;i<progRows.length;i++){
         progMap[progRows[i].flashcard_id]=progRows[i];
       }
-      DD_setProgress(progMap);
       // Para barajas oficiales con sesión: cargar user_tags + user_card_tags
       if(deck.is_official&&user&&window.ECEPT_SUPABASE){
         var cids=[];
@@ -19192,7 +19221,7 @@ function DeckDetailView(props){
           ?window.ECEPT_SUPABASE.from("user_card_tags").select("flashcard_id,tag").eq("user_id",user.id).in("flashcard_id",cids)
           :Promise.resolve({data:[],error:null});
         Promise.all([utP,uctP]).then(function(r2){
-          DD_setUserTagsList((r2[0]&&!r2[0].error)?(r2[0].data||[]):[]);
+          var uTagsList=(r2[0]&&!r2[0].error)?(r2[0].data||[]):[];
           var uctMap={};
           var uctRows=(r2[1]&&!r2[1].error)?(r2[1].data||[]):[];
           for(var j=0;j<uctRows.length;j++){
@@ -19200,15 +19229,32 @@ function DeckDetailView(props){
             if(!uctMap[fid2]) uctMap[fid2]=[];
             uctMap[fid2].push(uctRows[j].tag);
           }
-          DD_setUserCardTags(uctMap);
-          DD_setLoading(false);
-        }).catch(function(){ DD_setLoading(false); });
+          DD_finish(function(){
+            DD_setCards(allCards);
+            DD_setProgress(progMap);
+            DD_setUserTagsList(uTagsList);
+            DD_setUserCardTags(uctMap);
+            DD_setLoading(false);
+          });
+        }).catch(function(){
+          DD_finish(function(){
+            DD_setCards(allCards);
+            DD_setProgress(progMap);
+            DD_setLoading(false);
+          });
+        });
       } else {
-        DD_setLoading(false);
+        DD_finish(function(){
+          DD_setCards(allCards);
+          DD_setProgress(progMap);
+          DD_setLoading(false);
+        });
       }
     }).catch(function(){
-      DD_setLoading(false);
-      DD_setLoadErr("Error de conexión.");
+      DD_finish(function(){
+        DD_setLoading(false);
+        DD_setLoadErr("Error de conexión.");
+      });
     });
   }
 
