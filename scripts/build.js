@@ -102,6 +102,7 @@ var parts = [
   'src/components/Logo.js',
   'src/components/LoadingScreen.js',
   'src/components/HomeView.js',
+  'src/components/ModuleShell.js',
   // chatbot (must come after App? no — function hoisted; keep with components)
   'src/components/ChatBot.js',
   // supabase client (reads window.__ECEPT_ENV; exposes window.ECEPT_SUPABASE)
@@ -183,6 +184,7 @@ var expectedGlobals = [
   // logo + loading screen + home view
   'function Logo', 'window.Logo', 'function LoadingScreen', 'window.LoadingScreen',
   'function HomeView', 'window.HomeView',
+  'function ModuleShell', 'window.ModuleShell',
   // chatbot
   'function ChatBot', 'window.ChatBot',
   // supabase client
