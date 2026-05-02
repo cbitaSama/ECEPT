@@ -21,6 +21,8 @@ function App(){
   s=_(0);var calcGotas=s[0],setCalcGotas=s[1]; s=_(null);var sbExp=s[0],setSbExp=s[1]; s=_(null);var sbSub=s[0],setSbSub=s[1];
   s=_([]);var favs=s[0],setFavs=s[1];
   s=_(null);var ecuUser=s[0],setEcuUser=s[1];
+  s=_(null);var ecuRole=s[0],setEcuRole=s[1];
+  s=_(false);var dpOpen=s[0],setDpOpen=s[1];
   s=_(false);var ecuShowAuth=s[0],setEcuShowAuth=s[1];
   s=_(0);var streak=s[0],setStreak=s[1]; s=_(0);var bestStreak=s[0],setBestStreak=s[1]; s=_(0);var calcHoras=s[0],setCalcHoras=s[1];
   s=_(function(){try{return JSON.parse(localStorage.getItem("ecept_v1")||"[]")}catch(e2){return[]}});
@@ -46,6 +48,13 @@ function App(){
       };
     }catch(e2){ console.error('[ECEPT] auth session hook failed:',e2); }
   },[]);
+
+  // ─── ROLE FETCH ─── load profile.role when user changes
+  useEffect(function(){
+    if(!ecuUser||!window.ECEPT_SUPABASE){setEcuRole(null);return;}
+    window.ECEPT_SUPABASE.from('profiles').select('role').eq('id',ecuUser.id).single()
+      .then(function(r){setEcuRole(r.data&&r.data.role||null);}).catch(function(){setEcuRole(null);});
+  },[ecuUser]);
 
   // ─── NAVIGATION ─── back-button history stack
   s=_([]); var hist=s[0],setHist=s[1];
@@ -1074,6 +1083,10 @@ function App(){
     vista!=="home"&&e("button",{onClick:handleBack,style:{position:"fixed",bottom:"20px",left:"20px",background:C.ac,color:"#fff",border:"none",borderRadius:"50%",width:"48px",height:"48px",fontSize:"20px",cursor:"pointer",boxShadow:"0 4px 20px "+C.gl,zIndex:90,display:"flex",alignItems:"center",justifyContent:"center"}},"←"),
     // ════════════ CHATBOT (floating bottom-right) ════════════
     e(ChatBot,{onLoginRequest:function(){setEcuShowAuth(true);}}),
+    // ════════════ DEBUG BUTTON (admin-only, bottom-right above chat) ════════════
+    ecuUser&&ecuRole==="admin"&&!dpOpen&&e("button",{onClick:function(){setDpOpen(true);},style:{position:"fixed",bottom:80,right:20,zIndex:100,background:"#1a2040",color:"#e2e8f0",border:"1px solid #3b82f6",borderRadius:12,padding:"10px 14px",fontSize:13,cursor:"pointer"}},"🛠 Debug"),
+    // ════════════ DEBUG PANEL (modal overlay) ════════════
+    dpOpen&&e("div",{style:{position:"fixed",inset:0,zIndex:200,overflowY:"auto",background:"#080e1f"}},e(DebugPanel,{user:ecuUser,onClose:function(){setDpOpen(false);}})),
     // ════════════ AUTH MODAL ════════════
     ecuShowAuth&&e(AuthModal,{onSuccess:function(){setEcuShowAuth(false);},onClose:function(){setEcuShowAuth(false);}})
   );

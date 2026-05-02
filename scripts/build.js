@@ -119,6 +119,8 @@ var parts = [
   'src/components/StudyView.js',
   // tag manager (user tag entities CRUD; exposes window.TagManager)
   'src/components/TagManager.js',
+  // debug panel (admin-only backend diagnostic; exposes window.DebugPanel)
+  'src/components/DebugPanel.js',
   // app
   'src/app.js'
 ];
@@ -192,7 +194,9 @@ var expectedGlobals = [
   // study view
   'function StudyView', 'window.StudyView',
   // tag manager
-  'function TagManager', 'window.TagManager'
+  'function TagManager', 'window.TagManager',
+  // debug panel
+  'function DebugPanel', 'window.DebugPanel'
 ];
 expectedGlobals.forEach(function(g) {
   if (output.indexOf(g) === -1) errors.push('missing global: ' + g);
