@@ -15738,6 +15738,11 @@ function DD_clozeReveal(text){
   return text.replace(/\{\{c\d+::(.*?)\}\}|\}\}(.*?)\}\}/g,function(m,g1,g2){ return g1!==undefined?g1:g2; });
 }
 
+function DD_clozeBlank(text){
+  if(!text) return "";
+  return text.replace(/\{\{c\d+::([^}]+)\}\}|\}\}([^}]+)\}\}/g,"_____");
+}
+
 function DeckDetailView(props){
   var user=props.user;
   var deck=props.deck;
@@ -16105,17 +16110,17 @@ function DeckDetailView(props){
             overflow:"hidden",display:"-webkit-box",
             WebkitLineClamp:2,WebkitBoxOrient:"vertical",
             marginBottom:4
-          }},isCloze ? DD_clozeEl(c.front||"") : (c.front||"")),
-          // Back preview (masked or revealed by toggle)
-          e("div",{style:{
+          }},isCloze
+            ?(DD_showAnswers?DD_previewClozeEl(c.front||"",false):DD_clozeBlank(c.front||""))
+            :(c.front||"")),
+          // Back preview (basic only — cloze info is already inline in the front row)
+          !isCloze&&e("div",{style:{
             fontSize:"12px",color:C.dm,lineHeight:1.4,
             overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"
           }},
             !DD_showAnswers
               ?"→ ●●●●●"
-              :isCloze
-                ?"→ "+DD_clozeReveal(c.front||"").slice(0,80)
-                :c.back?"→ "+(c.back.length>80?c.back.slice(0,77)+"...":c.back):""
+              :c.back?"→ "+(c.back.length>80?c.back.slice(0,77)+"...":c.back):""
           ),
           // Tags oficiales (solid border, color muted)
           Array.isArray(c.tags)&&c.tags.length>0&&e("div",{style:{display:"flex",flexWrap:"wrap",gap:"4px",marginTop:"6px"}},
