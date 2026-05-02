@@ -35,6 +35,9 @@ function DecksView(props){
   s=useState(null);  var DV_menuOpenId=s[0],     DV_setMenuOpenId=s[1];
   s=useState(null);  var DV_deleteConfirmId=s[0], DV_setDeleteConfirmId=s[1];
   s=useState(false); var DV_tagMgrOpen=s[0],     DV_setTagMgrOpen=s[1];
+  s=useState(null);  var DV_dragIdx=s[0],         DV_setDragIdx=s[1];
+  s=useState(null);  var DV_dragOverIdx=s[0],     DV_setDragOverIdx=s[1];
+  var DV_dragRef=useRef({idx:null,overIdx:null});
 
   // ── Inject CSS once ──
   useEffect(function(){
@@ -58,10 +61,11 @@ function DecksView(props){
     if(user&&!DV_guestMode){
       deckPromise=window.ECEPT_SUPABASE
         .from("decks")
-        .select("id,name,description,color,icon,is_official,user_id,created_at")
+        .select("id,name,description,color,icon,is_official,user_id,created_at,sort_order")
         .or("is_official.eq.true,user_id.eq."+user.id)
         .order("is_official",{ascending:false})
-        .order("created_at",{ascending:false});
+        .order("sort_order",{ascending:true,nullsFirst:false})
+        .order("name",{ascending:true});
     } else {
       deckPromise=window.ECEPT_SUPABASE
         .from("decks")
@@ -188,6 +192,22 @@ function DecksView(props){
     if(typeof go==="function") go("flashcards_deck");
   }
 
+  function DV_persistOrder(orderedDecks){
+    if(!window.ECEPT_SUPABASE||!user) return;
+    try{
+      for(var pi=0;pi<orderedDecks.length;pi++){
+        (function(d,idx){
+          window.ECEPT_SUPABASE.from("decks").update({sort_order:idx}).eq("id",d.id)
+            .then(function(res){
+              if(res&&res.error) console.error("[DecksView] sort_order:",res.error);
+            }).catch(function(err){ console.error("[DecksView] sort_order catch:",err); });
+        })(orderedDecks[pi],pi);
+      }
+    }catch(ex){
+      console.error("[DecksView] persistOrder:",ex);
+    }
+  }
+
   // ── Gate: sin sesión activa ──
   if(!user&&!DV_guestMode){
     return e("div",{style:{maxWidth:"540px",margin:"0 auto",padding:"20px 20px 60px"}},
@@ -230,6 +250,143 @@ function DecksView(props){
       e("div",{className:"dv-skel",style:{width:"60%",height:"14px",marginBottom:"8px"}}),
       e("div",{className:"dv-skel",style:{width:"90%",height:"10px",marginBottom:"4px"}}),
       e("div",{className:"dv-skel",style:{width:"40%",height:"10px"}})
+    );
+  }
+
+  function DV_userDeckCard(deck,i){
+    var col=deck.color||"#a78bfa";
+    var icon=deck.icon||"🎴";
+    var count=DV_counts[deck.id]||0;
+    var isMenuOpen=DV_menuOpenId===deck.id;
+    var isDragging=DV_dragIdx===i;
+    var isDropTarget=DV_dragOverIdx===i&&DV_dragIdx!==null&&DV_dragIdx!==i;
+    return e("div",{
+      key:deck.id,
+      "data-drag-idx":String(i),
+      className:"dv-card",
+      onClick:function(){ if(!isMenuOpen&&DV_dragIdx===null) DV_openDeck(deck); },
+      style:{
+        position:"relative",
+        background:"linear-gradient(135deg,"+C.cd+","+col+"08)",
+        border:"1px solid "+col+"35",
+        borderRadius:"12px",padding:"16px",
+        cursor:isDragging?"grabbing":"pointer",
+        animation:"slideUp .4s ease-out "+(i*0.05)+"s both",
+        opacity:isDragging?0.4:1,
+        transition:"opacity .15s",
+        boxSizing:"border-box",
+        boxShadow:isDropTarget?"inset 0 3px 0 #a78bfa":"none"
+      }
+    },
+      e("div",{style:{display:"flex",alignItems:"flex-start",gap:"8px",marginBottom:"10px"}},
+        e("div",{
+          onPointerDown:function(ev){
+            ev.stopPropagation();
+            ev.currentTarget.setPointerCapture(ev.pointerId);
+            DV_dragRef.current={idx:i,overIdx:i};
+            DV_setDragIdx(i);
+            DV_setDragOverIdx(i);
+          },
+          onPointerMove:function(ev){
+            if(DV_dragRef.current.idx===null) return;
+            var el=document.elementFromPoint(ev.clientX,ev.clientY);
+            if(!el) return;
+            var card=el.closest?el.closest("[data-drag-idx]"):null;
+            if(!card) return;
+            var oi=parseInt(card.getAttribute("data-drag-idx"),10);
+            if(!isNaN(oi)&&oi!==DV_dragRef.current.overIdx){
+              DV_dragRef.current.overIdx=oi;
+              DV_setDragOverIdx(oi);
+            }
+          },
+          onPointerUp:function(){
+            var from=DV_dragRef.current.idx;
+            var to=DV_dragRef.current.overIdx!==null?DV_dragRef.current.overIdx:from;
+            DV_dragRef.current={idx:null,overIdx:null};
+            DV_setDragIdx(null);
+            DV_setDragOverIdx(null);
+            if(from===null||from===to) return;
+            var next=userDecks.slice();
+            var moved=next.splice(from,1)[0];
+            next.splice(to,0,moved);
+            var offs=DV_decks.filter(function(d){ return d.is_official; });
+            DV_setDecks(offs.concat(next));
+            DV_persistOrder(next);
+          },
+          onPointerCancel:function(){
+            DV_dragRef.current={idx:null,overIdx:null};
+            DV_setDragIdx(null);
+            DV_setDragOverIdx(null);
+          },
+          style:{
+            cursor:"grab",color:C.dm,fontSize:"13px",letterSpacing:"1px",
+            minWidth:"44px",minHeight:"44px",
+            display:"flex",alignItems:"center",justifyContent:"center",
+            flexShrink:0,marginLeft:"-8px",
+            touchAction:"none",userSelect:"none",WebkitUserSelect:"none",
+            borderRadius:"8px"
+          }
+        },"⋮⋮"),
+        e("div",{style:{
+          fontSize:"24px",width:"46px",height:"46px",flexShrink:0,
+          display:"flex",alignItems:"center",justifyContent:"center",
+          borderRadius:"12px",background:col+"15"
+        }},icon),
+        e("div",{style:{flex:1,minWidth:0,paddingTop:"4px"}},
+          e("h3",{style:{fontSize:"14px",fontWeight:700,color:C.tx,marginBottom:"2px",
+            overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},deck.name||"Sin nombre")
+        ),
+        e("button",{
+          onClick:function(ev){ ev.stopPropagation(); DV_setMenuOpenId(isMenuOpen?null:deck.id); },
+          "aria-label":"Opciones",
+          style:{
+            background:"none",border:"none",color:C.dm,
+            fontSize:"18px",cursor:"pointer",
+            width:"44px",height:"44px",flexShrink:0,
+            display:"flex",alignItems:"center",justifyContent:"center",
+            borderRadius:"8px",marginTop:"-8px",marginRight:"-8px"
+          }
+        },"⋮")
+      ),
+      deck.description&&e("p",{style:{fontSize:"12px",color:C.dm,lineHeight:1.5,marginBottom:"10px"}},deck.description),
+      e("div",{style:{display:"flex",alignItems:"center",gap:"6px",fontSize:"11px",color:col,fontWeight:600}},
+        e("span",null,"🎴"),
+        e("span",null,count+" tarjeta"+(count===1?"":"s"))
+      ),
+      isMenuOpen&&e("div",{
+        onClick:function(ev){ ev.stopPropagation(); },
+        style:{
+          position:"absolute",top:"50px",right:"12px",
+          background:C.cd,border:"1px solid "+C.bd,
+          borderRadius:"10px",overflow:"hidden",
+          boxShadow:"0 8px 24px rgba(0,0,0,.5)",
+          zIndex:5,minWidth:"140px"
+        }
+      },
+        e("button",{
+          onClick:function(ev){
+            ev.stopPropagation();
+            DV_setMenuOpenId(null);
+            setTimeout(function(){ DV_openEdit(deck); },0);
+          },
+          style:{display:"block",width:"100%",minHeight:"44px",
+            padding:"10px 14px",textAlign:"left",
+            background:"none",border:"none",color:C.tx,
+            fontSize:"13px",fontWeight:600,cursor:"pointer"}
+        },"✏️  Editar"),
+        e("div",{style:{height:"1px",background:C.bd}}),
+        e("button",{
+          onClick:function(ev){
+            ev.stopPropagation();
+            DV_setMenuOpenId(null);
+            setTimeout(function(){ DV_setDeleteConfirmId(deck.id); },0);
+          },
+          style:{display:"block",width:"100%",minHeight:"44px",
+            padding:"10px 14px",textAlign:"left",
+            background:"none",border:"none",color:"#fca5a5",
+            fontSize:"13px",fontWeight:600,cursor:"pointer"}
+        },"🗑  Eliminar")
+      )
     );
   }
 
@@ -464,7 +621,7 @@ function DecksView(props){
                 e("p",{style:{fontSize:"12px",color:C.dm,lineHeight:1.5}},"¡Empezá ahora! Tocá «+ Crear baraja» arriba.")
               )
             : e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:"12px"}},
-                userDecks.map(function(d,i){ return DV_deckCard(d,officialDecks.length+i); })
+                userDecks.map(function(d,i){ return DV_userDeckCard(d,i); })
               )
           )
     ),
