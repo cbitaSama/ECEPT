@@ -7129,6 +7129,9 @@ var DECK_GROUPS={
 // Flashcards de estudio · tarjeta con pregunta, toca para voltear y ver respuesta
 // Soporta añadir/editar/eliminar tarjetas del usuario con persistencia en localStorage
 function FlashDeck(p){
+  if(SM_goFlashcards&&SM_SUPABASE_DECKS&&SM_SUPABASE_DECKS[p.deckId]){
+    return e(SM_FlashBridge,{deckId:p.deckId,goFlashcards:SM_goFlashcards});
+  }
   var c=p.c||C.anx;
   var storageKey=p.storageKey||("flashcards_"+(p.deckId||"default"));
 
@@ -12779,10 +12782,37 @@ function NeurosisHub(p){
 // APP SHELL — 3 niveles: root → neurosis → view
 // ══════════════════════════════════════════════════════════════
 
+var SM_goFlashcards=null;
+var SM_SUPABASE_DECKS={
+  anxiety:{id:"f46157d1-56d5-5132-b1ab-e8bc594f129e",name:"Ansiedad",color:C.anx,icon:"🫀",is_official:true,user_id:null,description:null},
+  psicosis:{id:"f2760c5b-a34f-5701-b8fe-d19e76cb7e85",name:"Psicosis",color:C.psi,icon:"🔺",is_official:true,user_id:null,description:null},
+  toc:{id:"19c71fc4-0082-5ad6-bd89-cc4865c6e03e",name:"TOC",color:C.toc,icon:"🔁",is_official:true,user_id:null,description:null},
+  trauma:{id:"7961df40-25bb-59fd-b440-fa3dde5d3181",name:"Trauma",color:C.trm,icon:"⚡",is_official:true,user_id:null,description:null},
+  somaticos:{id:"aab1a948-080a-5b97-8afc-bf35d3c9b8f7",name:"Somáticos",color:C.som,icon:"🧬",is_official:true,user_id:null,description:null},
+  tca:{id:"7031c483-db20-5c86-813d-cecb4531be87",name:"TCA",color:C.tca,icon:"🍽️",is_official:true,user_id:null,description:null},
+  sueno:{id:"1061175e-a84c-583f-ae9e-f5b4f6e5b6cd",name:"Sueño",color:C.sue,icon:"🌙",is_official:true,user_id:null,description:null},
+  personalidad:{id:"3f0c92fe-1e66-5f70-82f6-ab0c4c5835eb",name:"Personalidad",color:C.per,icon:"🎭",is_official:true,user_id:null,description:null},
+  impulsos:{id:"debb4556-a5f6-5529-96b0-20e8ad36b9a1",name:"Impulsos",color:C.imp,icon:"🎯",is_official:true,user_id:null,description:null},
+  depresivos:{id:"d6a7a64c-08e2-53f6-83c1-d52b14c7e3a2",name:"Depresivos",color:C.dpr,icon:"💧",is_official:true,user_id:null,description:null}
+};
+function SM_FlashBridge(p){
+  var deckObj=SM_SUPABASE_DECKS[p.deckId]||null;
+  return e("div",{style:{textAlign:"center",padding:"40px 24px",display:"flex",flexDirection:"column",alignItems:"center",gap:"20px"}},
+    e("div",{style:{fontSize:"48px"}},"🎴"),
+    e("div",{style:{fontSize:"18px",fontWeight:600,color:C.tx}},"El modo repaso se mudó"),
+    e("div",{style:{fontSize:"14px",color:C.mt,maxWidth:"280px",lineHeight:"1.5"}},"Las flashcards de Salud Mental ahora están en el sistema de flashcards de ECEPT, con repetición espaciada y seguimiento de progreso."),
+    e("button",{
+      onClick:function(){if(p.goFlashcards)p.goFlashcards(deckObj);},
+      style:{background:C.ac,color:"#fff",border:"none",borderRadius:"12px",padding:"14px 28px",fontSize:"15px",fontWeight:600,cursor:"pointer",minHeight:"44px"}
+    },deckObj?"🎴 Estudiar estas cards":"🎴 Ver en flashcards")
+  );
+}
+
 function App(p){
   // Host prop: onHome is ECEPT's go("home"). Falls back to a no-op if mounted
   // standalone (e.g. artifacts/salud_mental.html).
   var onHome=(p&&p.onHome)||function(){};
+  SM_goFlashcards=p.goFlashcards||null;
 
   var s1=useState("root");var view=s1[0],setView=s1[1];
   // History stack: every forward navigation pushes the previous view id.
@@ -12983,7 +13013,7 @@ function App(p){
             isFlash?"Todas las flashcards oficiales de "+groupLabel+" + las que tú añadas. Filtra por tema, busca texto, alterna entre modo tarjeta y modo lista.":"Todos los casos clínicos de "+groupLabel+". Filtra por tema, alterna entre modo tarjeta (interactivo) y modo lista (vista rápida con respuestas)."
           )
         ),
-        isFlash?e(GlobalFlashDeck,{group:group}):e(GlobalQuiz,{group:group})
+        isFlash?(SM_goFlashcards?e(SM_FlashBridge,{deckId:null,goFlashcards:SM_goFlashcards}):e(GlobalFlashDeck,{group:group})):e(GlobalQuiz,{group:group})
       ),
       scrollTopBtn(hc)
     );
@@ -19720,7 +19750,7 @@ function App(){
     // onViewChange — SM calls this on every internal view change so ECEPT can
     //                render the deeper breadcrumb. Module itself is headless.
     // className "sm-root" scopes the SM-specific CSS (.prose + button resets).
-    vista==="salud_mental"&&e("div",{className:"sm-root"},e(SaludMentalView,{onHome:function(){go("home")},onBackRef:smBackRef,onViewChange:onSmViewChange})),
+    vista==="salud_mental"&&e("div",{className:"sm-root"},e(SaludMentalView,{onHome:function(){go("home")},onBackRef:smBackRef,onViewChange:onSmViewChange,goFlashcards:function(deck){if(deck){window.ECEPT_DECK_SELECTED=deck;go("flashcards_deck");}else{go("flashcards");}}})),
 
     // ════════════ QUEMADURAS ════════════
     vista==="cir_quem"&&e(F,null,
