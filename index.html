@@ -15917,6 +15917,13 @@ function DeckDetailView(props){
       .then(function(res){ if(!res.error) DD_setOwnDecks(res.data||[]); });
   },[]);
 
+  useEffect(function(){
+    if(!user||!window.ECEPT_SUPABASE) return;
+    window.ECEPT_SUPABASE.from("user_tags")
+      .select("id,name,color").eq("user_id",user.id).order("name")
+      .then(function(res){ if(!res.error) DD_setUserTagsList(res.data||[]); });
+  },[]);
+
   function DD_handleDelete(cardId){
     if(!user||!window.ECEPT_SUPABASE) return;
     window.ECEPT_SUPABASE.from("flashcards").delete().eq("id",cardId).then(function(){
