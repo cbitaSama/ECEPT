@@ -250,4 +250,117 @@ del viewBox → corte). Curvas Bézier esquemáticas sin refinamiento.
 - `src/data/*` intacto.
 - `api/*` intacto.
 - 8 commits secuenciales, todos en `Alpha25-elion-flashcards`.
+
+---
+
+## 12. Ronda 2 — Fixes finos (sesión Mayo 2026)
+
+8 commits adicionales sobre la ronda 1. Todos en `Alpha25-elion-flashcards`.
+
+| # | Hash      | Fix / Feature                            | Resumen                                         |
+|---|-----------|------------------------------------------|-------------------------------------------------|
+| 1 | `229e476` | Logo flow infinito (no rotación)         | strokeDashoffset animado + scale breathe        |
+| 2 | `4cece43` | Loading screen FORZAR 1200ms             | CSS animation-delay puro, no JS timing          |
+| 3 | `c497931` | ModuleShell aplicado a 3 menús           | cir_menu, anat_menu, emergen_menu               |
+| 4 | `f19e8f3` | Skeletons VISIBLES con min 400ms         | finishLoading helper en DecksView/DeckDetail/CB |
+| 5 | `cd32aac` | ModuleShell con IMPACTO real             | Hero radial + título gradient + icon 80px       |
+| 6 | `0cfa566` | EmptyState component + aplicado          | DecksView/DeckDetail/ChatBot empty refinados    |
+| 7 | `b8a51bf` | Toast feedback en import/bulk/copy       | API flexible + integrado en flujos              |
+| 8 | (este)    | Docs ronda 2                             |                                                 |
+
+### Bug 1 — Animación logo "flow infinito"
+**Causa**: la rotación 360° no era el efecto deseado. Sebas quería sensación de movimiento perpetuo (∞) en las strands DNA.
+
+**Solución**: en `src/components/Logo.js` se reemplazó `animation: ecept_logoSpin` por dos clases:
+- `.ecept-strand-flow` / `.ecept-strand-flow-reverse`: animan `stroke-dashoffset` de 0 a -20/+20 px en 2.5s linear loop. Las strands ahora tienen `stroke-dasharray: '6 4'` lo que crea segmentos visibles que aparecen "fluyendo" perpetuamente en direcciones opuestas.
+- `.ecept-logo-flow`: scale 1↔1.03 en 3s ease-in-out → respiración sutil del container.
+
+Los keyframes están en `src/index.html` (CSS global). El initial-loader inline también usa el mismo efecto vía `il-strand-a/b` classes con keyframes `ecept_il_strandFlow` (idénticos pero scoped).
+
+ID único por instancia (`ECEPT_LOGO_UID++`) para que el avatar del chat (28px) no comparta gradient con el FAB (32px) ni con el hero del home (88px).
+
+### Bug 2 — Loading screen forzado 1200ms
+**Causa**: el min-time JS en `src/app.js` no funcionaba consistentemente. En cargas cacheadas, el bundle se ejecutaba antes de que `_ECEPT_START` fuera capturado de manera confiable, y el dispatch de `ECEPT_READY` ocurría inmediato.
+
+**Solución**: cambio a CSS-only. El `#initial-loader` tiene:
+```css
+animation: ecept_loaderFadeOut 320ms cubic-bezier(0.16,1,0.3,1) forwards;
+animation-delay: 1200ms;
+animation-play-state: paused;
+```
+
+Cuando React monta y dispara `ECEPT_READY`, agregamos clase `.go` que cambia a `animation-play-state: running`. El `animation-delay` CSS de 1200ms garantiza visibilidad mínima desde el primer paint del HTML — sin depender de cuándo se ejecute JS. Si la app monta en 50ms, el loader sigue visible hasta cumplir 1200ms.
+
+Fail-safe a 8s: si nunca llegó `ECEPT_READY`, el loader se reemplaza por mensaje de error con botón Recargar.
+
+### Bug 3 — Premium aplicado app-wide
+ModuleShell ahora envuelve también `cir_menu`, `anat_menu`, `emergen_menu` (antes solo `reuma`). Cards internas con grid auto-fit, hover translateY(-2px), stagger animation.
+
+ModuleShell mismo fue refactorizado (Commit 5) para tener IMPACTO visible:
+- Hero prominente con padding 56px desktop / 32px móvil.
+- Background con accent radial gradient derivado del color del módulo.
+- Icon container 80x80 con gradient + glow (24px @ 0.15) + border al 32%.
+- Título h1 40px desktop, gradient mixto (text→accent), font-weight 800.
+- Subtitle visible al lado del título.
+- Layout column en mobile (icon arriba) / row en tablet+.
+
+**Pendiente**: aplicar a `fisio`, `general`, `trauma-u1`, `vocabulario`. No se aplicó esta sesión por riesgo de romper widgets nativos.
+
+### Bug 4 — Skeletons visibles con min 400ms
+**Causa**: las queries respondían en <100ms, el flash del skeleton era imperceptible.
+
+**Solución**: helper `finishLoading(fn)` que captura `Date.now()` al iniciar, calcula `elapsed` al recibir respuesta, y espera `max(0, 400 - elapsed)` antes de hacer `setLoading(false)`. Aplicado en:
+- `DecksView.DV_loadData` (con `DV_finishLoading`)
+- `DeckDetailView.DD_loadCards` (con `DD_finish`)
+- `ChatBot.CB_loadConversations` (con `CB_finish`)
+
+No retrasa cargas lentas — solo difiere las rápidas para garantizar visibilidad mínima.
+
+### Bug 5 — ModuleShell visual real
+Resuelto en Commit 5. Ver Bug 3 arriba.
+
+### EmptyState component
+Nuevo en `src/components/EmptyState.js`. API:
+```js
+e(EmptyState, {
+  icon: '🎴',
+  title: 'Todavía no tenés barajas',
+  description: '...',
+  actions: [
+    { label: '+ Crear baraja', onClick: ..., variant: 'primary' },
+    { label: '✨ Generar con IA', onClick: ..., variant: 'premium' }
+  ]
+})
+```
+
+Variants: `primary` (gradient mixed), `secondary` (bg primarySoft + border), `premium` (gradient gold + glow_premium, color text bg0 para legibilidad).
+
+Aplicado en DecksView empty, DeckDetailView empty (canEdit + oficial), ChatBot sidebar (versión compacta inline).
+
+### Toast en flujos
+ECEPT_toast ahora soporta API string + objeto. Aplicado en:
+- `DV_importDeck` success/error
+- `DD_bulkDelete` success/error
+- `DD_bulkCopy` success
+
+window.alert() activos en src/components/: 0. Los `role:'alert'` que aparecen son ARIA, no native dialogs.
+
+### TODOs ronda 2
+
+- ProfileView con layout 2-col en desktop (sidebar avatar + main cards) — no se aplicó esta sesión.
+- StudyView con background gradient + footer stats post-sesión — no se aplicó.
+- Aplicar ModuleShell a fisio, general, trauma-u1, vocabulario.
+- Migrar inline-styled buttons a `<Button>`.
+- Skeleton para StudyView durante carga inicial.
+- Auditar mobile (320-480px) tap targets / texto / modales en cada vista — no se hizo smoke test mobile esta sesión.
+- ChatBot fullscreen aprovecha hasta 1400px max-width (ya está según el merge previo, solo pendiente verificar en device real).
+
+### Verificación final (ronda 2)
+
+- 0 ocurrencias de `const`/`let`/`=>` en archivos creados/modificados (verificado).
+- Build: `✓ build OK (150 integrity checks passed)`.
+- `src/data/*` intacto.
+- `api/*` intacto.
+- RLS / Supabase queries de negocio intactas.
+- 8 commits secuenciales, ninguno mergeado a Alpha-2.
 6. Para CTAs: `<Button variant="primary">` o `variant="premium"` según contexto.
