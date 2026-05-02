@@ -8,12 +8,14 @@
 // ══════════════════════════════════════════════════════════════
 var FE_styleInjected=false;
 
+// Parses both {{c1::word}} (old) and }}word}} (new simplified) syntax
 function FE_buildClozePreview(text,hidden){
   var parts=[];
-  var re=/\{\{c\d+::(.*?)\}\}/g;
+  var re=/\{\{c\d+::(.*?)\}\}|\}\}(.*?)\}\}/g;
   var last=0,match,idx=0;
   while((match=re.exec(text))!==null){
     if(match.index>last) parts.push(e("span",{key:"t"+idx++},text.slice(last,match.index)));
+    var ans=match[1]!==undefined?match[1]:match[2];
     if(hidden){
       parts.push(e("span",{key:"c"+idx++,style:{
         display:"inline-block",padding:"1px 10px",borderRadius:"6px",
@@ -21,12 +23,20 @@ function FE_buildClozePreview(text,hidden){
         color:"#fbbf24",fontWeight:700,margin:"0 2px"
       }},"[...]"));
     } else {
-      parts.push(e("span",{key:"r"+idx++,style:{color:"#34d399",fontWeight:700}},match[1]));
+      parts.push(e("span",{key:"r"+idx++,style:{color:"#34d399",fontWeight:700}},ans));
     }
     last=re.lastIndex;
   }
   if(last<text.length) parts.push(e("span",{key:"t"+idx++},text.slice(last)));
   return parts.length ? e("span",null,parts) : e("span",null,text||"");
+}
+
+// Deterministic tag color from palette
+function FE_tagColor(tag){
+  var palette=["#a78bfa","#60a5fa","#34d399","#fbbf24","#f472b6","#ef4444","#06b6d4","#fb923c"];
+  var h=0;
+  for(var i=0;i<tag.length;i++){ h=((h*31)+tag.charCodeAt(i))&0x7fffffff; }
+  return palette[h%palette.length];
 }
 
 function FlashcardEditor(props){
@@ -102,11 +112,11 @@ function FlashcardEditor(props){
     return function(){ clearInterval(t); };
   },[]);
 
-  // ── Load tag suggestions ──
+  // ── Load tag suggestions (all user flashcards, sorted by frequency) ──
   useEffect(function(){
-    if(!deck||!window.ECEPT_SUPABASE) return;
+    if(!user||!window.ECEPT_SUPABASE) return;
     window.ECEPT_SUPABASE
-      .from("flashcards").select("tags").eq("deck_id",deck.id)
+      .from("flashcards").select("tags").eq("user_id",user.id)
       .then(function(res){
         if(!res||res.error) return;
         var tc={};
@@ -120,7 +130,7 @@ function FlashcardEditor(props){
           }
         }
         var sorted=Object.keys(tc).sort(function(a,b){ return tc[b]-tc[a]; });
-        FE_setSugg(sorted.slice(0,5));
+        FE_setSugg(sorted.slice(0,30));
       }).catch(function(){});
   },[]);
 
@@ -187,7 +197,7 @@ function FlashcardEditor(props){
       else if(!FE_back.trim()) err="El dorso es obligatorio.";
     } else {
       if(!FE_cloze.trim()) err="El texto es obligatorio.";
-      else if(!/\{\{c\d+::.*?\}\}/.test(FE_cloze)) err="Agrega al menos un marcador {{c1::...}}.";
+      else if(!/\{\{c\d+::.*?\}\}|\}\}.*?\}\}/.test(FE_cloze)) err="Agrega al menos un marcador }}texto}}.";
     }
     if(err){ FE_setErr(err); return; }
     if(!user||!window.ECEPT_SUPABASE){ FE_setErr("Servicio no disponible."); return; }
@@ -468,14 +478,16 @@ function FlashcardEditor(props){
           e("label",{style:labelSt},"Texto"),
           e("textarea",{
             value:FE_cloze,rows:5,disabled:FE_saving,
-            placeholder:"La inflamación de las meninges se llama {{c1::meningitis}}.",
+            placeholder:"La inflamación de las meninges se llama }}meningitis}}.",
             onChange:function(ev){ FE_setCloze(ev.target.value); FE_setErr(""); FE_grow(ev); },
             style:inputSt
           }),
           e("p",{style:hintSt},
-            "Usá ",
-            e("code",{style:{background:"rgba(251,191,36,.15)",color:"#fbbf24",padding:"1px 5px",borderRadius:"4px"}},"{{c1::texto}}"),
-            " para ocultar partes."
+            "Usa ",
+            e("code",{style:{background:"rgba(251,191,36,.15)",color:"#fbbf24",padding:"1px 5px",borderRadius:"4px"}},"}}texto}}"),
+            " para ocultar partes. Ejemplo: La inflamación de las meninges se llama ",
+            e("code",{style:{background:"rgba(251,191,36,.15)",color:"#fbbf24",padding:"1px 5px",borderRadius:"4px"}},"}}meningitis}}"),
+            "."
           ),
           FE_cloze.trim() && e("div",{style:{
             marginTop:"12px",padding:"12px",borderRadius:"10px",
@@ -509,17 +521,18 @@ function FlashcardEditor(props){
           borderRadius:"10px",border:"1px solid "+C.bd,background:C.bg
         }},
           FE_tags.map(function(t,i){
+            var tc=FE_tagColor(t);
             return e("span",{key:i,style:{
               display:"inline-flex",alignItems:"center",gap:"4px",
               padding:"3px 6px 3px 10px",borderRadius:"999px",
-              background:"rgba(167,139,250,.15)",border:"1px solid rgba(167,139,250,.3)",
-              color:"#a78bfa",fontSize:"11px",fontWeight:600
+              background:tc+"20",border:"1px solid "+tc+"45",
+              color:tc,fontSize:"11px",fontWeight:600
             }},
               "#"+t,
               e("button",{
                 onClick:function(){ FE_removeTag(i); },
                 style:{
-                  background:"none",border:"none",color:"#a78bfa",
+                  background:"none",border:"none",color:tc,
                   cursor:"pointer",padding:"0 2px",lineHeight:1,fontSize:"13px"
                 }
               },"×")
@@ -539,10 +552,11 @@ function FlashcardEditor(props){
         FE_sugg.filter(function(t){ return FE_tags.indexOf(t)===-1; }).length>0 &&
           e("div",{style:{display:"flex",flexWrap:"wrap",gap:"5px",marginTop:"7px"}},
             FE_sugg.filter(function(t){ return FE_tags.indexOf(t)===-1; }).map(function(t){
+              var tc=FE_tagColor(t);
               return e("button",{key:t,onClick:function(){ FE_addTag(t); },style:{
                 padding:"3px 10px",borderRadius:"999px",minHeight:"28px",
-                background:"rgba(255,255,255,.04)",border:"1px solid "+C.bd,
-                color:C.dm,fontSize:"11px",cursor:"pointer"
+                background:tc+"14",border:"1px solid "+tc+"38",
+                color:tc,fontSize:"11px",cursor:"pointer"
               }},"#"+t);
             })
           )

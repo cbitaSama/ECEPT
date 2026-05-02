@@ -74,10 +74,10 @@ function SV_shuffle(arr){
   return a;
 }
 
-// ── Cloze renderer ──
+// ── Cloze renderer — handles both {{c1::word}} and }}word}} ──
 function SV_clozeEl(text,hidden){
   if(!text) return e("span",null,"");
-  var regex=/\{\{c\d+::(.*?)\}\}/g;
+  var regex=/\{\{c\d+::(.*?)\}\}|\}\}(.*?)\}\}/g;
   var parts=[];
   var lastIndex=0;
   var match;
@@ -86,7 +86,7 @@ function SV_clozeEl(text,hidden){
     if(match.index>lastIndex){
       parts.push(text.substring(lastIndex,match.index));
     }
-    var answer=match[1];
+    var answer=match[1]!==undefined?match[1]:match[2];
     if(hidden){
       parts.push(e("span",{
         key:"cl-"+idx,
