@@ -22642,9 +22642,10 @@ function App(){
       e("div",{onClick:function(){setSb(false)},style:{flex:1,background:"rgba(0,0,0,.6)"}})
     ),
     // ════════════ MAIN (content wrapper — Trauma + Vocab now render natively inside) ════════════
-    // El home gestiona su propio ancho hasta 1400px. Las vistas internas
-    // siguen con wrapper 900px para mantener legibilidad de prosa larga.
-    e("div",{style:vista==="home"?{width:"100%",margin:0,padding:"0 0 80px"}:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
+    // El home y reuma gestionan su propio ancho (Home hasta 1400, Reuma usa
+    // ModuleShell hasta 1280). Las vistas internas siguen con wrapper 900px
+    // para mantener legibilidad de prosa larga.
+    e("div",{style:(vista==="home"||vista==="reuma")?{width:"100%",margin:0,padding:"0 0 80px"}:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
 
     // ════════════ HOME ════════════
     vista==="home"&&e(HomeView,{user:ecuUser,vi:vi,favs:favs,bestStreak:bestStreak,go:go}),
@@ -22668,9 +22669,15 @@ function App(){
     ),
 
     // ════════════ REUMATOLOGÍA HOME ════════════
-    vista==="reuma"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"28px"}},e("h1",{style:{fontFamily:"'Playfair Display',serif",fontSize:"28px",fontWeight:800,background:"linear-gradient(135deg,#60a5fa,#a78bfa,#f472b6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}},"Reumatología"),e("p",{style:{color:C.mt,fontSize:"14px"}},tot+" enfermedades · "+vi.length+" revisadas")),
-      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(250px,1fr))",gap:"12px"}},REUMA_SECS.map(function(sec){var cn=RD.filter(function(d){return d.s===sec.id}).length;return e("div",{key:sec.id,onClick:function(){go("reuma_sec",sec.id)},style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"18px",cursor:"pointer"}},e("div",{style:{fontSize:"24px",marginBottom:"8px"}},sec.i),e("h3",{style:{fontSize:"14px",fontWeight:700,marginBottom:"3px"}},sec.n),e("p",{style:{fontSize:"11px",color:C.dm}},sec.d),e("span",{style:{fontSize:"11px",color:C.mt}},cn+" enf"))}))
+    // Test de ModuleShell: header consistente + grid auto-fit. Si rompe el
+    // layout, revertir a la versión anterior (queda commited).
+    vista==="reuma"&&e(ModuleShell,{
+      title:"Reumatología",
+      subtitle:tot+" enfermedades · "+vi.length+" revisadas",
+      icon:"🦴",
+      accent:"#60a5fa"
+    },
+      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:"16px"}},REUMA_SECS.map(function(sec,si){var cn=RD.filter(function(d){return d.s===sec.id}).length;return e("div",{key:sec.id,onClick:function(){go("reuma_sec",sec.id)},style:{background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",border:"1px solid "+C.bd,borderRadius:"16px",padding:"20px 22px",cursor:"pointer",minHeight:"140px",display:"flex",flexDirection:"column",transition:"transform 240ms cubic-bezier(0.32,0.72,0,1),border-color 240ms cubic-bezier(0.32,0.72,0,1),box-shadow 240ms ease-out",animation:"ecept_fadeSlideUp 480ms cubic-bezier(0.16,1,0.3,1) "+(si*40+80)+"ms both",boxSizing:"border-box"},onMouseEnter:function(ev){ev.currentTarget.style.borderColor="rgba(96,165,250,0.4)";ev.currentTarget.style.transform="translateY(-2px)";ev.currentTarget.style.boxShadow="0 8px 24px rgba(0,0,0,0.30), 0 2px 8px rgba(0,0,0,0.20)";},onMouseLeave:function(ev){ev.currentTarget.style.borderColor=C.bd;ev.currentTarget.style.transform="translateY(0)";ev.currentTarget.style.boxShadow="none";}},e("div",{style:{fontSize:"30px",marginBottom:"10px"}},sec.i),e("h3",{style:{fontSize:"16px",fontWeight:600,marginBottom:"4px",letterSpacing:"-0.01em"}},sec.n),e("p",{style:{fontSize:"13px",color:C.dm,lineHeight:1.5,flex:1}},sec.d),e("span",{style:{fontSize:"11px",color:C.mt,marginTop:"10px",fontWeight:600,letterSpacing:"0.04em"}},cn+" ENFERMEDADES"))}))
     ),
 
     // ════════════ REUMATOLOGÍA SECCIÓN ════════════
