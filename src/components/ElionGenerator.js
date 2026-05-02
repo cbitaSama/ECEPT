@@ -7,6 +7,15 @@
 // Props: user, supabase, deckId, onImport, onClose
 // ══════════════════════════════════════════════════════════════
 
+var EG_styleInjected = false;
+
+var EG_SLIDER_CSS =
+  '.EG_slider{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;outline:none;cursor:pointer;}' +
+  '.EG_slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#a78bfa;cursor:pointer;box-shadow:0 0 8px rgba(167,139,250,.6);}' +
+  '.EG_slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#a78bfa;border:none;cursor:pointer;box-shadow:0 0 8px rgba(167,139,250,.6);}' +
+  '.EG_slider::-webkit-slider-runnable-track{height:4px;border-radius:2px;}' +
+  '.EG_slider::-moz-range-track{height:4px;border-radius:2px;background:rgba(26,32,64,.8);}';
+
 function ElionGenerator(props) {
   var user = props.user;
   var supabase = props.supabase || window.ECEPT_SUPABASE;
@@ -27,6 +36,16 @@ function ElionGenerator(props) {
   s=useState({});       var EG_editValues=s[0],   EG_setEditValues=s[1];
   s=useState('');       var EG_error=s[0],        EG_setError=s[1];
   s=useState(null);     var EG_quota=s[0],        EG_setQuota=s[1];
+
+  // ── CSS injection ──
+  useEffect(function() {
+    if (!EG_styleInjected) {
+      var st = document.createElement('style');
+      st.textContent = EG_SLIDER_CSS;
+      document.head.appendChild(st);
+      EG_styleInjected = true;
+    }
+  }, []);
 
   // ── Derived ──
   var EG_approvedCount = 0;
@@ -294,15 +313,33 @@ function ElionGenerator(props) {
 
       // Count slider
       e('div', { style: { marginBottom:'16px' } },
-        e('div', { style: { display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'8px' } },
-          e('span', { style: { fontSize:'12px', color:C.mt, fontWeight:700 } }, 'Cantidad de flashcards'),
-          e('span', { style: { fontSize:'14px', color:C.tx, fontWeight:700 } }, EG_count+' flashcards')
+        e('div', { style: { marginBottom:'10px' } },
+          e('span', { style: { fontSize:'12px', color:C.mt, fontWeight:700 } }, 'Cantidad de flashcards')
         ),
-        e('input', {
-          type:'range', min:5, max:30, value:EG_count,
-          onChange: function(ev) { EG_setCount(parseInt(ev.target.value)); },
-          style: { width:'100%', accentColor:'#a78bfa' }
-        })
+        e('div', { style: { position:'relative', paddingBottom:'22px' } },
+          (function() {
+            var EG_sliderPct = Math.round((EG_count - 5) / 25 * 100);
+            var EG_thumbLeft = 'calc('+EG_sliderPct+'% - '+Math.round(EG_sliderPct * 0.18)+'px)';
+            return [
+              e('input', {
+                key:'sl', type:'range', min:5, max:30, value:EG_count,
+                onChange: function(ev) { EG_setCount(parseInt(ev.target.value)); },
+                className: 'EG_slider',
+                style: {
+                  width:'100%',
+                  background:'linear-gradient(to right,#a78bfa 0%,#a78bfa '+EG_sliderPct+'%,rgba(26,32,64,.8) '+EG_sliderPct+'%,rgba(26,32,64,.8) 100%)'
+                }
+              }),
+              e('div', { key:'tag', style: {
+                position:'absolute', bottom:0, left:EG_thumbLeft,
+                background:'rgba(167,139,250,.2)', border:'1px solid rgba(167,139,250,.5)',
+                color:'#a78bfa', borderRadius:'10px', padding:'2px 8px',
+                fontSize:'11px', fontWeight:700, pointerEvents:'none', whiteSpace:'nowrap',
+                transition:'left .05s'
+              }}, EG_count+' cards')
+            ];
+          })()
+        )
       ),
 
       // Card type selector
