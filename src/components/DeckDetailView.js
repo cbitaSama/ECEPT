@@ -7,6 +7,7 @@
 // Props: user, deck, onBack, go
 // ══════════════════════════════════════════════════════════════
 var DD_styleInjected=false;
+var DD_DECK_COLORS=["#a78bfa","#60a5fa","#34d399","#fbbf24","#f472b6","#ef4444","#06b6d4","#fb923c","#8b5cf6","#10b981","#ec4899","#84cc16"];
 
 function DD_previewText(text,type){
   if(!text) return "";
@@ -113,6 +114,14 @@ function DeckDetailView(props){
   s=useState("");      var DD_bulkTargetDeckId=s[0],DD_setBulkTargetDeckId=s[1];
   s=useState(false);   var DD_bulkLoading=s[0],    DD_setBulkLoading=s[1];
   s=useState("");      var DD_bulkErrMsg=s[0],     DD_setBulkErrMsg=s[1];
+  s=useState(null);    var DD_deckMeta=s[0],       DD_setDeckMeta=s[1];
+  s=useState(false);   var DD_editDeckOpen=s[0],   DD_setEditDeckOpen=s[1];
+  s=useState("");      var DD_editDeckName=s[0],   DD_setEditDeckName=s[1];
+  s=useState("");      var DD_editDeckDesc=s[0],   DD_setEditDeckDesc=s[1];
+  s=useState("#a78bfa");var DD_editDeckColor=s[0], DD_setEditDeckColor=s[1];
+  s=useState("📚");   var DD_editDeckIcon=s[0],   DD_setEditDeckIcon=s[1];
+  s=useState(false);   var DD_editDeckLoading=s[0],DD_setEditDeckLoading=s[1];
+  s=useState("");      var DD_editDeckErr=s[0],    DD_setEditDeckErr=s[1];
   s=useState(false);   var DD_tagBulkOpen=s[0],    DD_setTagBulkOpen=s[1];
   s=useState("");      var DD_tagBulkInput=s[0],   DD_setTagBulkInput=s[1];
   s=useState(false);   var DD_tagBulkLoading=s[0], DD_setTagBulkLoading=s[1];
@@ -572,6 +581,26 @@ function DeckDetailView(props){
     URL.revokeObjectURL(url);
   }
 
+  async function DD_execEditDeck(){
+    var name=DD_editDeckName.trim();
+    if(!name||!user||!window.ECEPT_SUPABASE) return;
+    DD_setEditDeckLoading(true); DD_setEditDeckErr("");
+    try{
+      var icon=DD_editDeckIcon.trim()||"📚";
+      var res=await window.ECEPT_SUPABASE.from("decks")
+        .update({name:name,description:DD_editDeckDesc.trim(),color:DD_editDeckColor,icon:icon})
+        .eq("id",deck.id).eq("user_id",user.id);
+      if(res.error) throw res.error;
+      DD_setDeckMeta({name:name,description:DD_editDeckDesc.trim(),color:DD_editDeckColor,icon:icon});
+      DD_setEditDeckOpen(false);
+    }catch(err){
+      console.error("edit deck error",err);
+      DD_setEditDeckErr("Error al guardar. Intentá de nuevo.");
+    }finally{
+      DD_setEditDeckLoading(false);
+    }
+  }
+
   // ── Deck no seleccionado: fallback ──
   if(!deck){
     return e("div",{style:{maxWidth:"540px",margin:"0 auto",padding:"40px 20px",textAlign:"center"}},
@@ -593,8 +622,11 @@ function DeckDetailView(props){
   }
 
   // ── Derived ──
-  var deckCol=deck.color||"#a78bfa";
-  var deckIcon=deck.icon||"🎴";
+  var _dm=DD_deckMeta||deck;
+  var deckCol=_dm.color||"#a78bfa";
+  var deckIcon=_dm.icon||"🎴";
+  var _deckName=_dm.name||"Sin nombre";
+  var _deckDesc=_dm.description||"";
   var isOfficial=!!deck.is_official;
   var canEdit=!isOfficial && user && deck.user_id===user.id;
   var DD_userTagColorMap={};
@@ -919,14 +951,14 @@ function DeckDetailView(props){
             fontFamily:"'Playfair Display',serif",
             overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
             margin:0
-          }},deck.name||"Sin nombre"),
+          }},_deckName),
           isOfficial && e("span",{style:{
             fontSize:"9px",padding:"3px 8px",borderRadius:"6px",
             background:deckCol+"22",color:deckCol,fontWeight:700,
             flexShrink:0,whiteSpace:"nowrap"
           }},"Oficial ⭐")
         ),
-        deck.description && e("p",{style:{fontSize:"12px",color:C.dm,lineHeight:1.4,margin:0}},deck.description)
+        _deckDesc && e("p",{style:{fontSize:"12px",color:C.dm,lineHeight:1.4,margin:0}},_deckDesc)
       )
     ),
 
@@ -1115,7 +1147,24 @@ function DeckDetailView(props){
             color:DD_showAnswers?C.ac2:C.mt,
             fontSize:"12px",fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"
           }
-        },DD_showAnswers?"👁 Ocultar respuestas":"👁 Mostrar respuestas")
+        },DD_showAnswers?"👁 Ocultar respuestas":"👁 Mostrar respuestas"),
+        canEdit&&e("button",{
+          onClick:function(){
+            var src=DD_deckMeta||deck;
+            DD_setEditDeckName(src.name||"");
+            DD_setEditDeckDesc(src.description||"");
+            DD_setEditDeckColor(src.color||"#a78bfa");
+            DD_setEditDeckIcon(src.icon||"📚");
+            DD_setEditDeckErr("");
+            DD_setEditDeckOpen(true);
+          },
+          style:{
+            flexShrink:0,minHeight:"44px",padding:"8px 14px",
+            borderRadius:"10px",background:"none",
+            border:"1px solid "+C.bd,
+            color:C.dm,fontSize:"12px",fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"
+          }
+        },"✏️ Editar baraja")
       ),
       allTags.length>0 && e("div",{style:{display:"flex",flexWrap:"wrap",gap:"6px",alignItems:"center"}},
         allTags.map(function(t){
@@ -1463,6 +1512,117 @@ function DeckDetailView(props){
         document.body
       );
     })(),
+    DD_editDeckOpen&&ReactDOM.createPortal(
+      e("div",{
+        onClick:function(){ if(!DD_editDeckLoading){ DD_setEditDeckOpen(false); } },
+        style:{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",
+          display:"flex",alignItems:"center",justifyContent:"center",
+          zIndex:1050,padding:"16px"}
+      },
+        e("div",{
+          onClick:function(ev){ ev.stopPropagation(); },
+          style:{width:"100%",maxWidth:"420px",background:C.cd,
+            border:"1px solid "+C.bd,borderRadius:"16px",
+            boxShadow:"0 12px 40px rgba(0,0,0,.6)",overflow:"hidden"}
+        },
+          e("div",{style:{
+            display:"flex",alignItems:"center",justifyContent:"space-between",
+            padding:"16px 18px",borderBottom:"1px solid "+C.bd
+          }},
+            e("span",{style:{fontSize:"14px",color:C.tx,fontWeight:700}},"✏️ Editar baraja"),
+            e("button",{
+              onClick:function(){ DD_setEditDeckOpen(false); },
+              disabled:DD_editDeckLoading,
+              style:{background:"none",border:"none",color:C.dm,fontSize:"20px",
+                cursor:"pointer",lineHeight:1,padding:"4px 8px"}
+            },"×")
+          ),
+          e("div",{style:{padding:"18px",display:"flex",flexDirection:"column",gap:"14px"}},
+            e("div",null,
+              e("div",{style:{fontSize:"12px",color:C.dm,fontWeight:600,marginBottom:"6px"}},"Nombre"),
+              e("input",{
+                type:"text",value:DD_editDeckName,autoFocus:true,
+                disabled:DD_editDeckLoading,
+                onChange:function(ev){ DD_setEditDeckName(ev.target.value); },
+                onKeyDown:function(ev){ if(ev.key==="Enter"&&DD_editDeckName.trim()) DD_execEditDeck(); },
+                style:{width:"100%",minHeight:"42px",padding:"8px 12px",
+                  borderRadius:"10px",border:"1px solid "+C.bd,
+                  background:C.bg,color:C.tx,fontSize:"13px",
+                  outline:"none",boxSizing:"border-box"}
+              })
+            ),
+            e("div",null,
+              e("div",{style:{fontSize:"12px",color:C.dm,fontWeight:600,marginBottom:"6px"}},"Descripción"),
+              e("input",{
+                type:"text",value:DD_editDeckDesc,
+                disabled:DD_editDeckLoading,
+                placeholder:"Opcional...",
+                onChange:function(ev){ DD_setEditDeckDesc(ev.target.value); },
+                style:{width:"100%",minHeight:"42px",padding:"8px 12px",
+                  borderRadius:"10px",border:"1px solid "+C.bd,
+                  background:C.bg,color:C.tx,fontSize:"13px",
+                  outline:"none",boxSizing:"border-box"}
+              })
+            ),
+            e("div",null,
+              e("div",{style:{fontSize:"12px",color:C.dm,fontWeight:600,marginBottom:"8px"}},"Color"),
+              e("div",{style:{display:"flex",flexWrap:"wrap",gap:"8px"}},
+                DD_DECK_COLORS.map(function(col){
+                  var isSel=DD_editDeckColor===col;
+                  return e("button",{key:col,
+                    onClick:function(){ DD_setEditDeckColor(col); },
+                    style:{
+                      width:"28px",height:"28px",borderRadius:"50%",
+                      background:col,border:isSel?"3px solid #fff":"2px solid transparent",
+                      cursor:"pointer",boxSizing:"border-box",
+                      boxShadow:isSel?"0 0 0 2px "+col:""
+                    }
+                  });
+                })
+              )
+            ),
+            e("div",null,
+              e("div",{style:{fontSize:"12px",color:C.dm,fontWeight:600,marginBottom:"6px"}},"Ícono (emoji)"),
+              e("input",{
+                type:"text",value:DD_editDeckIcon,
+                disabled:DD_editDeckLoading,
+                maxLength:2,
+                onChange:function(ev){ DD_setEditDeckIcon(ev.target.value); },
+                style:{width:"70px",minHeight:"42px",padding:"8px 12px",
+                  borderRadius:"10px",border:"1px solid "+C.bd,
+                  background:C.bg,color:C.tx,fontSize:"22px",textAlign:"center",
+                  outline:"none",boxSizing:"border-box"}
+              })
+            ),
+            DD_editDeckErr&&e("div",{style:{fontSize:"12px",color:"#fca5a5",fontWeight:600}},DD_editDeckErr)
+          ),
+          e("div",{style:{
+            padding:"14px 18px",borderTop:"1px solid "+C.bd,
+            display:"flex",gap:"8px"
+          }},
+            e("button",{
+              onClick:DD_execEditDeck,
+              disabled:!DD_editDeckName.trim()||DD_editDeckLoading,
+              style:{
+                flex:1,minHeight:"44px",padding:"12px",borderRadius:"12px",border:"none",
+                background:(DD_editDeckName.trim()&&!DD_editDeckLoading)?"#a78bfa":"rgba(255,255,255,.08)",
+                color:(DD_editDeckName.trim()&&!DD_editDeckLoading)?"#fff":C.mt,
+                fontSize:"14px",fontWeight:700,
+                cursor:(DD_editDeckName.trim()&&!DD_editDeckLoading)?"pointer":"default"
+              }
+            },DD_editDeckLoading?"Guardando...":"Guardar"),
+            e("button",{
+              onClick:function(){ DD_setEditDeckOpen(false); },
+              disabled:DD_editDeckLoading,
+              style:{minHeight:"44px",padding:"12px 18px",borderRadius:"12px",
+                background:"none",border:"1px solid "+C.bd,
+                color:C.mt,fontSize:"14px",fontWeight:700,cursor:"pointer"}
+            },"Cancelar")
+          )
+        )
+      ),
+      document.body
+    ),
     DD_copySuccess&&ReactDOM.createPortal(
       e("div",{style:{
         position:"fixed",bottom:"80px",left:"50%",transform:"translateX(-50%)",
