@@ -15707,6 +15707,32 @@ function DD_clozeEl(text){
   return parts.length ? e("span",null,parts) : e("span",null,text||"");
 }
 
+// Preview modal cloze renderer — handles both {{c1::word}} and }}word}} formats.
+// hidden=true → blanks shown as [...]  hidden=false → answers revealed in green.
+function DD_previewClozeEl(text,hidden){
+  if(!text) return e("span",null,"");
+  var regex=/\{\{c\d+::(.*?)\}\}|\}\}(.*?)\}\}/g;
+  var parts=[]; var lastIndex=0; var match; var idx=0;
+  while((match=regex.exec(text))!==null){
+    if(match.index>lastIndex) parts.push(text.substring(lastIndex,match.index));
+    var answer=match[1]!==undefined?match[1]:match[2];
+    if(hidden){
+      parts.push(e("span",{key:"cl-"+idx,style:{
+        display:"inline-block",padding:"1px 8px",borderRadius:"5px",
+        background:"rgba(251,191,36,.2)",border:"1px solid rgba(251,191,36,.4)",
+        color:"#fbbf24",fontWeight:700,margin:"0 2px"
+      }},"[...]"));
+    } else {
+      parts.push(e("span",{key:"cl-"+idx,style:{color:"#34d399",fontWeight:700}},answer));
+    }
+    lastIndex=match.index+match[0].length;
+    idx++;
+  }
+  if(lastIndex<text.length) parts.push(text.substring(lastIndex));
+  if(parts.length===0) return e("span",null,text);
+  return e("span",null,parts);
+}
+
 function DeckDetailView(props){
   var user=props.user;
   var deck=props.deck;
@@ -16494,9 +16520,11 @@ function DeckDetailView(props){
               gap:"20px",textAlign:"center"
             }},
               e("div",{style:{fontSize:"17px",color:C.tx,fontWeight:600,lineHeight:1.5}},
-                pcIsCloze?DD_clozeEl(pc.front||""):(pc.front||"")
+                pcIsCloze
+                  ?DD_previewClozeEl(pc.front||"",!DD_previewFlipped)
+                  :(pc.front||"")
               ),
-              DD_previewFlipped&&pc.back&&e("div",{style:{
+              !pcIsCloze&&DD_previewFlipped&&pc.back&&e("div",{style:{
                 paddingTop:"16px",borderTop:"1px solid "+C.bd,width:"100%",
                 fontSize:"15px",color:C.dm,lineHeight:1.5
               }},pc.back),
