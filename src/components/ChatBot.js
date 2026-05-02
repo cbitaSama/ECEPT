@@ -900,13 +900,19 @@ function ChatBot(props) {
       }
     },
       e(window.Logo || 'span', { size: 34, animated: true, idSuffix:'fab' }),
-      // Online indicator: punto verde pulsante abajo-derecha
-      e('span', { 'aria-hidden':'true', style:{
+      // Indicador de estado: verde pulsante si hay sesión, gris estático si no.
+      CB_session === true && e('span', { 'aria-hidden':'true', style:{
         position:'absolute', bottom:4, right:4, width:12, height:12,
         borderRadius:'50%', background:'#34d399',
         border:'2px solid #060a14',
         boxShadow:'0 0 8px rgba(52,211,153,0.6)',
         animation:'ecept_pulseDot 2.4s ease-in-out infinite',
+        pointerEvents:'none'
+      }}),
+      CB_session === false && e('span', { 'aria-hidden':'true', style:{
+        position:'absolute', bottom:4, right:4, width:12, height:12,
+        borderRadius:'50%', background:'#94a3b8',
+        border:'2px solid #060a14',
         pointerEvents:'none'
       }})
     ),
