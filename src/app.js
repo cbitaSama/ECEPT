@@ -29,6 +29,12 @@ function App(){
   var vi=s[0],setVi=s[1];
   useEffect(function(){try{localStorage.setItem("ecept_v1",JSON.stringify(vi))}catch(e2){}},[vi]);
 
+  // ─── INITIAL LOADER DISMISS ─── señalá al loader inline de index.html
+  // que React montó. El listener fade-out remueve #initial-loader.
+  useEffect(function(){
+    try { window.dispatchEvent(new Event('ECEPT_READY')); } catch(e2) {}
+  },[]);
+
   // ─── AUTH SESSION ─── restore on mount + keep in sync via onAuthStateChange
   useEffect(function(){
     if(!window.ECEPT_SUPABASE) return;

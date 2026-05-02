@@ -98,6 +98,9 @@ var parts = [
   'src/components/salud_mental/70-app.js',
   'src/components/salud_mental/_exposures.js',
   'src/components/salud_mental/_iife-close.js',
+  // logo + loading screen (premium primitives — must precede everything that consumes them)
+  'src/components/Logo.js',
+  'src/components/LoadingScreen.js',
   // chatbot (must come after App? no — function hoisted; keep with components)
   'src/components/ChatBot.js',
   // supabase client (reads window.__ECEPT_ENV; exposes window.ECEPT_SUPABASE)
@@ -176,6 +179,8 @@ var expectedGlobals = [
   'function PerView', 'function ImpView', 'function DprView',
   'function IntroView', 'function RootHub', 'function NeurosisHub',
   'window.SaludMentalView', 'window.SM_SEARCH_INDEX',
+  // logo + loading screen
+  'function Logo', 'window.Logo', 'function LoadingScreen', 'window.LoadingScreen',
   // chatbot
   'function ChatBot', 'window.ChatBot',
   // supabase client
