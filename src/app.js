@@ -30,9 +30,17 @@ function App(){
   useEffect(function(){try{localStorage.setItem("ecept_v1",JSON.stringify(vi))}catch(e2){}},[vi]);
 
   // ─── INITIAL LOADER DISMISS ─── señalá al loader inline de index.html
-  // que React montó. El listener fade-out remueve #initial-loader.
+  // que React montó. Garantizá min-visibility 800ms para que el loader
+  // sea siempre perceptible (no flash) — es parte de la marca, no espera.
   useEffect(function(){
-    try { window.dispatchEvent(new Event('ECEPT_READY')); } catch(e2) {}
+    var startTime = window._ECEPT_START || (typeof performance!=='undefined' && performance.now ? performance.now() : Date.now());
+    var nowFn = (typeof performance!=='undefined' && performance.now) ? function(){return performance.now();} : function(){return Date.now();};
+    var elapsed = nowFn() - startTime;
+    var minLoaderTime = 800;
+    var remaining = Math.max(0, minLoaderTime - elapsed);
+    setTimeout(function(){
+      try { window.dispatchEvent(new Event('ECEPT_READY')); } catch(e2) {}
+    }, remaining);
   },[]);
 
   // ─── AUTH SESSION ─── restore on mount + keep in sync via onAuthStateChange

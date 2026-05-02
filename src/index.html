@@ -2,19 +2,95 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<script>window._ECEPT_START = (typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>ECEPT · El Conocimiento Es Para Todos</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ECEPT">
 <meta name="theme-color" content="#060a14">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><defs><linearGradient id=%22g%22 x1=%220%22 y1=%220%22 x2=%2264%22 y2=%2264%22 gradientUnits=%22userSpaceOnUse%22><stop offset=%220%22 stop-color=%22%2360a5fa%22/><stop offset=%221%22 stop-color=%22%23a78bfa%22/></linearGradient></defs><path d=%22M18 6 C30 18 34 18 46 6 M18 22 C30 34 34 34 46 22 M18 42 C30 54 34 54 46 42 M18 58 C30 70 34 70 46 58%22 stroke=%22url(%23g)%22 stroke-width=%223%22 stroke-linecap=%22round%22 fill=%22none%22/><line x1=%2222%22 y1=%2214%22 x2=%2242%22 y2=%2214%22 stroke=%22url(%23g)%22 stroke-width=%222%22 opacity=%22.6%22/><line x1=%2222%22 y1=%2230%22 x2=%2242%22 y2=%2230%22 stroke=%22url(%23g)%22 stroke-width=%222%22 opacity=%22.6%22/><line x1=%2222%22 y1=%2250%22 x2=%2242%22 y2=%2250%22 stroke=%22url(%23g)%22 stroke-width=%222%22 opacity=%22.6%22/></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><defs><linearGradient id=%22g%22 x1=%220%22 y1=%220%22 x2=%22100%22 y2=%22100%22 gradientUnits=%22userSpaceOnUse%22><stop offset=%220%22 stop-color=%22%2360a5fa%22/><stop offset=%221%22 stop-color=%22%23a78bfa%22/></linearGradient></defs><path d=%22M22 12 C22 30 78 30 78 48 C78 66 22 66 22 84%22 stroke=%22url(%23g)%22 stroke-width=%224%22 stroke-linecap=%22round%22 fill=%22none%22/><line x1=%2228%22 y1=%2222%22 x2=%2272%22 y2=%2222%22 stroke=%22url(%23g)%22 stroke-width=%222.5%22 opacity=%22.7%22/><line x1=%2232%22 y1=%2236%22 x2=%2268%22 y2=%2236%22 stroke=%22url(%23g)%22 stroke-width=%222.5%22 opacity=%22.55%22/><line x1=%2232%22 y1=%2260%22 x2=%2268%22 y2=%2260%22 stroke=%22url(%23g)%22 stroke-width=%222.5%22 opacity=%22.55%22/><line x1=%2228%22 y1=%2274%22 x2=%2272%22 y2=%2274%22 stroke=%22url(%23g)%22 stroke-width=%222.5%22 opacity=%22.7%22/></svg>">
+<!-- Initial loader styles inline (sin depender del bundle) -->
+<style>
+@keyframes ecept_il_spin { to { transform: rotate(360deg); } }
+@keyframes ecept_il_bar {
+  0%   { transform: translateX(-160px); }
+  100% { transform: translateX(400px);  }
+}
+@keyframes ecept_il_pulse { 0%,100% { opacity: 0.65; } 50% { opacity: 1; } }
+#initial-loader{position:fixed;inset:0;background:#060a14;z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;transition:opacity 320ms cubic-bezier(0.16,1,0.3,1);font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif}
+#initial-loader.fade{opacity:0;pointer-events:none}
+#initial-loader .il-logo{width:88px;height:88px;animation:ecept_il_spin 12s linear infinite;filter:drop-shadow(0 0 18px rgba(167,139,250,0.45))}
+#initial-loader .il-title{font-size:40px;font-weight:800;letter-spacing:-0.025em;background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.05}
+#initial-loader .il-tag{font-size:13px;color:#64748b;letter-spacing:0.04em;animation:ecept_il_pulse 1.8s ease-in-out infinite}
+#initial-loader .il-bar-wrap{width:160px;height:3px;background:rgba(96,165,250,0.14);border-radius:2px;overflow:hidden;margin-top:6px}
+#initial-loader .il-bar{width:60px;height:100%;background:linear-gradient(90deg,#60a5fa,#a78bfa);border-radius:2px;animation:ecept_il_bar 1.4s cubic-bezier(0.4,0,0.6,1) infinite}
+</style>
+</head>
+<body>
+<!-- Initial loader: visible al primer paint, sin depender de React/bundle -->
+<div id="initial-loader">
+  <div class="il-logo">
+    <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;">
+      <defs>
+        <linearGradient id="il_grad_a" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#60a5fa"/>
+          <stop offset="100%" stop-color="#a78bfa"/>
+        </linearGradient>
+        <linearGradient id="il_grad_b" x1="100" y1="0" x2="0" y2="100" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#a78bfa"/>
+          <stop offset="100%" stop-color="#60a5fa"/>
+        </linearGradient>
+      </defs>
+      <path d="M 22 12 C 22 30, 78 30, 78 48 C 78 66, 22 66, 22 84" stroke="url(#il_grad_a)" stroke-width="4" stroke-linecap="round" fill="none"/>
+      <path d="M 78 12 C 78 30, 22 30, 22 48 C 22 66, 78 66, 78 84" stroke="url(#il_grad_b)" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.5"/>
+      <line x1="28" y1="22" x2="72" y2="22" stroke="url(#il_grad_a)" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+      <line x1="32" y1="36" x2="68" y2="36" stroke="url(#il_grad_a)" stroke-width="2.5" stroke-linecap="round" opacity="0.55"/>
+      <line x1="32" y1="60" x2="68" y2="60" stroke="url(#il_grad_a)" stroke-width="2.5" stroke-linecap="round" opacity="0.55"/>
+      <line x1="28" y1="74" x2="72" y2="74" stroke="url(#il_grad_a)" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+      <circle cx="22" cy="12" r="3" fill="#60a5fa"/>
+      <circle cx="78" cy="12" r="3" fill="#a78bfa"/>
+      <circle cx="22" cy="84" r="3" fill="#a78bfa"/>
+      <circle cx="78" cy="84" r="3" fill="#60a5fa"/>
+    </svg>
+  </div>
+  <div class="il-title">ECEPT</div>
+  <div class="il-tag">El Conocimiento Es Para Todos</div>
+  <div class="il-bar-wrap"><div class="il-bar"></div></div>
+</div>
 <script>
-  window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+(function(){
+  function dismiss() {
+    var l = document.getElementById('initial-loader');
+    if (!l) return;
+    l.classList.add('fade');
+    setTimeout(function(){ if(l && l.parentNode) l.parentNode.removeChild(l); }, 360);
+  }
+  window.addEventListener('ECEPT_READY', dismiss);
+  // Fail-safe: si pasaron 12s sin ECEPT_READY, ofrecer reload (no quedarse colgado).
+  setTimeout(function(){
+    var l = document.getElementById('initial-loader');
+    if (!l) return;
+    var tag = l.querySelector('.il-tag');
+    if (tag) {
+      tag.textContent = 'Está tardando más de lo normal — tocá acá para recargar';
+      tag.style.cursor = 'pointer';
+      tag.style.color = '#fbbf24';
+      tag.style.animation = 'none';
+      tag.onclick = function(){ window.location.reload(); };
+    }
+  }, 12000);
+  window.addEventListener('error', function(){
+    var l = document.getElementById('initial-loader');
+    if (!l) return;
+    setTimeout(function(){
+      var s = document.getElementById('initial-loader');
+      if (!s) return;
+      s.innerHTML = '<div style="text-align:center;color:#e2e8f0;padding:24px;font-family:-apple-system,system-ui,sans-serif;"><div style="font-size:18px;font-weight:600;margin-bottom:8px;">Algo falló al cargar</div><div style="font-size:13px;color:#94a3b8;margin-bottom:20px;max-width:320px;">Intentá recargar la página. Si persiste, verificá tu conexión.</div><button onclick="window.location.reload()" style="background:linear-gradient(135deg,#60a5fa,#a78bfa);color:#fff;border:none;padding:10px 24px;border-radius:14px;font-weight:600;font-size:14px;cursor:pointer;">Recargar</button></div>';
+    }, 50);
+  });
+})();
 </script>
-<script defer src="/_vercel/speed-insights/script.js"></script>
 <style>
 :root {
   --ease-standard: cubic-bezier(0.32, 0.72, 0, 1);
@@ -57,58 +133,22 @@ button { cursor: pointer; color: inherit; background: none; }
 @keyframes ecept_logoFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-6px); } }
 @keyframes ecept_messageIn { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes ecept_initialPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+@keyframes ecept_skel_shimmer {
+  0%   { background-position: -240px 0; }
+  100% { background-position: 240px 0; }
+}
 /* Salud Mental II · scoped styles */
 .sm-root .prose{font-size:14.5px;line-height:1.7;color:#e2e8f0}
 .sm-root .prose b,.sm-root .prose strong{color:#fff;font-weight:700}
 .sm-root input,.sm-root button,.sm-root select{border:none;outline:none}
 .sm-root button{cursor:pointer;color:inherit;background:none}
 </style>
-</head>
-<body>
-<div id="initial-loader" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#060a14;z-index:99999;transition:opacity 240ms cubic-bezier(0.16,1,0.3,1);">
-  <div style="text-align:center;">
-    <div style="width:80px;height:80px;margin:0 auto 24px;animation:ecept_logoFloat 2.4s ease-in-out infinite;">
-      <svg width="80" height="80" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 16px rgba(167,139,250,0.45));">
-        <defs>
-          <linearGradient id="il_g" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stop-color="#60a5fa"/>
-            <stop offset="100%" stop-color="#a78bfa"/>
-          </linearGradient>
-        </defs>
-        <path d="M18 6 C30 18 34 18 46 6 M18 22 C30 34 34 34 46 22 M18 42 C30 54 34 54 46 42 M18 58 C30 70 34 70 46 58" stroke="url(#il_g)" stroke-width="2.6" stroke-linecap="round" fill="none"/>
-        <line x1="22" y1="14" x2="42" y2="14" stroke="url(#il_g)" stroke-width="1.8" opacity="0.6"/>
-        <line x1="22" y1="30" x2="42" y2="30" stroke="url(#il_g)" stroke-width="1.8" opacity="0.6"/>
-        <line x1="22" y1="50" x2="42" y2="50" stroke="url(#il_g)" stroke-width="1.8" opacity="0.6"/>
-      </svg>
-    </div>
-    <div style="font-family:'Inter','DM Sans',sans-serif;font-size:32px;font-weight:800;letter-spacing:-0.02em;background:linear-gradient(135deg,#60a5fa 0%,#a78bfa 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;">ECEPT</div>
-    <div style="font-family:'Inter','DM Sans',sans-serif;font-size:13px;color:#64748b;animation:ecept_initialPulse 1.6s ease-in-out infinite;">El Conocimiento Es Para Todos</div>
-  </div>
-</div>
-<script>
-  window.addEventListener('ECEPT_READY', function() {
-    var l = document.getElementById('initial-loader');
-    if (l) {
-      l.style.opacity = '0';
-      setTimeout(function(){ if (l && l.parentNode) l.parentNode.removeChild(l); }, 280);
-    }
-  });
-  window.addEventListener('error', function(ev) {
-    var l = document.getElementById('initial-loader');
-    if (!l) return;
-    setTimeout(function() {
-      var still = document.getElementById('initial-loader');
-      if (still) {
-        still.innerHTML = '<div style="text-align:center;font-family:Inter,sans-serif;color:#e2e8f0;padding:24px;"><div style="font-size:18px;font-weight:600;margin-bottom:8px;">Algo falló al cargar</div><div style="font-size:13px;color:#94a3b8;margin-bottom:20px;max-width:320px;">Intentá recargar la página. Si persiste, verificá tu conexión.</div><button onclick="window.location.reload()" style="background:linear-gradient(135deg,#60a5fa,#a78bfa);color:white;border:none;padding:10px 24px;border-radius:14px;font-weight:600;font-size:14px;cursor:pointer;">Recargar</button></div>';
-      }
-    }, 50);
-  });
-</script>
 <div id="root"></div>
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>window.__ECEPT_ENV={SUPABASE_URL:'__SUPABASE_URL__',SUPABASE_ANON_KEY:'__SUPABASE_ANON_KEY__'};</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script>
 /* BUNDLE */
 </script>
