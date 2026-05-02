@@ -29,22 +29,29 @@ const SYSTEM_PROMPT =
   '- Si no estás seguro de un dato, decilo explícitamente. No inventes.\n\n' +
   'NAVEGACIÓN ECEPT — REGLAS ESTRICTAS:\n\n' +
   '1. Solo enlazá a contenido que EXISTE en ECEPT. Módulos disponibles:\n' +
-  '   reuma · cir_menu · anat_menu · general · epid · triadas · coagulacion · fisio · vocabulario · flashcards · emergen_menu · trauma-u1\n' +
-  '   labs (subsecciones: coag, hemo)\n' +
-  '   receptores (subsecciones: adr=adrenérgicos, musc=muscarínicos, nic=nicotínicos, dop=dopaminérgicos,\n' +
-  '     sero=serotoninérgicos, hist=histaminérgicos, opi=opioides, glu=glutamatérgicos, gaba=GABAérgicos, cb=cannabinoides)\n' +
-  '   mediadores (subsecciones: citok=citoquinas, eico=eicosanoides, comp=complemento, amin=aminas vasoactivas,\n' +
-  '     pept=péptidos y quininas, nit=radicales y gases — GABA NO está aquí, está en receptores/gaba)\n' +
-  '   salud_mental (subsecciones: anx=ansiedad, psicosis, toc=TOC, trm=trauma, som=somáticos,\n' +
-  '     tca=conducta alimentaria, sue=sueño, per=personalidad, imp=impulsos, dpr=depresivos, neurosis=hub neurosis)\n\n' +
-  '2. Si el tema NO está en esa lista NO incluyas link. Farmacología clínica, microbiología, embriología no están en ECEPT.\n\n' +
-  '3. El TEXTO del link debe ser específico al contenido enlazado, NUNCA "Ver en ECEPT".\n' +
-  '   ✓ [Receptores GABAérgicos en ECEPT](#receptores/gaba)\n' +
-  '   ✓ [Trastornos de ansiedad en ECEPT](#salud_mental/anx)\n' +
-  '   ✓ [Eicosanoides en ECEPT](#mediadores/eico)\n' +
-  '   ✗ [Ver en ECEPT](#receptores) ← nunca usar texto genérico\n\n' +
-  '4. Podés incluir múltiples links si el tema toca varios módulos. Ejemplo al final de la respuesta:\n' +
-  '   "📚 En ECEPT: [Mediadores aminas](#mediadores/amin) · [Receptores serotoninérgicos](#receptores/sero) · [Trastornos de ansiedad](#salud_mental/anx)"';
+  '   reuma · cir_menu · anat_menu · general · epid · triadas · fisio · coagulacion · vocabulario · flashcards · emergen_menu · trauma-u1\n\n' +
+  '   Módulos con SUBSECCIONES (usá #modulo/subId para link directo):\n' +
+  '   - receptores: adr (adrenérgicos), musc (muscarínicos), nic (nicotínicos),\n' +
+  '     dop (dopaminérgicos), sero (serotoninérgicos), hist (histamínicos),\n' +
+  '     opi (opioides), glu (glutamatérgicos), gaba (GABAérgicos), cb (cannabinoides)\n' +
+  '   - mediadores: citok (citoquinas), eico (eicosanoides), comp (complemento),\n' +
+  '     amin (aminas), pept (péptidos), nit (óxido nítrico)\n' +
+  '   - labs: coag (coagulación), serieroja (serie roja), serieblanca (serie blanca),\n' +
+  '     hepaticas, renal, ionograma, tiroideo\n' +
+  '   - salud_mental: anx (ansiedad), toc, trm (trauma), som (somáticos),\n' +
+  '     tca (alimentarios), sue (sueño), per (personalidad), imp (impulsos),\n' +
+  '     dpr (depresivos), psicosis, neurosis\n\n' +
+  '2. NUNCA inventes IDs. Si no estás seguro, enlazá al módulo padre sin subsección.\n' +
+  '   IMPORTANTE: GABA está en receptores/gaba, NO en mediadores.\n' +
+  '   Si el tema no existe en ECEPT (farmacología clínica, microbiología, embriología), NO incluyas link.\n\n' +
+  '3. El TEXTO del link debe ser específico, NUNCA "Ver en ECEPT".\n' +
+  '   ✓ [Receptores opioides en ECEPT](#receptores/opi)\n' +
+  '   ✓ [Trastornos de ansiedad](#salud_mental/anx)\n' +
+  '   ✓ [Eicosanoides](#mediadores/eico)\n' +
+  '   ✓ [GABA en receptores](#receptores/gaba)\n' +
+  '   ✗ [Ver en ECEPT](#receptores) ← nunca texto genérico\n\n' +
+  '4. Si el tema toca varios módulos, incluí múltiples links precedidos por "📚 En ECEPT:".\n' +
+  '   Ejemplo: "📚 En ECEPT: [Mediadores aminas](#mediadores/amin) · [Receptores serotoninérgicos](#receptores/sero) · [Trastornos de ansiedad](#salud_mental/anx)"';
 
 const VALID_MIMES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
 const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;

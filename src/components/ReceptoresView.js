@@ -23,7 +23,11 @@ function ReceptoresView(){
   }
 
   useEffect(function(){
-    window._receptorFocus=function(subId){changeFamily(subId);};
+    var VALID=['adr','musc','nic','dop','sero','hist','opi','glu','gaba','cb'];
+    window._receptorFocus=function(subId){
+      if(VALID.indexOf(subId)===-1){console.warn('[ECEPT] receptor family not found:',subId);return;}
+      changeFamily(subId);
+    };
     return function(){window._receptorFocus=null;};
   },[]);
 

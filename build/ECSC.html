@@ -3692,7 +3692,11 @@ function ReceptoresView(){
   }
 
   useEffect(function(){
-    window._receptorFocus=function(subId){changeFamily(subId);};
+    var VALID=['adr','musc','nic','dop','sero','hist','opi','glu','gaba','cb'];
+    window._receptorFocus=function(subId){
+      if(VALID.indexOf(subId)===-1){console.warn('[ECEPT] receptor family not found:',subId);return;}
+      changeFamily(subId);
+    };
     return function(){window._receptorFocus=null;};
   },[]);
 
@@ -4183,7 +4187,11 @@ function MediadoresView(){
   var _o=useState(null),open=_o[0],setOpen=_o[1];
 
   useEffect(function(){
-    window._medFocus=function(subId){setFam(subId);setOpen(null);try{window.scrollTo({top:0,behavior:'smooth'});}catch(e2){}};
+    var VALID=['all','citok','eico','comp','amin','pept','nit'];
+    window._medFocus=function(subId){
+      if(VALID.indexOf(subId)===-1){console.warn('[ECEPT] mediador family not found:',subId);return;}
+      setFam(subId);setOpen(null);try{window.scrollTo({top:0,behavior:'smooth'});}catch(e2){}
+    };
     return function(){window._medFocus=null;};
   },[]);
 
@@ -12854,6 +12862,8 @@ function App(p){
   useEffect(function(){
     window._smFocus=function(v){
       if(!v)return;
+      var VALID=['root','intro','neurosis','psicosis','anx','toc','trm','som','tca','sue','per','imp','dpr'];
+      if(VALID.indexOf(v)===-1){console.warn('[ECEPT] SM view not found:',v);return;}
       setSmHist(function(h){return h.concat([view]);});
       setView(v);
     };
@@ -20139,7 +20149,11 @@ function App(){
     };
   },[go]);
   useEffect(function(){
-    window._labFocus=function(secId){setAbdOpen(secId);};
+    var VALID=['coag','serieroja','serieblanca','hepaticas','plasmaticas','lipidico','inflam','pancreas','renal','ionograma','tiroideo','hba1c'];
+    window._labFocus=function(secId){
+      if(VALID.indexOf(secId)===-1){console.warn('[ECEPT] lab section not found:',secId);return;}
+      setAbdOpen(secId);
+    };
   },[]);
 
   var goBack=useCallback(function(){

@@ -213,7 +213,11 @@ function MediadoresView(){
   var _o=useState(null),open=_o[0],setOpen=_o[1];
 
   useEffect(function(){
-    window._medFocus=function(subId){setFam(subId);setOpen(null);try{window.scrollTo({top:0,behavior:'smooth'});}catch(e2){}};
+    var VALID=['all','citok','eico','comp','amin','pept','nit'];
+    window._medFocus=function(subId){
+      if(VALID.indexOf(subId)===-1){console.warn('[ECEPT] mediador family not found:',subId);return;}
+      setFam(subId);setOpen(null);try{window.scrollTo({top:0,behavior:'smooth'});}catch(e2){}
+    };
     return function(){window._medFocus=null;};
   },[]);
 

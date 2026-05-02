@@ -113,7 +113,11 @@ function App(){
     };
   },[go]);
   useEffect(function(){
-    window._labFocus=function(secId){setAbdOpen(secId);};
+    var VALID=['coag','serieroja','serieblanca','hepaticas','plasmaticas','lipidico','inflam','pancreas','renal','ionograma','tiroideo','hba1c'];
+    window._labFocus=function(secId){
+      if(VALID.indexOf(secId)===-1){console.warn('[ECEPT] lab section not found:',secId);return;}
+      setAbdOpen(secId);
+    };
   },[]);
 
   var goBack=useCallback(function(){

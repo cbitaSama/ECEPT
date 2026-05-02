@@ -64,6 +64,8 @@ function App(p){
   useEffect(function(){
     window._smFocus=function(v){
       if(!v)return;
+      var VALID=['root','intro','neurosis','psicosis','anx','toc','trm','som','tca','sue','per','imp','dpr'];
+      if(VALID.indexOf(v)===-1){console.warn('[ECEPT] SM view not found:',v);return;}
       setSmHist(function(h){return h.concat([view]);});
       setView(v);
     };
