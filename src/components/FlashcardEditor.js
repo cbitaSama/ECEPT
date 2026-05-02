@@ -112,11 +112,12 @@ function FlashcardEditor(props){
     return function(){ clearInterval(t); };
   },[]);
 
-  // ── Load tag suggestions (all user flashcards, sorted by frequency) ──
+  // ── Load tag suggestions (user's own cards only, sorted by frequency) ──
   useEffect(function(){
     if(!user||!window.ECEPT_SUPABASE) return;
     window.ECEPT_SUPABASE
-      .from("flashcards").select("tags").eq("user_id",user.id)
+      .from("flashcards").select("tags")
+      .eq("user_id",user.id).eq("is_official",false)
       .then(function(res){
         if(!res||res.error) return;
         var tc={};
@@ -129,11 +130,8 @@ function FlashcardEditor(props){
             }
           }
         }
-        var FE_SYSTEM_TAGS=["psicosis","salud_mental","anxiety","depresivos",
-          "trauma","somaticos","tca","sueno","personalidad","impulsos","toc"];
         var sorted=Object.keys(tc).sort(function(a,b){ return tc[b]-tc[a]; });
-        var filtered=sorted.filter(function(t){ return FE_SYSTEM_TAGS.indexOf(t)===-1; });
-        FE_setSugg(filtered.slice(0,30));
+        FE_setSugg(sorted.slice(0,30));
       }).catch(function(){});
   },[]);
 

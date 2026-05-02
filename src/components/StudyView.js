@@ -299,6 +299,7 @@ function StudyView(props){
     // Update SM-2 progress
     var prog=SV_progress[card.id];
     var newProg=SV_sm2(prog,rating);
+    console.log("[SM-2] card:",card.id,"rating:",rating,"before:",prog||"(new)","after:",newProg);
     var nextProg={};
     for(var pk in SV_progress){ if(SV_progress.hasOwnProperty(pk)) nextProg[pk]=SV_progress[pk]; }
     nextProg[card.id]=newProg;
@@ -681,7 +682,7 @@ function StudyView(props){
         },
           // 3D flip inner card
           e("div",{
-            onClick:function(){ if(!SV_flipped&&!SV_rated) SV_setFlipped(true); },
+            onClick:function(){ if(!SV_rated) SV_setFlipped(!SV_flipped); },
             style:{
               position:"relative",
               minHeight:"240px",
@@ -689,7 +690,7 @@ function StudyView(props){
               transformStyle:"preserve-3d",
               transform:SV_flipped?"rotateY(180deg)":"rotateY(0deg)",
               transition:"transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 300ms ease",
-              cursor:SV_flipped||SV_rated?"default":"pointer",
+              cursor:SV_rated?"default":"pointer",
               boxShadow:SV_flipped
                 ?"0 24px 48px rgba(0,0,0,.45), 0 0 32px "+deckCol+"25"
                 :"0 4px 18px rgba(0,0,0,.22)"
