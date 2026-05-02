@@ -1,207 +1,185 @@
-// Vercel serverless function — ECEPT AI assistant proxy (Gemini 2.5 Flash).
-// Recibe {messages, searchIndex} y devuelve {answer, links} con links = array de {vista, sec, label}.
+// Vercel serverless function — Elion AI assistant (ECEPT).
+// POST { messages, model, attachments? } → { reply, quota }
+// Tier-gated: quota (free) → credits → 402 insufficient_credits.
+// No npm deps — raw fetch (Node 18+).
+
+const { TIERS, CREDIT_COSTS } = require('./_tiers');
+const { getProfile, spendCredits, getDailyChatCount, incrementDailyChat } = require('./_credits');
+
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const ANON_KEY = process.env.SUPABASE_ANON_KEY;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
+const SYSTEM_PROMPT =
+  'Eres Elion, asistente de IA de ECEPT (El Conocimiento Es Para Todos), ' +
+  'webapp de estudio médico para hispanohablantes. Ayudás a estudiantes de medicina ' +
+  'con explicaciones claras, casos clínicos, diagnóstico diferencial, mecanismos de ' +
+  'acción de fármacos, y conceptos médicos. Respondés en español latinoamericano. ' +
+  'Sos preciso, conciso, directo. Si no estás seguro de algo médico, lo decís en ' +
+  'lugar de inventar. Usás markdown (negritas, listas, headers) para estructurar ' +
+  'respuestas largas.';
+
+const VALID_MIMES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') { res.status(200).end(); return; }
+  if (req.method !== 'POST') { res.status(405).json({ error: 'Method not allowed' }); return; }
 
-  if (req.method === 'OPTIONS') {
-    res.status(204).end();
-    return;
-  }
+  // ── 1. Auth ──
+  const authHeader = req.headers.authorization;
+  if (!authHeader) { res.status(401).json({ error: 'unauthorized' }); return; }
 
-  if (req.method === 'GET') {
-    var hasKey = !!process.env.GEMINI_API_KEY;
-    res.status(200).json({ hasKey: hasKey, keyPrefix: hasKey ? process.env.GEMINI_API_KEY.slice(0, 10) : 'missing' });
-    return;
-  }
-
-  if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Method not allowed' });
-    return;
-  }
-
+  let user;
   try {
-    var apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      res.status(500).json({ error: 'GEMINI_API_KEY not configured' });
-      return;
-    }
-
-    var body = req.body || {};
-    if (typeof body === 'string') {
-      try { body = JSON.parse(body); } catch (e) { body = {}; }
-    }
-
-    var messages = Array.isArray(body.messages) ? body.messages : [];
-    var searchIndex = Array.isArray(body.searchIndex) ? body.searchIndex : [];
-
-    var systemText =
-      "Eres un asistente inteligente integrado en ECEPT, una app de estudio médico. " +
-      "Responde SIEMPRE en español latinoamericano. Sé conciso y directo (pero la suficiente informacion el punto esta en que sepan pero ahorrar tokens). " +
-      "Tu especialidad es medicina y el contenido de ECEPT, pero puedes responder preguntas generales de ciencias, biología, farmacología, etimología médica, historia de la medicina, y cualquier tema académico o educativo. Responde con sentido común — ayuda con preguntas legítimas de estudio. No respondas preguntas sobre cómo hacer daño, armas, o contenido ilegal.\n\n" +
-      "MÓDULOS Y VISTAS DISPONIBLES EN ECEPT (usa estos vista IDs exactos en los links):\n\n" +
-      "NAVEGACIÓN DIRECTA (sec siempre null para estos):\n" +
-      "- coagulacion → Cascada de coagulación y factores (incluyendo factores vitamina K)\n" +
-      "- mediadores → Mediadores inflamatorios\n" +
-      "- receptores → Receptores adrenérgicos\n" +
-      "- fisio → Fisiología general\n" +
-      "- labs → Valores de laboratorio (hemograma, coagulación, hepáticas, renal, ionograma, tiroides)\n" +
-      "- epid → Epidemiología (tipos de estudio, sesgos, medidas)\n" +
-      "- triadas → Tríadas y síndromes clásicos\n" +
-      "- general → Generalidades (inmunología, pares craneales)\n" +
-      "- emergen_menu → Emergenciología\n" +
-      "- cir_quem → Quemaduras\n" +
-      "- cir_abd → Abdomen agudo\n" +
-      "- cir_menu → Cirugía general\n" +
-      "- cir_ing → Hernias inguinales / anatomía\n" +
-      "- trauma-u1 → Trauma ATLS\n" +
-      "- vocabulario → Vocabulario médico\n" +
-      "- salud_mental → Salud Mental (esquizofrenia, bipolar, delirante, depresión, ansiedad, TOC, obsesión, compulsión)\n\n" +
-      "REUMATOLOGÍA (usa vista reuma_sec con sec específico):\n" +
-      "- vista: reuma_sec, sec: ai → Artritis reumatoidea, LES, Sjögren, Esclerodermia, SAF, Miopatías\n" +
-      "- vista: reuma_sec, sec: vas → Vasculitis\n" +
-      "- vista: reuma_sec, sec: misc → Fibromialgia, Gota, otras\n\n" +
-      "REGLAS PARA LINKS:\n" +
-      "1. Incluye TODOS los links relevantes, no solo uno. Si el tema toca coagulación, labs Y general, pon los 3.\n" +
-      "2. Usa el vista ID exacto de la lista — nunca inventes IDs.\n" +
-      "3. Para todo excepto reuma_sec, usa sec: null.\n" +
-      "4. El label debe ser descriptivo: 'Cascada de Coagulación', 'Lab de Coagulación', no solo 'General'.\n" +
-      "5. Para preguntas sobre coagulación, SIEMPRE incluye estos 3 links juntos:\n" +
-      "   {vista:'coagulacion', sec:null, label:'Cascada de Coagulación'}\n" +
-      "   {vista:'labs', sec:null, label:'Lab de Coagulación'}\n" +
-      "   {vista:'general', sec:null, label:'Tabla de Factores'}\n" +
-      "6. Para preguntas sobre salud mental (TOC, obsesión, compulsión, esquizofrenia, bipolar, etc), SIEMPRE incluye:\n" +
-      "   {vista:'salud_mental', sec:null, label:'Salud Mental'}\n\n" +
-      "Cuando el usuario pregunte algo relacionado con uno o más módulos, incluye links de navegación en el campo 'links' (array). Cada link tiene {vista, sec, label}.\n\n" +
-      "Responde SIEMPRE con JSON puro, sin markdown, en este formato exacto:\n" +
-      "{\"answer\": \"tu respuesta aquí\", \"links\": []}\n" +
-      "o con links:\n" +
-      "{\"answer\": \"tu respuesta\", \"links\": [{\"vista\": \"general\", \"sec\": \"coag\", \"label\": \"Cascada de Coagulación\"}, {\"vista\": \"labs\", \"sec\": null, \"label\": \"Laboratorio de Coagulación\"}]}\n\n" +
-      "CRÍTICO: responde ÚNICAMENTE con el objeto JSON. Sin texto antes, sin texto después, sin explicaciones, sin markdown.";
-
-    // Gemini: "assistant" → "model", últimos 3 turnos.
-    var contents = messages.slice(-3).map(function (m) {
-      return {
-        role: m.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: String(m.content == null ? '' : m.content) }]
-      };
+    const userResp = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      headers: { 'Authorization': authHeader, 'apikey': ANON_KEY }
     });
-
-    var geminiBody = JSON.stringify({
-      systemInstruction: { parts: [{ text: systemText }] },
-      contents: contents,
-      generationConfig: {
-        maxOutputTokens: 400,
-        temperature: 0.4,
-        responseMimeType: 'application/json'
-      }
-    });
-
-    // Fallback chain: on 429 (rate limit) or 503 (overload), retry the
-    // same or next model. 2.5-flash appears twice so a transient 503
-    // gets a second shot before falling back to 2.0-flash (different
-    // quota bucket, so a 429 on 2.5 won't propagate).
-    var GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash', 'gemini-2.0-flash'];
-    var geminiResp, modelUsed, lastStatus;
-    for (var mi = 0; mi < GEMINI_MODELS.length; mi++) {
-      modelUsed = GEMINI_MODELS[mi];
-      var geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/' + modelUsed + ':generateContent?key=' + encodeURIComponent(apiKey);
-      geminiResp = await fetch(geminiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: geminiBody
-      });
-      lastStatus = geminiResp.status;
-      if (geminiResp.status !== 503 && geminiResp.status !== 429) break;
-      if (geminiResp.status === 503) {
-        await new Promise(function(resolve) { setTimeout(resolve, 1000); });
-      }
-    }
-
-    // If every model in the chain returned 429, surface a friendly
-    // message instead of a 500 so the UI doesn't flash "Error de conexión".
-    if (lastStatus === 429) {
-      res.status(200).json({
-        answer: 'El servicio de IA está saturado en este momento. Por favor intenta de nuevo en un minuto.',
-        links: []
-      });
-      return;
-    }
-
-    if (!geminiResp.ok) {
-      var errText = await geminiResp.text();
-      res.status(500).json({ error: 'Gemini API error: ' + geminiResp.status + ' ' + errText });
-      return;
-    }
-
-    var data = await geminiResp.json();
-    var rawText = '';
-    if (data && Array.isArray(data.candidates) && data.candidates[0] && data.candidates[0].content && Array.isArray(data.candidates[0].content.parts)) {
-      data.candidates[0].content.parts.forEach(function (p) {
-        if (p && typeof p.text === 'string') rawText += p.text;
-      });
-    }
-    rawText = rawText.trim();
-
-    var answer = rawText;
-    var links = [];
-
-    // Extract the JSON object — strip markdown fences and any prefix/suffix
-    // text around the outermost { … } so Gemini preambles like
-    // "Here is the JSON requested" don't leak into answer.
-    var jsonCandidate = rawText;
-    var fence = jsonCandidate.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (fence && fence[1]) jsonCandidate = fence[1].trim();
-    var firstBrace = jsonCandidate.indexOf('{');
-    var lastBrace = jsonCandidate.lastIndexOf('}');
-    if (firstBrace >= 0 && lastBrace > firstBrace) {
-      jsonCandidate = jsonCandidate.slice(firstBrace, lastBrace + 1);
-    }
-
-    // If there are two JSON objects concatenated, take only the first complete one
-    var braceCount = 0;
-    var firstObjEnd = -1;
-    for (var ci = 0; ci < jsonCandidate.length; ci++) {
-      if (jsonCandidate[ci] === '{') braceCount++;
-      if (jsonCandidate[ci] === '}') braceCount--;
-      if (braceCount === 0 && ci > 0) { firstObjEnd = ci; break; }
-    }
-    if (firstObjEnd !== -1) jsonCandidate = jsonCandidate.slice(0, firstObjEnd + 1);
-
-    var parsedOk = false;
-    try {
-      var parsed = JSON.parse(jsonCandidate);
-      if (parsed && typeof parsed === 'object') {
-        parsedOk = true;
-        if (typeof parsed.answer === 'string') answer = parsed.answer;
-        if (Array.isArray(parsed.links)) {
-          links = parsed.links
-            .filter(function (l) { return l && typeof l === 'object' && typeof l.vista === 'string'; })
-            .map(function (l) {
-              return {
-                vista: l.vista,
-                sec: l.sec == null ? null : l.sec,
-                label: typeof l.label === 'string' ? l.label : l.vista
-              };
-            });
-        }
-      }
-    } catch (e) {
-      // JSON parse failed — handled below.
-    }
-
-    // If parsing failed, surface the raw Gemini text so the user at least
-    // sees the real response instead of an opaque error message.
-    if (!parsedOk) {
-      console.log('JSON parse failed, raw:', rawText.slice(0, 200));
-      res.status(200).json({ answer: rawText, links: [] });
-      return;
-    }
-
-    res.status(200).json({ answer: answer, links: links });
+    if (!userResp.ok) { res.status(401).json({ error: 'unauthorized' }); return; }
+    user = await userResp.json();
   } catch (err) {
-    res.status(500).json({ error: (err && err.message) ? err.message : 'Unknown error', stack: err ? String(err) : 'none' });
+    console.error('auth fetch error:', err.message);
+    res.status(401).json({ error: 'unauthorized' }); return;
   }
+  if (!user || !user.id) { res.status(401).json({ error: 'unauthorized' }); return; }
+
+  // ── 2. Body ──
+  const body = req.body || {};
+  const { messages, model, attachments } = body;
+
+  if (!model || !CREDIT_COSTS[model] || model === 'gen_per_card') {
+    res.status(400).json({ error: 'invalid_model', valid: Object.keys(CREDIT_COSTS).filter(k => k !== 'gen_per_card') });
+    return;
+  }
+  if (!Array.isArray(messages) || messages.length === 0) {
+    res.status(400).json({ error: 'invalid_request', message: 'messages must be a non-empty array' });
+    return;
+  }
+
+  // ── 3. Profile + tier ──
+  const profile = await getProfile(user.id);
+  const role = profile?.role || 'student';
+  const tier = TIERS[role] || TIERS.student;
+  const currentCredits = profile?.credits || 0;
+
+  // ── 4. Gating decision ──
+  let paidWith;
+  let daily = 0;
+  let creditResult = null;
+  const cost = CREDIT_COSTS[model];
+
+  if (role === 'admin') {
+    paidWith = 'free_admin';
+  } else if (tier.models.includes(model)) {
+    daily = await getDailyChatCount(user.id);
+    paidWith = daily < tier.dailyChat ? 'quota' : 'credits';
+  } else {
+    // Model not in tier (e.g. student → 2.5-flash, or anyone → 2.5-pro)
+    daily = await getDailyChatCount(user.id);
+    paidWith = 'credits';
+  }
+
+  if (paidWith === 'credits') {
+    try {
+      creditResult = await spendCredits(user.id, cost, 'chat_' + model, { model });
+    } catch (err) {
+      console.error('spendCredits error:', err.message);
+      res.status(500).json({ error: 'internal', message: err.message }); return;
+    }
+    if (!creditResult.ok && !creditResult.skipped) {
+      res.status(402).json({ error: 'insufficient_credits', need: creditResult.need, have: creditResult.have });
+      return;
+    }
+  }
+
+  // ── 5. Validate attachments ──
+  const validAttachments = [];
+  if (Array.isArray(attachments) && attachments.length > 0) {
+    for (const a of attachments) {
+      if (!a || !a.mimeType || !a.data) continue;
+      if (!VALID_MIMES.includes(a.mimeType)) {
+        res.status(400).json({ error: 'invalid_attachment', message: `Unsupported type: ${a.mimeType}` });
+        return;
+      }
+      if (Buffer.byteLength(a.data, 'base64') > MAX_ATTACHMENT_BYTES) {
+        res.status(400).json({ error: 'invalid_attachment', message: `File too large (max 10 MB): ${a.name || ''}` });
+        return;
+      }
+      validAttachments.push(a);
+    }
+  }
+
+  // ── 6. Build Gemini contents ──
+  const recent = messages.slice(-10);
+  const contents = recent.map((m, idx) => {
+    const parts = [{ text: String(m.content || '') }];
+    // Attach files to the last message only
+    if (idx === recent.length - 1 && validAttachments.length > 0) {
+      validAttachments.forEach(a => parts.push({ inlineData: { mimeType: a.mimeType, data: a.data } }));
+    }
+    return { role: m.role === 'assistant' ? 'model' : 'user', parts };
+  });
+
+  // ── 7. Call Gemini ──
+  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+  let geminiResp;
+  try {
+    geminiResp = await fetch(geminiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        contents,
+        generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
+      })
+    });
+  } catch (err) {
+    console.error('Gemini fetch error:', err.message);
+    res.status(500).json({ error: 'gemini_error', message: err.message }); return;
+  }
+
+  if (!geminiResp.ok) {
+    const errText = await geminiResp.text().catch(() => '');
+    console.error('Gemini API error:', geminiResp.status, errText.slice(0, 300));
+    res.status(500).json({ error: 'gemini_error', message: `Gemini returned ${geminiResp.status}` }); return;
+  }
+
+  const geminiData = await geminiResp.json();
+  let reply = '';
+  const cparts = geminiData?.candidates?.[0]?.content?.parts;
+  if (Array.isArray(cparts)) {
+    cparts.forEach(p => { if (p?.text) reply += p.text; });
+  }
+  reply = reply.trim();
+
+  // ── 8. Post-success side-effects ──
+  if (paidWith === 'quota') {
+    try {
+      daily = await incrementDailyChat(user.id);
+    } catch (err) {
+      console.error('incrementDailyChat error:', err.message);
+      // Non-fatal — don't fail the response
+    }
+  }
+
+  // Resolve updated credits (use spendCredits return value to avoid extra fetch)
+  let updatedCredits = currentCredits;
+  if (paidWith === 'credits' && creditResult?.ok) {
+    updatedCredits = creditResult.balance;
+  }
+
+  // ── 9. Response ──
+  res.status(200).json({
+    reply,
+    quota: {
+      paidWith,
+      dailyUsed: daily,
+      dailyLimit: tier.dailyChat,
+      credits: updatedCredits,
+      spent: paidWith === 'credits' ? cost : 0
+    }
+  });
 };
