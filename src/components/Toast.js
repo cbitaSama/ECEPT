@@ -22,10 +22,20 @@ function ECEPT_toast_emit() {
   }
 }
 
+// API flexible: acepta variant como string o como objeto {variant, duration}.
+//   ECEPT_toast('Guardado', 'success')
+//   ECEPT_toast('Error de red', { variant: 'error' })
+//   ECEPT_toast('Generado', { variant: 'premium', duration: 6000 })
 window.ECEPT_toast = function(message, variant, duration) {
+  var v, d;
+  if (variant && typeof variant === 'object') {
+    v = variant.variant || 'info';
+    d = variant.duration || (v === 'error' ? 8000 : 4000);
+  } else {
+    v = variant || 'info';
+    d = duration || (v === 'error' ? 8000 : 4000);
+  }
   var id = ECEPT_TOAST_NEXT_ID++;
-  var v = variant || 'info';
-  var d = duration || (v === 'error' ? 8000 : 4000);
   ECEPT_TOASTS.push({ id: id, message: message, variant: v, t: Date.now() });
   ECEPT_toast_emit();
   setTimeout(function() {

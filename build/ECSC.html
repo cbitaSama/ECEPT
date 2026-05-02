@@ -14351,10 +14351,20 @@ function ECEPT_toast_emit() {
   }
 }
 
+// API flexible: acepta variant como string o como objeto {variant, duration}.
+//   ECEPT_toast('Guardado', 'success')
+//   ECEPT_toast('Error de red', { variant: 'error' })
+//   ECEPT_toast('Generado', { variant: 'premium', duration: 6000 })
 window.ECEPT_toast = function(message, variant, duration) {
+  var v, d;
+  if (variant && typeof variant === 'object') {
+    v = variant.variant || 'info';
+    d = variant.duration || (v === 'error' ? 8000 : 4000);
+  } else {
+    v = variant || 'info';
+    d = duration || (v === 'error' ? 8000 : 4000);
+  }
   var id = ECEPT_TOAST_NEXT_ID++;
-  var v = variant || 'info';
-  var d = duration || (v === 'error' ? 8000 : 4000);
   ECEPT_TOASTS.push({ id: id, message: message, variant: v, t: Date.now() });
   ECEPT_toast_emit();
   setTimeout(function() {
@@ -16888,9 +16898,11 @@ function DecksView(props){
       DV_setImportData(null);
       DV_setImportError("");
       DV_loadData();
+      if(window.ECEPT_toast){ window.ECEPT_toast("Baraja importada con éxito","success"); }
     }catch(err){
       console.error("import error",err);
       DV_setImportError("Error al importar. Intentá de nuevo.");
+      if(window.ECEPT_toast){ window.ECEPT_toast("Error al importar la baraja","error"); }
     }finally{
       DV_setImportLoading(false);
     }
@@ -19512,11 +19524,14 @@ function DeckDetailView(props){
       for(var bdi=0;bdi<DD_cards.length;bdi++){
         if(!snap[DD_cards[bdi].id]) next.push(DD_cards[bdi]);
       }
+      var deletedCount=DD_cards.length-next.length;
       DD_setCards(next);
       DD_cancelSelect();
+      if(window.ECEPT_toast&&deletedCount>0){ window.ECEPT_toast(deletedCount+" tarjeta"+(deletedCount===1?"":"s")+" eliminada"+(deletedCount===1?"":"s"),"success"); }
     }catch(err){
       console.error("bulk delete error",err);
       DD_setBulkMsg("Error al eliminar. Intentá de nuevo.");
+      if(window.ECEPT_toast){ window.ECEPT_toast("Error al eliminar tarjetas","error"); }
     }
   }
 
@@ -19579,6 +19594,7 @@ function DeckDetailView(props){
       var n=newCards.length;
       DD_setBulkMsg(n+" card"+(n===1?"":"s")+" copiada"+(n===1?"":"s")+(targetDeck?" a "+targetDeck.name:""));
       setTimeout(function(){ DD_setBulkMsg(""); },3000);
+      if(window.ECEPT_toast){ window.ECEPT_toast(n+" tarjeta"+(n===1?"":"s")+" copiada"+(n===1?"":"s")+(targetDeck?" a "+targetDeck.name:""),"success"); }
     }catch(err){
       console.error("bulk copy error",err);
       DD_setBulkErrMsg("Error al copiar. Intentá de nuevo.");

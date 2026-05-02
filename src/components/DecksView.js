@@ -226,9 +226,11 @@ function DecksView(props){
       DV_setImportData(null);
       DV_setImportError("");
       DV_loadData();
+      if(window.ECEPT_toast){ window.ECEPT_toast("Baraja importada con éxito","success"); }
     }catch(err){
       console.error("import error",err);
       DV_setImportError("Error al importar. Intentá de nuevo.");
+      if(window.ECEPT_toast){ window.ECEPT_toast("Error al importar la baraja","error"); }
     }finally{
       DV_setImportLoading(false);
     }

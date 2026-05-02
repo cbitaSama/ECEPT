@@ -357,11 +357,14 @@ function DeckDetailView(props){
       for(var bdi=0;bdi<DD_cards.length;bdi++){
         if(!snap[DD_cards[bdi].id]) next.push(DD_cards[bdi]);
       }
+      var deletedCount=DD_cards.length-next.length;
       DD_setCards(next);
       DD_cancelSelect();
+      if(window.ECEPT_toast&&deletedCount>0){ window.ECEPT_toast(deletedCount+" tarjeta"+(deletedCount===1?"":"s")+" eliminada"+(deletedCount===1?"":"s"),"success"); }
     }catch(err){
       console.error("bulk delete error",err);
       DD_setBulkMsg("Error al eliminar. Intentá de nuevo.");
+      if(window.ECEPT_toast){ window.ECEPT_toast("Error al eliminar tarjetas","error"); }
     }
   }
 
@@ -424,6 +427,7 @@ function DeckDetailView(props){
       var n=newCards.length;
       DD_setBulkMsg(n+" card"+(n===1?"":"s")+" copiada"+(n===1?"":"s")+(targetDeck?" a "+targetDeck.name:""));
       setTimeout(function(){ DD_setBulkMsg(""); },3000);
+      if(window.ECEPT_toast){ window.ECEPT_toast(n+" tarjeta"+(n===1?"":"s")+" copiada"+(n===1?"":"s")+(targetDeck?" a "+targetDeck.name:""),"success"); }
     }catch(err){
       console.error("bulk copy error",err);
       DD_setBulkErrMsg("Error al copiar. Intentá de nuevo.");
