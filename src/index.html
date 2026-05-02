@@ -153,6 +153,10 @@ button { cursor: pointer; color: inherit; background: none; }
 @keyframes ecept_strandFlow         { to { stroke-dashoffset: -20; } }
 @keyframes ecept_strandFlowReverse  { to { stroke-dashoffset:  20; } }
 @keyframes ecept_logoBreathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+@keyframes ecept_pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.55; transform: scale(0.88); }
+}
 .ecept-strand-flow         { animation: ecept_strandFlow         2.5s linear infinite; }
 .ecept-strand-flow-reverse { animation: ecept_strandFlowReverse  2.5s linear infinite; }
 .ecept-logo-flow           { animation: ecept_logoBreathe        3s   ease-in-out infinite; }

@@ -889,7 +889,7 @@ function ChatBot(props) {
         else { CB_setOpen(true); CB_setConnErr(''); }
       },
       'aria-label':'Abrir asistente Elion',
-      style:{ position:'fixed', bottom:24, right:24, width:60, height:60, minWidth:44, minHeight:44, borderRadius:'50%', background:'linear-gradient(135deg,#60a5fa 0%,#a78bfa 100%)', border:'none', color:'#fff', cursor:'pointer', boxShadow:'0 0 32px rgba(167,139,250,0.35), 0 8px 24px rgba(0,0,0,0.3)', zIndex:95, display:'flex', alignItems:'center', justifyContent:'center', transition:'transform 240ms cubic-bezier(0.32,0.72,0,1), box-shadow 240ms ease-out', animation:'ecept_scaleIn 360ms cubic-bezier(0.34,1.56,0.64,1) 600ms both' },
+      style:{ position:'fixed', bottom:24, right:24, width:60, height:60, minWidth:44, minHeight:44, padding:0, overflow:'visible', borderRadius:'50%', background:'linear-gradient(135deg,#60a5fa 0%,#a78bfa 100%)', border:'none', color:'#fff', cursor:'pointer', boxShadow:'0 0 32px rgba(167,139,250,0.35), 0 8px 24px rgba(0,0,0,0.3)', zIndex:95, display:'flex', alignItems:'center', justifyContent:'center', transition:'transform 240ms cubic-bezier(0.32,0.72,0,1), box-shadow 240ms ease-out', animation:'ecept_scaleIn 360ms cubic-bezier(0.34,1.56,0.64,1) 600ms both' },
       onMouseEnter: function(ev) {
         ev.currentTarget.style.transform = 'scale(1.06)';
         ev.currentTarget.style.boxShadow = '0 0 40px rgba(167,139,250,0.5), 0 12px 28px rgba(0,0,0,0.35)';
@@ -898,7 +898,18 @@ function ChatBot(props) {
         ev.currentTarget.style.transform = 'scale(1)';
         ev.currentTarget.style.boxShadow = '0 0 32px rgba(167,139,250,0.35), 0 8px 24px rgba(0,0,0,0.3)';
       }
-    }, e(window.Logo || 'span', { size: 32, idSuffix:'fab' })),
+    },
+      e(window.Logo || 'span', { size: 34, animated: true, idSuffix:'fab' }),
+      // Online indicator: punto verde pulsante abajo-derecha
+      e('span', { 'aria-hidden':'true', style:{
+        position:'absolute', bottom:4, right:4, width:12, height:12,
+        borderRadius:'50%', background:'#34d399',
+        border:'2px solid #060a14',
+        boxShadow:'0 0 8px rgba(52,211,153,0.6)',
+        animation:'ecept_pulseDot 2.4s ease-in-out infinite',
+        pointerEvents:'none'
+      }})
+    ),
 
     // ── Backdrop ──
     CB_open && (isMobile || CB_fullscreen) && e('div', {

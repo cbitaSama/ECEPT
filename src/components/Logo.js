@@ -31,6 +31,14 @@ function Logo(props) {
   if (animated) className += 'ecept-logo-flow';
   if (float) className += ' ecept-logo-float';
 
+  // strokeWidth y dasharray adaptativos: a tamaños chicos las strands
+  // necesitan ser proporcionalmente más gruesas y con dashes más cortos
+  // para que el efecto flow sea visible sin verse roto.
+  var sw      = size <= 36 ? 5 : (size <= 64 ? 4.2 : 4);
+  var dash    = size <= 36 ? '4 3' : (size <= 64 ? '5 3.5' : '6 4');
+  var rungSw  = size <= 36 ? 3 : 2.5;
+  var dotR    = size <= 36 ? 3.5 : 3;
+
   var containerStyle = {
     width: size,
     height: size,
@@ -68,33 +76,33 @@ function Logo(props) {
       e('path', {
         d: 'M 22 12 C 22 30, 78 30, 78 48 C 78 66, 22 66, 22 84',
         stroke: 'url(#' + idA + ')',
-        strokeWidth: 4,
+        strokeWidth: sw,
         strokeLinecap: 'round',
         fill: 'none',
         className: animated ? 'ecept-strand-flow' : '',
-        strokeDasharray: animated ? '6 4' : 'none'
+        strokeDasharray: animated ? dash : 'none'
       }),
       // Strand 2 — flujo opuesto (espejo)
       e('path', {
         d: 'M 78 12 C 78 30, 22 30, 22 48 C 22 66, 78 66, 78 84',
         stroke: 'url(#' + idB + ')',
-        strokeWidth: 4,
+        strokeWidth: sw,
         strokeLinecap: 'round',
         fill: 'none',
         opacity: 0.55,
         className: animated ? 'ecept-strand-flow-reverse' : '',
-        strokeDasharray: animated ? '6 4' : 'none'
+        strokeDasharray: animated ? dash : 'none'
       }),
       // Rungs
-      e('line', { x1: 28, y1: 22, x2: 72, y2: 22, stroke: 'url(#' + idA + ')', strokeWidth: 2.5, strokeLinecap: 'round', opacity: 0.65 }),
-      e('line', { x1: 32, y1: 36, x2: 68, y2: 36, stroke: 'url(#' + idA + ')', strokeWidth: 2.5, strokeLinecap: 'round', opacity: 0.5 }),
-      e('line', { x1: 32, y1: 60, x2: 68, y2: 60, stroke: 'url(#' + idA + ')', strokeWidth: 2.5, strokeLinecap: 'round', opacity: 0.5 }),
-      e('line', { x1: 28, y1: 74, x2: 72, y2: 74, stroke: 'url(#' + idA + ')', strokeWidth: 2.5, strokeLinecap: 'round', opacity: 0.65 }),
+      e('line', { x1: 28, y1: 22, x2: 72, y2: 22, stroke: 'url(#' + idA + ')', strokeWidth: rungSw, strokeLinecap: 'round', opacity: 0.65 }),
+      e('line', { x1: 32, y1: 36, x2: 68, y2: 36, stroke: 'url(#' + idA + ')', strokeWidth: rungSw, strokeLinecap: 'round', opacity: 0.5 }),
+      e('line', { x1: 32, y1: 60, x2: 68, y2: 60, stroke: 'url(#' + idA + ')', strokeWidth: rungSw, strokeLinecap: 'round', opacity: 0.5 }),
+      e('line', { x1: 28, y1: 74, x2: 72, y2: 74, stroke: 'url(#' + idA + ')', strokeWidth: rungSw, strokeLinecap: 'round', opacity: 0.65 }),
       // Endpoints
-      e('circle', { cx: 22, cy: 12, r: 3, fill: '#60a5fa' }),
-      e('circle', { cx: 78, cy: 12, r: 3, fill: '#a78bfa' }),
-      e('circle', { cx: 22, cy: 84, r: 3, fill: '#a78bfa' }),
-      e('circle', { cx: 78, cy: 84, r: 3, fill: '#60a5fa' })
+      e('circle', { cx: 22, cy: 12, r: dotR, fill: '#60a5fa' }),
+      e('circle', { cx: 78, cy: 12, r: dotR, fill: '#a78bfa' }),
+      e('circle', { cx: 22, cy: 84, r: dotR, fill: '#a78bfa' }),
+      e('circle', { cx: 78, cy: 84, r: dotR, fill: '#60a5fa' })
     )
   );
 }

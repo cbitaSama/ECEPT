@@ -153,6 +153,10 @@ button { cursor: pointer; color: inherit; background: none; }
 @keyframes ecept_strandFlow         { to { stroke-dashoffset: -20; } }
 @keyframes ecept_strandFlowReverse  { to { stroke-dashoffset:  20; } }
 @keyframes ecept_logoBreathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+@keyframes ecept_pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.55; transform: scale(0.88); }
+}
 .ecept-strand-flow         { animation: ecept_strandFlow         2.5s linear infinite; }
 .ecept-strand-flow-reverse { animation: ecept_strandFlowReverse  2.5s linear infinite; }
 .ecept-logo-flow           { animation: ecept_logoBreathe        3s   ease-in-out infinite; }
@@ -13335,6 +13339,14 @@ function Logo(props) {
   if (animated) className += 'ecept-logo-flow';
   if (float) className += ' ecept-logo-float';
 
+  // strokeWidth y dasharray adaptativos: a tamaños chicos las strands
+  // necesitan ser proporcionalmente más gruesas y con dashes más cortos
+  // para que el efecto flow sea visible sin verse roto.
+  var sw      = size <= 36 ? 5 : (size <= 64 ? 4.2 : 4);
+  var dash    = size <= 36 ? '4 3' : (size <= 64 ? '5 3.5' : '6 4');
+  var rungSw  = size <= 36 ? 3 : 2.5;
+  var dotR    = size <= 36 ? 3.5 : 3;
+
   var containerStyle = {
     width: size,
     height: size,
@@ -13372,33 +13384,33 @@ function Logo(props) {
       e('path', {
         d: 'M 22 12 C 22 30, 78 30, 78 48 C 78 66, 22 66, 22 84',
         stroke: 'url(#' + idA + ')',
-        strokeWidth: 4,
+        strokeWidth: sw,
         strokeLinecap: 'round',
         fill: 'none',
         className: animated ? 'ecept-strand-flow' : '',
-        strokeDasharray: animated ? '6 4' : 'none'
+        strokeDasharray: animated ? dash : 'none'
       }),
       // Strand 2 — flujo opuesto (espejo)
       e('path', {
         d: 'M 78 12 C 78 30, 22 30, 22 48 C 22 66, 78 66, 78 84',
         stroke: 'url(#' + idB + ')',
-        strokeWidth: 4,
+        strokeWidth: sw,
         strokeLinecap: 'round',
         fill: 'none',
         opacity: 0.55,
         className: animated ? 'ecept-strand-flow-reverse' : '',
-        strokeDasharray: animated ? '6 4' : 'none'
+        strokeDasharray: animated ? dash : 'none'
       }),
       // Rungs
-      e('line', { x1: 28, y1: 22, x2: 72, y2: 22, stroke: 'url(#' + idA + ')', strokeWidth: 2.5, strokeLinecap: 'round', opacity: 0.65 }),
-      e('line', { x1: 32, y1: 36, x2: 68, y2: 36, stroke: 'url(#' + idA + ')', strokeWidth: 2.5, strokeLinecap: 'round', opacity: 0.5 }),
-      e('line', { x1: 32, y1: 60, x2: 68, y2: 60, stroke: 'url(#' + idA + ')', strokeWidth: 2.5, strokeLinecap: 'round', opacity: 0.5 }),
-      e('line', { x1: 28, y1: 74, x2: 72, y2: 74, stroke: 'url(#' + idA + ')', strokeWidth: 2.5, strokeLinecap: 'round', opacity: 0.65 }),
+      e('line', { x1: 28, y1: 22, x2: 72, y2: 22, stroke: 'url(#' + idA + ')', strokeWidth: rungSw, strokeLinecap: 'round', opacity: 0.65 }),
+      e('line', { x1: 32, y1: 36, x2: 68, y2: 36, stroke: 'url(#' + idA + ')', strokeWidth: rungSw, strokeLinecap: 'round', opacity: 0.5 }),
+      e('line', { x1: 32, y1: 60, x2: 68, y2: 60, stroke: 'url(#' + idA + ')', strokeWidth: rungSw, strokeLinecap: 'round', opacity: 0.5 }),
+      e('line', { x1: 28, y1: 74, x2: 72, y2: 74, stroke: 'url(#' + idA + ')', strokeWidth: rungSw, strokeLinecap: 'round', opacity: 0.65 }),
       // Endpoints
-      e('circle', { cx: 22, cy: 12, r: 3, fill: '#60a5fa' }),
-      e('circle', { cx: 78, cy: 12, r: 3, fill: '#a78bfa' }),
-      e('circle', { cx: 22, cy: 84, r: 3, fill: '#a78bfa' }),
-      e('circle', { cx: 78, cy: 84, r: 3, fill: '#60a5fa' })
+      e('circle', { cx: 22, cy: 12, r: dotR, fill: '#60a5fa' }),
+      e('circle', { cx: 78, cy: 12, r: dotR, fill: '#a78bfa' }),
+      e('circle', { cx: 22, cy: 84, r: dotR, fill: '#a78bfa' }),
+      e('circle', { cx: 78, cy: 84, r: dotR, fill: '#60a5fa' })
     )
   );
 }
@@ -15687,7 +15699,7 @@ function ChatBot(props) {
         else { CB_setOpen(true); CB_setConnErr(''); }
       },
       'aria-label':'Abrir asistente Elion',
-      style:{ position:'fixed', bottom:24, right:24, width:60, height:60, minWidth:44, minHeight:44, borderRadius:'50%', background:'linear-gradient(135deg,#60a5fa 0%,#a78bfa 100%)', border:'none', color:'#fff', cursor:'pointer', boxShadow:'0 0 32px rgba(167,139,250,0.35), 0 8px 24px rgba(0,0,0,0.3)', zIndex:95, display:'flex', alignItems:'center', justifyContent:'center', transition:'transform 240ms cubic-bezier(0.32,0.72,0,1), box-shadow 240ms ease-out', animation:'ecept_scaleIn 360ms cubic-bezier(0.34,1.56,0.64,1) 600ms both' },
+      style:{ position:'fixed', bottom:24, right:24, width:60, height:60, minWidth:44, minHeight:44, padding:0, overflow:'visible', borderRadius:'50%', background:'linear-gradient(135deg,#60a5fa 0%,#a78bfa 100%)', border:'none', color:'#fff', cursor:'pointer', boxShadow:'0 0 32px rgba(167,139,250,0.35), 0 8px 24px rgba(0,0,0,0.3)', zIndex:95, display:'flex', alignItems:'center', justifyContent:'center', transition:'transform 240ms cubic-bezier(0.32,0.72,0,1), box-shadow 240ms ease-out', animation:'ecept_scaleIn 360ms cubic-bezier(0.34,1.56,0.64,1) 600ms both' },
       onMouseEnter: function(ev) {
         ev.currentTarget.style.transform = 'scale(1.06)';
         ev.currentTarget.style.boxShadow = '0 0 40px rgba(167,139,250,0.5), 0 12px 28px rgba(0,0,0,0.35)';
@@ -15696,7 +15708,18 @@ function ChatBot(props) {
         ev.currentTarget.style.transform = 'scale(1)';
         ev.currentTarget.style.boxShadow = '0 0 32px rgba(167,139,250,0.35), 0 8px 24px rgba(0,0,0,0.3)';
       }
-    }, e(window.Logo || 'span', { size: 32, idSuffix:'fab' })),
+    },
+      e(window.Logo || 'span', { size: 34, animated: true, idSuffix:'fab' }),
+      // Online indicator: punto verde pulsante abajo-derecha
+      e('span', { 'aria-hidden':'true', style:{
+        position:'absolute', bottom:4, right:4, width:12, height:12,
+        borderRadius:'50%', background:'#34d399',
+        border:'2px solid #060a14',
+        boxShadow:'0 0 8px rgba(52,211,153,0.6)',
+        animation:'ecept_pulseDot 2.4s ease-in-out infinite',
+        pointerEvents:'none'
+      }})
+    ),
 
     // ── Backdrop ──
     CB_open && (isMobile || CB_fullscreen) && e('div', {
