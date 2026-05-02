@@ -15788,6 +15788,10 @@ function DeckDetailView(props){
   s=useState({});      var DD_selectedIds=s[0],   DD_setSelectedIds=s[1];
   s=useState(false);   var DD_bulkDelConfirm=s[0],DD_setBulkDelConfirm=s[1];
   s=useState("");      var DD_bulkMsg=s[0],        DD_setBulkMsg=s[1];
+  s=useState(null);    var DD_bulkAction=s[0],     DD_setBulkAction=s[1];
+  s=useState("");      var DD_bulkTargetDeckId=s[0],DD_setBulkTargetDeckId=s[1];
+  s=useState(false);   var DD_bulkLoading=s[0],    DD_setBulkLoading=s[1];
+  s=useState("");      var DD_bulkErrMsg=s[0],     DD_setBulkErrMsg=s[1];
   var DD_pressTimer=useRef(null);
 
   // ── Inject CSS once ──
@@ -15898,7 +15902,7 @@ function DeckDetailView(props){
   },[DD_previewIdx]);
 
   useEffect(function(){
-    if(!deck||!deck.is_official||!user||!window.ECEPT_SUPABASE) return;
+    if(!deck||!user||!window.ECEPT_SUPABASE) return;
     window.ECEPT_SUPABASE
       .from("decks")
       .select("id,name,color,icon")
@@ -15993,6 +15997,73 @@ function DeckDetailView(props){
     }catch(err){
       console.error("bulk delete error",err);
       DD_setBulkMsg("Error al eliminar. Intentá de nuevo.");
+    }
+  }
+
+  async function DD_execBulkMove(){
+    var snap=DD_selectedIds;
+    var ids=Object.keys(snap);
+    if(!ids.length||!user||!window.ECEPT_SUPABASE||!DD_bulkTargetDeckId) return;
+    DD_setBulkLoading(true); DD_setBulkErrMsg("");
+    try{
+      var res=await window.ECEPT_SUPABASE.from("flashcards")
+        .update({deck_id:DD_bulkTargetDeckId})
+        .in("id",ids).eq("user_id",user.id);
+      if(res.error) throw res.error;
+      var next=[];
+      for(var bmi=0;bmi<DD_cards.length;bmi++){
+        if(!snap[DD_cards[bmi].id]) next.push(DD_cards[bmi]);
+      }
+      DD_setCards(next);
+      DD_setSelectMode(false);
+      DD_setSelectedIds({});
+      DD_setBulkDelConfirm(false);
+      DD_setBulkMsg("");
+      DD_setBulkAction(null);
+      DD_setBulkTargetDeckId("");
+    }catch(err){
+      console.error("bulk move error",err);
+      DD_setBulkErrMsg("Error al mover. Intentá de nuevo.");
+    }finally{
+      DD_setBulkLoading(false);
+    }
+  }
+  async function DD_execBulkCopy(){
+    var snap=DD_selectedIds;
+    if(!Object.keys(snap).length||!user||!window.ECEPT_SUPABASE||!DD_bulkTargetDeckId) return;
+    var cardsToCopy=[];
+    for(var bci=0;bci<DD_cards.length;bci++){
+      if(snap[DD_cards[bci].id]) cardsToCopy.push(DD_cards[bci]);
+    }
+    var newCards=[];
+    for(var bcj=0;bcj<cardsToCopy.length;bcj++){
+      var bcc=cardsToCopy[bcj];
+      newCards.push({
+        deck_id:DD_bulkTargetDeckId,user_id:user.id,is_official:false,
+        card_type:bcc.card_type,front:bcc.front,back:bcc.back,tags:bcc.tags||[]
+      });
+    }
+    DD_setBulkLoading(true); DD_setBulkErrMsg("");
+    try{
+      var res2=await window.ECEPT_SUPABASE.from("flashcards").insert(newCards);
+      if(res2.error) throw res2.error;
+      var targetDeck=null;
+      for(var bck=0;bck<DD_ownDecks.length;bck++){
+        if(DD_ownDecks[bck].id===DD_bulkTargetDeckId){ targetDeck=DD_ownDecks[bck]; break; }
+      }
+      DD_setSelectMode(false);
+      DD_setSelectedIds({});
+      DD_setBulkDelConfirm(false);
+      DD_setBulkAction(null);
+      DD_setBulkTargetDeckId("");
+      var n=newCards.length;
+      DD_setBulkMsg(n+" card"+(n===1?"":"s")+" copiada"+(n===1?"":"s")+(targetDeck?" a "+targetDeck.name:""));
+      setTimeout(function(){ DD_setBulkMsg(""); },3000);
+    }catch(err){
+      console.error("bulk copy error",err);
+      DD_setBulkErrMsg("Error al copiar. Intentá de nuevo.");
+    }finally{
+      DD_setBulkLoading(false);
     }
   }
 
@@ -16522,22 +16593,18 @@ function DeckDetailView(props){
                     fontSize:"13px",fontWeight:700,cursor:DD_selectCount?"pointer":"default"}
                 },"🗑 Eliminar"),
                 e("button",{
-                  onClick:function(){
-                    DD_setBulkMsg("Próximamente");
-                    setTimeout(function(){ DD_setBulkMsg(""); },1500);
-                  },
+                  onClick:function(){ DD_setBulkAction("move"); DD_setBulkTargetDeckId(""); DD_setBulkErrMsg(""); },
+                  disabled:!DD_selectCount,
                   style:{padding:"10px 18px",borderRadius:"10px",background:"none",
-                    border:"1px solid "+C.bd,color:C.dm,
-                    fontSize:"13px",fontWeight:700,cursor:"pointer"}
+                    border:"1px solid "+C.bd,color:DD_selectCount?C.tx:C.dm,
+                    fontSize:"13px",fontWeight:700,cursor:DD_selectCount?"pointer":"default"}
                 },"📦 Mover"),
                 e("button",{
-                  onClick:function(){
-                    DD_setBulkMsg("Próximamente");
-                    setTimeout(function(){ DD_setBulkMsg(""); },1500);
-                  },
+                  onClick:function(){ DD_setBulkAction("copy"); DD_setBulkTargetDeckId(""); DD_setBulkErrMsg(""); },
+                  disabled:!DD_selectCount,
                   style:{padding:"10px 18px",borderRadius:"10px",background:"none",
-                    border:"1px solid "+C.bd,color:C.dm,
-                    fontSize:"13px",fontWeight:700,cursor:"pointer"}
+                    border:"1px solid "+C.bd,color:DD_selectCount?C.tx:C.dm,
+                    fontSize:"13px",fontWeight:700,cursor:DD_selectCount?"pointer":"default"}
                 },"📋 Copiar"),
                 e("button",{
                   onClick:function(){
@@ -16968,7 +17035,108 @@ function DeckDetailView(props){
         whiteSpace:"nowrap",pointerEvents:"none"
       }},"✓ Card agregada a tu baraja"),
       document.body
-    )
+    ),
+    DD_bulkAction&&(function(){
+      var isMove=DD_bulkAction==="move";
+      var otherDecks=[];
+      for(var bdo=0;bdo<DD_ownDecks.length;bdo++){
+        if(DD_ownDecks[bdo].id!==deck.id) otherDecks.push(DD_ownDecks[bdo]);
+      }
+      var canConfirm=!!DD_bulkTargetDeckId&&!DD_bulkLoading;
+      return ReactDOM.createPortal(
+        e("div",{
+          onClick:function(){ if(!DD_bulkLoading){ DD_setBulkAction(null); DD_setBulkTargetDeckId(""); DD_setBulkErrMsg(""); } },
+          style:{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",
+            display:"flex",alignItems:"center",justifyContent:"center",
+            zIndex:1050,padding:"16px"}
+        },
+          e("div",{
+            onClick:function(ev){ ev.stopPropagation(); },
+            style:{width:"100%",maxWidth:"440px",background:C.cd,
+              border:"1px solid "+C.bd,borderRadius:"16px",
+              boxShadow:"0 12px 40px rgba(0,0,0,.6)",overflow:"hidden"}
+          },
+            e("div",{style:{
+              display:"flex",alignItems:"center",justifyContent:"space-between",
+              padding:"16px 18px",borderBottom:"1px solid "+C.bd
+            }},
+              e("span",{style:{fontSize:"14px",color:C.tx,fontWeight:700}},
+                (isMove?"📦 Mover ":"📋 Copiar ")+DD_selectCount+" card"+(DD_selectCount===1?"":"s")
+              ),
+              e("button",{
+                onClick:function(){ DD_setBulkAction(null); DD_setBulkTargetDeckId(""); DD_setBulkErrMsg(""); },
+                disabled:DD_bulkLoading,
+                style:{background:"none",border:"none",color:C.dm,fontSize:"20px",
+                  cursor:"pointer",lineHeight:1,padding:"4px 8px"}
+              },"×")
+            ),
+            e("div",{style:{padding:"14px 18px 0"}},
+              otherDecks.length===0
+                ?e("div",{style:{
+                    padding:"20px",textAlign:"center",
+                    fontSize:"13px",color:C.dm,lineHeight:1.5
+                  }},
+                    e("div",{style:{fontSize:"28px",marginBottom:"8px"}},"📭"),
+                    "No tenés otras barajas. Creá una desde la pantalla principal."
+                  )
+                :e("div",null,
+                    e("div",{style:{fontSize:"12px",color:C.dm,marginBottom:"8px",fontWeight:600}},
+                      "Seleccionar baraja destino"
+                    ),
+                    e("div",{style:{display:"flex",flexDirection:"column",gap:"6px",maxHeight:"240px",overflowY:"auto"}},
+                      otherDecks.map(function(d){
+                        var isSel=DD_bulkTargetDeckId===d.id;
+                        return e("button",{key:d.id,
+                          onClick:function(){ DD_setBulkTargetDeckId(d.id); },
+                          style:{
+                            display:"flex",alignItems:"center",gap:"10px",
+                            padding:"10px 14px",borderRadius:"10px",
+                            border:"1px solid "+(isSel?C.ac:C.bd),
+                            background:isSel?"rgba(96,165,250,.12)":"rgba(255,255,255,.03)",
+                            color:isSel?C.ac:C.tx,fontSize:"13px",fontWeight:600,
+                            cursor:"pointer",textAlign:"left"
+                          }
+                        },
+                          e("span",null,(d.icon||"📚")),
+                          e("span",{style:{flex:1}},d.name||"Sin nombre")
+                        );
+                      })
+                    )
+                  )
+            ),
+            DD_bulkErrMsg&&e("div",{style:{margin:"10px 18px 0",fontSize:"12px",
+              color:"#fca5a5",fontWeight:600}},DD_bulkErrMsg),
+            e("div",{style:{
+              padding:"14px 18px",borderTop:"1px solid "+C.bd,
+              display:"flex",gap:"8px",marginTop:"14px"
+            }},
+              otherDecks.length>0&&e("button",{
+                onClick:isMove?DD_execBulkMove:DD_execBulkCopy,
+                disabled:!canConfirm,
+                style:{
+                  flex:1,minHeight:"44px",padding:"12px",borderRadius:"12px",
+                  border:"none",
+                  background:canConfirm?"#3b82f6":"rgba(255,255,255,.08)",
+                  color:canConfirm?"#fff":C.mt,
+                  fontSize:"14px",fontWeight:700,
+                  cursor:canConfirm?"pointer":"default"
+                }
+              },DD_bulkLoading?(isMove?"Moviendo...":"Copiando..."):(isMove?"Mover":"Copiar")),
+              e("button",{
+                onClick:function(){ DD_setBulkAction(null); DD_setBulkTargetDeckId(""); DD_setBulkErrMsg(""); },
+                disabled:DD_bulkLoading,
+                style:{
+                  minHeight:"44px",padding:"12px 18px",borderRadius:"12px",
+                  background:"none",border:"1px solid "+C.bd,
+                  color:C.mt,fontSize:"14px",fontWeight:700,cursor:"pointer"
+                }
+              },"Cancelar")
+            )
+          )
+        ),
+        document.body
+      );
+    })()
   ));
 }
 
