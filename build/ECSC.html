@@ -66,34 +66,42 @@
 <script>
 (function(){
   // Loader visible mínimo 1200ms desde primer paint (animation-delay CSS).
-  // Cuando React monta, dispara ECEPT_READY → desactivamos pause.
-  // El animation-delay del CSS (1200ms) garantiza que aunque ECEPT_READY
-  // llegue inmediato, el loader sigue visible hasta cumplir 1200ms.
+  // Cuando React monta, dispara ECEPT_READY → desactivamos pause + cancelamos fail-safes.
+  var ECEPT_LOADER_FAILSAFE = null;
+  var loaderDismissed = false;
   function dismiss() {
+    if (loaderDismissed) return;
+    loaderDismissed = true;
+    window._ECEPT_LOADED = true;
+    if (ECEPT_LOADER_FAILSAFE) { clearTimeout(ECEPT_LOADER_FAILSAFE); ECEPT_LOADER_FAILSAFE = null; }
     var l = document.getElementById('initial-loader');
     if (!l) return;
     l.classList.add('go');
-    // 1200ms delay + 320ms fade + 80ms buffer
+    // 1200ms animation-delay + 320ms fade + 80ms buffer
     setTimeout(function(){ if(l && l.parentNode) l.parentNode.removeChild(l); }, 1700);
   }
   window.addEventListener('ECEPT_READY', dismiss);
-  // Fail-safe agresivo: 8s sin ECEPT_READY → mostrar error de carga con reload.
-  setTimeout(function(){
+  // Fail-safe: 12s sin ECEPT_READY → mostrar error de carga con reload.
+  // 12s es generoso (era 8s) — cargas lentas en 3G no deberían dispararlo.
+  ECEPT_LOADER_FAILSAFE = setTimeout(function(){
+    if (loaderDismissed || window._ECEPT_LOADED) return;
     var l = document.getElementById('initial-loader');
     if (!l) return;
-    // Si todavía está pausado (no llegó ECEPT_READY), mostramos fallback.
     if (l.classList.contains('go')) return;
     l.innerHTML = '<div style="text-align:center;padding:32px;font-family:-apple-system,system-ui,sans-serif;"><div style="font-size:36px;margin-bottom:16px;">⚠️</div><div style="font-size:18px;color:#e2e8f0;margin-bottom:8px;font-weight:600;">No pudimos cargar la app</div><div style="font-size:14px;color:#94a3b8;margin-bottom:24px;">Verificá tu conexión a internet</div><button onclick="window.location.reload()" style="background:linear-gradient(135deg,#60a5fa,#a78bfa);color:#fff;border:none;padding:12px 28px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;">Reintentar</button></div>';
-  }, 8000);
-  window.addEventListener('error', function(){
+  }, 12000);
+  // Listener error: SOLO si la app todavía no se cargó. Errores post-load
+  // (de vercel-insights, fonts, scripts de terceros, etc.) son ignorados.
+  window.addEventListener('error', function(ev){
+    if (loaderDismissed || window._ECEPT_LOADED) return;
+    // No reaccionar a errores de assets (img/script con error de red), solo
+    // a runtime errors críticos. Y solo durante el primer paint.
+    if (ev && ev.target && ev.target !== window) return;
     var l = document.getElementById('initial-loader');
     if (!l) return;
-    setTimeout(function(){
-      var s = document.getElementById('initial-loader');
-      if (!s) return;
-      s.innerHTML = '<div style="text-align:center;color:#e2e8f0;padding:24px;font-family:-apple-system,system-ui,sans-serif;"><div style="font-size:18px;font-weight:600;margin-bottom:8px;">Algo falló al cargar</div><div style="font-size:13px;color:#94a3b8;margin-bottom:20px;max-width:320px;">Intentá recargar la página. Si persiste, verificá tu conexión.</div><button onclick="window.location.reload()" style="background:linear-gradient(135deg,#60a5fa,#a78bfa);color:#fff;border:none;padding:10px 24px;border-radius:14px;font-weight:600;font-size:14px;cursor:pointer;">Recargar</button></div>';
-    }, 50);
-  });
+    if (l.classList.contains('go')) return;
+    l.innerHTML = '<div style="text-align:center;color:#e2e8f0;padding:24px;font-family:-apple-system,system-ui,sans-serif;"><div style="font-size:18px;font-weight:600;margin-bottom:8px;">Algo falló al cargar</div><div style="font-size:13px;color:#94a3b8;margin-bottom:20px;max-width:320px;">Intentá recargar la página. Si persiste, verificá tu conexión.</div><button onclick="window.location.reload()" style="background:linear-gradient(135deg,#60a5fa,#a78bfa);color:#fff;border:none;padding:10px 24px;border-radius:14px;font-weight:600;font-size:14px;cursor:pointer;">Recargar</button></div>';
+  }, true);
 })();
 </script>
 <style>
