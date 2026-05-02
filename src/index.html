@@ -12,15 +12,20 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><defs><linearGradient id=%22g%22 x1=%220%22 y1=%220%22 x2=%22100%22 y2=%22100%22 gradientUnits=%22userSpaceOnUse%22><stop offset=%220%22 stop-color=%22%2360a5fa%22/><stop offset=%221%22 stop-color=%22%23a78bfa%22/></linearGradient></defs><path d=%22M22 12 C22 30 78 30 78 48 C78 66 22 66 22 84%22 stroke=%22url(%23g)%22 stroke-width=%224%22 stroke-linecap=%22round%22 fill=%22none%22/><line x1=%2228%22 y1=%2222%22 x2=%2272%22 y2=%2222%22 stroke=%22url(%23g)%22 stroke-width=%222.5%22 opacity=%22.7%22/><line x1=%2232%22 y1=%2236%22 x2=%2268%22 y2=%2236%22 stroke=%22url(%23g)%22 stroke-width=%222.5%22 opacity=%22.55%22/><line x1=%2232%22 y1=%2260%22 x2=%2268%22 y2=%2260%22 stroke=%22url(%23g)%22 stroke-width=%222.5%22 opacity=%22.55%22/><line x1=%2228%22 y1=%2274%22 x2=%2272%22 y2=%2274%22 stroke=%22url(%23g)%22 stroke-width=%222.5%22 opacity=%22.7%22/></svg>">
 <!-- Initial loader styles inline (sin depender del bundle) -->
 <style>
-@keyframes ecept_il_spin { to { transform: rotate(360deg); } }
+@keyframes ecept_il_strandFlow { to { stroke-dashoffset: -20; } }
+@keyframes ecept_il_strandFlowReverse { to { stroke-dashoffset: 20; } }
+@keyframes ecept_il_breathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.04); } }
 @keyframes ecept_il_bar {
   0%   { transform: translateX(-160px); }
   100% { transform: translateX(400px);  }
 }
 @keyframes ecept_il_pulse { 0%,100% { opacity: 0.65; } 50% { opacity: 1; } }
-#initial-loader{position:fixed;inset:0;background:#060a14;z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;transition:opacity 320ms cubic-bezier(0.16,1,0.3,1);font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif}
-#initial-loader.fade{opacity:0;pointer-events:none}
-#initial-loader .il-logo{width:88px;height:88px;animation:ecept_il_spin 12s linear infinite;filter:drop-shadow(0 0 18px rgba(167,139,250,0.45))}
+@keyframes ecept_loaderFadeOut { to { opacity: 0; visibility: hidden; } }
+#initial-loader{position:fixed;inset:0;background:#060a14;z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;opacity:1;animation:ecept_loaderFadeOut 320ms cubic-bezier(0.16,1,0.3,1) forwards;animation-delay:1200ms;animation-play-state:paused}
+#initial-loader.go{animation-play-state:running}
+#initial-loader .il-logo{width:88px;height:88px;animation:ecept_il_breathe 3s ease-in-out infinite;filter:drop-shadow(0 0 18px rgba(167,139,250,0.45))}
+#initial-loader .il-logo .il-strand-a{stroke-dasharray:6 4;animation:ecept_il_strandFlow 2.5s linear infinite}
+#initial-loader .il-logo .il-strand-b{stroke-dasharray:6 4;animation:ecept_il_strandFlowReverse 2.5s linear infinite}
 #initial-loader .il-title{font-size:40px;font-weight:800;letter-spacing:-0.025em;background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.05}
 #initial-loader .il-tag{font-size:13px;color:#64748b;letter-spacing:0.04em;animation:ecept_il_pulse 1.8s ease-in-out infinite}
 #initial-loader .il-bar-wrap{width:160px;height:3px;background:rgba(96,165,250,0.14);border-radius:2px;overflow:hidden;margin-top:6px}
@@ -42,8 +47,8 @@
           <stop offset="100%" stop-color="#60a5fa"/>
         </linearGradient>
       </defs>
-      <path d="M 22 12 C 22 30, 78 30, 78 48 C 78 66, 22 66, 22 84" stroke="url(#il_grad_a)" stroke-width="4" stroke-linecap="round" fill="none"/>
-      <path d="M 78 12 C 78 30, 22 30, 22 48 C 22 66, 78 66, 78 84" stroke="url(#il_grad_b)" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.5"/>
+      <path class="il-strand-a" d="M 22 12 C 22 30, 78 30, 78 48 C 78 66, 22 66, 22 84" stroke="url(#il_grad_a)" stroke-width="4" stroke-linecap="round" fill="none"/>
+      <path class="il-strand-b" d="M 78 12 C 78 30, 22 30, 22 48 C 22 66, 78 66, 78 84" stroke="url(#il_grad_b)" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.5"/>
       <line x1="28" y1="22" x2="72" y2="22" stroke="url(#il_grad_a)" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
       <line x1="32" y1="36" x2="68" y2="36" stroke="url(#il_grad_a)" stroke-width="2.5" stroke-linecap="round" opacity="0.55"/>
       <line x1="32" y1="60" x2="68" y2="60" stroke="url(#il_grad_a)" stroke-width="2.5" stroke-linecap="round" opacity="0.55"/>
@@ -137,6 +142,13 @@ button { cursor: pointer; color: inherit; background: none; }
   0%   { background-position: -240px 0; }
   100% { background-position: 240px 0; }
 }
+@keyframes ecept_strandFlow         { to { stroke-dashoffset: -20; } }
+@keyframes ecept_strandFlowReverse  { to { stroke-dashoffset:  20; } }
+@keyframes ecept_logoBreathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+.ecept-strand-flow         { animation: ecept_strandFlow         2.5s linear infinite; }
+.ecept-strand-flow-reverse { animation: ecept_strandFlowReverse  2.5s linear infinite; }
+.ecept-logo-flow           { animation: ecept_logoBreathe        3s   ease-in-out infinite; }
+.ecept-logo-float          { animation: ecept_logoFloat          3.6s ease-in-out infinite; }
 /* Salud Mental II · scoped styles */
 .sm-root .prose{font-size:14.5px;line-height:1.7;color:#e2e8f0}
 .sm-root .prose b,.sm-root .prose strong{color:#fff;font-weight:700}
