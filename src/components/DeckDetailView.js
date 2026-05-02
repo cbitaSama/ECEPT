@@ -1219,10 +1219,8 @@ function DeckDetailView(props){
       padding:"10px 12px",fontSize:"13px",marginBottom:"16px"
     }},DD_loadErr),
 
-    // ── Loading skeletons ──
-    DD_loading && e("div",null,
-      DD_skeletonCard("dsk1"),DD_skeletonCard("dsk2"),DD_skeletonCard("dsk3")
-    ),
+    // ── Loading skeletons (premium SkeletonList) ──
+    DD_loading && e(window.SkeletonList || "div",{count:6,grid:true,minWidth:320,minHeight:110}),
 
     // ── Card list / empty states ──
     !DD_loading && DD_cards.length===0 && e("div",{style:{

@@ -632,7 +632,7 @@ function ChatBot(props) {
 
       // Conversation list
       e('div', { style:{ flex:1, overflowY:'auto', padding:'6px 8px' } },
-        CB_loadingConvs && e('div', { style:{ color:C.dm, fontSize:12, padding:'12px 8px', textAlign:'center' } }, 'Cargando…'),
+        CB_loadingConvs && (window.SkeletonRow ? e('div', { style:{ display:'flex', flexDirection:'column', gap:4, padding:'4px 0' } }, e(window.SkeletonRow), e(window.SkeletonRow), e(window.SkeletonRow), e(window.SkeletonRow)) : e('div', { style:{ color:C.dm, fontSize:12, padding:'12px 8px', textAlign:'center' } }, 'Cargando…')),
 
         !CB_loadingConvs && CB_conversations.length === 0 && e('div', { style:{ padding:'20px 8px', textAlign:'center' } },
           e('div', { style:{ color:C.dm, fontSize:12, lineHeight:1.6 } }, 'Aún no tenés conversaciones. Mandá tu primer mensaje para empezar.')

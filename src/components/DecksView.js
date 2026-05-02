@@ -706,13 +706,8 @@ function DecksView(props){
       padding:"10px 12px",fontSize:"13px",marginBottom:"16px"
     }},DV_loadErr),
 
-    // ── Loading skeletons ──
-    DV_loading && e("div",{style:{
-      display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:"16px"
-    }},
-      DV_skeletonCard("sk1"),DV_skeletonCard("sk2"),
-      DV_skeletonCard("sk3"),DV_skeletonCard("sk4")
-    ),
+    // ── Loading skeletons (premium SkeletonList) ──
+    DV_loading && e(window.SkeletonList || "div",{count:6,grid:true,minWidth:280,minHeight:160}),
 
     // ── Official decks section ──
     !DV_loading && officialDecks.length>0 && e("div",{style:{marginBottom:"28px"}},
