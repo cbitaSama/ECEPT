@@ -14987,8 +14987,11 @@ function FlashcardEditor(props){
             }
           }
         }
+        var FE_SYSTEM_TAGS=["psicosis","salud_mental","anxiety","depresivos",
+          "trauma","somaticos","tca","sueno","personalidad","impulsos","toc"];
         var sorted=Object.keys(tc).sort(function(a,b){ return tc[b]-tc[a]; });
-        FE_setSugg(sorted.slice(0,30));
+        var filtered=sorted.filter(function(t){ return FE_SYSTEM_TAGS.indexOf(t)===-1; });
+        FE_setSugg(filtered.slice(0,30));
       }).catch(function(){});
   },[]);
 
@@ -15097,27 +15100,30 @@ function FlashcardEditor(props){
 
   // ── Guard: no user ──
   if(!user){
-    return e("div",{
-      className:"fe-bg",
-      style:{
-        position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:250,
-        background:"rgba(6,10,20,.85)",
-        backdropFilter:"blur(4px)",WebkitBackdropFilter:"blur(4px)",
-        display:"flex",alignItems:"center",justifyContent:"center",padding:"16px"
-      }
-    },
-      e("div",{style:{
-        background:C.cd,border:"1px solid "+C.bd,borderRadius:"16px",
-        padding:"28px 24px",maxWidth:"340px",width:"100%",textAlign:"center"
-      }},
-        e("div",{style:{fontSize:"36px",marginBottom:"10px"}},"🔒"),
-        e("p",{style:{color:C.tx,fontSize:"14px",fontWeight:600,marginBottom:"14px"}},"Necesitás una cuenta para crear tarjetas."),
-        e("button",{onClick:FE_cancel,style:{
-          padding:"10px 20px",borderRadius:"10px",
-          background:"none",border:"1px solid "+C.bd,
-          color:C.tx,fontSize:"13px",fontWeight:600,cursor:"pointer",minHeight:"44px"
-        }},"Cerrar")
-      )
+    return ReactDOM.createPortal(
+      e("div",{
+        className:"fe-bg",
+        style:{
+          position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:250,
+          background:"rgba(6,10,20,.85)",
+          backdropFilter:"blur(4px)",WebkitBackdropFilter:"blur(4px)",
+          display:"flex",alignItems:"center",justifyContent:"center",padding:"16px"
+        }
+      },
+        e("div",{style:{
+          background:C.cd,border:"1px solid "+C.bd,borderRadius:"16px",
+          padding:"28px 24px",maxWidth:"340px",width:"100%",textAlign:"center"
+        }},
+          e("div",{style:{fontSize:"36px",marginBottom:"10px"}},"🔒"),
+          e("p",{style:{color:C.tx,fontSize:"14px",fontWeight:600,marginBottom:"14px"}},"Necesitás una cuenta para crear tarjetas."),
+          e("button",{onClick:FE_cancel,style:{
+            padding:"10px 20px",borderRadius:"10px",
+            background:"none",border:"1px solid "+C.bd,
+            color:C.tx,fontSize:"13px",fontWeight:600,cursor:"pointer",minHeight:"44px"
+          }},"Cerrar")
+        )
+      ),
+      document.body
     );
   }
 
@@ -15138,17 +15144,18 @@ function FlashcardEditor(props){
   };
   var hintSt={fontSize:"11px",color:C.dm,marginTop:"4px",lineHeight:1.4};
 
-  return e("div",{
-    className:"fe-bg",
-    onClick:function(ev){ if(ev.target===ev.currentTarget&&!FE_saving) FE_cancel(); },
-    style:{
-      position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:250,
-      background:"rgba(6,10,20,.85)",
-      backdropFilter:"blur(4px)",WebkitBackdropFilter:"blur(4px)",
-      display:"flex",alignItems:"flex-start",justifyContent:"center",
-      padding:"20px",overflowY:"auto",WebkitOverflowScrolling:"touch"
-    }
-  },
+  return ReactDOM.createPortal(
+    e("div",{
+      className:"fe-bg",
+      onClick:function(ev){ if(ev.target===ev.currentTarget&&!FE_saving) FE_cancel(); },
+      style:{
+        position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:250,
+        background:"rgba(6,10,20,.85)",
+        backdropFilter:"blur(4px)",WebkitBackdropFilter:"blur(4px)",
+        display:"flex",alignItems:"flex-start",justifyContent:"center",
+        padding:"20px",overflowY:"auto",WebkitOverflowScrolling:"touch"
+      }
+    },
     e("div",{
       className:"fe-modal",
       onClick:function(ev){ ev.stopPropagation(); },
@@ -15478,7 +15485,8 @@ function FlashcardEditor(props){
       )
 
     )
-  );
+  ),
+  document.body);
 }
 
 window.FlashcardEditor=FlashcardEditor;
