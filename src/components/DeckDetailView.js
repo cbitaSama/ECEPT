@@ -97,7 +97,14 @@ function DeckDetailView(props){
   s=useState(function(){
     try{ return localStorage.getItem(DD_storageKey)==='true'; }catch(ex){ return false; }
   });
-  var DD_showAnswers=s[0], DD_setShowAnswers=s[1];
+  var DD_showAnswers=s[0],   DD_setShowAnswers=s[1];
+  s=useState(null);    var DD_copyCard=s[0],      DD_setCopyCard=s[1];
+  s=useState([]);      var DD_ownDecks=s[0],      DD_setOwnDecks=s[1];
+  s=useState('');      var DD_copyDeckId=s[0],    DD_setCopyDeckId=s[1];
+  s=useState('');      var DD_copyNewName=s[0],   DD_setCopyNewName=s[1];
+  s=useState('select');var DD_copyMode=s[0],      DD_setCopyMode=s[1];
+  s=useState(false);   var DD_copyLoading=s[0],   DD_setCopyLoading=s[1];
+  s=useState(false);   var DD_copySuccess=s[0],   DD_setCopySuccess=s[1];
 
   // ── Inject CSS once ──
   useEffect(function(){
@@ -206,6 +213,18 @@ function DeckDetailView(props){
     return function(){ document.removeEventListener("keydown",DD_onKeyDown); };
   },[DD_previewIdx]);
 
+  useEffect(function(){
+    if(!deck||!deck.is_official||!user||!window.ECEPT_SUPABASE) return;
+    window.ECEPT_SUPABASE
+      .from("decks")
+      .select("id,name,color,icon")
+      .eq("user_id",user.id)
+      .eq("is_official",false)
+      .order("sort_order",{ascending:true,nullsFirst:false})
+      .order("name",{ascending:true})
+      .then(function(res){ if(!res.error) DD_setOwnDecks(res.data||[]); });
+  },[]);
+
   function DD_handleDelete(cardId){
     if(!user||!window.ECEPT_SUPABASE) return;
     window.ECEPT_SUPABASE.from("flashcards").delete().eq("id",cardId).then(function(){
@@ -238,6 +257,37 @@ function DeckDetailView(props){
     var next=!DD_showAnswers;
     DD_setShowAnswers(next);
     try{ localStorage.setItem(DD_storageKey,String(next)); }catch(ex){}
+  }
+
+  async function DD_execCopy(){
+    if(!user||!window.ECEPT_SUPABASE||!DD_copyCard) return;
+    DD_setCopyLoading(true);
+    try{
+      var targetDeckId=DD_copyDeckId;
+      if(DD_copyMode==='new'){
+        var deckRes=await window.ECEPT_SUPABASE
+          .from('decks')
+          .insert({user_id:user.id,name:DD_copyNewName.trim(),is_official:false,color:'#3b82f6',icon:'📚'})
+          .select('id')
+          .single();
+        if(deckRes.error) throw deckRes.error;
+        targetDeckId=deckRes.data.id;
+        DD_setOwnDecks(function(prev){ return prev.concat([{id:targetDeckId,name:DD_copyNewName.trim(),color:'#3b82f6',icon:'📚'}]); });
+      }
+      var insRes=await window.ECEPT_SUPABASE.from('flashcards').insert({
+        deck_id:targetDeckId,user_id:user.id,is_official:false,
+        card_type:DD_copyCard.card_type,front:DD_copyCard.front,
+        back:DD_copyCard.back,tags:DD_copyCard.tags||[]
+      });
+      if(insRes.error) throw insRes.error;
+      DD_setCopyCard(null);
+      DD_setCopySuccess(true);
+      setTimeout(function(){ DD_setCopySuccess(false); },2000);
+    }catch(err){
+      console.error('copy card error',err);
+    }finally{
+      DD_setCopyLoading(false);
+    }
   }
 
   function DD_addUserCardTag(cardId,tagName){
@@ -546,7 +596,21 @@ function DeckDetailView(props){
                 display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"6px",marginTop:"-2px"
               }
             },"⋮")
-          : isOfficial&&e("span",{style:{fontSize:"9px",color:C.dm,fontWeight:600,flexShrink:0,paddingTop:"2px"}},"⭐")
+          : isOfficial&&user&&e("button",{
+              onClick:function(ev){
+                ev.stopPropagation();
+                DD_setCopyCard(c);
+                DD_setCopyMode('select');
+                DD_setCopyDeckId(DD_ownDecks[0]?DD_ownDecks[0].id:'');
+              },
+              "aria-label":"Agregar a mi baraja",
+              style:{
+                background:"none",border:"none",color:C.dm,fontSize:"18px",cursor:"pointer",
+                minWidth:"44px",minHeight:"44px",flexShrink:0,
+                display:"flex",alignItems:"center",justifyContent:"center",
+                borderRadius:"6px",marginTop:"-2px"
+              }
+            },"📥")
       ),
       // ⋮ Dropdown
       isMenuOpen&&e("div",{
@@ -929,7 +993,135 @@ function DeckDetailView(props){
         ),
         document.body
       );
-    })()
+    })(),
+    DD_copyCard&&(function(){
+      var cc=DD_copyCard;
+      var frontPreview=(cc.front||"").slice(0,60)+((cc.front||"").length>60?"...":"");
+      var showNewForm=DD_copyMode==='new'||(DD_copyMode==='select'&&DD_ownDecks.length===0);
+      var canSubmit=!DD_copyLoading&&(showNewForm?DD_copyNewName.trim().length>0:DD_copyDeckId!=='');
+      return ReactDOM.createPortal(
+        e("div",{
+          onClick:function(){ DD_setCopyCard(null); },
+          style:{
+            position:"fixed",top:0,left:0,right:0,bottom:0,
+            background:"rgba(6,10,20,.88)",
+            backdropFilter:"blur(6px)",WebkitBackdropFilter:"blur(6px)",
+            display:"flex",alignItems:"center",justifyContent:"center",
+            padding:"16px",zIndex:1000
+          }
+        },
+          e("div",{
+            onClick:function(ev){ ev.stopPropagation(); },
+            style:{
+              width:"100%",maxWidth:"480px",
+              background:C.cd,border:"1px solid "+C.bd,
+              borderRadius:"20px",overflow:"hidden",
+              boxShadow:"0 20px 60px rgba(0,0,0,.7)",
+              display:"flex",flexDirection:"column"
+            }
+          },
+            e("div",{style:{
+              display:"flex",alignItems:"center",justifyContent:"space-between",
+              padding:"16px 18px",borderBottom:"1px solid "+C.bd
+            }},
+              e("span",{style:{fontSize:"14px",color:C.tx,fontWeight:700}},"📥 Agregar a mi baraja"),
+              e("button",{
+                onClick:function(){ DD_setCopyCard(null); },
+                style:{background:"none",border:"none",color:C.dm,fontSize:"20px",
+                  cursor:"pointer",lineHeight:1,padding:"4px 8px"}
+              },"×")
+            ),
+            e("div",{style:{
+              margin:"14px 18px",padding:"10px 14px",
+              background:"rgba(255,255,255,.04)",border:"1px solid "+C.bd,
+              borderRadius:"10px",fontSize:"13px",color:C.dm,lineHeight:1.4
+            }},frontPreview),
+            e("div",{style:{padding:"0 18px 18px"}},
+              showNewForm
+                ? e("div",null,
+                    DD_copyMode==='new'&&DD_ownDecks.length>0&&e("button",{
+                      onClick:function(){ DD_setCopyMode('select'); },
+                      style:{background:"none",border:"none",color:C.ac2,fontSize:"12px",
+                        cursor:"pointer",padding:"0 0 10px",fontWeight:600}
+                    },"← Volver"),
+                    e("div",{style:{fontSize:"12px",color:C.dm,marginBottom:"8px",fontWeight:600}},
+                      "Nombre de la nueva baraja"),
+                    e("input",{
+                      type:"text",value:DD_copyNewName,autoFocus:true,
+                      placeholder:"Mi baraja...",
+                      onChange:function(ev){ DD_setCopyNewName(ev.target.value); },
+                      onKeyDown:function(ev){ if(ev.key==="Enter"&&canSubmit) DD_execCopy(); },
+                      style:{
+                        width:"100%",minHeight:"44px",padding:"10px 14px",
+                        borderRadius:"10px",border:"1px solid "+C.bd,
+                        background:C.bg,color:C.tx,fontSize:"13px",
+                        outline:"none",boxSizing:"border-box"
+                      }
+                    })
+                  )
+                : e("div",null,
+                    e("div",{style:{fontSize:"12px",color:C.dm,marginBottom:"8px",fontWeight:600,paddingTop:"4px"}},
+                      "Seleccionar baraja"),
+                    e("div",{style:{display:"flex",flexDirection:"column",gap:"6px",maxHeight:"220px",overflowY:"auto"}},
+                      DD_ownDecks.map(function(d){
+                        var isSel=DD_copyDeckId===d.id;
+                        return e("button",{key:d.id,
+                          onClick:function(){ DD_setCopyDeckId(d.id); },
+                          style:{
+                            display:"flex",alignItems:"center",gap:"10px",
+                            padding:"10px 14px",borderRadius:"10px",
+                            border:"1px solid "+(isSel?C.ac:C.bd),
+                            background:isSel?"rgba(96,165,250,.12)":"rgba(255,255,255,.03)",
+                            color:isSel?C.ac:C.tx,fontSize:"13px",fontWeight:600,
+                            cursor:"pointer",textAlign:"left"
+                          }
+                        },
+                          e("span",null,(d.icon||"📚")),
+                          e("span",{style:{flex:1}},d.name||"Sin nombre")
+                        );
+                      }),
+                      e("button",{
+                        onClick:function(){ DD_setCopyMode('new'); DD_setCopyNewName(''); },
+                        style:{
+                          display:"flex",alignItems:"center",gap:"6px",
+                          padding:"10px 14px",borderRadius:"10px",
+                          border:"1px dashed "+C.bd,
+                          background:"none",color:C.mt,fontSize:"13px",
+                          cursor:"pointer"
+                        }
+                      },"+ Crear nueva baraja")
+                    )
+                  )
+            ),
+            e("div",{style:{padding:"14px 18px",borderTop:"1px solid "+C.bd}},
+              e("button",{
+                onClick:DD_execCopy,
+                disabled:!canSubmit,
+                style:{
+                  width:"100%",minHeight:"44px",padding:"12px",
+                  borderRadius:"12px",border:"none",
+                  background:canSubmit?"#3b82f6":"rgba(255,255,255,.08)",
+                  color:canSubmit?"#fff":C.mt,
+                  fontSize:"14px",fontWeight:700,
+                  cursor:canSubmit?"pointer":"default"
+                }
+              },DD_copyLoading?"Agregando...":"Agregar")
+            )
+          )
+        ),
+        document.body
+      );
+    })(),
+    DD_copySuccess&&ReactDOM.createPortal(
+      e("div",{style:{
+        position:"fixed",bottom:"80px",left:"50%",transform:"translateX(-50%)",
+        background:"rgba(52,211,153,.15)",border:"1px solid rgba(52,211,153,.4)",
+        color:"#34d399",borderRadius:"10px",padding:"10px 20px",
+        fontSize:"13px",fontWeight:700,zIndex:1100,
+        whiteSpace:"nowrap",pointerEvents:"none"
+      }},"✓ Card agregada a tu baraja"),
+      document.body
+    )
   ));
 }
 
