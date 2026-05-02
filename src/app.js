@@ -411,30 +411,36 @@ function App(){
       e("div",{onClick:function(){setSb(false)},style:{flex:1,background:"rgba(0,0,0,.6)"}})
     ),
     // ════════════ MAIN (content wrapper — Trauma + Vocab now render natively inside) ════════════
-    // El home y reuma gestionan su propio ancho (Home hasta 1400, Reuma usa
-    // ModuleShell hasta 1280). Las vistas internas siguen con wrapper 900px
-    // para mantener legibilidad de prosa larga.
-    e("div",{style:(vista==="home"||vista==="reuma")?{width:"100%",margin:0,padding:"0 0 80px"}:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
+    // Vistas que usan ModuleShell o gestionan su propio ancho escapan del
+    // wrapper de 900px. El resto mantiene wrapper estrecho para legibilidad
+    // de prosa larga.
+    e("div",{style:({home:1,reuma:1,cir_menu:1,anat_menu:1,emergen_menu:1}[vista])?{width:"100%",margin:0,padding:"0 0 80px"}:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
 
     // ════════════ HOME ════════════
     vista==="home"&&e(HomeView,{user:ecuUser,vi:vi,favs:favs,bestStreak:bestStreak,go:go}),
 
     // ════════════ CIRUGÍA MENÚ ════════════
-    vista==="cir_menu"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🔪"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"24px",fontWeight:800,color:"#ef4444"}},"Cirugía")),
-      [{v:"cir_abd",ic:"🔴",n:"Abdomen Agudo Infeccioso",d:"Peritonitis, Apendicitis, Colecistitis, Pancreatitis, Colangitis"}].map(function(it){
-        return e("div",{key:it.v,onClick:function(){go(it.v)},style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"18px",cursor:"pointer",marginBottom:"12px",display:"flex",alignItems:"center",gap:"14px"}},
-          e("span",{style:{fontSize:"28px"}},it.ic),e("div",null,e("h3",{style:{fontSize:"15px",fontWeight:700}},it.n),e("p",{style:{fontSize:"12px",color:C.dm}},it.d)),e("span",{style:{color:C.dm,marginLeft:"auto"}},"›"))
-      })
+    vista==="cir_menu"&&e(ModuleShell,{title:"Cirugía",subtitle:"Algoritmos quirúrgicos y abdomen agudo",icon:"🔪",accent:"#ef4444"},
+      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:"16px"}},
+        [{v:"cir_abd",ic:"🔴",n:"Abdomen Agudo Infeccioso",d:"Peritonitis, Apendicitis, Colecistitis, Pancreatitis, Colangitis"}].map(function(it,si){
+          return e("div",{key:it.v,onClick:function(){go(it.v)},style:{background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",border:"1px solid "+C.bd,borderRadius:"16px",padding:"20px 22px",cursor:"pointer",display:"flex",alignItems:"center",gap:"16px",minHeight:"96px",transition:"transform 240ms cubic-bezier(0.32,0.72,0,1),border-color 240ms cubic-bezier(0.32,0.72,0,1),box-shadow 240ms ease-out",animation:"ecept_fadeSlideUp 480ms cubic-bezier(0.16,1,0.3,1) "+(si*40+80)+"ms both",boxSizing:"border-box"},onMouseEnter:function(ev){ev.currentTarget.style.borderColor="rgba(239,68,68,0.35)";ev.currentTarget.style.transform="translateY(-2px)";ev.currentTarget.style.boxShadow="0 8px 24px rgba(0,0,0,0.30), 0 2px 8px rgba(0,0,0,0.20)";},onMouseLeave:function(ev){ev.currentTarget.style.borderColor=C.bd;ev.currentTarget.style.transform="translateY(0)";ev.currentTarget.style.boxShadow="none";}},
+            e("span",{style:{fontSize:"30px",width:"56px",height:"56px",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"14px",background:"rgba(239,68,68,0.10)",border:"1px solid rgba(239,68,68,0.20)",flexShrink:0}},it.ic),
+            e("div",{style:{flex:1,minWidth:0}},e("h3",{style:{fontSize:"16px",fontWeight:600,letterSpacing:"-0.01em",marginBottom:"4px"}},it.n),e("p",{style:{fontSize:"13px",color:C.dm,lineHeight:1.5}},it.d)),
+            e("span",{style:{color:C.dm,fontSize:"20px",flexShrink:0}},"›"))
+        })
+      )
     ),
 
     // ════════════ ANATOMÍA MENÚ ════════════
-    vista==="anat_menu"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🩻"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"24px",fontWeight:800,color:"#f59e0b"}},"Anatomía")),
-      [{v:"anatomia",ic:"🧠",n:"Pares Craneales",d:"Mapa interactivo · 12 pares · Origen, función y clínica"},{v:"cir_ing",ic:"🧱",n:"Conducto Inguinal",d:"Conducto · Anillos · Cordón Espermático"}].map(function(it){
-        return e("div",{key:it.v,onClick:function(){go(it.v)},style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"18px",cursor:"pointer",marginBottom:"12px",display:"flex",alignItems:"center",gap:"14px"}},
-          e("span",{style:{fontSize:"28px"}},it.ic),e("div",null,e("h3",{style:{fontSize:"15px",fontWeight:700}},it.n),e("p",{style:{fontSize:"12px",color:C.dm}},it.d)),e("span",{style:{color:C.dm,marginLeft:"auto"}},"›"))
-      })
+    vista==="anat_menu"&&e(ModuleShell,{title:"Anatomía",subtitle:"Pares craneales · Conducto inguinal",icon:"🩻",accent:"#f59e0b"},
+      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:"16px"}},
+        [{v:"anatomia",ic:"🧠",n:"Pares Craneales",d:"Mapa interactivo · 12 pares · Origen, función y clínica"},{v:"cir_ing",ic:"🧱",n:"Conducto Inguinal",d:"Conducto · Anillos · Cordón Espermático"}].map(function(it,si){
+          return e("div",{key:it.v,onClick:function(){go(it.v)},style:{background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",border:"1px solid "+C.bd,borderRadius:"16px",padding:"20px 22px",cursor:"pointer",display:"flex",alignItems:"center",gap:"16px",minHeight:"96px",transition:"transform 240ms cubic-bezier(0.32,0.72,0,1),border-color 240ms cubic-bezier(0.32,0.72,0,1),box-shadow 240ms ease-out",animation:"ecept_fadeSlideUp 480ms cubic-bezier(0.16,1,0.3,1) "+(si*40+80)+"ms both",boxSizing:"border-box"},onMouseEnter:function(ev){ev.currentTarget.style.borderColor="rgba(245,158,11,0.40)";ev.currentTarget.style.transform="translateY(-2px)";ev.currentTarget.style.boxShadow="0 8px 24px rgba(0,0,0,0.30), 0 2px 8px rgba(0,0,0,0.20)";},onMouseLeave:function(ev){ev.currentTarget.style.borderColor=C.bd;ev.currentTarget.style.transform="translateY(0)";ev.currentTarget.style.boxShadow="none";}},
+            e("span",{style:{fontSize:"30px",width:"56px",height:"56px",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"14px",background:"rgba(245,158,11,0.10)",border:"1px solid rgba(245,158,11,0.20)",flexShrink:0}},it.ic),
+            e("div",{style:{flex:1,minWidth:0}},e("h3",{style:{fontSize:"16px",fontWeight:600,letterSpacing:"-0.01em",marginBottom:"4px"}},it.n),e("p",{style:{fontSize:"13px",color:C.dm,lineHeight:1.5}},it.d)),
+            e("span",{style:{color:C.dm,fontSize:"20px",flexShrink:0}},"›"))
+        })
+      )
     ),
 
     // ════════════ REUMATOLOGÍA HOME ════════════
@@ -531,19 +537,22 @@ function App(){
     ),
 
     // ════════════ EMERGENCIOLOGÍA MENÚ ════════════
-    vista==="emergen_menu"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🚑"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"24px",fontWeight:800,color:"#ef4444"}},"Emergenciología")),
-      [{v:"cir_quem",ic:"🔥",n:"Algoritmo de Quemaduras",d:"Tratamiento paso a paso + Calculadoras de Parkland y Goteo"},{v:"trauma-u1",ic:"🩸",n:"Trauma — Unidad 1",d:"Vía aérea, Shock, Tórax, Triage, Deontología — 5 temas completos"}].map(function(it){
-        return e("div",{key:it.v,onClick:function(){go(it.v)},style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"18px",cursor:"pointer",marginBottom:"12px",display:"flex",alignItems:"center",gap:"14px"}},
-          e("span",{style:{fontSize:"28px"}},it.ic),e("div",null,e("h3",{style:{fontSize:"15px",fontWeight:700}},it.n),e("p",{style:{fontSize:"12px",color:C.dm}},it.d)),e("span",{style:{color:C.dm,marginLeft:"auto"}},"›"))
-      }),
-      // Placeholders
-      [{ic:"💓",n:"RCP — Reanimación",d:"ACLS, BLS, algoritmos — Próximamente"},{ic:"🩸",n:"Shock",d:"Hipovolémico, Distributivo, Cardiogénico, Obstructivo — Próximamente"}].map(function(ph,i){
-        return e("div",{key:i,style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"16px",marginBottom:"10px",opacity:.4,display:"flex",alignItems:"center",gap:"14px"}},
-          e("span",{style:{fontSize:"22px"}},ph.ic),e("div",null,e("h3",{style:{fontSize:"14px",fontWeight:700}},ph.n),e("p",{style:{fontSize:"11px",color:C.dm}},ph.d)),
-          e("span",{style:{fontSize:"9px",padding:"3px 8px",borderRadius:"6px",background:"rgba(255,255,255,.05)",color:C.dm,marginLeft:"auto"}},"Pronto")
-        )
-      })
+    vista==="emergen_menu"&&e(ModuleShell,{title:"Emergenciología",subtitle:"Trauma · Quemaduras · RCP · Shock",icon:"🚑",accent:"#ef4444"},
+      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:"16px"}},
+        [{v:"cir_quem",ic:"🔥",n:"Algoritmo de Quemaduras",d:"Tratamiento paso a paso + Calculadoras de Parkland y Goteo"},{v:"trauma-u1",ic:"🩸",n:"Trauma — Unidad 1",d:"Vía aérea, Shock, Tórax, Triage, Deontología — 5 temas completos"}].map(function(it,si){
+          return e("div",{key:it.v,onClick:function(){go(it.v)},style:{background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",border:"1px solid "+C.bd,borderRadius:"16px",padding:"20px 22px",cursor:"pointer",display:"flex",alignItems:"center",gap:"16px",minHeight:"96px",transition:"transform 240ms cubic-bezier(0.32,0.72,0,1),border-color 240ms cubic-bezier(0.32,0.72,0,1),box-shadow 240ms ease-out",animation:"ecept_fadeSlideUp 480ms cubic-bezier(0.16,1,0.3,1) "+(si*40+80)+"ms both",boxSizing:"border-box"},onMouseEnter:function(ev){ev.currentTarget.style.borderColor="rgba(239,68,68,0.40)";ev.currentTarget.style.transform="translateY(-2px)";ev.currentTarget.style.boxShadow="0 8px 24px rgba(0,0,0,0.30), 0 2px 8px rgba(0,0,0,0.20)";},onMouseLeave:function(ev){ev.currentTarget.style.borderColor=C.bd;ev.currentTarget.style.transform="translateY(0)";ev.currentTarget.style.boxShadow="none";}},
+            e("span",{style:{fontSize:"30px",width:"56px",height:"56px",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"14px",background:"rgba(239,68,68,0.10)",border:"1px solid rgba(239,68,68,0.20)",flexShrink:0}},it.ic),
+            e("div",{style:{flex:1,minWidth:0}},e("h3",{style:{fontSize:"16px",fontWeight:600,letterSpacing:"-0.01em",marginBottom:"4px"}},it.n),e("p",{style:{fontSize:"13px",color:C.dm,lineHeight:1.5}},it.d)),
+            e("span",{style:{color:C.dm,fontSize:"20px",flexShrink:0}},"›"))
+        }),
+        [{ic:"💓",n:"RCP — Reanimación",d:"ACLS, BLS, algoritmos — Próximamente"},{ic:"🩸",n:"Shock",d:"Hipovolémico, Distributivo, Cardiogénico, Obstructivo — Próximamente"}].map(function(ph,i){
+          return e("div",{key:"ph"+i,style:{background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",border:"1px dashed "+C.bd,borderRadius:"16px",padding:"20px 22px",opacity:.5,display:"flex",alignItems:"center",gap:"16px",minHeight:"96px",boxSizing:"border-box"}},
+            e("span",{style:{fontSize:"28px",width:"56px",height:"56px",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"14px",background:"rgba(255,255,255,0.03)",flexShrink:0}},ph.ic),
+            e("div",{style:{flex:1,minWidth:0}},e("h3",{style:{fontSize:"15px",fontWeight:600,marginBottom:"3px"}},ph.n),e("p",{style:{fontSize:"12px",color:C.dm,lineHeight:1.5}},ph.d)),
+            e("span",{style:{fontSize:"10px",padding:"4px 10px",borderRadius:"999px",background:"rgba(255,255,255,.05)",color:C.dm,fontWeight:600,letterSpacing:"0.04em",flexShrink:0}},"PRONTO")
+          )
+        })
+      )
     ),
 
     // ════════════ TRAUMA — UNIDAD 1 (NATIVE) ════════════
