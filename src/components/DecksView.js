@@ -50,8 +50,8 @@ function DecksView(props){
       var st=document.createElement("style");
       st.textContent=
         "@keyframes DV_shimmer{0%{background-position:-300px 0}100%{background-position:300px 0}}" +
-        ".dv-card{transition:transform .15s ease-out,border-color .15s ease-out}" +
-        ".dv-card:hover{transform:translateY(-2px)}" +
+        ".dv-card{transition:transform 240ms cubic-bezier(0.32,0.72,0,1),border-color 240ms cubic-bezier(0.32,0.72,0,1),box-shadow 240ms ease-out}" +
+        ".dv-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.30), 0 2px 8px rgba(0,0,0,0.20)}" +
         ".dv-skel{background:linear-gradient(90deg,rgba(255,255,255,.03) 25%,rgba(255,255,255,.08) 50%,rgba(255,255,255,.03) 75%);background-size:600px 100%;animation:DV_shimmer 1.4s ease-in-out infinite;border-radius:6px}";
       document.head.appendChild(st);
       DV_styleInjected=true;
