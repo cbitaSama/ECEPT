@@ -15733,6 +15733,11 @@ function DD_previewClozeEl(text,hidden){
   return e("span",null,parts);
 }
 
+function DD_clozeReveal(text){
+  if(!text) return "";
+  return text.replace(/\{\{c\d+::(.*?)\}\}|\}\}(.*?)\}\}/g,function(m,g1,g2){ return g1!==undefined?g1:g2; });
+}
+
 function DeckDetailView(props){
   var user=props.user;
   var deck=props.deck;
@@ -15758,6 +15763,11 @@ function DeckDetailView(props){
   s=useState(false); var DD_previewFlipped=s[0], DD_setPreviewFlipped=s[1];
   var DD_swipeStartY=useRef(null);
   var DD_filteredRef=useRef([]);
+  var DD_storageKey=deck?('ECEPT_DECK_'+deck.id+'_SHOW_ANSWERS'):'';
+  s=useState(function(){
+    try{ return localStorage.getItem(DD_storageKey)==='true'; }catch(ex){ return false; }
+  });
+  var DD_showAnswers=s[0], DD_setShowAnswers=s[1];
 
   // ── Inject CSS once ──
   useEffect(function(){
@@ -15892,6 +15902,12 @@ function DeckDetailView(props){
   function DD_clearFilters(){
     DD_setSearch("");
     DD_setSelectedTags([]);
+  }
+
+  function DD_toggleAnswers(){
+    var next=!DD_showAnswers;
+    DD_setShowAnswers(next);
+    try{ localStorage.setItem(DD_storageKey,String(next)); }catch(ex){}
   }
 
   function DD_addUserCardTag(cardId,tagName){
@@ -16090,11 +16106,17 @@ function DeckDetailView(props){
             WebkitLineClamp:2,WebkitBoxOrient:"vertical",
             marginBottom:4
           }},isCloze ? DD_clozeEl(c.front||"") : (c.front||"")),
-          // Back preview (basic only)
-          !isCloze&&c.back&&e("div",{style:{
+          // Back preview (masked or revealed by toggle)
+          e("div",{style:{
             fontSize:"12px",color:C.dm,lineHeight:1.4,
             overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"
-          }},"→ "+(c.back.length>80?c.back.slice(0,77)+"...":c.back)),
+          }},
+            !DD_showAnswers
+              ?"→ ●●●●●"
+              :isCloze
+                ?"→ "+DD_clozeReveal(c.front||"").slice(0,80)
+                :c.back?"→ "+(c.back.length>80?c.back.slice(0,77)+"...":c.back):""
+          ),
           // Tags oficiales (solid border, color muted)
           Array.isArray(c.tags)&&c.tags.length>0&&e("div",{style:{display:"flex",flexWrap:"wrap",gap:"4px",marginTop:"6px"}},
             c.tags.map(function(t,ti){
@@ -16327,18 +16349,29 @@ function DeckDetailView(props){
 
     // ── Search + tag filter ──
     !DD_loading && DD_cards.length>0 && e("div",{style:{marginBottom:"18px"}},
-      e("input",{
-        type:"text",value:DD_search,
-        onChange:function(ev){ DD_setSearch(ev.target.value); },
-        placeholder:"Buscar en esta baraja...",
-        style:{
-          width:"100%",minHeight:"44px",padding:"10px 14px",
-          borderRadius:"10px",border:"1px solid "+C.bd,
-          background:C.bg,color:C.tx,fontSize:"13px",
-          outline:"none",boxSizing:"border-box",
-          marginBottom:allTags.length>0?"10px":0
-        }
-      }),
+      e("div",{style:{display:"flex",gap:"8px",alignItems:"center",marginBottom:allTags.length>0?"10px":0}},
+        e("input",{
+          type:"text",value:DD_search,
+          onChange:function(ev){ DD_setSearch(ev.target.value); },
+          placeholder:"Buscar en esta baraja...",
+          style:{
+            flex:1,minHeight:"44px",padding:"10px 14px",
+            borderRadius:"10px",border:"1px solid "+C.bd,
+            background:C.bg,color:C.tx,fontSize:"13px",
+            outline:"none",boxSizing:"border-box"
+          }
+        }),
+        e("button",{
+          onClick:DD_toggleAnswers,
+          style:{
+            flexShrink:0,minHeight:"44px",padding:"8px 14px",
+            borderRadius:"10px",background:"none",
+            border:"1px solid "+C.bd,
+            color:DD_showAnswers?C.ac2:C.mt,
+            fontSize:"12px",fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"
+          }
+        },DD_showAnswers?"👁 Ocultar respuestas":"👁 Mostrar respuestas")
+      ),
       allTags.length>0 && e("div",{style:{display:"flex",flexWrap:"wrap",gap:"6px",alignItems:"center"}},
         allTags.map(function(t){
           var sel=DD_selectedTags.indexOf(t)!==-1;
