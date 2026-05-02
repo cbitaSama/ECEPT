@@ -105,6 +105,11 @@ function DeckDetailView(props){
   s=useState('select');var DD_copyMode=s[0],      DD_setCopyMode=s[1];
   s=useState(false);   var DD_copyLoading=s[0],   DD_setCopyLoading=s[1];
   s=useState(false);   var DD_copySuccess=s[0],   DD_setCopySuccess=s[1];
+  s=useState(false);   var DD_selectMode=s[0],    DD_setSelectMode=s[1];
+  s=useState({});      var DD_selectedIds=s[0],   DD_setSelectedIds=s[1];
+  s=useState(false);   var DD_bulkDelConfirm=s[0],DD_setBulkDelConfirm=s[1];
+  s=useState("");      var DD_bulkMsg=s[0],        DD_setBulkMsg=s[1];
+  var DD_pressTimer=useRef(null);
 
   // ── Inject CSS once ──
   useEffect(function(){
@@ -259,6 +264,59 @@ function DeckDetailView(props){
     try{ localStorage.setItem(DD_storageKey,String(next)); }catch(ex){}
   }
 
+  function DD_onPressStart(cardId){
+    if(DD_selectMode) return;
+    DD_pressTimer.current=setTimeout(function(){
+      var sel={};
+      sel[cardId]=true;
+      DD_setSelectMode(true);
+      DD_setSelectedIds(sel);
+    },500);
+  }
+  function DD_onPressEnd(){
+    clearTimeout(DD_pressTimer.current);
+  }
+  function DD_toggleSelect(cardId){
+    var next={};
+    for(var tsk in DD_selectedIds){ if(DD_selectedIds.hasOwnProperty(tsk)) next[tsk]=true; }
+    if(next[cardId]) delete next[cardId];
+    else next[cardId]=true;
+    DD_setSelectedIds(next);
+  }
+  function DD_selectAll(){
+    var next={};
+    for(var sai=0;sai<DD_cards.length;sai++){
+      if(!DD_cards[sai].is_official) next[DD_cards[sai].id]=true;
+    }
+    DD_setSelectedIds(next);
+  }
+  function DD_cancelSelect(){
+    DD_setSelectMode(false);
+    DD_setSelectedIds({});
+    DD_setBulkDelConfirm(false);
+    DD_setBulkMsg("");
+  }
+  async function DD_bulkDelete(){
+    var ids=Object.keys(DD_selectedIds);
+    var snap=DD_selectedIds;
+    if(!ids.length||!user||!window.ECEPT_SUPABASE) return;
+    DD_setBulkMsg("");
+    try{
+      var res=await window.ECEPT_SUPABASE.from("flashcards")
+        .delete().in("id",ids).eq("user_id",user.id);
+      if(res.error) throw res.error;
+      var next=[];
+      for(var bdi=0;bdi<DD_cards.length;bdi++){
+        if(!snap[DD_cards[bdi].id]) next.push(DD_cards[bdi]);
+      }
+      DD_setCards(next);
+      DD_cancelSelect();
+    }catch(err){
+      console.error("bulk delete error",err);
+      DD_setBulkMsg("Error al eliminar. Intentá de nuevo.");
+    }
+  }
+
   async function DD_execCopy(){
     if(!user||!window.ECEPT_SUPABASE||!DD_copyCard) return;
     DD_setCopyLoading(true);
@@ -402,6 +460,7 @@ function DeckDetailView(props){
   DD_filteredRef.current=filteredCards;
 
   var hasFilters=q.length>0 || DD_selectedTags.length>0;
+  var DD_selectCount=Object.keys(DD_selectedIds).length;
 
   // ── Helpers ──
   function DD_skeletonCard(key){
@@ -457,26 +516,44 @@ function DeckDetailView(props){
       }
     }
 
+    var isSelected=!!DD_selectedIds[c.id];
     return e("div",{
       key:c.id,
       className:"dd-card-item",
-      onClick:function(){ DD_setPreviewIdx(i); DD_setPreviewFlipped(false); },
+      onClick:function(){
+        if(DD_selectMode&&!isOfficial){ DD_toggleSelect(c.id); }
+        else if(!DD_selectMode){ DD_setPreviewIdx(i); DD_setPreviewFlipped(false); }
+      },
+      onPointerDown:!isOfficial?function(ev){ ev.stopPropagation(); DD_onPressStart(c.id); }:null,
+      onPointerUp:!isOfficial?DD_onPressEnd:null,
+      onPointerLeave:!isOfficial?DD_onPressEnd:null,
+      onPointerCancel:!isOfficial?DD_onPressEnd:null,
       style:{
         position:"relative",cursor:"pointer",
-        background:C.cd,border:"1px solid "+C.bd,
+        background:isSelected?"rgba(167,139,250,.10)":C.cd,
+        border:"1px solid "+(isSelected?"rgba(167,139,250,.50)":C.bd),
         borderRadius:"12px",padding:"14px 14px 12px",
         marginBottom:"8px"
       }
     },
       // Main row: icon + content + menu button
       e("div",{style:{display:"flex",gap:"12px",alignItems:"flex-start"}},
-        // Type icon circle
-        e("div",{style:{
-          width:"34px",height:"34px",flexShrink:0,
-          borderRadius:"8px",marginTop:"1px",
-          background:isCloze?"rgba(251,191,36,.12)":"rgba(96,165,250,.12)",
-          display:"flex",alignItems:"center",justifyContent:"center",fontSize:"14px"
-        }},isCloze?"✂️":"📝"),
+        // Type icon circle or selection checkbox
+        DD_selectMode&&!isOfficial
+          ?e("div",{style:{
+              width:"34px",height:"34px",flexShrink:0,
+              borderRadius:"50%",marginTop:"1px",
+              border:"2px solid "+(isSelected?"#a78bfa":C.bd),
+              background:isSelected?"rgba(167,139,250,.20)":"rgba(255,255,255,.04)",
+              display:"flex",alignItems:"center",justifyContent:"center",fontSize:"16px",
+              color:"#a78bfa"
+            }},isSelected?"✓":"")
+          :e("div",{style:{
+              width:"34px",height:"34px",flexShrink:0,
+              borderRadius:"8px",marginTop:"1px",
+              background:isCloze?"rgba(251,191,36,.12)":"rgba(96,165,250,.12)",
+              display:"flex",alignItems:"center",justifyContent:"center",fontSize:"14px"
+            }},isCloze?"✂️":"📝"),
         // Content
         e("div",{style:{flex:1,minWidth:0}},
           // Front (2 lines max)
@@ -586,7 +663,7 @@ function DeckDetailView(props){
           statsText&&e("div",{style:{fontSize:"10px",color:C.dm,marginTop:"5px"}},statsText)
         ),
         // ⋮ button or readonly badge
-        canEdit
+        !DD_selectMode&&(canEdit
           ? e("button",{
               onClick:function(ev){ ev.stopPropagation(); DD_setMenuOpenId(isMenuOpen?null:c.id); },
               "aria-label":"Opciones",
@@ -610,10 +687,10 @@ function DeckDetailView(props){
                 display:"flex",alignItems:"center",justifyContent:"center",
                 borderRadius:"6px",marginTop:"-2px"
               }
-            },"📥")
+            },"📥"))
       ),
       // ⋮ Dropdown
-      isMenuOpen&&e("div",{
+      !DD_selectMode&&isMenuOpen&&e("div",{
         onClick:function(ev){ ev.stopPropagation(); },
         style:{
           position:"absolute",top:"44px",right:"10px",
@@ -717,29 +794,120 @@ function DeckDetailView(props){
     ),
 
     // ── Action bar ──
-    e("div",{style:{display:"flex",gap:"8px",marginBottom:"22px",flexWrap:"wrap"}},
-      DD_cards.length>0 && e("button",{
-        onClick:DD_handleStudy,
-        style:{
-          flex:"1 1 200px",minHeight:"52px",padding:"14px 20px",
-          borderRadius:"14px",
-          background:"linear-gradient(135deg,"+deckCol+",#60a5fa)",
-          color:"#fff",border:"none",
-          fontSize:"15px",fontWeight:700,cursor:"pointer",
-          boxShadow:"0 4px 18px "+deckCol+"55"
-        }
-      },"🎯 Estudiar"),
-      canEdit && e("button",{
-        onClick:DD_handleNewCard,
-        style:{
-          flex:"1 1 160px",minHeight:"52px",padding:"14px 20px",
-          borderRadius:"14px",
-          background:"none",
-          border:"1.5px solid "+C.bd,color:C.tx,
-          fontSize:"14px",fontWeight:700,cursor:"pointer"
-        }
-      },"+ Nueva tarjeta")
-    ),
+    DD_selectMode
+      ?e("div",{style:{marginBottom:"22px"}},
+          // Count row
+          e("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"8px"}},
+            e("span",{style:{flex:1,fontSize:"14px",fontWeight:700,color:C.tx}},
+              DD_selectCount+" seleccionada"+(DD_selectCount===1?"":"s")
+            ),
+            e("button",{
+              onClick:DD_selectAll,
+              style:{padding:"6px 14px",borderRadius:"8px",background:"none",
+                border:"1px solid "+C.bd,color:C.dm,fontSize:"12px",fontWeight:600,cursor:"pointer"}
+            },"Todas"),
+            e("button",{
+              onClick:DD_cancelSelect,
+              style:{padding:"6px 14px",borderRadius:"8px",background:"none",
+                border:"1px solid "+C.bd,color:C.mt,fontSize:"12px",fontWeight:600,cursor:"pointer"}
+            },"Cancelar")
+          ),
+          // Action buttons or delete confirm
+          DD_bulkDelConfirm
+            ?e("div",{style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap"}},
+                e("span",{style:{fontSize:"13px",color:"#fca5a5",fontWeight:600}},
+                  "¿Eliminar "+DD_selectCount+" card"+(DD_selectCount===1?"":"s")+"?"
+                ),
+                e("button",{
+                  onClick:DD_bulkDelete,
+                  disabled:!DD_selectCount,
+                  style:{padding:"8px 18px",borderRadius:"10px",
+                    background:"#ef4444",border:"none",color:"#fff",
+                    fontSize:"13px",fontWeight:700,cursor:"pointer"}
+                },"Sí"),
+                e("button",{
+                  onClick:function(){ DD_setBulkDelConfirm(false); DD_setBulkMsg(""); },
+                  style:{padding:"8px 18px",borderRadius:"10px",background:"none",
+                    border:"1px solid "+C.bd,color:C.mt,
+                    fontSize:"13px",fontWeight:700,cursor:"pointer"}
+                },"No")
+              )
+            :e("div",{style:{display:"flex",gap:"8px",flexWrap:"wrap"}},
+                e("button",{
+                  onClick:function(){ DD_setBulkDelConfirm(true); DD_setBulkMsg(""); },
+                  disabled:!DD_selectCount,
+                  style:{padding:"10px 18px",borderRadius:"10px",
+                    background:DD_selectCount?"rgba(239,68,68,.15)":"rgba(255,255,255,.04)",
+                    border:"1px solid "+(DD_selectCount?"rgba(239,68,68,.40)":C.bd),
+                    color:DD_selectCount?"#fca5a5":C.dm,
+                    fontSize:"13px",fontWeight:700,cursor:DD_selectCount?"pointer":"default"}
+                },"🗑 Eliminar"),
+                e("button",{
+                  onClick:function(){
+                    DD_setBulkMsg("Próximamente");
+                    setTimeout(function(){ DD_setBulkMsg(""); },1500);
+                  },
+                  style:{padding:"10px 18px",borderRadius:"10px",background:"none",
+                    border:"1px solid "+C.bd,color:C.dm,
+                    fontSize:"13px",fontWeight:700,cursor:"pointer"}
+                },"📦 Mover"),
+                e("button",{
+                  onClick:function(){
+                    DD_setBulkMsg("Próximamente");
+                    setTimeout(function(){ DD_setBulkMsg(""); },1500);
+                  },
+                  style:{padding:"10px 18px",borderRadius:"10px",background:"none",
+                    border:"1px solid "+C.bd,color:C.dm,
+                    fontSize:"13px",fontWeight:700,cursor:"pointer"}
+                },"📋 Copiar"),
+                e("button",{
+                  onClick:function(){
+                    DD_setBulkMsg("Próximamente");
+                    setTimeout(function(){ DD_setBulkMsg(""); },1500);
+                  },
+                  style:{padding:"10px 18px",borderRadius:"10px",background:"none",
+                    border:"1px solid "+C.bd,color:C.dm,
+                    fontSize:"13px",fontWeight:700,cursor:"pointer"}
+                },"🏷 Etiquetar")
+              ),
+          DD_bulkMsg&&e("div",{style:{marginTop:"8px",fontSize:"12px",
+            color:DD_bulkMsg.indexOf("Error")===0?"#fca5a5":"#a78bfa",fontWeight:600}},
+            DD_bulkMsg
+          )
+        )
+      :e("div",{style:{display:"flex",gap:"8px",marginBottom:"22px",flexWrap:"wrap"}},
+          DD_cards.length>0 && e("button",{
+            onClick:DD_handleStudy,
+            style:{
+              flex:"1 1 200px",minHeight:"52px",padding:"14px 20px",
+              borderRadius:"14px",
+              background:"linear-gradient(135deg,"+deckCol+",#60a5fa)",
+              color:"#fff",border:"none",
+              fontSize:"15px",fontWeight:700,cursor:"pointer",
+              boxShadow:"0 4px 18px "+deckCol+"55"
+            }
+          },"🎯 Estudiar"),
+          canEdit && e("button",{
+            onClick:DD_handleNewCard,
+            style:{
+              flex:"1 1 160px",minHeight:"52px",padding:"14px 20px",
+              borderRadius:"14px",
+              background:"none",
+              border:"1.5px solid "+C.bd,color:C.tx,
+              fontSize:"14px",fontWeight:700,cursor:"pointer"
+            }
+          },"+ Nueva tarjeta"),
+          canEdit&&DD_cards.length>0&&e("button",{
+            onClick:function(){ DD_setSelectMode(true); },
+            style:{
+              minHeight:"52px",padding:"14px 16px",
+              borderRadius:"14px",
+              background:"none",
+              border:"1.5px solid "+C.bd,color:C.dm,
+              fontSize:"14px",fontWeight:700,cursor:"pointer",flexShrink:0
+            }
+          },"☑ Seleccionar")
+        ),
 
     // ── Search + tag filter ──
     !DD_loading && DD_cards.length>0 && e("div",{style:{marginBottom:"18px"}},
