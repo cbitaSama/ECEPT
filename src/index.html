@@ -65,26 +65,26 @@
 </div>
 <script>
 (function(){
+  // Loader visible mínimo 1200ms desde primer paint (animation-delay CSS).
+  // Cuando React monta, dispara ECEPT_READY → desactivamos pause.
+  // El animation-delay del CSS (1200ms) garantiza que aunque ECEPT_READY
+  // llegue inmediato, el loader sigue visible hasta cumplir 1200ms.
   function dismiss() {
     var l = document.getElementById('initial-loader');
     if (!l) return;
-    l.classList.add('fade');
-    setTimeout(function(){ if(l && l.parentNode) l.parentNode.removeChild(l); }, 360);
+    l.classList.add('go');
+    // 1200ms delay + 320ms fade + 80ms buffer
+    setTimeout(function(){ if(l && l.parentNode) l.parentNode.removeChild(l); }, 1700);
   }
   window.addEventListener('ECEPT_READY', dismiss);
-  // Fail-safe: si pasaron 12s sin ECEPT_READY, ofrecer reload (no quedarse colgado).
+  // Fail-safe agresivo: 8s sin ECEPT_READY → mostrar error de carga con reload.
   setTimeout(function(){
     var l = document.getElementById('initial-loader');
     if (!l) return;
-    var tag = l.querySelector('.il-tag');
-    if (tag) {
-      tag.textContent = 'Está tardando más de lo normal — tocá acá para recargar';
-      tag.style.cursor = 'pointer';
-      tag.style.color = '#fbbf24';
-      tag.style.animation = 'none';
-      tag.onclick = function(){ window.location.reload(); };
-    }
-  }, 12000);
+    // Si todavía está pausado (no llegó ECEPT_READY), mostramos fallback.
+    if (l.classList.contains('go')) return;
+    l.innerHTML = '<div style="text-align:center;padding:32px;font-family:-apple-system,system-ui,sans-serif;"><div style="font-size:36px;margin-bottom:16px;">⚠️</div><div style="font-size:18px;color:#e2e8f0;margin-bottom:8px;font-weight:600;">No pudimos cargar la app</div><div style="font-size:14px;color:#94a3b8;margin-bottom:24px;">Verificá tu conexión a internet</div><button onclick="window.location.reload()" style="background:linear-gradient(135deg,#60a5fa,#a78bfa);color:#fff;border:none;padding:12px 28px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;">Reintentar</button></div>';
+  }, 8000);
   window.addEventListener('error', function(){
     var l = document.getElementById('initial-loader');
     if (!l) return;
