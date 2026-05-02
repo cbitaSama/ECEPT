@@ -363,4 +363,96 @@ window.alert() activos en src/components/: 0. Los `role:'alert'` que aparecen so
 - `api/*` intacto.
 - RLS / Supabase queries de negocio intactas.
 - 8 commits secuenciales, ninguno mergeado a Alpha-2.
+
+---
+
+## 13. Ronda 3 — Bugs urgentes + Logo app-wide + ModuleShell completo
+
+6 commits sobre la ronda 2. Todos en `Alpha25-elion-flashcards`.
+
+| # | Hash      | Fix / Feature                                       |
+|---|-----------|-----------------------------------------------------|
+| 1 | `bfe406a` | Pantallazo "error al cargar" intermitente          |
+| 2 | `95d4b81` | FAB chat con Logo visible + online pulse dot       |
+| 3 | `c7a014f` | Logo en header global, header del chat, header Profile |
+| 4 | `0fa677b` | ModuleShell aplicado a fisio, general, vocab, trauma |
+| 5 | `a045a63` | Sub-niveles Reuma (reuma_sec) refinados con ModuleShell |
+| 6 | (este)    | Docs ronda 3                                       |
+
+### Bug 1 — Pantallazo "error al cargar" intermitente
+
+**Causa raíz**: el listener `window.addEventListener('error', ...)` en el inline script de `src/index.html` capturaba errores globales de cualquier script de la página (vercel-insights, Google Fonts, supabase CDN) DESPUÉS de que la app ya estaba cargada y el initial-loader ya removido o en proceso de fade. Esos errores son benignos (el navegador los tira por scripts de terceros sin afectar a la app) pero el listener inyectaba el UI de error sin verificar si la app ya estaba lista → flash visible al inicio de cada sesión.
+
+**Solución** (commit `bfe406a`):
+- Variable nombrada `ECEPT_LOADER_FAILSAFE = setTimeout(...)` para poder cancelarlo.
+- Flag global `window._ECEPT_LOADED = true` cuando se ejecuta `dismiss()`.
+- Flag local `loaderDismissed` para idempotencia (múltiples dispatches no rompen).
+- `dismiss()` hace `clearTimeout(ECEPT_LOADER_FAILSAFE)` antes de animar.
+- Fail-safe ahora 12s (era 8s) — más generoso para 3G lento.
+- Listener `'error'` chequea `loaderDismissed` / `_ECEPT_LOADED` PRIMERO; si la app ya cargó, retorna sin hacer nada. Además filtra errores de assets (`ev.target !== window`) para solo reaccionar a runtime errors críticos.
+
+### Bug 2 — FAB del chat sin logo visible
+
+**Causa probable**: el Logo a tamaño 32px renderizaba el SVG con `strokeWidth: 4` + `strokeDasharray: '6 4'` en viewBox 100. A 32px de display, el dasharray se escalaba a ~1.9px segments → casi invisible o apariencia de strands rotas. Adicionalmente el `<button>` no tenía `padding:0` ni `overflow:visible` explícitos.
+
+**Solución** (commit `95d4b81`):
+- `Logo.js`: `strokeWidth`, `strokeDasharray`, `rungSw`, `dotR` ahora ADAPTATIVOS al size.
+  - `size <= 36`: sw 5, dash '4 3', rungSw 3, dotR 3.5
+  - `size <= 64`: sw 4.2, dash '5 3.5', rungSw 2.5, dotR 3
+  - `size > 64`: sw 4, dash '6 4', rungSw 2.5, dotR 3
+- `ChatBot.js` FAB: `padding:0` + `overflow:'visible'` explícitos. Logo `size: 34` con `animated: true`.
+- Online indicator: `<span>` absoluto bottom 4 / right 4, círculo verde 12x12 con `border: 2px solid #060a14` (mismo color que body para parecer "flotar"), boxShadow glow verde, animación `ecept_pulseDot` 2.4s ease-in-out.
+- Keyframe `ecept_pulseDot` (opacity + scale 0.88↔1) añadido a `index.html`.
+
+### Bug 3 — Logo en más ubicaciones de la app
+
+Auditoría de las 10 ubicaciones del spec (commit `c7a014f`):
+
+| # | Ubicación                          | Estado                                         |
+|---|------------------------------------|------------------------------------------------|
+| 1 | Loading screen                     | ✅ ya estaba (initial-loader inline + LoadingScreen.js) |
+| 2 | Auth modal                         | ✅ ya estaba (size 64 con glow + animated)     |
+| 3 | FAB chat                           | ✅ fixeado en B2 (size 34 con online dot)      |
+| 4 | Avatar Elion en mensajes assistant | ✅ ya estaba (CB_elionAvatar usa Logo)         |
+| 5 | Header del chat                    | ✅ AGREGADO (size 26 en círculo 36 con glow)   |
+| 6 | Header global ECEPT (top nav)      | ✅ AGREGADO (size 24 + texto gradient mixed)   |
+| 7 | Empty state ChatBot main           | ✅ ya estaba (size 72 glow float)              |
+| 8 | Empty state DecksView              | (icon emoji 🎴 acorde al contexto)            |
+| 9 | ProfileView header                 | ✅ AGREGADO (size 28 al lado del título)       |
+| 10 | Favicon                           | ✅ ya estaba (SVG hélice viewBox 100)          |
+
+### Bug 4 — ModuleShell en módulos restantes
+
+ModuleShell ahora aplicado a (commit `0fa677b`):
+- `fisio` (FisiologiaHub refactor): icon 🔬 accent pink #ec4899. Cards de topics premium con minHeight 150, hover, stagger.
+- `general`: icon 📚 accent purple. Wrap directo, contenido interno (accordions) intacto.
+- `vocabulario`: icon 🔤 accent cyan. VocabularioView nativo wrapped sin tocar.
+- `trauma-u1`: icon 🩸 accent danger. TraumaView nativo wrapped sin tocar.
+
+`salud_mental`: NO se aplica. SaludMentalView es chrome-free intencionalmente (su `.sm-root` tiene su propio header y stack interno elaborado). Documentado como TODO.
+
+### Bug 5 — Sub-niveles Reuma refinados
+
+`reuma_sec` (sub-sección de Reumatología — ej: "Artritis Inflamatoria") ahora usa ModuleShell con título dinámico (nombre de la sección), subtitle "N enfermedades", icon de la sección. Lista de enfermedades en grid auto-fit minmax(320px,1fr) — aprovecha pantallas wide (antes era stack vertical 1-col). Cards refinadas: gradient surface, hover translateY(-1px) + border primary 0.40, stagger fadeSlideUp.
+
+`reuma_dis` (enfermedad específica): NO se modifica. Contenido denso con quiz/tabs/sub-secciones que requiere rediseño más amplio. Documentado como TODO.
+
+### TODOs ronda 3
+
+- `vista==='salud_mental'`: aplicar ModuleShell o decidir si se mantiene chrome-free. La SaludMentalView tiene su propio header complejo.
+- `vista==='reuma_dis'`: rediseñar contenido denso (quiz, tabs SUB[], cards de cuadro clínico) con jerarquía visual premium.
+- ProfileView: aplicar layout 2-col en desktop (avatar + datos en sidebar 280px, cards de Créditos/Memoria/Stats en main).
+- StudyView: background gradient + footer stats post-sesión.
+- Migrar inline-styled buttons en DecksView/DeckDetailView a `<Button>`.
+- Skeleton para StudyView durante carga inicial.
+- Smoke test mobile real (320-480px) en Sebas iPad / iPhone.
+
+### Verificación final (ronda 3)
+
+- 0 ocurrencias de `const`/`let`/`=>` en archivos modificados.
+- Build: `✓ build OK (150 integrity checks passed)`.
+- `src/data/*` intacto.
+- `api/*` intacto.
+- RLS / Supabase queries de negocio intactas.
+- 6 commits secuenciales, ninguno mergeado a Alpha-2.
 6. Para CTAs: `<Button variant="primary">` o `variant="premium"` según contexto.
