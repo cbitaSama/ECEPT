@@ -38,6 +38,10 @@ function DecksView(props){
   s=useState(null);  var DV_dragIdx=s[0],         DV_setDragIdx=s[1];
   s=useState(null);  var DV_dragOverIdx=s[0],     DV_setDragOverIdx=s[1];
   var DV_dragRef=useRef({idx:null,overIdx:null});
+  s=useState(false); var DV_importOpen=s[0],    DV_setImportOpen=s[1];
+  s=useState(null);  var DV_importData=s[0],    DV_setImportData=s[1];
+  s=useState("");    var DV_importError=s[0],   DV_setImportError=s[1];
+  s=useState(false); var DV_importLoading=s[0], DV_setImportLoading=s[1];
 
   // ── Inject CSS once ──
   useEffect(function(){
@@ -127,6 +131,70 @@ function DecksView(props){
     DV_setMIcon("🎴"); DV_setMColor("#a78bfa");
     DV_setMErr(""); DV_setMLoading(false);
     DV_setModalMode("create");
+  }
+
+  function DV_handleImportFile(ev){
+    var file=ev.target.files&&ev.target.files[0];
+    if(!file) return;
+    DV_setImportError(""); DV_setImportData(null);
+    var reader=new FileReader();
+    reader.onload=function(e2){
+      try{
+        var parsed=JSON.parse(e2.target.result);
+        if(!parsed.version||!parsed.deck||!parsed.deck.name||!Array.isArray(parsed.cards)){
+          DV_setImportError("Archivo inválido. Usá un JSON exportado desde ECEPT.");
+          return;
+        }
+        DV_setImportData(parsed);
+      }catch(ex){
+        DV_setImportError("Archivo inválido. Usá un JSON exportado desde ECEPT.");
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  async function DV_importDeck(){
+    if(!DV_importData||!user||!window.ECEPT_SUPABASE) return;
+    DV_setImportLoading(true); DV_setImportError("");
+    try{
+      var deckRes=await window.ECEPT_SUPABASE.from("decks")
+        .insert({
+          user_id:user.id,
+          name:DV_importData.deck.name,
+          description:DV_importData.deck.description||"",
+          color:DV_importData.deck.color||"#3b82f6",
+          icon:DV_importData.deck.icon||"📚",
+          is_official:false
+        })
+        .select("id")
+        .single();
+      if(deckRes.error) throw deckRes.error;
+      var newDeckId=deckRes.data.id;
+      var allCards=[];
+      for(var ici=0;ici<DV_importData.cards.length;ici++){
+        var ic=DV_importData.cards[ici];
+        allCards.push({
+          deck_id:newDeckId,user_id:user.id,is_official:false,
+          card_type:ic.card_type||"basic",
+          front:ic.front||"",back:ic.back||"",tags:ic.tags||[]
+        });
+      }
+      var chunkSize=50;
+      for(var ics=0;ics<allCards.length;ics+=chunkSize){
+        var chunk=allCards.slice(ics,ics+chunkSize);
+        var res=await window.ECEPT_SUPABASE.from("flashcards").insert(chunk);
+        if(res.error) throw res.error;
+      }
+      DV_setImportOpen(false);
+      DV_setImportData(null);
+      DV_setImportError("");
+      DV_loadData();
+    }catch(err){
+      console.error("import error",err);
+      DV_setImportError("Error al importar. Intentá de nuevo.");
+    }finally{
+      DV_setImportLoading(false);
+    }
   }
 
   function DV_openEdit(deck){
@@ -565,7 +633,18 @@ function DecksView(props){
           color:C.dm,
           fontSize:"14px",fontWeight:700,cursor:"pointer"
         }
-      },"🏷️ Etiquetas")
+      },"🏷️ Etiquetas"),
+      user&&e("button",{
+        onClick:function(){ DV_setImportOpen(true); DV_setImportData(null); DV_setImportError(""); },
+        style:{
+          flex:"0 0 auto",minHeight:"52px",padding:"14px 18px",
+          borderRadius:"14px",
+          background:"none",
+          border:"1.5px solid rgba(167,139,250,.25)",
+          color:C.dm,
+          fontSize:"14px",fontWeight:700,cursor:"pointer"
+        }
+      },"⬆ Importar")
     ),
 
     // ── Load error ──
@@ -854,7 +933,120 @@ function DecksView(props){
       user:user,
       supabase:window.ECEPT_SUPABASE,
       onClose:function(){ DV_setTagMgrOpen(false); }
-    })
+    }),
+
+    DV_importOpen&&ReactDOM.createPortal(
+      e("div",{
+        onClick:function(){ if(!DV_importLoading){ DV_setImportOpen(false); DV_setImportData(null); DV_setImportError(""); } },
+        style:{position:"fixed",inset:0,background:"rgba(0,0,0,.65)",
+          display:"flex",alignItems:"center",justifyContent:"center",
+          zIndex:1050,padding:"16px"}
+      },
+        e("div",{
+          onClick:function(ev){ ev.stopPropagation(); },
+          style:{width:"100%",maxWidth:"440px",background:C.cd,
+            border:"1px solid "+C.bd,borderRadius:"16px",
+            boxShadow:"0 12px 40px rgba(0,0,0,.6)",overflow:"hidden"}
+        },
+          e("div",{style:{
+            display:"flex",alignItems:"center",justifyContent:"space-between",
+            padding:"16px 18px",borderBottom:"1px solid "+C.bd
+          }},
+            e("span",{style:{fontSize:"14px",color:C.tx,fontWeight:700}},"⬆ Importar baraja"),
+            e("button",{
+              onClick:function(){ DV_setImportOpen(false); DV_setImportData(null); DV_setImportError(""); },
+              disabled:DV_importLoading,
+              style:{background:"none",border:"none",color:C.dm,fontSize:"20px",
+                cursor:"pointer",lineHeight:1,padding:"4px 8px"}
+            },"×")
+          ),
+          e("div",{style:{padding:"18px"}},
+            !DV_importData
+              ?e("div",null,
+                  e("p",{style:{fontSize:"13px",color:C.dm,marginBottom:"14px",lineHeight:1.5}},
+                    "Seleccioná un archivo .json exportado desde ECEPT."
+                  ),
+                  e("label",{style:{
+                    display:"flex",alignItems:"center",justifyContent:"center",
+                    minHeight:"80px",borderRadius:"12px",cursor:"pointer",
+                    border:"2px dashed "+C.bd,background:"rgba(255,255,255,.02)",
+                    fontSize:"13px",color:C.dm,fontWeight:600,gap:"8px"
+                  }},
+                    e("span",null,"📂 Elegir archivo .json"),
+                    e("input",{
+                      type:"file",accept:".json",
+                      onChange:DV_handleImportFile,
+                      style:{display:"none"}
+                    })
+                  ),
+                  DV_importError&&e("div",{style:{marginTop:"10px",fontSize:"12px",
+                    color:"#fca5a5",fontWeight:600}},DV_importError)
+                )
+              :e("div",null,
+                  e("div",{style:{
+                    display:"flex",alignItems:"center",gap:"10px",
+                    padding:"12px 14px",borderRadius:"10px",
+                    background:"rgba(255,255,255,.04)",border:"1px solid "+C.bd,
+                    marginBottom:"14px"
+                  }},
+                    e("span",{style:{fontSize:"22px"}},(DV_importData.deck.icon||"📚")),
+                    e("div",{style:{flex:1,minWidth:0}},
+                      e("div",{style:{fontSize:"14px",color:C.tx,fontWeight:700,
+                        overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},
+                        DV_importData.deck.name
+                      ),
+                      e("div",{style:{fontSize:"11px",color:C.dm,marginTop:"2px"}},
+                        DV_importData.cards.length+" card"+(DV_importData.cards.length===1?"":"s")
+                      )
+                    )
+                  ),
+                  e("div",{style:{display:"flex",flexDirection:"column",gap:"4px",marginBottom:"4px"}},
+                    DV_importData.cards.slice(0,3).map(function(c,ci){
+                      var front=c.front||"";
+                      return e("div",{key:ci,style:{
+                        fontSize:"12px",color:C.dm,padding:"6px 10px",
+                        borderRadius:"8px",background:"rgba(255,255,255,.03)",
+                        overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"
+                      }},front.length>50?front.slice(0,50)+"…":front);
+                    })
+                  ),
+                  DV_importData.cards.length>3&&e("div",{style:{
+                    fontSize:"11px",color:C.dm,padding:"4px 10px"
+                  }},"… y "+(DV_importData.cards.length-3)+" más"),
+                  DV_importError&&e("div",{style:{marginTop:"10px",fontSize:"12px",
+                    color:"#fca5a5",fontWeight:600}},DV_importError)
+                )
+          ),
+          e("div",{style:{
+            padding:"14px 18px",borderTop:"1px solid "+C.bd,
+            display:"flex",gap:"8px"
+          }},
+            DV_importData&&e("button",{
+              onClick:DV_importDeck,
+              disabled:DV_importLoading,
+              style:{
+                flex:1,minHeight:"44px",padding:"12px",borderRadius:"12px",
+                border:"none",
+                background:DV_importLoading?"rgba(255,255,255,.08)":"#3b82f6",
+                color:DV_importLoading?C.mt:"#fff",
+                fontSize:"14px",fontWeight:700,
+                cursor:DV_importLoading?"default":"pointer"
+              }
+            },DV_importLoading?"Importando...":"Importar"),
+            e("button",{
+              onClick:function(){ DV_setImportOpen(false); DV_setImportData(null); DV_setImportError(""); },
+              disabled:DV_importLoading,
+              style:{
+                minHeight:"44px",padding:"12px 18px",borderRadius:"12px",
+                background:"none",border:"1px solid "+C.bd,
+                color:C.mt,fontSize:"14px",fontWeight:700,cursor:"pointer"
+              }
+            },"Cancelar")
+          )
+        )
+      ),
+      document.body
+    )
   );
 }
 

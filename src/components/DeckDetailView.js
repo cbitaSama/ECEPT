@@ -540,6 +540,38 @@ function DeckDetailView(props){
     if(typeof go==="function") go("flashcards_study");
   }
 
+  function DD_exportDeck(){
+    var exportData={
+      version:1,
+      exportedAt:new Date().toISOString(),
+      deck:{
+        name:deck.name,
+        description:deck.description||"",
+        color:deck.color||"#3b82f6",
+        icon:deck.icon||"📚"
+      },
+      cards:[]
+    };
+    for(var ei=0;ei<DD_cards.length;ei++){
+      var ec=DD_cards[ei];
+      exportData.cards.push({
+        card_type:ec.card_type,
+        front:ec.front,
+        back:ec.back||"",
+        tags:ec.tags||[]
+      });
+    }
+    var blob=new Blob([JSON.stringify(exportData,null,2)],{type:"application/json"});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement("a");
+    a.href=url;
+    a.download=(deck.name||"baraja").replace(/[^a-z0-9]/gi,"_")+"_ecept.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   // ── Deck no seleccionado: fallback ──
   if(!deck){
     return e("div",{style:{maxWidth:"540px",margin:"0 auto",padding:"40px 20px",textAlign:"center"}},
@@ -1047,7 +1079,17 @@ function DeckDetailView(props){
               border:"1.5px solid "+C.bd,color:C.dm,
               fontSize:"14px",fontWeight:700,cursor:"pointer",flexShrink:0
             }
-          },"☑ Seleccionar")
+          },"☑ Seleccionar"),
+          canEdit&&DD_cards.length>0&&e("button",{
+            onClick:DD_exportDeck,
+            style:{
+              minHeight:"52px",padding:"14px 16px",
+              borderRadius:"14px",
+              background:"none",
+              border:"1.5px solid "+C.bd,color:C.dm,
+              fontSize:"14px",fontWeight:700,cursor:"pointer",flexShrink:0
+            }
+          },"⬇ Exportar")
         ),
 
     // ── Search + tag filter ──
