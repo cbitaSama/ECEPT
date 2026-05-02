@@ -1,6 +1,7 @@
 // Vercel serverless function — Elion AI assistant (ECEPT).
-// POST { messages, model, attachments? } → { reply, quota }
+// POST { messages, model, attachments?, conversationId? } → { reply, quota, conversationId }
 // Tier-gated: quota (free) → credits → 402 insufficient_credits.
+// Persists messages to chat_messages + manages chat_conversations.
 // No npm deps — raw fetch (Node 18+).
 
 const { TIERS, CREDIT_COSTS } = require('./_tiers');
@@ -8,7 +9,14 @@ const { getProfile, spendCredits, getDailyChatCount, incrementDailyChat } = requ
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const ANON_KEY = process.env.SUPABASE_ANON_KEY;
+const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
+const SVC_HEADERS = {
+  'apikey': SERVICE_KEY,
+  'Authorization': `Bearer ${SERVICE_KEY}`,
+  'Content-Type': 'application/json'
+};
 
 const SYSTEM_PROMPT =
   'Eres Elion, asistente de IA de ECEPT, webapp de estudio médico para estudiantes de medicina hispanohablantes.\n\n' +
@@ -65,6 +73,97 @@ const SYSTEM_PROMPT =
 const VALID_MIMES = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
 const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+async function createConversation(uid, model) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/chat_conversations`, {
+    method: 'POST',
+    headers: { ...SVC_HEADERS, 'Prefer': 'return=representation' },
+    body: JSON.stringify({ user_id: uid, title: 'Nueva conversación', model, archived: false })
+  });
+  const rows = await r.json();
+  return Array.isArray(rows) ? rows[0] : rows;
+}
+
+async function verifyConvOwnership(convId, uid) {
+  const r = await fetch(
+    `${SUPABASE_URL}/rest/v1/chat_conversations?id=eq.${convId}&user_id=eq.${uid}&select=id`,
+    { headers: SVC_HEADERS }
+  );
+  const rows = await r.json();
+  return Array.isArray(rows) && rows.length > 0;
+}
+
+async function insertMessage(convId, role, content, attachments, model, paidWith, creditsSpent) {
+  await fetch(`${SUPABASE_URL}/rest/v1/chat_messages`, {
+    method: 'POST',
+    headers: { ...SVC_HEADERS, 'Prefer': 'return=minimal' },
+    body: JSON.stringify({
+      conversation_id: convId,
+      role,
+      content: String(content || '').slice(0, 32000),
+      attachments: attachments || null,
+      model: model || null,
+      paid_with: paidWith || null,
+      credits_spent: creditsSpent || 0
+    })
+  });
+}
+
+async function patchConvTitle(convId, title) {
+  await fetch(
+    `${SUPABASE_URL}/rest/v1/chat_conversations?id=eq.${convId}`,
+    {
+      method: 'PATCH',
+      headers: { ...SVC_HEADERS, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ title: String(title).slice(0, 200) })
+    }
+  );
+}
+
+async function getUserContext(uid) {
+  try {
+    const r = await fetch(
+      `${SUPABASE_URL}/rest/v1/user_context?user_id=eq.${uid}&select=notes`,
+      { headers: SVC_HEADERS }
+    );
+    if (!r.ok) return '';
+    const rows = await r.json();
+    return (Array.isArray(rows) && rows[0]) ? (rows[0].notes || '') : '';
+  } catch (err) {
+    return '';
+  }
+}
+
+async function autoTitle(apiKey, userContent) {
+  const titlePrompt =
+    'Resumí en 4-6 palabras (sin comillas, sin emojis, sin punto final) ' +
+    'el tema principal de esta consulta médica:\n\n' +
+    String(userContent).slice(0, 200);
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: titlePrompt }] }],
+        generationConfig: { temperature: 0.2, maxOutputTokens: 32 }
+      })
+    });
+    if (!r.ok) return null;
+    const data = await r.json();
+    const parts = data?.candidates?.[0]?.content?.parts;
+    if (!Array.isArray(parts)) return null;
+    let t = '';
+    parts.forEach(p => { if (p?.text) t += p.text; });
+    return t.trim().slice(0, 120) || null;
+  } catch (err) {
+    return null;
+  }
+}
+
+// ── Handler ───────────────────────────────────────────────────────────────────
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -89,9 +188,12 @@ module.exports = async function handler(req, res) {
   }
   if (!user || !user.id) { res.status(401).json({ error: 'unauthorized' }); return; }
 
+  const uid = user.id;
+
   // ── 2. Body ──
   const body = req.body || {};
   const { messages, model, attachments } = body;
+  let { conversationId } = body;
 
   if (!model || !CREDIT_COSTS[model] || model === 'gen_per_card') {
     res.status(400).json({ error: 'invalid_model', valid: Object.keys(CREDIT_COSTS).filter(k => k !== 'gen_per_card') });
@@ -102,13 +204,29 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  // ── 3. Profile + tier ──
-  const profile = await getProfile(user.id);
+  // ── 3. Conversation ──
+  let isNewConv = false;
+  if (!conversationId) {
+    try {
+      const conv = await createConversation(uid, model);
+      conversationId = conv && conv.id;
+      isNewConv = true;
+    } catch (err) {
+      console.error('createConversation error:', err.message);
+      // Non-fatal: proceed without persistence
+    }
+  } else {
+    const owned = await verifyConvOwnership(conversationId, uid).catch(() => false);
+    if (!owned) { res.status(403).json({ error: 'forbidden' }); return; }
+  }
+
+  // ── 4. Profile + tier ──
+  const profile = await getProfile(uid);
   const role = profile?.role || 'student';
   const tier = TIERS[role] || TIERS.student;
   const currentCredits = profile?.credits || 0;
 
-  // ── 4. Gating decision ──
+  // ── 5. Gating decision ──
   let paidWith;
   let daily = 0;
   let creditResult = null;
@@ -117,17 +235,16 @@ module.exports = async function handler(req, res) {
   if (role === 'admin') {
     paidWith = 'free_admin';
   } else if (tier.models.includes(model)) {
-    daily = await getDailyChatCount(user.id);
+    daily = await getDailyChatCount(uid);
     paidWith = daily < tier.dailyChat ? 'quota' : 'credits';
   } else {
-    // Model not in tier (e.g. student → 2.5-flash, or anyone → 2.5-pro)
-    daily = await getDailyChatCount(user.id);
+    daily = await getDailyChatCount(uid);
     paidWith = 'credits';
   }
 
   if (paidWith === 'credits') {
     try {
-      creditResult = await spendCredits(user.id, cost, 'chat_' + model, { model });
+      creditResult = await spendCredits(uid, cost, 'chat_' + model, { model });
     } catch (err) {
       console.error('spendCredits error:', err.message);
       res.status(500).json({ error: 'internal', message: err.message }); return;
@@ -138,7 +255,7 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // ── 5. Validate attachments ──
+  // ── 6. Validate attachments ──
   const validAttachments = [];
   if (Array.isArray(attachments) && attachments.length > 0) {
     for (const a of attachments) {
@@ -155,18 +272,23 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // ── 6. Build Gemini contents ──
+  // ── 7. User context (memory) ──
+  const userNotes = await getUserContext(uid);
+  const systemPromptFull = userNotes
+    ? SYSTEM_PROMPT + '\n\nCONTEXTO DEL USUARIO:\n' + userNotes
+    : SYSTEM_PROMPT;
+
+  // ── 8. Build Gemini contents ──
   const recent = messages.slice(-10);
   const contents = recent.map((m, idx) => {
     const parts = [{ text: String(m.content || '') }];
-    // Attach files to the last message only
     if (idx === recent.length - 1 && validAttachments.length > 0) {
       validAttachments.forEach(a => parts.push({ inlineData: { mimeType: a.mimeType, data: a.data } }));
     }
     return { role: m.role === 'assistant' ? 'model' : 'user', parts };
   });
 
-  // ── 7. Call Gemini ──
+  // ── 9. Call Gemini ──
   const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
   let geminiResp;
   try {
@@ -174,7 +296,7 @@ module.exports = async function handler(req, res) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        systemInstruction: { parts: [{ text: systemPromptFull }] },
         contents,
         generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
       })
@@ -198,31 +320,51 @@ module.exports = async function handler(req, res) {
   }
   reply = reply.trim();
 
-  // ── 8. Post-success side-effects ──
+  // ── 10. Post-success side-effects ──
   if (paidWith === 'quota') {
-    try {
-      daily = await incrementDailyChat(user.id);
-    } catch (err) {
-      console.error('incrementDailyChat error:', err.message);
-      // Non-fatal — don't fail the response
-    }
+    try { daily = await incrementDailyChat(uid); }
+    catch (err) { console.error('incrementDailyChat error:', err.message); }
   }
 
-  // Resolve updated credits (use spendCredits return value to avoid extra fetch)
   let updatedCredits = currentCredits;
   if (paidWith === 'credits' && creditResult?.ok) {
     updatedCredits = creditResult.balance;
   }
 
-  // ── 9. Response ──
+  const spent = paidWith === 'credits' ? cost : 0;
+
+  // ── 11. Persist messages ──
+  if (conversationId) {
+    const userMsg = messages[messages.length - 1];
+    const attachSummary = validAttachments.length > 0
+      ? validAttachments.map(a => ({ name: a.name, mimeType: a.mimeType }))
+      : null;
+    try {
+      await insertMessage(conversationId, 'user', userMsg.content, attachSummary, null, null, 0);
+      await insertMessage(conversationId, 'assistant', reply, null, model, paidWith, spent);
+    } catch (err) {
+      console.error('insertMessage error:', err.message);
+    }
+  }
+
+  // ── 12. Auto-title for new conversations (fire-and-forget) ──
+  if (isNewConv && conversationId) {
+    const userContent = messages[messages.length - 1]?.content || '';
+    autoTitle(GEMINI_API_KEY, userContent)
+      .then(title => { if (title) return patchConvTitle(conversationId, title); })
+      .catch(err => console.error('autoTitle error:', err.message));
+  }
+
+  // ── 13. Response ──
   res.status(200).json({
     reply,
+    conversationId: conversationId || null,
     quota: {
       paidWith,
       dailyUsed: daily,
       dailyLimit: tier.dailyChat,
       credits: updatedCredits,
-      spent: paidWith === 'credits' ? cost : 0
+      spent
     }
   });
 };

@@ -17,6 +17,33 @@ var CB_TIER_MODELS = {
   admin:   ['gemini-2.5-flash-lite','gemini-2.5-flash']
 };
 
+var CB_MODEL_INFO = [
+  {
+    id:'gemini-2.5-flash-lite', icon:'⚡', name:'Flash Lite',
+    tagline:'Rápido y eficiente',
+    description:'Ideal para preguntas cotidianas, definiciones, repaso rápido.',
+    bullets:['Respuestas en segundos','Acceso libre con cuota diaria','1 🪙 por mensaje extra'],
+    gradient:'linear-gradient(135deg,rgba(96,165,250,0.15),rgba(96,165,250,0.05))',
+    accent:'#60a5fa'
+  },
+  {
+    id:'gemini-2.5-flash', icon:'✨', name:'Flash 2.5',
+    tagline:'Mejor calidad y razonamiento',
+    description:'Para casos clínicos complejos, análisis comparativos, esquemas detallados.',
+    bullets:['Razonamiento más sólido','⭐ Incluido en Premium','3 🪙 por mensaje (sin Premium)'],
+    gradient:'linear-gradient(135deg,rgba(167,139,250,0.18),rgba(167,139,250,0.06))',
+    accent:'#a78bfa', badge:'POPULAR'
+  },
+  {
+    id:'gemini-2.5-pro', icon:'🧠', name:'Pro 2.5',
+    tagline:'Máxima inteligencia',
+    description:'Análisis profundo de documentos largos, casos extensos, razonamiento avanzado.',
+    bullets:['Razonamiento avanzado','Sin cuota gratis','15 🪙 por mensaje'],
+    gradient:'linear-gradient(135deg,rgba(251,191,36,0.18),rgba(251,191,36,0.06))',
+    accent:'#fbbf24', badge:'PREMIUM'
+  }
+];
+
 var CB_styleInjected = false;
 
 var CB_CALLOUTS = {
@@ -43,13 +70,11 @@ function CB_parseInline(text) {
   var result = [];
   var remaining = String(text || '');
   var kn = 0;
-  // Groups: 1=link-text 2=link-url 3=bold 4=code 5=italic
   while (remaining.length > 0) {
     var m = /\[([^\]]+)\]\(([^)]+)\)|\*\*(.+?)\*\*|`([^`]+)`|\*([^*\n]+)\*/.exec(remaining);
     if (!m) { if (remaining) result.push(remaining); break; }
     if (m.index > 0) result.push(remaining.slice(0, m.index));
     if (m[1] !== undefined) {
-      // Link — IIFE captures href/label per iteration
       (function(href, label, key) {
         if (href.indexOf('#') === 0) {
           var route = href.slice(1);
@@ -101,7 +126,6 @@ function CB_renderMarkdown(text) {
   while (i < lines.length) {
     var line = lines[i];
 
-    // Code block
     if (/^\s*```/.test(line)) {
       var codeLines = [];
       i++;
@@ -110,7 +134,6 @@ function CB_renderMarkdown(text) {
       i++; continue;
     }
 
-    // Headers
     if (line.indexOf('### ') === 0) {
       elems.push(e('div', { key:'mk'+(kn++), style:{ color:'#a78bfa', fontSize:14, fontWeight:600, marginTop:12, marginBottom:6 } }, e('span', null, CB_parseInline(line.slice(4)))));
       i++; continue;
@@ -124,13 +147,11 @@ function CB_renderMarkdown(text) {
       i++; continue;
     }
 
-    // Horizontal rule
     if (/^\s*---+\s*$/.test(line) || /^\s*\*\*\*+\s*$/.test(line)) {
       elems.push(e('hr', { key:'mk'+(kn++), style:{ border:0, borderTop:'1px solid '+C.bd, margin:'12px 0' } }));
       i++; continue;
     }
 
-    // Table
     if (line.indexOf('|') !== -1 && i+1 < lines.length && /^\s*\|[\s|:=-]+\|\s*$/.test(lines[i+1])) {
       var headerCells = line.split('|').filter(function(c) { return c.trim() !== ''; }).map(function(c) { return c.trim(); });
       i += 2;
@@ -149,7 +170,7 @@ function CB_renderMarkdown(text) {
               var isLastRow = ri === tableRows.length - 1;
               return e('tr', { key:ri },
                 cells.map(function(cell, ci) {
-                  return e('td', { key:ci, style:{ padding:'8px 10px', borderBottom: isLastRow ? 'none' : '1px solid '+C.bd, fontSize:13 } }, e('span', null, CB_parseInline(cell)));
+                  return e('td', { key:ci, style:{ padding:'8px 10px', borderBottom:isLastRow?'none':'1px solid '+C.bd, fontSize:13 } }, e('span', null, CB_parseInline(cell)));
                 })
               );
             })
@@ -159,7 +180,6 @@ function CB_renderMarkdown(text) {
       continue;
     }
 
-    // Callout blocks
     var _calloutKey = null;
     var _calloutEmojis = Object.keys(CB_CALLOUTS);
     for (var _cki = 0; _cki < _calloutEmojis.length; _cki++) {
@@ -171,7 +191,6 @@ function CB_renderMarkdown(text) {
       i++; continue;
     }
 
-    // List items
     if (line.indexOf('- ') === 0 || line.indexOf('* ') === 0) {
       elems.push(e('div', { key:'mk'+(kn++), style:{ display:'flex', gap:'6px', margin:'2px 0', alignItems:'flex-start' } },
         e('span', { style:{ color:C.ac, flexShrink:0, marginTop:2, fontSize:12 } }, '•'),
@@ -180,26 +199,20 @@ function CB_renderMarkdown(text) {
       i++; continue;
     }
 
-    // Empty line
     if (!line.trim()) {
       elems.push(e('div', { key:'mk'+(kn++), style:{ height:6 } }));
       i++; continue;
     }
 
-    // ECEPT navigation footer (📚 En ECEPT: ...)
     if (line.indexOf('📚 En ECEPT:') === 0) {
       var footerText = line.slice('📚 En ECEPT:'.length).trim();
-      elems.push(e('div', { key:'mk'+(kn++), style:{
-        borderTop:'1px solid rgba(96,165,250,0.15)', marginTop:12, paddingTop:10,
-        display:'flex', flexWrap:'wrap', alignItems:'center', gap:4
-      }},
+      elems.push(e('div', { key:'mk'+(kn++), style:{ borderTop:'1px solid rgba(96,165,250,0.15)', marginTop:12, paddingTop:10, display:'flex', flexWrap:'wrap', alignItems:'center', gap:4 } },
         e('span', { style:{ fontSize:11, color:'#94a3b8', fontWeight:600, marginRight:4, flexShrink:0 } }, '📚 En ECEPT:'),
         e('span', { style:{ display:'inline-flex', flexWrap:'wrap', gap:4 } }, CB_parseInline(footerText))
       ));
       i++; continue;
     }
 
-    // Normal paragraph
     elems.push(e('p', { key:'mk'+(kn++), style:{ margin:'2px 0', lineHeight:1.55 } }, e('span', null, CB_parseInline(line))));
     i++;
   }
@@ -224,11 +237,26 @@ function ChatBot(props) {
   s=useState(null);                      var CB_quota=s[0],           CB_setQuota=s[1];
   s=useState('gemini-2.5-flash-lite');   var CB_selectedModel=s[0],   CB_setSelectedModel=s[1];
   s=useState([]);                        var CB_pendingFiles=s[0],    CB_setPendingFiles=s[1];
-  s=useState(false);                     var CB_showPicker=s[0],      CB_setShowPicker=s[1];
   s=useState(false);                     var CB_inputFocused=s[0],    CB_setInputFocused=s[1];
+  // ── New state (25b-D) ──
+  s=useState([]);                        var CB_conversations=s[0],   CB_setConversations=s[1];
+  s=useState(null);                      var CB_activeConvId=s[0],    CB_setActiveConvId=s[1];
+  s=useState(false);                     var CB_loadingConvs=s[0],    CB_setLoadingConvs=s[1];
+  s=useState(false);                     var CB_sidebarOpen=s[0],     CB_setSidebarOpen=s[1];
+  s=useState(null);                      var CB_convMenuId=s[0],      CB_setConvMenuId=s[1];
+  s=useState(null);                      var CB_renamingId=s[0],      CB_setRenamingId=s[1];
+  s=useState('');                        var CB_renameValue=s[0],     CB_setRenameValue=s[1];
+  s=useState(false);                     var CB_modelPickerOpen=s[0], CB_setModelPickerOpen=s[1];
+  s=useState(false);                     var CB_settingsOpen=s[0],    CB_setSettingsOpen=s[1];
+  s=useState('');                        var CB_userNotes=s[0],       CB_setUserNotes=s[1];
+  s=useState(false);                     var CB_userNotesLoaded=s[0], CB_setUserNotesLoaded=s[1];
+  s=useState(false);                     var CB_notesSaving=s[0],     CB_setNotesSaving=s[1];
+  s=useState('');                        var CB_notesError=s[0],      CB_setNotesError=s[1];
 
   var CB_scrollRef = useRef(null);
   var CB_inputRef  = useRef(null);
+  var CB_longPressRef = useRef(null);
+  var CB_convLoadedRef = useRef(false);
 
   // ── Inject CSS animations once ──
   useEffect(function() {
@@ -238,20 +266,22 @@ function ChatBot(props) {
         '@keyframes CB_dotBounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}' +
         '@keyframes CB_panelIn{from{opacity:0;transform:translateX(-30px) scale(0.97)}to{opacity:1;transform:translateX(0) scale(1)}}' +
         '@keyframes CB_panelInMobile{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}' +
-        '@keyframes CB_spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}';
+        '@keyframes CB_spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}' +
+        '@keyframes CB_sidebarIn{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:translateX(0)}}' +
+        '.CB_convItem:hover{background:rgba(96,165,250,0.08)!important;}';
       document.head.appendChild(st);
       CB_styleInjected = true;
     }
   }, []);
 
-  // ── Scroll lock when panel is fullscreen or on mobile ──
+  // ── Scroll lock ──
   useEffect(function() {
     var locked = CB_open && (CB_fullscreen || !CB_isDesktop);
     document.body.style.overflow = locked ? 'hidden' : '';
     return function() { document.body.style.overflow = ''; };
   }, [CB_open, CB_fullscreen, CB_isDesktop]);
 
-  // ── iPad keyboard fix (visualViewport) ──
+  // ── iPad keyboard fix ──
   useEffect(function() {
     if (!CB_open || !window.visualViewport) return;
     function CB_handleViewport() {
@@ -276,13 +306,13 @@ function ChatBot(props) {
     };
   }, [CB_open, CB_isDesktop, CB_fullscreen]);
 
-  // ── Expose close handler for deeplink auto-close ──
+  // ── Expose close handler for deeplinks ──
   useEffect(function() {
     window._CB_closePanel = function() { CB_setOpen(false); CB_setFullscreen(false); };
     return function() { window._CB_closePanel = null; };
   }, [CB_setOpen, CB_setFullscreen]);
 
-  // ── Auth + viewport resize ──
+  // ── Auth + resize ──
   useEffect(function() {
     function CB_onResize() { CB_setIsDesktop(window.innerWidth >= 768); }
     window.addEventListener('resize', CB_onResize);
@@ -292,6 +322,16 @@ function ChatBot(props) {
       return function() { window.removeEventListener('resize', CB_onResize); };
     }
     try {
+      // Load saved model
+      try {
+        var savedModel = localStorage.getItem('ECEPT_CHAT_MODEL');
+        if (savedModel) {
+          for (var _smi = 0; _smi < CB_MODELS.length; _smi++) {
+            if (CB_MODELS[_smi].id === savedModel) { CB_setSelectedModel(savedModel); break; }
+          }
+        }
+      } catch(e3) {}
+
       window.ECEPT_SUPABASE.auth.getSession().then(function(res) {
         if (res && res.data && res.data.session) {
           var uid = res.data.session.user.id;
@@ -303,7 +343,6 @@ function ChatBot(props) {
                 CB_setCredits(prof.data.credits || 0);
               }
             }).catch(function() { CB_setRole('student'); });
-          // TODO: persist — load localStorage['ECEPT_CHAT_HISTORY'] in commit B
         } else {
           CB_setSession(false);
         }
@@ -313,10 +352,170 @@ function ChatBot(props) {
     return function() { window.removeEventListener('resize', CB_onResize); };
   }, []);
 
-  // ── Auto-scroll on new messages ──
+  // ── Load conversations when panel opens ──
+  useEffect(function() {
+    if (CB_open && CB_session === true && !CB_convLoadedRef.current) {
+      CB_convLoadedRef.current = true;
+      CB_loadConversations();
+    }
+    if (!CB_open) { CB_convLoadedRef.current = false; }
+  }, [CB_open, CB_session]);
+
+  // ── Load messages when active conv changes ──
+  useEffect(function() {
+    if (!CB_activeConvId) return;
+    CB_loadConvMessages(CB_activeConvId);
+    try { localStorage.setItem('ECEPT_CHAT_LAST_CONV', CB_activeConvId); } catch(e) {}
+  }, [CB_activeConvId]);
+
+  // ── Auto-scroll ──
   useEffect(function() {
     if (CB_scrollRef.current) CB_scrollRef.current.scrollTop = CB_scrollRef.current.scrollHeight;
   }, [CB_msgs, CB_loading]);
+
+  // ── Conversation loaders ──
+  async function CB_loadConversations() {
+    CB_setLoadingConvs(true);
+    try {
+      var sess = await window.ECEPT_SUPABASE.auth.getSession();
+      var token = sess && sess.data && sess.data.session && sess.data.session.access_token;
+      if (!token) { CB_setLoadingConvs(false); return; }
+      var r = await fetch('/api/conversations', {
+        headers: { 'Authorization':'Bearer '+token }
+      });
+      if (!r.ok) { CB_setLoadingConvs(false); return; }
+      var convs = await r.json();
+      CB_setConversations(Array.isArray(convs) ? convs : []);
+
+      // Restore last active conv
+      try {
+        var lastId = localStorage.getItem('ECEPT_CHAT_LAST_CONV');
+        if (lastId) {
+          var found = false;
+          for (var _i = 0; _i < convs.length; _i++) {
+            if (convs[_i].id === lastId) { found = true; break; }
+          }
+          if (found) CB_setActiveConvId(lastId);
+        }
+      } catch(e) {}
+    } catch(err) {
+      console.error('CB_loadConversations:', err.message);
+    }
+    CB_setLoadingConvs(false);
+  }
+
+  async function CB_loadConvMessages(convId) {
+    try {
+      var sess = await window.ECEPT_SUPABASE.auth.getSession();
+      var token = sess && sess.data && sess.data.session && sess.data.session.access_token;
+      if (!token) return;
+      var r = await fetch('/api/conversations?id='+convId, {
+        headers: { 'Authorization':'Bearer '+token }
+      });
+      if (!r.ok) return;
+      var data = await r.json();
+      var mapped = (data.messages || []).map(function(m) {
+        return { role:m.role, text:m.content, ts: new Date(m.created_at).getTime() };
+      });
+      CB_setMsgs(mapped);
+    } catch(err) {
+      console.error('CB_loadConvMessages:', err.message);
+    }
+  }
+
+  async function CB_loadUserNotes() {
+    if (CB_userNotesLoaded) return;
+    try {
+      var sess = await window.ECEPT_SUPABASE.auth.getSession();
+      var token = sess && sess.data && sess.data.session && sess.data.session.access_token;
+      if (!token) return;
+      var r = await fetch('/api/user-context', {
+        headers: { 'Authorization':'Bearer '+token }
+      });
+      var data = await r.json();
+      CB_setUserNotes(data.notes || '');
+      CB_setUserNotesLoaded(true);
+    } catch(err) {
+      console.error('CB_loadUserNotes:', err.message);
+    }
+  }
+
+  async function CB_saveUserNotes() {
+    CB_setNotesSaving(true);
+    CB_setNotesError('');
+    try {
+      var sess = await window.ECEPT_SUPABASE.auth.getSession();
+      var token = sess && sess.data && sess.data.session && sess.data.session.access_token;
+      if (!token) { CB_setNotesError('Sesión expirada'); CB_setNotesSaving(false); return; }
+      var r = await fetch('/api/user-context', {
+        method:'PATCH',
+        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
+        body:JSON.stringify({ notes:CB_userNotes })
+      });
+      var data = await r.json();
+      if (r.status === 503) {
+        CB_setNotesError('La memoria estará disponible próximamente.');
+      } else if (!r.ok) {
+        CB_setNotesError('Error al guardar. Intentá de nuevo.');
+      } else {
+        CB_setSettingsOpen(false);
+      }
+    } catch(err) {
+      CB_setNotesError('Error de conexión.');
+    }
+    CB_setNotesSaving(false);
+  }
+
+  async function CB_renameConv(convId, title) {
+    try {
+      var sess = await window.ECEPT_SUPABASE.auth.getSession();
+      var token = sess && sess.data && sess.data.session && sess.data.session.access_token;
+      if (!token) return;
+      await fetch('/api/conversations', {
+        method:'PATCH',
+        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
+        body:JSON.stringify({ id:convId, title:title })
+      });
+      CB_setConversations(function(prev) {
+        return prev.map(function(c) { return c.id===convId ? Object.assign({},c,{title:title}) : c; });
+      });
+    } catch(err) { console.error('CB_renameConv:', err.message); }
+  }
+
+  async function CB_archiveConv(convId) {
+    try {
+      var sess = await window.ECEPT_SUPABASE.auth.getSession();
+      var token = sess && sess.data && sess.data.session && sess.data.session.access_token;
+      if (!token) return;
+      await fetch('/api/conversations', {
+        method:'PATCH',
+        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
+        body:JSON.stringify({ id:convId, archived:true })
+      });
+      CB_setConversations(function(prev) { return prev.filter(function(c) { return c.id !== convId; }); });
+      if (CB_activeConvId === convId) { CB_setActiveConvId(null); CB_setMsgs([]); }
+    } catch(err) { console.error('CB_archiveConv:', err.message); }
+  }
+
+  async function CB_newConv() {
+    try {
+      var sess = await window.ECEPT_SUPABASE.auth.getSession();
+      var token = sess && sess.data && sess.data.session && sess.data.session.access_token;
+      if (!token) return;
+      var r = await fetch('/api/conversations', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
+        body:JSON.stringify({ model:CB_selectedModel })
+      });
+      var conv = await r.json();
+      if (conv && conv.id) {
+        CB_setConversations(function(prev) { return [conv].concat(prev); });
+        CB_setActiveConvId(conv.id);
+        CB_setMsgs([]);
+        CB_setSidebarOpen(false);
+      }
+    } catch(err) { console.error('CB_newConv:', err.message); }
+  }
 
   // ── Send ──
   async function CB_send() {
@@ -347,7 +546,7 @@ function ChatBot(props) {
       var res = await fetch('/api/chat', {
         method:'POST',
         headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
-        body:JSON.stringify({ messages:history, model:CB_selectedModel })
+        body:JSON.stringify({ messages:history, model:CB_selectedModel, conversationId:CB_activeConvId })
       });
       var data = await res.json();
 
@@ -361,7 +560,16 @@ function ChatBot(props) {
       }
       if (data.quota) { CB_setQuota(data.quota); CB_setCredits(data.quota.credits); }
       CB_setMsgs(function(prev) { return prev.concat([{ role:'assistant', text:data.reply, ts:Date.now() }]); });
-      // TODO: persist — save to localStorage['ECEPT_CHAT_HISTORY'] in commit B
+
+      // Handle new conversation created by backend
+      if (data.conversationId && data.conversationId !== CB_activeConvId) {
+        CB_setActiveConvId(data.conversationId);
+        try { localStorage.setItem('ECEPT_CHAT_LAST_CONV', data.conversationId); } catch(e) {}
+        // Refresh list after title auto-generation (~1.5s)
+        setTimeout(function() {
+          CB_loadConversations();
+        }, 1500);
+      }
     } catch(err) {
       CB_setMsgs(function(prev) { return prev.concat([{ role:'assistant', text:'Error de conexión. Intentá de nuevo.', error:true, ts:Date.now() }]); });
       CB_setConnErr(err.message || 'Error');
@@ -375,8 +583,8 @@ function ChatBot(props) {
   for (var cmIdx = 0; cmIdx < CB_MODELS.length; cmIdx++) {
     if (CB_MODELS[cmIdx].id === CB_selectedModel) { currentModel = CB_MODELS[cmIdx]; break; }
   }
-  var modelLabel   = currentModel ? (currentModel.icon+' '+currentModel.name) : CB_selectedModel;
-  var quotaStr     = CB_quota ? (CB_quota.dailyUsed+'/'+CB_quota.dailyLimit) : '—';
+  var modelLabel = currentModel ? (currentModel.icon+' '+currentModel.name) : CB_selectedModel;
+  var quotaStr   = CB_quota ? (CB_quota.dailyUsed+'/'+CB_quota.dailyLimit) : '—';
   var quickPrompts = ['Explicame los betabloqueantes','DDx de dolor torácico','Resumen de cetoacidosis diabética'];
 
   var panelStyle;
@@ -396,7 +604,247 @@ function ChatBot(props) {
     boxShadow:CB_inputFocused?'0 0 0 3px rgba(59,130,246,.1)':'none'
   };
 
+  // ── Sidebar renderer ──
+  function CB_renderSidebar(permanent) {
+    var sidebarStyle = permanent
+      ? { width:280, flexShrink:0, borderRight:'1px solid '+C.bd, display:'flex', flexDirection:'column', overflow:'hidden' }
+      : { position:'absolute', top:0, left:0, bottom:0, width:280, zIndex:20,
+          background:'linear-gradient(180deg,#0d1224 0%,#060a14 100%)',
+          borderRight:'1px solid rgba(59,130,246,.2)',
+          display:'flex', flexDirection:'column', overflow:'hidden',
+          animation:'CB_sidebarIn 200ms ease', boxShadow:'4px 0 20px rgba(0,0,0,.4)' };
+
+    return e('div', { style:sidebarStyle },
+      // Sidebar header
+      e('div', { style:{ padding:'16px 14px 12px', borderBottom:'1px solid '+C.bd, display:'flex', alignItems:'center', justifyContent:'space-between', flexShrink:0 } },
+        e('span', { style:{ fontSize:13, fontWeight:700, color:C.tx } }, 'Conversaciones'),
+        e('button', {
+          onClick: CB_newConv,
+          title:'Nueva conversación',
+          style:{ background:'linear-gradient(135deg,#a78bfa,#60a5fa)', border:'none', borderRadius:8, color:'#fff', width:28, height:28, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', fontSize:16, flexShrink:0 }
+        }, '+')
+      ),
+
+      // Conversation list
+      e('div', { style:{ flex:1, overflowY:'auto', padding:'6px 8px' } },
+        CB_loadingConvs && e('div', { style:{ color:C.dm, fontSize:12, padding:'12px 8px', textAlign:'center' } }, 'Cargando…'),
+
+        !CB_loadingConvs && CB_conversations.length === 0 && e('div', { style:{ padding:'20px 8px', textAlign:'center' } },
+          e('div', { style:{ color:C.dm, fontSize:12, lineHeight:1.6 } }, 'Aún no tenés conversaciones. Mandá tu primer mensaje para empezar.')
+        ),
+
+        CB_conversations.map(function(conv) {
+          var isActive = conv.id === CB_activeConvId;
+          var isRenaming = CB_renamingId === conv.id;
+          var isMenuOpen = CB_convMenuId === conv.id;
+
+          return e('div', { key:conv.id, style:{ marginBottom:2 } },
+            e('div', {
+              className:'CB_convItem',
+              style:{
+                padding:'10px 10px', borderRadius:10, cursor:'pointer',
+                background: isActive ? 'rgba(96,165,250,0.18)' : 'transparent',
+                borderLeft: isActive ? '3px solid '+C.ac : '3px solid transparent',
+                transition:'background .15s'
+              },
+              onClick: function() {
+                if (CB_renamingId === conv.id) return;
+                CB_setActiveConvId(conv.id);
+                CB_setConvMenuId(null);
+                if (!permanent) CB_setSidebarOpen(false);
+              },
+              onMouseDown: function() {
+                if (CB_longPressRef.current) clearTimeout(CB_longPressRef.current);
+                CB_longPressRef.current = setTimeout(function() {
+                  CB_setConvMenuId(conv.id);
+                }, 500);
+              },
+              onMouseUp: function() { if (CB_longPressRef.current) clearTimeout(CB_longPressRef.current); },
+              onTouchStart: function() {
+                if (CB_longPressRef.current) clearTimeout(CB_longPressRef.current);
+                CB_longPressRef.current = setTimeout(function() {
+                  CB_setConvMenuId(conv.id);
+                }, 500);
+              },
+              onTouchEnd: function() { if (CB_longPressRef.current) clearTimeout(CB_longPressRef.current); }
+            },
+              isRenaming
+                ? e('input', {
+                    autoFocus:true,
+                    value:CB_renameValue,
+                    onChange:function(ev) { CB_setRenameValue(ev.target.value); },
+                    onKeyDown:function(ev) {
+                      if (ev.key==='Enter') {
+                        var t = CB_renameValue.trim();
+                        if (t) CB_renameConv(conv.id, t);
+                        CB_setRenamingId(null);
+                      } else if (ev.key==='Escape') {
+                        CB_setRenamingId(null);
+                      }
+                    },
+                    onBlur:function() { CB_setRenamingId(null); },
+                    onClick:function(ev) { ev.stopPropagation(); },
+                    style:{ width:'100%', background:'transparent', border:'none', borderBottom:'1px solid '+C.ac, color:C.tx, fontSize:12, outline:'none', padding:'2px 0' }
+                  })
+                : e('div', { style:{ fontSize:12, color: isActive ? C.tx : C.mt, fontWeight: isActive ? 600 : 400, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', lineHeight:1.4 } }, conv.title || 'Nueva conversación')
+            ),
+
+            // Context menu
+            isMenuOpen && e('div', { style:{ display:'flex', gap:4, padding:'4px 10px 6px' } },
+              e('button', {
+                onClick:function(ev) {
+                  ev.stopPropagation();
+                  CB_setRenameValue(conv.title || '');
+                  CB_setRenamingId(conv.id);
+                  CB_setConvMenuId(null);
+                },
+                style:{ flex:1, padding:'5px 8px', borderRadius:7, border:'1px solid '+C.bd, background:'none', color:C.mt, fontSize:11, cursor:'pointer', fontWeight:600 }
+              }, '✎ Renombrar'),
+              e('button', {
+                onClick:function(ev) {
+                  ev.stopPropagation();
+                  CB_archiveConv(conv.id);
+                  CB_setConvMenuId(null);
+                },
+                style:{ flex:1, padding:'5px 8px', borderRadius:7, border:'1px solid rgba(239,68,68,.3)', background:'none', color:'#ef4444', fontSize:11, cursor:'pointer', fontWeight:600 }
+              }, '🗑 Archivar')
+            )
+          );
+        })
+      )
+    );
+  }
+
+  // ── Model picker ──
+  function CB_renderModelPicker() {
+    return ReactDOM.createPortal(
+      e('div', {
+        style:{ position:'fixed', inset:0, zIndex:10000, background:'rgba(6,10,20,0.85)', backdropFilter:'blur(8px)', WebkitBackdropFilter:'blur(8px)', display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' },
+        onClick:function(ev) { if(ev.target===ev.currentTarget) CB_setModelPickerOpen(false); }
+      },
+        e('div', { style:{ width:'100%', maxWidth:480, background:'linear-gradient(180deg,#0d1224 0%,#060a14 100%)', border:'1px solid rgba(167,139,250,.25)', borderRadius:20, boxShadow:'0 20px 60px rgba(0,0,0,.6)', overflow:'hidden' } },
+          e('div', { style:{ padding:'20px 20px 16px', borderBottom:'1px solid rgba(167,139,250,.15)' } },
+            e('h2', { style:{ margin:'0 0 4px', fontSize:17, fontWeight:800, background:'linear-gradient(135deg,#60a5fa,#a78bfa)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' } }, 'Elegí tu modelo de IA'),
+            e('p', { style:{ margin:0, fontSize:12, color:C.mt } }, 'Cada modelo se especializa en algo distinto. Empezá con Flash Lite para lo cotidiano.')
+          ),
+          e('div', { style:{ padding:'16px', display:'flex', flexDirection:'column', gap:10 } },
+            CB_MODEL_INFO.map(function(info) {
+              var isSelected = CB_selectedModel === info.id;
+              var tierModels = CB_TIER_MODELS[CB_role] || CB_TIER_MODELS.student;
+              var inTier = false;
+              for (var _ti = 0; _ti < tierModels.length; _ti++) {
+                if (tierModels[_ti] === info.id) { inTier = true; break; }
+              }
+              var cost = 0;
+              for (var _ci = 0; _ci < CB_MODELS.length; _ci++) {
+                if (CB_MODELS[_ci].id === info.id) { cost = CB_MODELS[_ci].cost; break; }
+              }
+              var canAfford = CB_credits >= cost;
+              var available = inTier || canAfford || CB_role === 'admin';
+
+              return e('div', {
+                key:info.id,
+                onClick:function() {
+                  if (!available) return;
+                  CB_setSelectedModel(info.id);
+                  try { localStorage.setItem('ECEPT_CHAT_MODEL', info.id); } catch(e) {}
+                  CB_setModelPickerOpen(false);
+                },
+                style:{
+                  padding:'16px', borderRadius:14, cursor: available ? 'pointer' : 'default',
+                  background: isSelected ? info.gradient : 'rgba(255,255,255,.03)',
+                  border:'1px solid '+(isSelected ? info.accent : C.bd),
+                  opacity: available ? 1 : 0.5,
+                  transition:'all .15s', position:'relative'
+                }
+              },
+                info.badge && e('div', { style:{ position:'absolute', top:10, right:10, fontSize:9, fontWeight:800, letterSpacing:1.5, padding:'2px 7px', borderRadius:4, background:info.accent+'22', border:'1px solid '+info.accent+'55', color:info.accent } }, info.badge),
+                e('div', { style:{ display:'flex', alignItems:'center', gap:10, marginBottom:6 } },
+                  e('span', { style:{ fontSize:22 } }, info.icon),
+                  e('div', null,
+                    e('div', { style:{ fontSize:14, fontWeight:700, color: isSelected ? info.accent : C.tx } }, info.name),
+                    e('div', { style:{ fontSize:11, color:C.mt } }, info.tagline)
+                  )
+                ),
+                e('div', { style:{ fontSize:12, color:C.dm, marginBottom:10, lineHeight:1.5 } }, info.description),
+                e('div', { style:{ display:'flex', flexDirection:'column', gap:2 } },
+                  info.bullets.map(function(b, bi) {
+                    return e('div', { key:bi, style:{ fontSize:11, color:C.mt, display:'flex', gap:6 } },
+                      e('span', { style:{ color:info.accent } }, '✓'),
+                      e('span', null, b)
+                    );
+                  })
+                ),
+                !available && e('div', { style:{ marginTop:8, fontSize:11, color:'#ef4444' } }, 'Necesitás '+(cost - CB_credits)+' 🪙 más')
+              );
+            })
+          ),
+          e('div', { style:{ padding:'12px 16px 16px', display:'flex', justifyContent:'flex-end' } },
+            e('button', {
+              onClick:function() { CB_setModelPickerOpen(false); },
+              style:{ padding:'9px 20px', borderRadius:10, border:'1px solid '+C.bd, background:'none', color:C.mt, fontSize:13, cursor:'pointer', fontWeight:600 }
+            }, 'Cerrar')
+          )
+        )
+      ),
+      document.body
+    );
+  }
+
+  // ── Settings modal ──
+  function CB_renderSettings() {
+    return ReactDOM.createPortal(
+      e('div', {
+        style:{ position:'fixed', inset:0, zIndex:10000, background:'rgba(6,10,20,0.85)', backdropFilter:'blur(8px)', WebkitBackdropFilter:'blur(8px)', display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' },
+        onClick:function(ev) { if(ev.target===ev.currentTarget) CB_setSettingsOpen(false); }
+      },
+        e('div', { style:{ width:'100%', maxWidth:440, background:'linear-gradient(180deg,#0d1224 0%,#060a14 100%)', border:'1px solid rgba(167,139,250,.25)', borderRadius:20, boxShadow:'0 20px 60px rgba(0,0,0,.6)', overflow:'hidden' } },
+          e('div', { style:{ padding:'20px 20px 16px', borderBottom:'1px solid rgba(167,139,250,.15)', display:'flex', alignItems:'center', gap:10 } },
+            e('span', { style:{ fontSize:24 } }, '🧠'),
+            e('div', null,
+              e('h2', { style:{ margin:'0 0 2px', fontSize:16, fontWeight:800, color:C.tx } }, 'Memoria de Elion'),
+              e('p', { style:{ margin:0, fontSize:12, color:C.mt } }, 'Elion va a recordar esto en todas tus conversaciones.')
+            )
+          ),
+          e('div', { style:{ padding:'16px 20px' } },
+            e('p', { style:{ margin:'0 0 12px', fontSize:12, color:C.mt, lineHeight:1.6 } }, 'Útil para tu especialidad, año de carrera, preferencias.'),
+            e('textarea', {
+              value:CB_userNotes,
+              onChange:function(ev) { CB_setUserNotes(ev.target.value.slice(0,1500)); },
+              rows:5,
+              placeholder:'Soy estudiante de 4to año de medicina. Estoy preparando el examen de\ncardiología. Prefiero respuestas con casos clínicos cuando sea posible.',
+              style:{ width:'100%', padding:'10px 12px', borderRadius:10, border:'1px solid '+C.bd, background:C.bg, color:C.tx, fontSize:13, outline:'none', boxSizing:'border-box', fontFamily:'inherit', resize:'vertical', lineHeight:1.6 }
+            }),
+            e('div', { style:{ display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:6 } },
+              e('span', { style:{ fontSize:11, color:C.dm } }, CB_userNotes.length+' / 1500 caracteres'),
+              CB_notesError && e('span', { style:{ fontSize:11, color:'#fbbf24' } }, CB_notesError)
+            )
+          ),
+          e('div', { style:{ padding:'8px 16px 16px', display:'flex', gap:8, justifyContent:'flex-end' } },
+            e('button', {
+              onClick:function() { CB_setSettingsOpen(false); CB_setNotesError(''); },
+              style:{ padding:'9px 18px', borderRadius:10, border:'1px solid '+C.bd, background:'none', color:C.mt, fontSize:13, cursor:'pointer', fontWeight:600 }
+            }, 'Cancelar'),
+            e('button', {
+              onClick:CB_saveUserNotes,
+              disabled:CB_notesSaving,
+              style:{ padding:'9px 20px', borderRadius:10, border:'none', background:'linear-gradient(135deg,#a78bfa,#60a5fa)', color:'#fff', fontSize:13, cursor:CB_notesSaving?'default':'pointer', fontWeight:700, opacity:CB_notesSaving?0.7:1 }
+            }, CB_notesSaving ? 'Guardando…' : 'Guardar')
+          )
+        )
+      ),
+      document.body
+    );
+  }
+
+  // ── Main render ───────────────────────────────────────────────
   return e('div', null,
+
+    // Model picker portal
+    CB_modelPickerOpen && CB_renderModelPicker(),
+
+    // Settings portal
+    CB_settingsOpen && CB_renderSettings(),
 
     // ── Floating button ──
     !CB_open && e('button', {
@@ -408,32 +856,57 @@ function ChatBot(props) {
       style:{ position:'fixed', bottom:20, right:20, width:52, height:52, minWidth:44, minHeight:44, borderRadius:'50%', background:'linear-gradient(135deg,#60a5fa,#a78bfa)', border:'none', color:'#fff', fontSize:20, cursor:'pointer', boxShadow:'0 4px 20px rgba(96,165,250,.45)', zIndex:95, display:'flex', alignItems:'center', justifyContent:'center' }
     }, '🧬'),
 
-    // ── Backdrop (mobile / fullscreen only) ──
+    // ── Backdrop ──
     CB_open && (isMobile || CB_fullscreen) && e('div', {
-      onClick: function() { CB_setOpen(false); CB_setFullscreen(false); },
+      onClick: function() { CB_setOpen(false); CB_setFullscreen(false); CB_setSidebarOpen(false); },
       style:{ position:'fixed', inset:0, background:'rgba(0,0,0,.6)', zIndex:9998 }
     }),
 
-    // ── Panel ──
-    CB_open && e('div', { id:'CB_panel', style:panelStyle },
+    // Sidebar overlay backdrop (floating desktop mode)
+    CB_open && !CB_fullscreen && CB_isDesktop && CB_sidebarOpen && e('div', {
+      onClick:function() { CB_setSidebarOpen(false); },
+      style:{ position:'fixed', inset:0, zIndex:9999 }
+    }),
 
-      // Sidebar (desktop fullscreen only)
-      CB_isDesktop && CB_fullscreen && e('div', {
-        style:{ width:280, flexShrink:0, borderRight:'1px solid '+C.bd, padding:'20px 16px' }
-      }, e('div', { style:{ color:C.mt, fontSize:12, fontWeight:600 } }, 'Conversación actual')),
+    // ── Panel ──
+    CB_open && e('div', { id:'CB_panel', style:Object.assign({},panelStyle,{position:'fixed'}), onClick:function() { CB_setConvMenuId(null); } },
+
+      // Permanent sidebar (fullscreen desktop)
+      CB_isDesktop && CB_fullscreen && CB_renderSidebar(true),
+
+      // Overlay sidebar (floating desktop)
+      CB_isDesktop && !CB_fullscreen && CB_sidebarOpen && CB_renderSidebar(false),
+
+      // Mobile sidebar (full overlay modal)
+      isMobile && CB_sidebarOpen && ReactDOM.createPortal(
+        e('div', { style:{ position:'fixed', inset:0, zIndex:10001, background:'rgba(6,10,20,0.95)', display:'flex', flexDirection:'column' } },
+          CB_renderSidebar(true),
+          e('button', {
+            onClick:function() { CB_setSidebarOpen(false); },
+            style:{ position:'absolute', top:14, right:14, background:'none', border:'none', color:C.mt, fontSize:22, cursor:'pointer', padding:8 }
+          }, '×')
+        ),
+        document.body
+      ),
 
       // Main column
       e('div', { style:{ flex:1, display:'flex', flexDirection:'column', minWidth:0, overflow:'hidden' } },
 
         // ── Header ──
-        e('div', { style:{ padding:'18px 20px 16px', background:'linear-gradient(180deg,rgba(59,130,246,.08),transparent)', borderBottom:'1px solid rgba(59,130,246,.15)', display:'flex', alignItems:'center', justifyContent:'space-between', flexShrink:0 } },
-          e('div', { style:{ display:'flex', alignItems:'center', gap:12, overflow:'hidden', minWidth:0 } },
-            e('div', { style:{ width:36, height:36, borderRadius:'50%', background:'rgba(59,130,246,.15)', border:'1px solid rgba(59,130,246,.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, flexShrink:0 } }, '🧬'),
-            e('div', { style:{ display:'flex', flexDirection:'column', gap:2, overflow:'hidden' } },
-              e('div', { style:{ fontWeight:700, fontSize:16, lineHeight:'1.2', background:'linear-gradient(135deg,#60a5fa,#a78bfa)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' } }, 'Elion'),
+        e('div', { style:{ padding:'14px 16px', background:'linear-gradient(180deg,rgba(59,130,246,.08),transparent)', borderBottom:'1px solid rgba(59,130,246,.15)', display:'flex', alignItems:'center', justifyContent:'space-between', flexShrink:0 } },
+          e('div', { style:{ display:'flex', alignItems:'center', gap:8, overflow:'hidden', minWidth:0 } },
+            // Sidebar toggle
+            e('button', {
+              onClick:function(ev) { ev.stopPropagation(); CB_setSidebarOpen(function(o) { return !o; }); },
+              title:'Conversaciones',
+              style:{ background:'none', border:'none', color: CB_sidebarOpen ? C.ac : C.mt, fontSize:15, cursor:'pointer', minWidth:32, minHeight:32, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:8, flexShrink:0 }
+            }, '📋'),
+            e('div', { style:{ width:32, height:32, borderRadius:'50%', background:'rgba(59,130,246,.15)', border:'1px solid rgba(59,130,246,.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:15, flexShrink:0 } }, '🧬'),
+            e('div', { style:{ display:'flex', flexDirection:'column', gap:1, overflow:'hidden', minWidth:0 } },
+              e('div', { style:{ fontWeight:700, fontSize:15, lineHeight:'1.2', background:'linear-gradient(135deg,#60a5fa,#a78bfa)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text', whiteSpace:'nowrap' } }, 'Elion'),
               e('div', {
-                onClick: function() { CB_setShowPicker(true); },
-                style:{ fontSize:11, color:C.mt, lineHeight:'1.2', cursor:'pointer', display:'flex', gap:5, alignItems:'center', flexWrap:'wrap' }
+                onClick:function(ev) { ev.stopPropagation(); CB_setModelPickerOpen(true); },
+                style:{ fontSize:11, color:C.mt, lineHeight:'1.2', cursor:'pointer', display:'flex', gap:4, alignItems:'center', flexWrap:'wrap', overflow:'hidden' }
               },
                 e('span', null, modelLabel),
                 e('span', { style:{ color:C.bd } }, '·'),
@@ -443,16 +916,21 @@ function ChatBot(props) {
               )
             )
           ),
-          e('div', { style:{ display:'flex', alignItems:'center', gap:4, flexShrink:0 } },
+          e('div', { style:{ display:'flex', alignItems:'center', gap:2, flexShrink:0 } },
+            e('button', {
+              onClick:function(ev) { ev.stopPropagation(); CB_loadUserNotes(); CB_setSettingsOpen(true); },
+              title:'Memoria de Elion',
+              style:{ background:'none', border:'none', color:C.mt, fontSize:15, cursor:'pointer', minWidth:32, minHeight:32, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:8 }
+            }, '⚙️'),
             CB_isDesktop && e('button', {
               onClick: function() { CB_setFullscreen(function(f) { return !f; }); },
               'aria-label': CB_fullscreen ? 'Salir de pantalla completa' : 'Pantalla completa',
-              style:{ background:'none', border:'none', color:C.mt, fontSize:16, cursor:'pointer', minWidth:44, minHeight:44, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:8 }
+              style:{ background:'none', border:'none', color:C.mt, fontSize:15, cursor:'pointer', minWidth:32, minHeight:32, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:8 }
             }, CB_fullscreen ? '↙' : '⛶'),
             e('button', {
-              onClick: function() { CB_setOpen(false); CB_setFullscreen(false); },
+              onClick: function() { CB_setOpen(false); CB_setFullscreen(false); CB_setSidebarOpen(false); },
               'aria-label':'Cerrar',
-              style:{ background:'none', border:'none', color:C.mt, fontSize:22, cursor:'pointer', minWidth:44, minHeight:44, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:8 }
+              style:{ background:'none', border:'none', color:C.mt, fontSize:20, cursor:'pointer', minWidth:32, minHeight:32, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:8 }
             }, '×')
           )
         ),
@@ -473,10 +951,8 @@ function ChatBot(props) {
               }, 'Crear cuenta / Iniciar sesión')
             )
           : e(F, null,
-              // Messages scroll area
               e('div', { ref:CB_scrollRef, style:{ flex:1, overflowY:'auto', padding:16, display:'flex', flexDirection:'column', gap:14 } },
 
-                // Empty state
                 CB_msgs.length === 0 && !CB_loading && e('div', {
                   style:{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flex:1, gap:14, minHeight:200, paddingTop:20 }
                 },
@@ -488,13 +964,12 @@ function ChatBot(props) {
                       return e('button', {
                         key:qi,
                         onClick: function() { CB_setInput(qp); if (CB_inputRef.current) CB_inputRef.current.focus(); },
-                        style:{ minHeight:44, padding:'12px 14px', borderRadius:12, background:C.cd, border:'1px solid '+C.bd, color:C.tx, fontSize:13, cursor:'pointer', textAlign:'left', lineHeight:1.4, transition:'border-color .2s,transform .2s' }
+                        style:{ minHeight:44, padding:'12px 14px', borderRadius:12, background:C.cd, border:'1px solid '+C.bd, color:C.tx, fontSize:13, cursor:'pointer', textAlign:'left', lineHeight:1.4 }
                       }, qp);
                     })
                   )
                 ),
 
-                // Message list
                 CB_msgs.map(function(m, i) {
                   var isUser = m.role === 'user';
                   return e('div', { key:i, style:{ display:'flex', flexDirection:'column', alignItems:isUser?'flex-end':'flex-start', gap:4 } },
@@ -509,7 +984,6 @@ function ChatBot(props) {
                   );
                 }),
 
-                // Typing indicator
                 CB_loading && e('div', { style:{ display:'flex', alignItems:'flex-start', gap:8 } },
                   CB_elionAvatar(28),
                   e('div', { style:{ padding:'14px 16px', borderRadius:'4px 18px 18px 18px', background:'#0d1224', border:'1px solid #1a2040', display:'flex', alignItems:'center', gap:5 } },
@@ -520,7 +994,6 @@ function ChatBot(props) {
                 )
               ),
 
-              // ── Input bar (capsule design) ──
               e('div', { style:{ padding:'12px 14px', borderTop:'1px solid rgba(59,130,246,.1)', background:C.bg, flexShrink:0 } },
                 e('div', { style:inputContainerStyle },
                   e('button', {
