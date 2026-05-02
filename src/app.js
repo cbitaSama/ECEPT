@@ -225,7 +225,10 @@ function App(){
     e("div",{style:{background:"linear-gradient(180deg,rgba(13,18,36,.98),rgba(6,10,20,.95))",borderBottom:"1px solid "+C.bd,padding:"12px 16px",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)"}},
       e("div",{style:{maxWidth:"900px",margin:"0 auto",display:"flex",alignItems:"center",gap:"10px"}},
         e("button",{onClick:function(){setSb(!sb)},style:{background:"none",border:"none",color:C.mt,fontSize:"20px",cursor:"pointer"}},"☰"),
-        e("div",{onClick:function(){go("home")},style:{fontFamily:"'Playfair Display',serif",fontSize:"18px",fontWeight:900,background:"linear-gradient(135deg,#3b82f6,#8b5cf6,#f472b6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",cursor:"pointer",flexShrink:0,letterSpacing:"2px"}},"ECEPT"),
+        e("div",{onClick:function(){go("home")},style:{display:"flex",alignItems:"center",gap:"8px",cursor:"pointer",flexShrink:0}},
+          e(window.Logo||"span",{ size: 24, idSuffix:"navhdr" }),
+          e("span",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"18px",fontWeight:800,background:"linear-gradient(135deg,#60a5fa,#a78bfa)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",letterSpacing:"-0.01em"}},"ECEPT")
+        ),
         vista!=="home"&&e("div",{style:{display:"flex",alignItems:"center",gap:"4px",fontSize:"11px",flexShrink:0}},
           e("span",{onClick:function(){go("home")},style:{color:C.dm,cursor:"pointer"}},"Inicio"),
           vista==="reuma_sec"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Reuma")),

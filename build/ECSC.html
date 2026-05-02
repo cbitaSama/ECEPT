@@ -15766,7 +15766,7 @@ function ChatBot(props) {
               title:'Conversaciones',
               style:{ background:'none', border:'none', color: CB_sidebarOpen ? C.ac : C.mt, fontSize:15, cursor:'pointer', minWidth:32, minHeight:32, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:8, flexShrink:0 }
             }, '📋'),
-            e('div', { style:{ width:32, height:32, borderRadius:'50%', background:'rgba(59,130,246,.15)', border:'1px solid rgba(59,130,246,.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:15, flexShrink:0 } }, '🧬'),
+            e('div', { style:{ width:36, height:36, borderRadius:'50%', background:'linear-gradient(135deg,rgba(96,165,250,0.18),rgba(167,139,250,0.10))', border:'1px solid rgba(167,139,250,0.30)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, boxShadow:'0 0 12px rgba(167,139,250,0.20)' } }, e(window.Logo || 'span', { size: 26, idSuffix:'cbhdr' })),
             e('div', { style:{ display:'flex', flexDirection:'column', gap:1, overflow:'hidden', minWidth:0 } },
               e('div', { style:{ fontWeight:700, fontSize:15, lineHeight:'1.2', background:'linear-gradient(135deg,#60a5fa,#a78bfa)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text', whiteSpace:'nowrap' } }, 'Elion'),
               e('div', {
@@ -16594,7 +16594,10 @@ function ProfileView(props){
         onMouseEnter:function(ev){ ev.currentTarget.style.background="rgba(255,255,255,0.04)"; },
         onMouseLeave:function(ev){ ev.currentTarget.style.background="none"; }
       },"←"),
-      e("div",{style:{fontSize:"24px",fontWeight:700,color:C.tx,letterSpacing:"-0.015em"}},"Mi perfil")
+      e("div",{style:{display:"flex",alignItems:"center",gap:"10px"}},
+        e(window.Logo||"span",{ size: 28, idSuffix:"profhdr" }),
+        e("div",{style:{fontSize:"24px",fontWeight:700,color:C.tx,letterSpacing:"-0.015em"}},"Mi perfil")
+      )
     ),
 
     // ── 1. HEADER: avatar + name + email + role ──
@@ -22808,7 +22811,10 @@ function App(){
     e("div",{style:{background:"linear-gradient(180deg,rgba(13,18,36,.98),rgba(6,10,20,.95))",borderBottom:"1px solid "+C.bd,padding:"12px 16px",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)"}},
       e("div",{style:{maxWidth:"900px",margin:"0 auto",display:"flex",alignItems:"center",gap:"10px"}},
         e("button",{onClick:function(){setSb(!sb)},style:{background:"none",border:"none",color:C.mt,fontSize:"20px",cursor:"pointer"}},"☰"),
-        e("div",{onClick:function(){go("home")},style:{fontFamily:"'Playfair Display',serif",fontSize:"18px",fontWeight:900,background:"linear-gradient(135deg,#3b82f6,#8b5cf6,#f472b6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",cursor:"pointer",flexShrink:0,letterSpacing:"2px"}},"ECEPT"),
+        e("div",{onClick:function(){go("home")},style:{display:"flex",alignItems:"center",gap:"8px",cursor:"pointer",flexShrink:0}},
+          e(window.Logo||"span",{ size: 24, idSuffix:"navhdr" }),
+          e("span",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"18px",fontWeight:800,background:"linear-gradient(135deg,#60a5fa,#a78bfa)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",letterSpacing:"-0.01em"}},"ECEPT")
+        ),
         vista!=="home"&&e("div",{style:{display:"flex",alignItems:"center",gap:"4px",fontSize:"11px",flexShrink:0}},
           e("span",{onClick:function(){go("home")},style:{color:C.dm,cursor:"pointer"}},"Inicio"),
           vista==="reuma_sec"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Reuma")),

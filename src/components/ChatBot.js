@@ -956,7 +956,7 @@ function ChatBot(props) {
               title:'Conversaciones',
               style:{ background:'none', border:'none', color: CB_sidebarOpen ? C.ac : C.mt, fontSize:15, cursor:'pointer', minWidth:32, minHeight:32, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:8, flexShrink:0 }
             }, '📋'),
-            e('div', { style:{ width:32, height:32, borderRadius:'50%', background:'rgba(59,130,246,.15)', border:'1px solid rgba(59,130,246,.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:15, flexShrink:0 } }, '🧬'),
+            e('div', { style:{ width:36, height:36, borderRadius:'50%', background:'linear-gradient(135deg,rgba(96,165,250,0.18),rgba(167,139,250,0.10))', border:'1px solid rgba(167,139,250,0.30)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, boxShadow:'0 0 12px rgba(167,139,250,0.20)' } }, e(window.Logo || 'span', { size: 26, idSuffix:'cbhdr' })),
             e('div', { style:{ display:'flex', flexDirection:'column', gap:1, overflow:'hidden', minWidth:0 } },
               e('div', { style:{ fontWeight:700, fontSize:15, lineHeight:'1.2', background:'linear-gradient(135deg,#60a5fa,#a78bfa)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text', whiteSpace:'nowrap' } }, 'Elion'),
               e('div', {

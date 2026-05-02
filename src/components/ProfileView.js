@@ -169,7 +169,10 @@ function ProfileView(props){
         onMouseEnter:function(ev){ ev.currentTarget.style.background="rgba(255,255,255,0.04)"; },
         onMouseLeave:function(ev){ ev.currentTarget.style.background="none"; }
       },"←"),
-      e("div",{style:{fontSize:"24px",fontWeight:700,color:C.tx,letterSpacing:"-0.015em"}},"Mi perfil")
+      e("div",{style:{display:"flex",alignItems:"center",gap:"10px"}},
+        e(window.Logo||"span",{ size: 28, idSuffix:"profhdr" }),
+        e("div",{style:{fontSize:"24px",fontWeight:700,color:C.tx,letterSpacing:"-0.015em"}},"Mi perfil")
+      )
     ),
 
     // ── 1. HEADER: avatar + name + email + role ──
