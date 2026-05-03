@@ -378,15 +378,15 @@ function App(){
       )
     ),
     // SIDEBAR
-    sb&&e("div",{style:{position:"fixed",top:0,left:0,width:"100%",height:"100%",zIndex:150,display:"flex"}},
-      e("div",{style:{background:C.cd,width:"290px",height:"100%",borderRight:"1px solid "+C.bd,overflow:"auto",padding:"20px",boxShadow:"4px 0 30px rgba(0,0,0,.5)"}},
+    sb&&e("div",{style:{position:"fixed",top:0,left:0,width:"100%",height:"100%",zIndex:150,display:"flex",animation:"ecept_fadeIn 240ms cubic-bezier(0.16,1,0.3,1)"}},
+      e("div",{style:{background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",width:"300px",height:"100%",borderRight:"1px solid rgba(96,165,250,0.18)",overflow:"auto",padding:"20px 18px",boxShadow:"4px 0 30px rgba(0,0,0,0.55), inset -1px 0 0 rgba(96,165,250,0.04)",animation:"ecept_sidebarIn 280ms cubic-bezier(0.16,1,0.3,1)",boxSizing:"border-box"}},
         // Header
-        e("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"20px"}},
-          e("div",{style:{display:"flex",alignItems:"center",gap:"8px"}},
-            e("span",{style:{fontSize:"18px"}},"🧬"),
-            e("span",{style:{fontFamily:"'Playfair Display',serif",fontSize:"18px",fontWeight:900,background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",letterSpacing:"2px"}},"ECEPT")
+        e("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"22px",paddingBottom:"14px",borderBottom:"1px solid rgba(96,165,250,0.10)"}},
+          e("div",{style:{display:"flex",alignItems:"center",gap:"10px"}},
+            e(window.Logo||"span",{ size:28, idSuffix:"appsb" }),
+            e("span",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"19px",fontWeight:800,letterSpacing:"-0.015em",background:"linear-gradient(135deg,#60a5fa,#a78bfa)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}},"ECEPT")
           ),
-          e("button",{onClick:function(){setSb(false)},style:{background:"none",border:"none",color:C.mt,fontSize:"20px",cursor:"pointer"}},"✕")
+          e("button",{onClick:function(){setSb(false)},'aria-label':"Cerrar menú",style:{background:"transparent",border:"1px solid "+C.bd,borderRadius:"10px",color:C.mt,fontSize:"14px",cursor:"pointer",width:"32px",height:"32px",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 200ms ease-out"},onMouseEnter:function(ev){ev.currentTarget.style.background="rgba(255,255,255,0.04)";ev.currentTarget.style.borderColor="rgba(96,165,250,0.30)";},onMouseLeave:function(ev){ev.currentTarget.style.background="transparent";ev.currentTarget.style.borderColor=C.bd;}},"✕")
         ),
         // UserMenu — session state at top of sidebar
         e(UserMenu,{
@@ -544,7 +544,7 @@ function App(){
 
     // ════════════ REUMATOLOGÍA ENFERMEDAD ════════════
     vista==="reuma_dis"&&dis&&e(F,null,
-      e("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"18px",flexWrap:"wrap",gap:"8px"}},e("div",{style:{display:"flex",alignItems:"center",gap:"10px"}},e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"20px",fontWeight:700,margin:0}},dis.n),e("button",{onClick:function(){toggleFav(dis.id)},style:{background:"none",border:"none",fontSize:"20px",cursor:"pointer",padding:"4px"}},isFav(dis.id)?"⭐":"☆")),dis.qz&&dis.qz.length>0&&e("button",{onClick:function(){setQm(!qm);setQa({})},style:{padding:"6px 14px",borderRadius:"20px",cursor:"pointer",fontSize:"13px",background:qm?C.ac:"rgba(255,255,255,.05)",color:qm?"#fff":C.mt,border:"none"}},qm?"✕ Cerrar":"🧠 Quiz")),
+      e("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"18px",flexWrap:"wrap",gap:"8px"}},e("div",{style:{display:"flex",alignItems:"center",gap:"10px"}},e("h2",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"20px",fontWeight:700,margin:0}},dis.n),e("button",{onClick:function(){toggleFav(dis.id)},style:{background:"none",border:"none",fontSize:"20px",cursor:"pointer",padding:"4px"}},isFav(dis.id)?"⭐":"☆")),dis.qz&&dis.qz.length>0&&e("button",{onClick:function(){setQm(!qm);setQa({})},style:{padding:"6px 14px",borderRadius:"20px",cursor:"pointer",fontSize:"13px",background:qm?C.ac:"rgba(255,255,255,.05)",color:qm?"#fff":C.mt,border:"none"}},qm?"✕ Cerrar":"🧠 Quiz")),
       qm?e("div",{style:cb},e("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"16px"}},e("h3",{style:{color:C.ac,fontSize:"16px",fontWeight:700,margin:0}},"🧠 Quiz"),streak>0&&e("div",{style:{display:"flex",alignItems:"center",gap:"6px",padding:"4px 12px",background:"rgba(52,211,153,.12)",borderRadius:"20px",border:"1px solid rgba(52,211,153,.25)"}},e("span",{style:{fontSize:"14px"}},"🔥"),e("span",{style:{fontSize:"12px",fontWeight:700,color:"#34d399"}},streak+" racha"))),dis.qz.map(function(q,qi){return e("div",{key:qi,style:{marginBottom:"18px",padding:"14px",background:"rgba(255,255,255,.02)",borderRadius:"12px"}},e("p",{style:{color:C.tx,fontWeight:600,marginBottom:"10px",fontSize:"14px"}},(qi+1)+". "+q.p),e("div",{style:{display:"flex",flexDirection:"column",gap:"6px"}},q.o.map(function(o,oi){var an2=qa[qi]!==undefined,sl=qa[qi]===oi,cr=oi===q.r;var bg2="rgba(255,255,255,.04)",bd2=C.bd;if(an2&&cr){bg2="rgba(52,211,153,.15)";bd2="#34d399"}if(an2&&sl&&!cr){bg2="rgba(239,68,68,.15)";bd2="#ef4444"}return e("button",{key:oi,onClick:function(){if(!an2){setQa(function(p2){var n2={};for(var k in p2)n2[k]=p2[k];n2[qi]=oi;return n2});if(oi===q.r){setStreak(function(s2){var ns=s2+1;if(ns>bestStreak)setBestStreak(ns);return ns})}else{setStreak(0)}}},style:{padding:"10px 14px",borderRadius:"8px",border:"1px solid "+bd2,background:bg2,color:C.tx,textAlign:"left",cursor:an2?"default":"pointer",fontSize:"13px"}},String.fromCharCode(65+oi)+") "+o+(an2&&cr?" ✓":"")+(an2&&sl&&!cr?" ✗":""))})),qa[qi]!==undefined&&e("p",{style:{marginTop:"8px",padding:"10px",background:qa[qi]===q.r?"rgba(52,211,153,.1)":"rgba(239,68,68,.1)",borderRadius:"8px",fontSize:"13px",color:qa[qi]===q.r?"#34d399":"#fca5a5",lineHeight:1.5}},q.x))}))
       :e(F,null,
         e("div",{style:{display:"flex",gap:"4px",overflowX:"auto",padding:"4px",background:"rgba(255,255,255,.03)",borderRadius:"14px",marginBottom:"18px",flexWrap:"wrap"}},SUB.map(function(s2,i){return e("div",{key:i,onClick:function(){setTab(i)},style:{padding:"7px 12px",borderRadius:"10px",cursor:"pointer",fontSize:"12px",fontWeight:600,background:tab===i?s2.c+"22":"transparent",color:tab===i?s2.c:C.mt,border:tab===i?"1px solid "+s2.c+"44":"1px solid transparent",whiteSpace:"nowrap"}},s2.i+" "+s2.l)})),
@@ -554,7 +554,7 @@ function App(){
 
     // ════════════ TRÍADAS ════════════
     vista==="triadas"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"10px"}},"🔺"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"22px",fontWeight:800,background:"linear-gradient(135deg,#e879f9,#f472b6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}},"Tríadas y Síndromes"),e("p",{style:{color:C.dm,fontSize:"13px"}},TR.length+" asociaciones clásicas")),
+      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"10px"}},"🔺"),e("h2",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"22px",fontWeight:800,background:"linear-gradient(135deg,#e879f9,#f472b6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}},"Tríadas y Síndromes"),e("p",{style:{color:C.dm,fontSize:"13px"}},TR.length+" asociaciones clásicas")),
       e("div",{style:{display:"flex",flexDirection:"column",gap:"10px"}},TR.map(function(t,i){
         var op=et===i;var ci=TC.find(function(c2){return c2.id===t.ct});
         return e("div",{key:i,style:{background:C.cd,border:"1px solid "+(op?t.cl+"66":C.bd),borderRadius:"14px",overflow:"hidden",transition:"all .3s"}},
@@ -581,7 +581,7 @@ function App(){
 
     // ════════════ ABDOMEN AGUDO ════════════
     vista==="cir_abd"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🔴"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"22px",fontWeight:800,color:"#ef4444"}},"Abdomen Agudo Infeccioso"),e("p",{style:{color:C.dm,fontSize:"13px"}},"Clasificación completa de etiologías y subtipos")),
+      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🔴"),e("h2",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"22px",fontWeight:800,color:"#ef4444"}},"Abdomen Agudo Infeccioso"),e("p",{style:{color:C.dm,fontSize:"13px"}},"Clasificación completa de etiologías y subtipos")),
       e("div",{style:{padding:"10px 14px",background:"rgba(120,53,15,.3)",border:"1px solid rgba(180,83,9,.4)",borderRadius:"10px",marginBottom:"20px"}},e("p",{style:{color:"#fcd34d",fontSize:"12px"}},"⚠️ El abdomen agudo es un SÍNDROME, no una enfermedad.")),
       ABD_DATA.map(function(item){
         var isOpen=abdOpen===item.id;
@@ -661,7 +661,7 @@ function App(){
     vista==="cir_quem"&&e(F,null,
       e("div",{style:{textAlign:"center",marginBottom:"32px"}},
         e("span",{style:{display:"inline-block",fontSize:"10px",letterSpacing:"3px",textTransform:"uppercase",color:"#ef4444",background:"rgba(239,68,68,.15)",border:"1px solid rgba(239,68,68,.3)",padding:"5px 14px",borderRadius:"4px",marginBottom:"12px"}},"Emergenciología"),
-        e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"24px",fontWeight:800,color:C.tx}},"Algoritmo de Quemaduras"),
+        e("h2",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"24px",fontWeight:800,color:C.tx}},"Algoritmo de Quemaduras"),
         e("p",{style:{color:C.dm,fontSize:"13px"}},"Abordaje sistemático paso a paso · Incluye calculadoras clínicas")
       ),
       QUEM_PASOS.map(function(paso,i){
@@ -680,7 +680,7 @@ function App(){
 
       // ═══ CALCULADORAS ═══
       e("div",{style:{marginTop:"8px"}},
-        e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"20px",fontWeight:800,color:"#f59e0b",textAlign:"center",marginBottom:"20px"}},"🧮 Calculadoras Clínicas"),
+        e("h2",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"20px",fontWeight:800,color:"#f59e0b",textAlign:"center",marginBottom:"20px"}},"🧮 Calculadoras Clínicas"),
 
         // CALCULADORA PARKLAND
         e("div",{style:{background:"linear-gradient(135deg,"+C.cd+",rgba(245,158,11,.04))",border:"1px solid rgba(245,158,11,.25)",borderRadius:"16px",padding:"22px",marginBottom:"16px"}},
@@ -792,7 +792,7 @@ function App(){
 
     // ════════════ ANATOMÍA INGUINAL ════════════
     vista==="cir_ing"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🧱"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"22px",fontWeight:800,color:"#f59e0b"}},"Anatomía Inguinal"),e("p",{style:{color:C.dm,fontSize:"13px"}},"Conducto · Anillos · Cordón Espermático")),
+      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🧱"),e("h2",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"22px",fontWeight:800,color:"#f59e0b"}},"Anatomía Inguinal"),e("p",{style:{color:C.dm,fontSize:"13px"}},"Conducto · Anillos · Cordón Espermático")),
       // Tabs
       e("div",{style:{display:"flex",gap:"6px",marginBottom:"20px",flexWrap:"wrap"}},
         [{l:"🧱 Conducto",i:0},{l:"🔵 Superficial",i:1},{l:"🔴 Profundo",i:2},{l:"🧬 Cordón",i:3}].map(function(tb){
@@ -846,7 +846,7 @@ function App(){
     
     // ════════════ ANATOMÍA (PARES CRANEALES) ════════════
     vista==="anatomia"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🩻"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"22px",fontWeight:800,color:"#f59e0b"}},"Anatomía"),e("p",{style:{color:C.dm,fontSize:"13px"}},"Pares Craneales · Origen, función y clínica")),
+      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🩻"),e("h2",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"22px",fontWeight:800,color:"#f59e0b"}},"Anatomía"),e("p",{style:{color:C.dm,fontSize:"13px"}},"Pares Craneales · Origen, función y clínica")),
       // Interactive brain map (collapsible)
       e("div",{style:{marginBottom:"16px"}},
         e("div",{onClick:function(){setAbdOpen(abdOpen==="mapa_nc"?null:"mapa_nc")},style:{background:C.cd,border:"1px solid "+(abdOpen==="mapa_nc"?"#a78bfa44":C.bd),borderRadius:"14px",padding:"16px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between"}},
@@ -859,7 +859,7 @@ function App(){
         var isExp2=abdExp["nc_"+n.id];
         return e("div",{key:n.id,style:{background:C.cd,border:"1px solid "+(isExp2?n.color+"44":C.bd),borderRadius:"12px",marginBottom:"8px",overflow:"hidden",animation:"fadeIn .3s ease"}},
           e("div",{onClick:function(){var nw={};for(var k in abdExp)nw[k]=abdExp[k];nw["nc_"+n.id]=!isExp2;setAbdExp(nw)},style:{padding:"14px 16px",cursor:"pointer",display:"flex",alignItems:"center",gap:"12px"}},
-            e("span",{style:{fontFamily:"'Playfair Display',serif",fontSize:"20px",fontWeight:900,color:n.color,minWidth:"36px"}},n.id),
+            e("span",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"20px",fontWeight:900,color:n.color,minWidth:"36px"}},n.id),
             e("div",{style:{flex:1}},
               e("div",{style:{fontWeight:700,fontSize:"14px",color:C.tx}},n.name),
               e("div",{style:{fontSize:"11px",color:C.dm,fontStyle:"italic"}},n.latin)
@@ -884,7 +884,7 @@ function App(){
 
     // ════════════ LABORATORIOS ════════════
     vista==="labs"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"📊"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"22px",fontWeight:800,color:"#4caf82"}},"Valores de Laboratorio"),e("p",{style:{color:C.dm,fontSize:"13px"}},"Rangos normales e interpretación clínica")),
+      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"📊"),e("h2",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"22px",fontWeight:800,color:"#4caf82"}},"Valores de Laboratorio"),e("p",{style:{color:C.dm,fontSize:"13px"}},"Rangos normales e interpretación clínica")),
       LAB_SECTIONS.map(function(sec,si){
         var isOpen=abdOpen===sec.id;
         return e("div",{key:sec.id,style:{marginBottom:"12px",animation:"slideUp .4s ease-out "+(si*0.05)+"s both"}},
@@ -940,7 +940,7 @@ function App(){
     vista==="imagenes"&&e(F,null,
       e("div",{style:{textAlign:"center",padding:"60px 20px"}},
         e("div",{style:{fontSize:"56px",marginBottom:"16px",opacity:.3}},"📷"),
-        e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"22px",fontWeight:800,color:"#06b6d4",marginBottom:"12px"}},"Imágenes Diagnósticas"),
+        e("h2",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"22px",fontWeight:800,color:"#06b6d4",marginBottom:"12px"}},"Imágenes Diagnósticas"),
         e("p",{style:{color:C.dm,fontSize:"14px",maxWidth:"400px",margin:"0 auto",lineHeight:1.6}},"Radiografías, Ecografías, Tomografías y Resonancias organizadas por región anatómica y patología."),
         e("div",{style:{marginTop:"24px",padding:"16px 24px",background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",display:"inline-block"}},
           e("p",{style:{color:C.mt,fontSize:"13px"}},"🚧 Sección en construcción. Se irá completando con imágenes clínicas.")
@@ -1021,7 +1021,7 @@ function App(){
     vista==="epid"&&e(F,null,
       e("div",{style:{textAlign:"center",marginBottom:"32px"}},
         e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"📊"),
-        e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"24px",fontWeight:900,background:"linear-gradient(135deg,#00b4d8,#3b82f6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}},"Epidemiología"),
+        e("h2",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"24px",fontWeight:900,background:"linear-gradient(135deg,#00b4d8,#3b82f6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}},"Epidemiología"),
         e("p",{style:{color:C.dm,fontSize:"13px"}},"Salud Pública · Lectura Crítica · MBE")
       ),
       // Tabs de epidemiología
@@ -1038,7 +1038,7 @@ function App(){
 
       // TAB 0: PIRÁMIDE
       ingTab===0&&e(F,null,
-        e("div",{style:{textAlign:"center",marginBottom:"16px"}},e("h3",{style:{fontFamily:"'Playfair Display',serif",fontSize:"18px",fontWeight:800,color:"#22d3ee"}},"Pirámide de Evidencia")),
+        e("div",{style:{textAlign:"center",marginBottom:"16px"}},e("h3",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"18px",fontWeight:800,color:"#22d3ee"}},"Pirámide de Evidencia")),
         e("div",{style:{display:"flex",flexDirection:"column",alignItems:"center",gap:"3px",marginBottom:"24px"}},
           PIRAMIDE.map(function(p,i){
             var isOpen=et===i;
@@ -1121,7 +1121,7 @@ function App(){
 
       // TAB 4: LECTURA CRÍTICA CHECKLIST
       ingTab===4&&e(F,null,
-        e("div",{style:{textAlign:"center",marginBottom:"16px"}},e("h3",{style:{fontFamily:"'Playfair Display',serif",fontSize:"18px",fontWeight:800,color:"#06b6d4"}},"Checklist de Lectura Crítica")),
+        e("div",{style:{textAlign:"center",marginBottom:"16px"}},e("h3",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"18px",fontWeight:800,color:"#06b6d4"}},"Checklist de Lectura Crítica")),
         CHECKLIST_LC.map(function(ck,i){
           return e("div",{key:i,style:{display:"flex",gap:"14px",alignItems:"flex-start",marginBottom:"14px",animation:"slideUp .3s ease-out "+(i*0.06)+"s both"}},
             e("div",{style:{width:"36px",height:"36px",borderRadius:"50%",background:ck.col+"15",border:"2px solid "+ck.col,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:"14px",color:ck.col,flexShrink:0}},ck.paso),

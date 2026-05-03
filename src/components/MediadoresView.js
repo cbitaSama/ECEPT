@@ -5,7 +5,7 @@
 function MediadoresHeader(){
   return e("div",{style:{textAlign:"center",marginBottom:"22px"}},
     e("div",{style:{fontSize:"44px",marginBottom:"4px"}},"🔥"),
-    e("h1",{style:{fontFamily:"'Playfair Display',serif",fontSize:"26px",fontWeight:900,
+    e("h1",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"26px",fontWeight:900,
       background:"linear-gradient(135deg,#ef4444 0%,#f472b6 50%,#a78bfa 100%)",
       WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",letterSpacing:"-0.5px"}},
       "Mediadores de la Inflamación"),

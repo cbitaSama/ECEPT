@@ -171,7 +171,7 @@ function BloqueTriageCards(props) {
              background:"#0d1224", border:"1px solid #1a2040",
              borderTop:"4px solid "+t.color, textAlign:"center"}
     },
-      e("div", {style:{fontFamily:"'Playfair Display',serif", fontSize:"13px",
+      e("div", {style:{fontFamily:"'Inter','DM Sans',sans-serif", fontSize:"13px",
                        fontWeight:800, letterSpacing:".14em",
                        textTransform:"uppercase", color:t.color, marginBottom:"4px"}}, t.code),
       e("div", {style:{fontSize:"13px", fontWeight:700, color:"#f1f5f9", marginBottom:"8px"}}, t.cat),
@@ -191,7 +191,7 @@ function BloqueDrugCards(props) {
              background:"#0d1224", border:"1px solid #1a2040",
              borderTop:"3px solid #fbbf24"}
     },
-      e("div", {style:{fontFamily:"'Playfair Display',serif", fontSize:"18px",
+      e("div", {style:{fontFamily:"'Inter','DM Sans',sans-serif", fontSize:"18px",
                        fontWeight:800, color:"#fde68a", marginBottom:"4px"}}, d.name),
       e("div", {style:{fontSize:"11.5px", fontWeight:700, letterSpacing:".08em",
                        textTransform:"uppercase", color:"#94a3b8", marginBottom:"10px"}}, d.role),

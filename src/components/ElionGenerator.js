@@ -383,7 +383,9 @@ function ElionGenerator(props) {
   // ── Render: loading step ──
   function renderLoading() {
     return e('div', { style: { textAlign:'center', padding:'60px 24px' } },
-      e('div', { style: { fontSize:'48px', marginBottom:'16px', animation:'float 2s ease-in-out infinite' } }, '🧬'),
+      e('div', { style: { marginBottom:'16px', display:'flex', justifyContent:'center' } },
+        e(window.Logo || 'span', { size: 56, animated: true, glow: true, idSuffix:'eliongen' })
+      ),
       e('div', { style: { fontSize:'16px', fontWeight:700, color:C.tx, marginBottom:'8px' } }, 'Elion está analizando el contenido…'),
       e('div', { style: { fontSize:'13px', color:C.mt } }, 'Esto puede tomar unos segundos')
     );

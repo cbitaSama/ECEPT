@@ -46,7 +46,7 @@ function ReceptoresView(){
   // ─── HEADER ───
   var header=e('div',{style:{textAlign:'center',marginBottom:'24px'}},
     e('span',{style:{display:'inline-block',fontSize:'10px',letterSpacing:'3px',textTransform:'uppercase',color:'#ec4899',background:'rgba(236,72,153,.12)',border:'1px solid rgba(236,72,153,.3)',padding:'5px 14px',borderRadius:'4px',marginBottom:'12px'}},'Fisiología · Receptores Celulares'),
-    e('h2',{style:{fontFamily:"'Playfair Display',serif",fontSize:'24px',fontWeight:900,background:'linear-gradient(135deg,#3b82f6,#8b5cf6,#f472b6,#fbbf24)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}},'Receptores Farmacológicos'),
+    e('h2',{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:'24px',fontWeight:900,background:'linear-gradient(135deg,#3b82f6,#8b5cf6,#f472b6,#fbbf24)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}},'Receptores Farmacológicos'),
     e('p',{style:{color:C.dm,fontSize:'13px'}},RECEPTOR_FAMILIES.length+' familias · '+RECEPTOR_FAMILIES.reduce(function(a,f){return a+f.receptors.length},0)+' subtipos · Mecanismos, fármacos y clínica')
   );
 
@@ -80,7 +80,7 @@ function ReceptoresView(){
     e('div',{style:{display:'flex',alignItems:'center',gap:'14px',flexWrap:'wrap'}},
       e('span',{style:{fontSize:'36px'}},currentFamily.icon),
       e('div',{style:{flex:1,minWidth:'200px'}},
-        e('h2',{style:{fontFamily:"'Playfair Display',serif",fontSize:'22px',fontWeight:800,color:currentFamily.col,marginBottom:'2px'}},currentFamily.name),
+        e('h2',{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:'22px',fontWeight:800,color:currentFamily.col,marginBottom:'2px'}},currentFamily.name),
         e('div',{style:{fontSize:'12px',color:C.mt}},'🧪 ',e('strong',{style:{color:C.tx}},currentFamily.nt))
       )
     )
@@ -125,16 +125,16 @@ function ReceptoresView(){
 
     var heroCard=e('div',{style:{borderRadius:'16px',padding:'24px',marginBottom:'20px',border:'1.5px solid '+currentRec.color+'40',background:currentRec.colorBg}},
       e('div',{style:{display:'flex',alignItems:'flex-start',gap:'16px',marginBottom:'20px',flexWrap:'wrap'}},
-        e('span',{style:{fontFamily:"'Playfair Display',serif",fontSize:'64px',fontWeight:900,lineHeight:1,color:currentRec.color,textShadow:'0 0 30px '+currentRec.color+'40'}},currentRec.letter),
+        e('span',{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:'64px',fontWeight:900,lineHeight:1,color:currentRec.color,textShadow:'0 0 30px '+currentRec.color+'40'}},currentRec.letter),
         e('div',{style:{flex:1,minWidth:'200px'}},
-          e('h3',{style:{fontFamily:"'Playfair Display',serif",fontSize:'26px',fontWeight:800,marginBottom:'6px',color:C.tx}},currentRec.symbol+' — '+currentRec.name),
+          e('h3',{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:'26px',fontWeight:800,marginBottom:'6px',color:C.tx}},currentRec.symbol+' — '+currentRec.name),
           e('div',{style:{display:'flex',alignItems:'center',gap:'8px',flexWrap:'wrap'}},
             e('span',{style:{background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.12)',padding:'4px 12px',borderRadius:'100px',fontSize:'12px',fontWeight:600,color:C.tx}},'🔗 '+currentRec.protein),
             currentRec.messenger.map(function(m,mi){
               return e('span',{key:mi,style:{fontSize:'12px',color:C.mt,padding:'4px 10px',background:'rgba(255,255,255,.03)',borderRadius:'100px'}},m)
             })
           ),
-          e('div',{style:{fontSize:'12px',color:C.mt,marginTop:'8px',fontFamily:"'Playfair Display',serif",fontStyle:'italic'}},'→ '+currentRec.net)
+          e('div',{style:{fontSize:'12px',color:C.mt,marginTop:'8px',fontFamily:"'Inter','DM Sans',sans-serif",fontStyle:'italic'}},'→ '+currentRec.net)
         )
       ),
       e('div',{style:{padding:'16px',background:'rgba(0,0,0,.4)',borderRadius:'12px',marginBottom:'20px',border:'1px solid '+C.bd,overflowX:'auto'}},
@@ -180,7 +180,7 @@ function ReceptoresView(){
     );
 
     var comparativeTable=e('div',{style:{marginTop:'24px'}},
-      e('h4',{style:{fontFamily:"'Playfair Display',serif",fontSize:'16px',fontWeight:700,marginBottom:'12px',color:currentFamily.col}},'📊 Comparativa — '+currentFamily.name),
+      e('h4',{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:'16px',fontWeight:700,marginBottom:'12px',color:currentFamily.col}},'📊 Comparativa — '+currentFamily.name),
       e('div',{style:{overflowX:'auto',borderRadius:'12px',border:'1.5px solid '+C.bd}},
         e('table',{style:{width:'100%',borderCollapse:'collapse',fontSize:'12px'}},
           e('thead',null,e('tr',{style:{background:C.cd}},
@@ -206,12 +206,12 @@ function ReceptoresView(){
   } else if(mainTab===1){
     // PROTEIN G TAB
     content=e(F,null,
-      e('h3',{style:{fontFamily:"'Playfair Display',serif",fontSize:'20px',fontWeight:700,marginBottom:'8px',color:currentFamily.col}},'🔬 Proteínas G — Transversal'),
+      e('h3',{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:'20px',fontWeight:700,marginBottom:'8px',color:currentFamily.col}},'🔬 Proteínas G — Transversal'),
       e('p',{style:{fontSize:'13px',color:C.mt,marginBottom:'20px'}},'Sistema de señalización que conecta receptores con efectores intracelulares.'),
       e('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(250px,1fr))',gap:'14px',marginBottom:'24px'}},
         RECEPTOR_PROT_G.map(function(g,gi){
           return e('div',{key:gi,style:{padding:'20px',borderRadius:'14px',background:'linear-gradient(135deg,'+g.color+'15,rgba(13,18,36,.8))',border:'1.5px solid '+g.color+'40'}},
-            e('div',{style:{fontSize:'32px',fontWeight:900,fontFamily:"'Playfair Display',serif",color:g.color,marginBottom:'4px'}},g.name),
+            e('div',{style:{fontSize:'32px',fontWeight:900,fontFamily:"'Inter','DM Sans',sans-serif",color:g.color,marginBottom:'4px'}},g.name),
             e('div',{style:{fontSize:'12px',color:C.dm,marginBottom:'8px'}},g.desc),
             e('div',{style:{fontSize:'14px',fontWeight:700,color:C.tx,marginBottom:'12px',fontFamily:"'JetBrains Mono',monospace"}},g.result),
             e('div',{style:{fontSize:'11px',color:C.dm,borderTop:'1px solid rgba(255,255,255,.08)',paddingTop:'10px'}},
@@ -237,7 +237,7 @@ function ReceptoresView(){
     content=e(F,null,
       e('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'16px',flexWrap:'wrap',gap:'8px'}},
         e('div',null,
-          e('h3',{style:{fontFamily:"'Playfair Display',serif",fontSize:'20px',fontWeight:700,color:currentFamily.col}},'🧠 Quiz — '+currentFamily.name),
+          e('h3',{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:'20px',fontWeight:700,color:currentFamily.col}},'🧠 Quiz — '+currentFamily.name),
           e('p',{style:{fontSize:'12px',color:C.dm,marginTop:'2px'}},currentQuiz.length+' preguntas · '+Object.keys(quizAns).length+'/'+currentQuiz.length+' respondidas')
         ),
         streak>0&&e('div',{style:{display:'flex',alignItems:'center',gap:'6px',padding:'6px 14px',background:'rgba(52,211,153,.12)',borderRadius:'100px',border:'1px solid rgba(52,211,153,.3)'}},
@@ -250,7 +250,7 @@ function ReceptoresView(){
         var isCorrect=answered&&quizAns[qi]===qq.r;
         return e('div',{key:qi,style:{background:C.cd,border:'1.5px solid '+(answered?(isCorrect?'#34d39944':'#ef444444'):C.bd),borderRadius:'14px',padding:'20px',marginBottom:'14px'}},
           e('div',{style:{fontSize:'11px',fontWeight:700,letterSpacing:'1px',textTransform:'uppercase',color:C.dm,marginBottom:'8px'}},'Pregunta '+(qi+1)+' de '+currentQuiz.length),
-          e('div',{style:{fontFamily:"'Playfair Display',serif",fontSize:'16px',fontWeight:600,marginBottom:'14px',lineHeight:1.5,color:C.tx}},qq.q),
+          e('div',{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:'16px',fontWeight:600,marginBottom:'14px',lineHeight:1.5,color:C.tx}},qq.q),
           e('div',{style:{display:'flex',flexDirection:'column',gap:'8px'}},
             qq.opts.map(function(opt,oi){
               var bg='rgba(255,255,255,.03)',bd=C.bd,col=C.mt;
@@ -281,10 +281,10 @@ function ReceptoresView(){
   } else {
     // PEARLS TAB
     content=e(F,null,
-      e('h3',{style:{fontFamily:"'Playfair Display',serif",fontSize:'20px',fontWeight:700,marginBottom:'16px',color:currentFamily.col}},'📌 Perlas Clínicas · '+currentFamily.name),
+      e('h3',{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:'20px',fontWeight:700,marginBottom:'16px',color:currentFamily.col}},'📌 Perlas Clínicas · '+currentFamily.name),
       currentPearls.map(function(p,pi){
         return e('div',{key:pi,style:{background:C.cd,border:'1.5px solid '+C.bd,borderRadius:'12px',padding:'18px 20px',marginBottom:'10px'}},
-          e('div',{style:{fontFamily:"'Playfair Display',serif",fontSize:'15px',fontWeight:700,marginBottom:'10px',color:currentFamily.col}},(p.ic||'')+' '+p.t),
+          e('div',{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:'15px',fontWeight:700,marginBottom:'10px',color:currentFamily.col}},(p.ic||'')+' '+p.t),
           e('div',{style:{display:'flex',flexDirection:'column',gap:'8px'}},
             (p.items||p.i||[]).map(function(item,ii){
               return e('div',{key:ii,style:{display:'flex',gap:'10px',alignItems:'flex-start',lineHeight:1.6}},

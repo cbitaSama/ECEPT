@@ -320,7 +320,7 @@ function DecksView(props){
     return e("div",{style:{maxWidth:"540px",margin:"0 auto",padding:"20px 20px 60px"}},
       e("div",{style:{textAlign:"center",padding:"20px 0"}},
         e("div",{style:{fontSize:"56px",marginBottom:"16px"}},"🎴"),
-        e("h2",{style:{fontSize:"22px",fontWeight:800,color:C.tx,fontFamily:"'Playfair Display',serif",marginBottom:"12px"}},"Flashcards"),
+        e("h2",{style:{fontSize:"22px",fontWeight:800,color:C.tx,fontFamily:"'Inter','DM Sans',sans-serif",marginBottom:"12px"}},"Flashcards"),
         e("p",{style:{fontSize:"14px",color:C.dm,lineHeight:1.6,maxWidth:"300px",margin:"0 auto 28px"}},"Iniciá sesión para crear tus barajas personales, guardar tu progreso y acceder a todas las funciones."),
         e("button",{
           onClick:function(){ if(typeof props.onLoginRequest==="function") props.onLoginRequest(); },
@@ -616,7 +616,7 @@ function DecksView(props){
 
     // ── Header ──
     e("div",{style:{marginBottom:"4px"}},
-      e("div",{style:{fontSize:"22px",fontWeight:800,color:C.tx,fontFamily:"'Playfair Display',serif"}},"🎴 Flashcards")
+      e("div",{style:{fontSize:"22px",fontWeight:800,color:C.tx,fontFamily:"'Inter','DM Sans',sans-serif"}},"🎴 Flashcards")
     ),
     e("div",{style:{fontSize:"13px",color:C.dm,marginLeft:"54px",marginBottom:"22px"}},DV_guestMode?"Barajas oficiales":"Tus barajas de estudio"),
 

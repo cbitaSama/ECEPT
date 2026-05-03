@@ -980,7 +980,7 @@ function DeckDetailView(props){
         e("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"2px"}},
           e("h1",{style:{
             fontSize:"18px",fontWeight:800,color:C.tx,
-            fontFamily:"'Playfair Display',serif",
+            fontFamily:"'Inter','DM Sans',sans-serif",
             overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
             margin:0
           }},_deckName),
