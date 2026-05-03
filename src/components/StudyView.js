@@ -457,7 +457,7 @@ function StudyView(props){
     ];
     var sliderMax=Math.min(100,available)||5;
 
-    return e("div",{style:{maxWidth:"760px",margin:"0 auto",padding:"20px 16px 80px"}},
+    return e("div",{style:{maxWidth:"760px",margin:"0 auto",padding:"20px 16px 80px",minHeight:"100vh",background:"radial-gradient(ellipse 80% 50% at 50% 0%, rgba(167,139,250,0.06) 0%, rgba(96,165,250,0.03) 35%, transparent 70%)"}},
       e("div",{style:{display:"flex",alignItems:"center",gap:"12px",marginBottom:"24px"}},
         e("h1",{style:{fontSize:"22px",fontWeight:700,color:C.tx,margin:0,flex:1}},"Modo estudio"),
         e("div",{style:{fontSize:"28px"}},"🎯")
