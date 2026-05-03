@@ -590,19 +590,19 @@ function PsicosisView(p){
   ];
 
   return e("div",null,
-    e(Hero,{c:c,kicker:"Psicosis · Salud Mental II",title:"Trastornos psicóticos"},
+    e(Hero,{c:c,kicker:"Psicosis · Salud Mental",title:"Trastornos psicóticos"},
       "Grupo de trastornos caracterizados por ",e("b",null,"pérdida del contacto con la realidad"),": delirios, alucinaciones, pensamiento desorganizado. El ",e("b",null,"espectro esquizofrénico")," se distingue principalmente por la ",e("b",null,"duración")," de los síntomas. Incluye también los trastornos del estado de ánimo graves (bipolar y depresión mayor) en la clasificación clínica que seguimos."
     ),
 
     e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.3),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Secciones del tema"),
-      e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Playfair Display"}},"Conceptos, fármacos + Quiz + Flashcards")
+      e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Inter,DM Sans"}},"Conceptos, fármacos + Quiz + Flashcards")
     ),
     e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:10,marginTop:10}},
       general.map(function(g,i){
         return e("button",{key:g.id,onClick:function(){if(p&&p.onOpenSection)p.onOpenSection(g);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:90}},
           e("div",{style:{fontSize:22,marginBottom:4}},g.ic),
-          e("div",{style:{fontSize:13,fontWeight:800,color:"#fff",lineHeight:1.25,fontFamily:"Playfair Display"}},g.t),
+          e("div",{style:{fontSize:13,fontWeight:800,color:"#fff",lineHeight:1.25,fontFamily:"Inter,DM Sans"}},g.t),
           e("div",{style:{fontSize:11,color:C.mt,lineHeight:1.4,marginTop:2}},g.sub)
         );
       })
@@ -625,7 +625,7 @@ function PsicosisView(p){
 
     e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.15)+","+ax(c,.04)+" 90%)",border:"1px solid "+ax(c,.35),borderRadius:14,margin:"18px 0 4px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Las 8 enfermedades"),
-      e("div",{style:{fontSize:17,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Playfair Display"}},"Toca cualquier enfermedad para abrir su ficha"),
+      e("div",{style:{fontSize:17,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Inter,DM Sans"}},"Toca cualquier enfermedad para abrir su ficha"),
       e("div",{style:{fontSize:12,color:C.mt,marginTop:4,lineHeight:1.45}},"Cada ficha tiene tabs: Definición · Clínica · Diagnóstico · Tratamiento")
     ),
     e(DzGrid,{c:c,items:diseases,onOpen:p&&p.onOpen}),

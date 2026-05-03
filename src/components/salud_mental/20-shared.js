@@ -60,10 +60,10 @@ function DiseaseBlock(p){
     p.id?e(Anchor,{id:p.id}):null,
     // Header de enfermedad
     e("div",{style:{display:"flex",alignItems:"center",gap:12,padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.2)+","+ax(c,.05)+" 80%)",border:"1px solid "+ax(c,.4),borderRadius:"12px 12px 0 0",borderBottom:"none"}},
-      e("div",{style:{minWidth:42,height:42,borderRadius:10,background:ax(c,.25),border:"1px solid "+ax(c,.4),color:c,fontSize:17,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontFamily:"Playfair Display"}},p.n),
+      e("div",{style:{minWidth:42,height:42,borderRadius:10,background:ax(c,.25),border:"1px solid "+ax(c,.4),color:c,fontSize:17,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontFamily:"Inter,DM Sans"}},p.n),
       e("div",{style:{flex:1,minWidth:0}},
         e("div",{style:{fontSize:10,fontWeight:800,color:c,letterSpacing:1.5,textTransform:"uppercase",marginBottom:1,opacity:.8}},p.kicker||"Enfermedad"),
-        e("div",{style:{fontSize:18,fontWeight:800,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Playfair Display"}},p.name)
+        e("div",{style:{fontSize:18,fontWeight:800,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Inter,DM Sans"}},p.name)
       )
     ),
     // Contenido
@@ -79,7 +79,7 @@ function SharedBanner(p){
   return e("div",{style:{padding:"16px 18px",background:"linear-gradient(135deg,"+ax(c,.2)+","+ax(c,.06)+" 90%)",border:"2px solid "+ax(c,.5),borderRadius:14,margin:"26px 0 14px",textAlign:"center"}},
     e("div",{style:{fontSize:24,marginBottom:4}},p.icon||"🎯"),
     e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:4}},p.kicker||"Sección compartida"),
-    e("div",{style:{fontSize:20,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.15,fontFamily:"Playfair Display"}},p.title),
+    e("div",{style:{fontSize:20,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.15,fontFamily:"Inter,DM Sans"}},p.title),
     p.subtitle?e("div",{style:{fontSize:12.5,color:C.mt,marginTop:5,lineHeight:1.5}},p.subtitle):null
   );
 }

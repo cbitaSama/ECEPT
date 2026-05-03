@@ -77,7 +77,7 @@ function App(p){
   },[view]);
 
   // Notify host (ECEPT) on every view change so it can render a deeper
-  // breadcrumb ("Inicio › Salud Mental II › Neurosis › Ansiedad", etc.).
+  // breadcrumb ("Inicio › Salud Mental › Neurosis › Ansiedad", etc.).
   // When on disease/section routes we also pass {name, parent} so ECEPT
   // can append the leaf name as the last crumb. No-op when standalone.
   useEffect(function(){
@@ -230,7 +230,7 @@ function App(p){
       e("div",{style:{padding:"16px 14px 90px",maxWidth:720,margin:"0 auto",animation:"fadeIn .3s"}},
         e("div",{style:{padding:"18px 18px",background:"linear-gradient(135deg,"+ax(hc,.15)+","+C.cd+" 85%)",border:"1px solid "+ax(hc,.35),borderLeft:"4px solid "+hc,borderRadius:14,marginBottom:18}},
           e("div",{style:{fontSize:10.5,fontWeight:800,color:hc,letterSpacing:2,textTransform:"uppercase",marginBottom:4}},isFlash?"Flashcards globales":"Quiz global"),
-          e("div",{style:{fontSize:18,fontWeight:900,color:"#fff",lineHeight:1.2,fontFamily:"Playfair Display",marginBottom:5}},isFlash?"Repaso combinado":"Casos clínicos combinados"),
+          e("div",{style:{fontSize:18,fontWeight:900,color:"#fff",lineHeight:1.2,fontFamily:"Inter,DM Sans",marginBottom:5}},isFlash?"Repaso combinado":"Casos clínicos combinados"),
           e("div",{style:{fontSize:12,color:C.tx,lineHeight:1.5}},
             isFlash?"Todas las flashcards oficiales de "+groupLabel+" + las que tú añadas. Filtra por tema, busca texto, alterna entre modo tarjeta y modo lista.":"Todos los casos clínicos de "+groupLabel+". Filtra por tema, alterna entre modo tarjeta (interactivo) y modo lista (vista rápida con respuestas)."
           )

@@ -118,7 +118,7 @@ function FlashDeck(p){
       e("div",{style:{background:C.cd,border:"1px solid "+ax(C.pearl,.4),borderLeft:"4px solid "+C.pearl,borderRadius:14,padding:18,maxWidth:500,width:"100%",maxHeight:"90vh",overflowY:"auto"}},
         e("div",{style:{display:"flex",alignItems:"center",gap:8,marginBottom:14}},
           e("div",{style:{fontSize:20}},"✦"),
-          e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",fontFamily:"Playfair Display",flex:1}},editingIdx===null?"Nueva flashcard":"Editar flashcard"),
+          e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",fontFamily:"Inter,DM Sans",flex:1}},editingIdx===null?"Nueva flashcard":"Editar flashcard"),
           e("button",{onClick:function(){setEditorOpen(false);},style:{padding:"5px 9px",background:C.bd,border:"1px solid "+C.bd2,color:C.mt,borderRadius:7,fontSize:11,fontWeight:700,cursor:"pointer"}},"✕")
         ),
         e("label",{style:{display:"block",fontSize:10.5,fontWeight:800,color:C.pearl,letterSpacing:1.5,textTransform:"uppercase",marginBottom:5}},"❓ Pregunta"),
@@ -153,7 +153,7 @@ function Quiz(p){
     var msg=pct>=80?"🏆 Dominas el tema":pct>=60?"💪 Bien, repasa lo fallado":"📚 Toca releer";
     return e("div",{style:{padding:24,background:"linear-gradient(135deg,"+ax(c,.15)+","+ax(c,.04)+")",border:"1px solid "+ax(c,.4),borderRadius:14,textAlign:"center"}},
       e("div",{style:{fontSize:42,marginBottom:8}},pct>=80?"🏆":pct>=60?"💪":"📚"),
-      e("div",{style:{fontFamily:"Playfair Display",fontSize:28,fontWeight:900,color:c,marginBottom:4}},score+" / "+p.items.length),
+      e("div",{style:{fontFamily:"Inter,DM Sans",fontSize:28,fontWeight:900,color:c,marginBottom:4}},score+" / "+p.items.length),
       e("div",{style:{fontSize:13,color:C.mt,marginBottom:18}},msg),
       e("button",{onClick:reset,style:{padding:"10px 22px",background:c,color:"#fff",border:"none",borderRadius:9,fontWeight:700,fontSize:13,letterSpacing:.3}},"🔄 Reintentar")
     );

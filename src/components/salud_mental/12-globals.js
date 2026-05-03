@@ -215,7 +215,7 @@ function GlobalFlashDeck(p){
       e("div",{style:{background:C.cd,border:"1px solid "+ax(C.pearl,.4),borderLeft:"4px solid "+C.pearl,borderRadius:14,padding:18,maxWidth:500,width:"100%",maxHeight:"90vh",overflowY:"auto"}},
         e("div",{style:{display:"flex",alignItems:"center",gap:8,marginBottom:14}},
           e("div",{style:{fontSize:20}},"✦"),
-          e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",fontFamily:"Playfair Display",flex:1}},editingIdx===null?"Nueva flashcard":"Editar flashcard"),
+          e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",fontFamily:"Inter,DM Sans",flex:1}},editingIdx===null?"Nueva flashcard":"Editar flashcard"),
           e("button",{onClick:function(){setEditorOpen(false);},style:{padding:"5px 9px",background:C.bd,border:"1px solid "+C.bd2,color:C.mt,borderRadius:7,fontSize:11,fontWeight:700,cursor:"pointer"}},"✕")
         ),
         e("label",{style:{display:"block",fontSize:10.5,fontWeight:800,color:C.pearl,letterSpacing:1.5,textTransform:"uppercase",marginBottom:5}},"Tema"),

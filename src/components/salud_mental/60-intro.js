@@ -142,7 +142,7 @@ function IntroView(p){
      )},
     {id:"preliminar",ic:"🗺️",t:"Cómo usar este módulo",sub:"Guía rápida de navegación",c:c,
      content:e("div",null,
-       e(P,null,"Bienvenido a Salud Mental II. Este módulo organiza toda la materia en ",e("b",null,"2 grandes bloques")," con el mismo formato visual:"),
+       e(P,null,"Bienvenido a Salud Mental. Este módulo organiza toda la materia en ",e("b",null,"2 grandes bloques")," con el mismo formato visual:"),
        e("div",{style:{display:"flex",gap:10,marginTop:14,flexWrap:"wrap"}},
          e("div",{style:{flex:1,minWidth:200,padding:"14px",background:"linear-gradient(135deg,"+ax(C.psi,.12)+","+C.cd+" 85%)",border:"1px solid "+ax(C.psi,.35),borderRadius:12}},
            e("div",{style:{fontSize:22,marginBottom:4}},"🔺"),
@@ -174,20 +174,20 @@ function IntroView(p){
   ];
 
   return e("div",null,
-    e(Hero,{c:c,kicker:"Tema 0 · Salud Mental II",title:"Introducción a la psiquiatría"},
+    e(Hero,{c:c,kicker:"Tema 0 · Salud Mental",title:"Introducción a la psiquiatría"},
       "Marco conceptual común a toda la materia. Definiciones de la OMS, historia, qué es un trastorno mental, la división clínica ",e("b",null,"psicosis vs neurosis"),", causas multicausales y los 3 pilares del tratamiento. Toca cada tarjeta para profundizar."
     ),
 
     e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.3),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Secciones del tema"),
-      e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Playfair Display"}},"Conceptos fundamentales"),
+      e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Inter,DM Sans"}},"Conceptos fundamentales"),
       e("div",{style:{fontSize:12,color:C.mt,marginTop:4,lineHeight:1.45}},"OMS · Historia · Psicosis vs Neurosis · Causas · Tratamientos · Navegación")
     ),
     e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:10,marginTop:10}},
       secciones.map(function(g,i){
         return e("button",{key:g.id,onClick:function(){if(p&&p.onOpenSection)p.onOpenSection(g);},style:{padding:"14px 12px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:10,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:100}},
           e("div",{style:{fontSize:22,marginBottom:4}},g.ic),
-          e("div",{style:{fontSize:13,fontWeight:800,color:"#fff",lineHeight:1.25,fontFamily:"Playfair Display"}},g.t),
+          e("div",{style:{fontSize:13,fontWeight:800,color:"#fff",lineHeight:1.25,fontFamily:"Inter,DM Sans"}},g.t),
           e("div",{style:{fontSize:11,color:C.mt,lineHeight:1.4,marginTop:2}},g.sub)
         );
       })

@@ -301,7 +301,7 @@ function App(){
             var isDisease=smView==="disease"&&smLeaf;
             var isSection=smView==="section"&&smLeaf;
             var sep=e("span",{style:{color:"rgba(255,255,255,.15)"}}," › ");
-            var smLabel=e("span",{style:{color:smView==="root"?C.mt:C.dm,cursor:smView==="root"?"default":"pointer"},onClick:smView==="root"?null:function(){if(window._smFocus)window._smFocus("root")}},"Salud Mental II");
+            var smLabel=e("span",{style:{color:smView==="root"?C.mt:C.dm,cursor:smView==="root"?"default":"pointer"},onClick:smView==="root"?null:function(){if(window._smFocus)window._smFocus("root")}},"Salud Mental");
             // Leaf crumbs (disease + section share the same shape {name, parent}).
             // Parent in ["psicosis"] → "Psicosis › <name>"; parent ∈ neurosis themes
             // → "Neurosis › <theme> › <name>"; parent "intro" → "Psiquiatría › <name>";
@@ -511,7 +511,7 @@ function App(){
     // Vistas que usan ModuleShell o gestionan su propio ancho escapan del
     // wrapper de 900px. El resto mantiene wrapper estrecho para legibilidad
     // de prosa larga.
-    e("div",{style:(({home:1,reuma:1,reuma_sec:1,cir_menu:1,anat_menu:1,emergen_menu:1,fisio:1,general:1,vocabulario:1,"trauma-u1":1,favoritos:1}[vista])||(vista&&vista.indexOf("anat_")===0&&vista!=="anatomia"))?{width:"100%",margin:0,padding:"0 0 80px"}:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
+    e("div",{style:(({home:1,reuma:1,reuma_sec:1,cir_menu:1,anat_menu:1,emergen_menu:1,fisio:1,general:1,vocabulario:1,"trauma-u1":1,favoritos:1,salud_mental:1,labs:1}[vista])||(vista&&vista.indexOf("anat_")===0&&vista!=="anatomia"))?{width:"100%",margin:0,padding:"0 0 80px"}:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
 
     // ════════════ HOME ════════════
     vista==="home"&&e(HomeView,{user:ecuUser,vi:vi,favs:favs,bestStreak:bestStreak,go:go}),
@@ -706,7 +706,9 @@ function App(){
     // onViewChange — SM calls this on every internal view change so ECEPT can
     //                render the deeper breadcrumb. Module itself is headless.
     // className "sm-root" scopes the SM-specific CSS (.prose + button resets).
-    vista==="salud_mental"&&e("div",{className:"sm-root"},e(SaludMentalView,{onHome:function(){go("home")},onBackRef:smBackRef,onViewChange:onSmViewChange,goFlashcards:function(deck){if(deck){window.ECEPT_DECK_SELECTED=deck;go("flashcards_deck");}else{go("flashcards");}}})),
+    vista==="salud_mental"&&e(ModuleShell,{title:"Salud Mental",subtitle:"Psiquiatría · Psicosis · Neurosis · Flashcards y Casos",icon:"🧠",accent:"#a78bfa"},
+      e("div",{className:"sm-root"},e(SaludMentalView,{onHome:function(){go("home")},onBackRef:smBackRef,onViewChange:onSmViewChange,goFlashcards:function(deck){if(deck){window.ECEPT_DECK_SELECTED=deck;go("flashcards_deck");}else{go("flashcards");}}}))
+    ),
 
     // ════════════ QUEMADURAS ════════════
     vista==="cir_quem"&&e(F,null,
