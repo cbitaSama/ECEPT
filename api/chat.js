@@ -361,26 +361,58 @@ module.exports = async function handler(req, res) {
       '\n\n=== FIN CONTEXTO DEL PROYECTO ===';
   }
 
-  // Capacidades extra para Pro 2.5
+  // Capacidades extra para Pro 2.5 — generación académica de calidad alta
   if (model === 'gemini-2.5-pro') {
     systemPromptFull +=
-      '\n\n=== CAPACIDADES PRO 2.5 ===\n' +
-      'Cuando el usuario pida explícitamente generar un documento (PDF, Word, ' +
-      'DOCX, ensayo, monografía, resumen exportable):\n' +
-      '1. Producí contenido bien estructurado en markdown — usá headers (##, ###), ' +
-      '   listas, tablas, citas si corresponden.\n' +
-      '2. Si se mencionan referencias bibliográficas, formateá según APA 7ma edición.\n' +
-      '3. Al FINAL del mensaje (no al inicio), agregá EXACTAMENTE este bloque para ' +
-      '   que el frontend ofrezca botón de descarga:\n\n' +
-      '   ===EXPORT_DOCUMENT===\n' +
-      '   {"format":"pdf","filename":"sugerencia.pdf","title":"Título del documento"}\n' +
-      '   ===END_EXPORT===\n\n' +
-      '   format puede ser "pdf" o "docx" según lo pida el usuario (default pdf).\n' +
-      '   filename: kebab-case sin tildes (ej: "betabloqueantes-resumen.pdf").\n' +
-      '   title: título legible para portada del documento.\n' +
-      'NO agregues el bloque si el usuario no está pidiendo un documento exportable. ' +
-      'Para preguntas normales, respondé como siempre.\n' +
-      '=== FIN CAPACIDADES PRO 2.5 ===';
+      '\n\n=== GENERACIÓN DE DOCUMENTOS ACADÉMICOS (Pro 2.5) ===\n\n' +
+      'Cuando el usuario pida un documento (Word, PDF, informe, resumen, ' +
+      'ensayo, monografía, protocolo, caso clínico):\n\n' +
+      'ESTRUCTURA OBLIGATORIA:\n' +
+      '1. Portada implícita: Título principal (# Título), Autor si lo mencionó, ' +
+      '   Materia/Institución si aplica, Fecha (DD/MM/YYYY).\n' +
+      '2. Introducción que contextualiza el tema (1-2 párrafos).\n' +
+      '3. Desarrollo organizado con headers ## y ### claros y jerarquía consistente.\n' +
+      '4. Tablas comparativas EN MARKDOWN cuando corresponda (formato:\n' +
+      '   | Columna 1 | Columna 2 |\n' +
+      '   |-----------|-----------|\n' +
+      '   | Dato      | Dato      |\n' +
+      '5. Conclusión o síntesis final.\n' +
+      '6. Referencias en formato APA 7ma cuando hay datos específicos o citas.\n\n' +
+      'CALIDAD ACADÉMICA:\n' +
+      '- Lenguaje técnico apropiado pero claro.\n' +
+      '- Profundidad de nivel universitario; no superficialidad.\n' +
+      '- **Negritas** SOLO para términos clave, no decorativo.\n' +
+      '- Máximo 1 emoji por sección, solo si suma.\n' +
+      '- Citas APA 7ma cuando incluyas datos específicos o estudios.\n' +
+      '- Listas y bullets bien estructurados (* o -).\n\n' +
+      'BLOQUE DE EXPORT — OBLIGATORIO al final del mensaje:\n' +
+      '===EXPORT_DOCUMENT===\n' +
+      '{"format":"pdf","filename":"[nombre-sugerido].pdf","title":"[Título del doc]"}\n' +
+      '===END_EXPORT===\n\n' +
+      'IMPORTANTE:\n' +
+      '- SIEMPRE terminá con el bloque de export cuando hay un pedido de documento.\n' +
+      '- filename: kebab-case sin tildes (ej: "betabloqueantes-resumen.pdf").\n' +
+      '- title: legible para la portada.\n' +
+      '- format default: "pdf". El usuario elige PDF o Word desde la UI.\n' +
+      '- NUNCA digas "no puedo generar documentos" o "no tengo esa capacidad". ' +
+      'Siempre generá el contenido completo + bloque de export.\n' +
+      '=== FIN GENERACIÓN DE DOCUMENTOS ===';
+  } else if (model === 'gemini-2.5-flash') {
+    // Flash 2.5 también puede generar docs (más simples)
+    systemPromptFull +=
+      '\n\n=== GENERACIÓN DE DOCUMENTOS (Flash 2.5) ===\n\n' +
+      'Cuando el usuario pida un documento (Word, PDF, resumen, informe):\n' +
+      '1. Generá contenido completo y bien estructurado en markdown:\n' +
+      '   - Headers ## y ###\n' +
+      '   - Listas con * o -\n' +
+      '   - Tablas en formato markdown | col | col |\n' +
+      '   - **Negritas** para términos clave\n' +
+      '2. Al FINAL del mensaje, incluí SIEMPRE este bloque:\n' +
+      '===EXPORT_DOCUMENT===\n' +
+      '{"format":"pdf","filename":"documento.pdf","title":"[Título]"}\n' +
+      '===END_EXPORT===\n\n' +
+      'NUNCA digas que no podés generar documentos. Siempre generá el contenido + bloque.\n' +
+      '=== FIN GENERACIÓN DE DOCUMENTOS ===';
   }
 
   // Capacidad universal: generación de flashcards (cualquier modelo).

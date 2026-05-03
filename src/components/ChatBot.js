@@ -125,7 +125,18 @@ function CB_extractExportMeta(text) {
   if (!text) return null;
   var match = String(text).match(/===EXPORT_DOCUMENT===\s*([\s\S]*?)\s*===END_EXPORT===/);
   if (!match) return null;
-  try { return JSON.parse(match[1]); } catch(e) { return null; }
+  try {
+    // Trim agresivo + remover trailing chars que rompen JSON.parse
+    var raw = String(match[1] || '').trim();
+    // Si Gemini envuelve en code fence ```json ... ``` lo limpiamos
+    raw = raw.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/\s*```\s*$/, '').trim();
+    if (!raw) return null;
+    var parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return null;
+    return parsed;
+  } catch(e) {
+    return null;
+  }
 }
 function CB_stripExportMeta(text) {
   if (!text) return text;
@@ -1070,10 +1081,15 @@ function ChatBot(props) {
   }
 
   async function CB_newConv(projectId) {
+    // Defensivo: si projectId no es string válido (event, undefined, null, etc), tratar como sin proyecto.
+    if (typeof projectId !== 'string' || !projectId) projectId = null;
     try {
       var sess = await window.ECEPT_SUPABASE.auth.getSession();
       var token = sess && sess.data && sess.data.session && sess.data.session.access_token;
-      if (!token) return;
+      if (!token) {
+        if (window.ECEPT_toast) window.ECEPT_toast('Iniciá sesión para chatear', 'info');
+        return;
+      }
       var r = await fetch('/api/conversations', {
         method:'POST',
         headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
@@ -1643,7 +1659,7 @@ function ChatBot(props) {
         e('div', { style:{ display:'flex', alignItems:'center', gap:10, marginBottom:4 } },
           e('div', { style:{ flex:1, fontSize:16, fontWeight:700, color:C.tx, letterSpacing:'-0.015em' } }, 'Conversaciones'),
           e('button', {
-            onClick: CB_newConv,
+            onClick: function() { CB_newConv(); },
             'aria-label':'Nueva conversación',
             title:'Nueva conversación',
             style:{ background:'linear-gradient(135deg,#60a5fa,#a78bfa)', border:'none', borderRadius:10, color:'#fff', width:32, height:32, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', fontSize:18, fontWeight:600, flexShrink:0, boxShadow:'0 2px 8px rgba(167,139,250,0.30)', transition:'transform 200ms cubic-bezier(0.34,1.56,0.64,1)' },
@@ -2032,24 +2048,32 @@ function ChatBot(props) {
         ev.currentTarget.style.boxShadow = '0 8px 24px rgba(167,139,250,0.40), 0 0 24px rgba(96,165,250,0.30)';
       }
     },
-      // Logo: ocupa el button completo, drop-shadow doble para destacar contra
-      // el gradient. zIndex 1.
-      e('div', {
-        style:{
-          position:'relative', zIndex:1,
-          width:'100%', height:'100%',
-          display:'flex', alignItems:'center', justifyContent:'center',
-          filter:'drop-shadow(0 0 4px rgba(255,255,255,0.30)) drop-shadow(0 1px 2px rgba(0,0,0,0.30))'
-        }
+      // Robot SVG inline — simple, visible, sin dependencias del componente Logo.
+      e('svg', {
+        width: 28, height: 28, viewBox: '0 0 28 28',
+        fill: 'none', xmlns: 'http://www.w3.org/2000/svg',
+        style: { display:'block', position:'relative', zIndex:1, filter:'drop-shadow(0 1px 2px rgba(0,0,0,0.25))' }
       },
-        e(window.Logo || 'span', { size: 36, animated: true, idSuffix:'fab' })
+        // Antena
+        e('line', { x1:14, y1:2, x2:14, y2:8, stroke:'rgba(255,255,255,0.95)', strokeWidth:2.5, strokeLinecap:'round' }),
+        e('circle', { cx:14, cy:2, r:1.5, fill:'rgba(255,255,255,0.95)' }),
+        // Cabeza
+        e('rect', { x:4, y:8, width:20, height:14, rx:4, fill:'rgba(255,255,255,0.95)' }),
+        // Orejas
+        e('rect', { x:1, y:12, width:3, height:6, rx:1.5, fill:'rgba(255,255,255,0.7)' }),
+        e('rect', { x:24, y:12, width:3, height:6, rx:1.5, fill:'rgba(255,255,255,0.7)' }),
+        // Ojos
+        e('circle', { cx:10, cy:14, r:2, fill:'#60a5fa' }),
+        e('circle', { cx:18, cy:14, r:2, fill:'#a78bfa' }),
+        // Sonrisa
+        e('path', { d:'M 9 19 Q 14 22 19 19', stroke:'rgba(255,255,255,0.95)', strokeWidth:1.8, strokeLinecap:'round', fill:'none' })
       ),
-      // Dot verde SOLO si logged in. Sin sesión = sin dot.
+      // Dot verde SOLO si logged in.
       CB_session === true && e('span', { 'aria-hidden':'true', style:{
-        position:'absolute', bottom:4, right:4, width:12, height:12,
+        position:'absolute', bottom:3, right:3, width:13, height:13,
         borderRadius:'50%', background:'#34d399',
-        border:'2px solid #060a14',
-        boxShadow:'0 0 8px rgba(52,211,153,0.6)',
+        border:'2.5px solid #060a14',
+        boxShadow:'0 0 8px rgba(52,211,153,0.7)',
         animation:'ecept_pulseDot 2s ease-in-out infinite',
         pointerEvents:'none', zIndex:2
       }})
@@ -2364,43 +2388,55 @@ function ChatBot(props) {
                                 }
                               }, '🎴 Guardar en baraja nueva')
                             ),
-                            // Pro 2.5: botón download premium si hay export meta
+                            // Documento generado: panel con 2 botones (PDF + Word)
                             exportMeta && e('div', { style:{
                               marginTop:'14px',
-                              padding:'12px 16px',
+                              padding:'14px 16px',
                               background:'linear-gradient(135deg, rgba(251,191,36,0.12), rgba(251,191,36,0.05))',
                               border:'1px solid rgba(251,191,36,0.30)',
                               borderRadius:12,
                               display:'flex',
-                              alignItems:'center',
-                              justifyContent:'space-between',
-                              gap:12,
-                              flexWrap:'wrap'
+                              flexDirection:'column',
+                              gap:10
                             } },
-                              e('div', { style:{ minWidth:0, flex:1 } },
-                                e('div', { style:{ fontSize:13, fontWeight:700, color:'#fbbf24', letterSpacing:'-0.01em', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' } }, '📄 ' + (exportMeta.title || 'Documento')),
-                                e('div', { style:{ fontSize:11, color:'#94a3b8', marginTop:2, letterSpacing:'0.04em' } }, 'Documento ' + String(exportMeta.format || 'pdf').toUpperCase() + ' listo para descargar')
+                              e('div', null,
+                                e('div', { style:{ fontSize:13, fontWeight:700, color:'#fbbf24', letterSpacing:'-0.01em', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' } }, '📄 ' + (exportMeta.title || 'Documento listo')),
+                                e('div', { style:{ fontSize:11, color:'#94a3b8', marginTop:2 } }, 'Elegí el formato de descarga')
                               ),
-                              e('button', {
-                                onClick: function() { CB_exportDocument(displayText, exportMeta); },
-                                style:{
-                                  background:'linear-gradient(135deg,#fbbf24,#f59e0b)',
-                                  color:'#0a0e1f',
-                                  border:'none',
-                                  padding:'10px 18px',
-                                  borderRadius:10,
-                                  fontSize:13,
-                                  fontWeight:700,
-                                  cursor:'pointer',
-                                  fontFamily:'inherit',
-                                  letterSpacing:'-0.01em',
-                                  boxShadow:'0 4px 12px rgba(251,191,36,0.25)',
-                                  transition:'transform 200ms cubic-bezier(0.16,1,0.3,1)',
-                                  flexShrink:0
-                                },
-                                onMouseEnter: function(ev) { ev.currentTarget.style.transform = 'translateY(-1px)'; },
-                                onMouseLeave: function(ev) { ev.currentTarget.style.transform = 'translateY(0)'; }
-                              }, '📥 Descargar')
+                              e('div', { style:{ display:'flex', gap:8, flexWrap:'wrap' } },
+                                e('button', {
+                                  onClick: function() { CB_exportToPDF(displayText, exportMeta); },
+                                  style:{
+                                    background:'linear-gradient(135deg, #ef4444, #dc2626)',
+                                    color:'#fff', border:'none',
+                                    padding:'9px 16px', borderRadius:9,
+                                    fontSize:12, fontWeight:700,
+                                    cursor:'pointer', fontFamily:'inherit',
+                                    letterSpacing:'-0.005em',
+                                    boxShadow:'0 4px 12px rgba(239,68,68,0.25)',
+                                    transition:'transform 200ms cubic-bezier(0.16,1,0.3,1)',
+                                    display:'inline-flex', alignItems:'center', gap:6
+                                  },
+                                  onMouseEnter: function(ev) { ev.currentTarget.style.transform = 'translateY(-1px)'; },
+                                  onMouseLeave: function(ev) { ev.currentTarget.style.transform = 'translateY(0)'; }
+                                }, e('span', null, '📄'), e('span', null, 'PDF')),
+                                e('button', {
+                                  onClick: function() { CB_exportToDOCX(displayText, exportMeta); },
+                                  style:{
+                                    background:'linear-gradient(135deg, #2563eb, #1d4ed8)',
+                                    color:'#fff', border:'none',
+                                    padding:'9px 16px', borderRadius:9,
+                                    fontSize:12, fontWeight:700,
+                                    cursor:'pointer', fontFamily:'inherit',
+                                    letterSpacing:'-0.005em',
+                                    boxShadow:'0 4px 12px rgba(37,99,235,0.25)',
+                                    transition:'transform 200ms cubic-bezier(0.16,1,0.3,1)',
+                                    display:'inline-flex', alignItems:'center', gap:6
+                                  },
+                                  onMouseEnter: function(ev) { ev.currentTarget.style.transform = 'translateY(-1px)'; },
+                                  onMouseLeave: function(ev) { ev.currentTarget.style.transform = 'translateY(0)'; }
+                                }, e('span', null, '📝'), e('span', null, 'Word'))
+                              )
                             ),
                             // Botón Reintentar inline para errores transitorios (último error, no loading)
                             m.error && m.retryable && i === CB_msgs.length - 1 && !CB_loading && CB_lastMsgRef.current && e('button', {
