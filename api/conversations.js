@@ -65,7 +65,7 @@ module.exports = async function handler(req, res) {
 
     // List (non-archived, latest first)
     const listR = await fetch(
-      `${SUPABASE_URL}/rest/v1/chat_conversations?user_id=eq.${uid}&archived=eq.false&order=updated_at.desc&limit=100&select=id,title,model,updated_at`,
+      `${SUPABASE_URL}/rest/v1/chat_conversations?user_id=eq.${uid}&archived=eq.false&order=updated_at.desc&limit=200&select=id,title,model,updated_at,project_id`,
       { headers: SVC_HEADERS }
     );
     const convs = await listR.json();
@@ -120,6 +120,7 @@ module.exports = async function handler(req, res) {
     const patch = {};
     if (body.title !== undefined) patch.title = String(body.title).slice(0, 200);
     if (body.archived !== undefined) patch.archived = Boolean(body.archived);
+    if (body.project_id !== undefined) patch.project_id = body.project_id || null; // null = quitar proyecto
     if (Object.keys(patch).length === 0) { res.status(400).json({ error: 'nothing to update' }); return; }
 
     const upR = await fetch(

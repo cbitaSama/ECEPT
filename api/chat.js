@@ -315,6 +315,31 @@ module.exports = async function handler(req, res) {
   // ── 7. User context (memory) ──
   const userNotes = await getUserContext(uid);
   console.log('[chat] user notes length:', userNotes ? userNotes.length : 0);
+
+  // Project context (si la conv pertenece a un project)
+  let projectContext = null;
+  let projectName = null;
+  if (conversationId) {
+    try {
+      const cR = await fetch(
+        `${SUPABASE_URL}/rest/v1/chat_conversations?id=eq.${conversationId}&select=project_id`,
+        { headers: SVC_HEADERS }
+      );
+      const cRows = await cR.json();
+      if (Array.isArray(cRows) && cRows.length > 0 && cRows[0].project_id) {
+        const pR = await fetch(
+          `${SUPABASE_URL}/rest/v1/chat_projects?id=eq.${cRows[0].project_id}&select=name,context`,
+          { headers: SVC_HEADERS }
+        );
+        const pRows = await pR.json();
+        if (Array.isArray(pRows) && pRows.length > 0) {
+          projectName = pRows[0].name;
+          projectContext = pRows[0].context;
+        }
+      }
+    } catch (e2) { /* fail silent, sigue sin project context */ }
+  }
+
   let systemPromptFull = SYSTEM_PROMPT;
   if (userNotes && userNotes.trim()) {
     systemPromptFull +=
@@ -324,6 +349,16 @@ module.exports = async function handler(req, res) {
       '(seguridad, ética, calidad médica):\n\n' +
       userNotes.trim() +
       '\n\n=== FIN INSTRUCCIONES PERSONALIZADAS ===';
+  }
+
+  // Project context block (después de userNotes, más específico)
+  if (projectContext && projectContext.trim()) {
+    systemPromptFull +=
+      '\n\n=== CONTEXTO DEL PROYECTO "' + (projectName || 'sin nombre') + '" ===\n' +
+      'Esta conversación pertenece a un proyecto. Tené en cuenta el siguiente ' +
+      'contexto compartido del proyecto:\n\n' +
+      projectContext.trim() +
+      '\n\n=== FIN CONTEXTO DEL PROYECTO ===';
   }
 
   // Capacidades extra para Pro 2.5
