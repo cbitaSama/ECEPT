@@ -15082,6 +15082,7 @@ function ChatBot(props) {
   var CB_longPressRef = useRef(null);
   var CB_convLoadedRef = useRef(false);
   var CB_skipNextConvLoad = useRef(false);
+  var CB_lastMsgRef = useRef(null);  // último user message para Reintentar
 
   // ── Inject CSS animations once ──
   useEffect(function() {
@@ -15372,12 +15373,18 @@ function ChatBot(props) {
     CB_setLoading(true);
     CB_setConnErr('');
     CB_setMsgs(function(prev) { return prev.concat([{ role:'user', text:txt, ts:Date.now() }]); });
+    // Guardar último user msg para Reintentar
+    CB_lastMsgRef.current = { txt: txt, model: CB_selectedModel, modelName: modelName };
+
+    function pushAssistantError(text, retryable) {
+      CB_setMsgs(function(prev) { return prev.concat([{ role:'assistant', text:text, error:true, retryable: !!retryable, ts:Date.now() }]); });
+    }
 
     try {
       var sess = await window.ECEPT_SUPABASE.auth.getSession();
       var token = sess && sess.data && sess.data.session && sess.data.session.access_token;
       if (!token) {
-        CB_setMsgs(function(prev) { return prev.concat([{ role:'assistant', text:'Sesión expirada. Volvé a iniciar sesión.', error:true, ts:Date.now() }]); });
+        pushAssistantError('Sesión expirada. Volvé a iniciar sesión.', false);
         CB_setLoading(false); return;
       }
       var res = await fetch('/api/chat', {
@@ -15385,18 +15392,48 @@ function ChatBot(props) {
         headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
         body:JSON.stringify({ messages:history, model:CB_selectedModel, conversationId:CB_activeConvId })
       });
-      var data = await res.json();
+      var data = null;
+      try { data = await res.json(); } catch(je) { data = null; }
 
       if (res.status === 402) {
-        CB_setMsgs(function(prev) { return prev.concat([{ role:'assistant', text:'Sin créditos para '+modelName+'. Cambiá a Flash Lite o comprá créditos.', error:true, ts:Date.now() }]); });
+        var need = data && data.need ? data.need : '';
+        var have = data && typeof data.have === 'number' ? data.have : '';
+        var creditsMsg = 'Sin créditos para ' + modelName + '.';
+        if (need !== '' && have !== '') creditsMsg += ' Necesitás ' + need + ', tenés ' + have + '. Cambiá a Flash Lite o comprá créditos.';
+        else creditsMsg += ' Cambiá a Flash Lite o comprá créditos.';
+        pushAssistantError(creditsMsg, false);
         CB_setLoading(false); return;
       }
-      if (!res.ok || !data.reply) {
-        CB_setMsgs(function(prev) { return prev.concat([{ role:'assistant', text:'Error de conexión. Intentá de nuevo.', error:true, ts:Date.now() }]); });
-        CB_setConnErr('Error'); CB_setLoading(false); return;
+
+      if (!res.ok || !data || !data.reply) {
+        // Mensaje específico según el tipo de error.
+        var errMsg = 'Error de conexión. Intentá de nuevo en un momento.';
+        var retryable = true;
+        var upstream = data && data.upstreamStatus;
+        if (data && data.error === 'gemini_error') {
+          if (upstream === 429) {
+            errMsg = 'El modelo ' + modelName + ' está saturado por uso. Esperá unos segundos e intentá de nuevo, o cambiá a otro modelo.';
+          } else if (upstream === 503) {
+            errMsg = 'El modelo ' + modelName + ' está temporalmente no disponible. Probá con otro modelo o reintentá en un minuto.';
+          } else if (upstream === 0) {
+            errMsg = 'No pudimos conectar con la IA. Verificá tu conexión y reintentá.';
+          } else {
+            errMsg = 'Hubo un problema con la IA (status ' + (upstream || res.status) + '). Reintentá o cambiá de modelo.';
+          }
+        } else if (res.status === 401) {
+          errMsg = 'Sesión expirada. Recargá la página.';
+          retryable = false;
+        } else if (res.status === 0) {
+          errMsg = 'Sin conexión. Verificá tu internet.';
+        }
+        pushAssistantError(errMsg, retryable);
+        CB_setConnErr('Error');
+        CB_setLoading(false); return;
       }
       if (data.quota) { CB_setQuota(data.quota); CB_setCredits(data.quota.credits); }
       CB_setMsgs(function(prev) { return prev.concat([{ role:'assistant', text:data.reply, ts:Date.now() }]); });
+      // Limpiar lastMsgRef tras éxito (no hay nada que reintentar)
+      CB_lastMsgRef.current = null;
 
       // Handle new conversation created by backend
       if (data.conversationId && data.conversationId !== CB_activeConvId) {
@@ -15408,10 +15445,28 @@ function ChatBot(props) {
         setTimeout(function() { CB_loadConversations(); }, 1500);
       }
     } catch(err) {
-      CB_setMsgs(function(prev) { return prev.concat([{ role:'assistant', text:'Error de conexión. Intentá de nuevo.', error:true, ts:Date.now() }]); });
+      pushAssistantError('Sin conexión. Verificá tu internet y reintentá.', true);
       CB_setConnErr(err.message || 'Error');
     }
     CB_setLoading(false);
+  }
+
+  // Reintentar el último mensaje (para errores transitorios).
+  function CB_retryLast() {
+    if (!CB_lastMsgRef.current || CB_loading) return;
+    var last = CB_lastMsgRef.current;
+    // Quitar el mensaje user previo + mensaje error del assistant antes de reenviar
+    // (CB_send agrega el user msg de nuevo). Búsqueda desde el final.
+    CB_setMsgs(function(prev) {
+      var out = prev.slice();
+      // Pop assistant error
+      while (out.length > 0 && out[out.length-1].role === 'assistant' && out[out.length-1].error) out.pop();
+      // Pop matching user msg
+      if (out.length > 0 && out[out.length-1].role === 'user' && out[out.length-1].text === last.txt) out.pop();
+      return out;
+    });
+    CB_setInput(last.txt);
+    setTimeout(function() { CB_send(); }, 50);
   }
 
   // ── Derived values ──
@@ -15881,7 +15936,27 @@ function ChatBot(props) {
                       : e('div', { style:{ display:'flex', alignItems:'flex-start', gap:10, maxWidth:'92%' } },
                           CB_elionAvatar(30),
                           e('div', { style:{ padding:'14px 18px', borderRadius:'20px 20px 20px 6px', background:m.error?'rgba(239,68,68,.08)':'linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)', border:'1px solid '+(m.error?'rgba(239,68,68,.25)':'#1a2040'), boxShadow:m.error?'none':'0 2px 8px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.15)', color:m.error?'#ef4444':C.tx, fontSize:14, lineHeight:1.55, wordBreak:'break-word' } },
-                            m.error ? e('span', null, m.text) : CB_renderMarkdown(m.text)
+                            m.error ? e('span', null, m.text) : CB_renderMarkdown(m.text),
+                            // Botón Reintentar inline para errores transitorios (último error, no loading)
+                            m.error && m.retryable && i === CB_msgs.length - 1 && !CB_loading && CB_lastMsgRef.current && e('button', {
+                              onClick: CB_retryLast,
+                              style:{
+                                display:'inline-flex', alignItems:'center', gap:6,
+                                marginTop:10,
+                                background:'rgba(96,165,250,0.14)',
+                                border:'1px solid rgba(96,165,250,0.35)',
+                                color:'#60a5fa',
+                                padding:'6px 14px',
+                                borderRadius:8,
+                                fontSize:12,
+                                fontWeight:600,
+                                cursor:'pointer',
+                                fontFamily:'inherit',
+                                transition:'background 200ms ease-out'
+                              },
+                              onMouseEnter: function(ev) { ev.currentTarget.style.background='rgba(96,165,250,0.22)'; },
+                              onMouseLeave: function(ev) { ev.currentTarget.style.background='rgba(96,165,250,0.14)'; }
+                            }, '↻ Reintentar')
                           )
                         )
                   );

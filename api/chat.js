@@ -18,6 +18,41 @@ const SVC_HEADERS = {
   'Content-Type': 'application/json'
 };
 
+// Retry helper para Gemini — exponential backoff en 429/503/network errors.
+// Returns the fetch Response. Throws on persistent network failure.
+async function callGeminiWithRetry(url, body, maxRetries) {
+  maxRetries = typeof maxRetries === 'number' ? maxRetries : 2;
+  let lastError = null;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) return res;
+      // Reintentar solo en 429 (rate limit) o 503 (overload)
+      if ((res.status === 429 || res.status === 503) && attempt < maxRetries) {
+        const waitMs = Math.pow(2, attempt) * 500; // 500ms, 1s, 2s
+        console.warn(`[chat] Gemini ${res.status}, retry ${attempt + 1}/${maxRetries} in ${waitMs}ms`);
+        await new Promise(r => setTimeout(r, waitMs));
+        continue;
+      }
+      // Otros errores: devolver la response para que el caller maneje
+      return res;
+    } catch (err) {
+      lastError = err;
+      if (attempt < maxRetries) {
+        const waitMs = Math.pow(2, attempt) * 500;
+        console.warn(`[chat] network error, retry ${attempt + 1}/${maxRetries} in ${waitMs}ms:`, err.message);
+        await new Promise(r => setTimeout(r, waitMs));
+        continue;
+      }
+    }
+  }
+  throw lastError || new Error('All retries failed');
+}
+
 const SYSTEM_PROMPT =
   'Eres Elion, asistente de IA de ECEPT, webapp de estudio médico para estudiantes de medicina hispanohablantes.\n\n' +
   'REGLAS DE RESPUESTA:\n' +
@@ -301,28 +336,30 @@ module.exports = async function handler(req, res) {
     return { role: m.role === 'assistant' ? 'model' : 'user', parts };
   });
 
-  // ── 9. Call Gemini ──
+  // ── 9. Call Gemini (con retry para 429/503) ──
   const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
   let geminiResp;
   try {
-    geminiResp = await fetch(geminiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: systemPromptFull }] },
-        contents,
-        generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
-      })
-    });
+    geminiResp = await callGeminiWithRetry(geminiUrl, {
+      systemInstruction: { parts: [{ text: systemPromptFull }] },
+      contents,
+      generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
+    }, 2);
   } catch (err) {
-    console.error('Gemini fetch error:', err.message);
-    res.status(500).json({ error: 'gemini_error', message: err.message }); return;
+    console.error('Gemini fetch error (after retries):', err.message);
+    res.status(503).json({ error: 'gemini_error', upstreamStatus: 0, message: err.message }); return;
   }
 
   if (!geminiResp.ok) {
     const errText = await geminiResp.text().catch(() => '');
     console.error('Gemini API error:', geminiResp.status, errText.slice(0, 300));
-    res.status(500).json({ error: 'gemini_error', message: `Gemini returned ${geminiResp.status}` }); return;
+    // Pasar status real de upstream al frontend para que muestre mensaje apropiado.
+    const httpStatus = (geminiResp.status === 429 || geminiResp.status === 503) ? 503 : 500;
+    res.status(httpStatus).json({
+      error: 'gemini_error',
+      upstreamStatus: geminiResp.status,
+      message: `Gemini returned ${geminiResp.status}`
+    }); return;
   }
 
   const geminiData = await geminiResp.json();
