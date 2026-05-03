@@ -299,6 +299,8 @@ function ReceptoresView(){
   }
 
   return e('div',{style:{paddingBottom:'40px'}},
+    // VisitTracker: registra cada cambio de familia activa
+    window.VisitTracker && e(window.VisitTracker, { itemType:'receptor', itemId: family }),
     header,familySelector,familyCard,tabs,content
   );
 }

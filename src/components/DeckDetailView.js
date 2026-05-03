@@ -968,6 +968,8 @@ function DeckDetailView(props){
 
   return e(F,null,
     e("div",{style:{width:"100%",maxWidth:"1280px",margin:"0 auto",padding:"24px max(16px, calc((100vw - 1280px) / 2 + 24px)) 80px",position:"relative",boxSizing:"border-box"}},
+      // VisitTracker para deck (al entrar al detalle)
+      window.VisitTracker && deck && deck.id && e(window.VisitTracker, { itemType:"deck", itemId: deck.id }),
 
     // ── Header ──
     e("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"14px"}},

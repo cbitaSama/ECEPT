@@ -873,6 +873,10 @@ function StudyView(props){
       position:"relative",overflow:"hidden"
     }},
 
+      // VisitTracker: registra sesión completada (single-mount al entrar a summary)
+      // VisitTracker para sesión completada — itemId = deckId del primer card o 'mixed'.
+      window.VisitTracker && e(window.VisitTracker, { itemType:"study_session", itemId: ((SV_session && SV_session[0] && SV_session[0].deck_id) || "mixed") + ":" + (SV_startTime || Date.now()) }),
+
       // ── CSS-only confetti (30 dots) ──
       e("div",{style:{
         position:"absolute",top:0,left:0,right:0,height:"360px",

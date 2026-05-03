@@ -4262,6 +4262,8 @@ function ReceptoresView(){
   }
 
   return e('div',{style:{paddingBottom:'40px'}},
+    // VisitTracker: registra cada cambio de familia activa
+    window.VisitTracker && e(window.VisitTracker, { itemType:'receptor', itemId: family }),
     header,familySelector,familyCard,tabs,content
   );
 }
@@ -4503,6 +4505,8 @@ function MediadoresView(){
   var familyDesc=fam==="all"?null:MED_FAMILIES.filter(function(f){return f.id===fam})[0];
 
   return e("div",{style:{maxWidth:"720px",margin:"0 auto",paddingBottom:"40px"}},
+    // VisitTracker: registra familia activa de mediadores
+    window.VisitTracker && e(window.VisitTracker, { itemType:"mediador", itemId: fam }),
     e(MediadoresHeader,null),
     e(MediadoresLegend,null),
     e(MediadoresSearchBar,{q:q,set:setQ}),
@@ -22598,6 +22602,8 @@ function DeckDetailView(props){
 
   return e(F,null,
     e("div",{style:{width:"100%",maxWidth:"1280px",margin:"0 auto",padding:"24px max(16px, calc((100vw - 1280px) / 2 + 24px)) 80px",position:"relative",boxSizing:"border-box"}},
+      // VisitTracker para deck (al entrar al detalle)
+      window.VisitTracker && deck && deck.id && e(window.VisitTracker, { itemType:"deck", itemId: deck.id }),
 
     // ── Header ──
     e("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"14px"}},
@@ -24413,6 +24419,10 @@ function StudyView(props){
       position:"relative",overflow:"hidden"
     }},
 
+      // VisitTracker: registra sesión completada (single-mount al entrar a summary)
+      // VisitTracker para sesión completada — itemId = deckId del primer card o 'mixed'.
+      window.VisitTracker && e(window.VisitTracker, { itemType:"study_session", itemId: ((SV_session && SV_session[0] && SV_session[0].deck_id) || "mixed") + ":" + (SV_startTime || Date.now()) }),
+
       // ── CSS-only confetti (30 dots) ──
       e("div",{style:{
         position:"absolute",top:0,left:0,right:0,height:"360px",
@@ -25942,6 +25952,7 @@ function App(){
 
     // ════════════ LABORATORIOS ════════════
     vista==="labs"&&e(ModuleShell,{title:"Valores de Laboratorio",subtitle:"Rangos normales · Interpretación clínica",icon:"📊",accent:"#4caf82"},
+      abdOpen&&window.VisitTracker&&e(window.VisitTracker,{itemType:"lab",itemId:abdOpen}),
       LAB_SECTIONS.map(function(sec,si){
         var isOpen=abdOpen===sec.id;
         return e("div",{key:sec.id,style:{marginBottom:"12px",animation:"slideUp .4s ease-out "+(si*0.05)+"s both"}},

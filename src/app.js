@@ -927,6 +927,7 @@ function App(){
 
     // ════════════ LABORATORIOS ════════════
     vista==="labs"&&e(ModuleShell,{title:"Valores de Laboratorio",subtitle:"Rangos normales · Interpretación clínica",icon:"📊",accent:"#4caf82"},
+      abdOpen&&window.VisitTracker&&e(window.VisitTracker,{itemType:"lab",itemId:abdOpen}),
       LAB_SECTIONS.map(function(sec,si){
         var isOpen=abdOpen===sec.id;
         return e("div",{key:sec.id,style:{marginBottom:"12px",animation:"slideUp .4s ease-out "+(si*0.05)+"s both"}},

@@ -235,6 +235,8 @@ function MediadoresView(){
   var familyDesc=fam==="all"?null:MED_FAMILIES.filter(function(f){return f.id===fam})[0];
 
   return e("div",{style:{maxWidth:"720px",margin:"0 auto",paddingBottom:"40px"}},
+    // VisitTracker: registra familia activa de mediadores
+    window.VisitTracker && e(window.VisitTracker, { itemType:"mediador", itemId: fam }),
     e(MediadoresHeader,null),
     e(MediadoresLegend,null),
     e(MediadoresSearchBar,{q:q,set:setQ}),
