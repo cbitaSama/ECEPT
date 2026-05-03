@@ -209,12 +209,50 @@ function CB_parseMdTableForPDF(tableLines) {
   return { headers: headers, rows: rows };
 }
 
+function CB_triggerDownload(blob, filename) {
+  try {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 1000);
+    return true;
+  } catch (err) {
+    try {
+      var url2 = URL.createObjectURL(blob);
+      window.open(url2, '_blank');
+      setTimeout(function() { URL.revokeObjectURL(url2); }, 60000);
+      return true;
+    } catch (err2) {
+      return false;
+    }
+  }
+}
+
 function CB_exportToPDF(content, meta) {
   if (!window.jspdf || !window.jspdf.jsPDF) {
     if (window.ECEPT_toast) window.ECEPT_toast('jsPDF no disponible. Recargá la página.', 'error');
     return;
   }
   if (window.ECEPT_toast) window.ECEPT_toast('Generando PDF...', 'info');
+  // Diferido para que el botón vuelva a su estado y la UI no se congele
+  setTimeout(function() {
+    try {
+      CB_doExportToPDF(content, meta);
+    } catch (err) {
+      if (window.console) console.error('[CB_exportToPDF]', err);
+      if (window.ECEPT_toast) window.ECEPT_toast('Error generando PDF: ' + (err && err.message ? err.message : 'desconocido'), 'error');
+    }
+  }, 50);
+}
+
+function CB_doExportToPDF(content, meta) {
   var jsPDF = window.jspdf.jsPDF;
   var doc = new jsPDF({ unit: 'mm', format: 'a4' });
   var pageW = doc.internal.pageSize.getWidth();
@@ -353,7 +391,17 @@ function CB_exportToPDF(content, meta) {
   // Forzar extensión .pdf (independiente de lo que diga meta.filename)
   var fname = (meta.filename || 'documento_ecept').replace(/\.(docx|pdf)$/i, '');
   fname += '.pdf';
-  doc.save(fname);
+  // Blob + anchor en lugar de doc.save() — más confiable en iPad/Safari y
+  // no rompe la UI si el navegador bloquea la descarga automática.
+  var blob;
+  try {
+    blob = doc.output('blob');
+  } catch (e) {
+    if (window.ECEPT_toast) window.ECEPT_toast('Error serializando PDF', 'error');
+    return;
+  }
+  var ok = CB_triggerDownload(blob, fname);
+  if (window.ECEPT_toast) window.ECEPT_toast(ok ? 'PDF descargado' : 'No se pudo descargar', ok ? 'success' : 'error');
 }
 
 // Lazy-load de docx con fallback de CDNs.
@@ -387,7 +435,14 @@ function CB_loadDocxLib() {
 function CB_exportToDOCX(content, meta) {
   if (window.ECEPT_toast) window.ECEPT_toast('Generando documento Word...', 'info');
   CB_loadDocxLib().then(function(docxLib) {
-    CB_doExportToDOCX(content, meta, docxLib);
+    setTimeout(function() {
+      try {
+        CB_doExportToDOCX(content, meta, docxLib);
+      } catch (err) {
+        if (window.console) console.error('[CB_exportToDOCX]', err);
+        if (window.ECEPT_toast) window.ECEPT_toast('Error generando Word: ' + (err && err.message ? err.message : 'desconocido'), 'error');
+      }
+    }, 50);
   }, function() {
     if (window.ECEPT_toast) window.ECEPT_toast('No se pudo cargar el generador de Word. Intentá con PDF.', 'error');
   });
@@ -604,17 +659,13 @@ function CB_doExportToDOCX(content, meta, docxLib) {
 
   var doc = new Document({ sections: [{ properties: {}, children: children }] });
   Packer.toBlob(doc).then(function(blob) {
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    // Forzar extensión .docx (independiente de lo que diga meta.filename)
     var fname = (meta.filename || 'documento_ecept').replace(/\.(docx|pdf)$/i, '');
     fname += '.docx';
-    a.download = fname;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(function(){ URL.revokeObjectURL(url); }, 200);
+    var ok = CB_triggerDownload(blob, fname);
+    if (window.ECEPT_toast) window.ECEPT_toast(ok ? 'Word descargado' : 'No se pudo descargar', ok ? 'success' : 'error');
+  }, function(err) {
+    if (window.console) console.error('[CB_doExportToDOCX] Packer', err);
+    if (window.ECEPT_toast) window.ECEPT_toast('Error empaquetando Word', 'error');
   });
 }
 
