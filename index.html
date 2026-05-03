@@ -25942,7 +25942,7 @@ function App(){
     // Vistas que usan ModuleShell o gestionan su propio ancho escapan del
     // wrapper de 900px. El resto mantiene wrapper estrecho para legibilidad
     // de prosa larga.
-    e("div",{style:(({home:1,reuma:1,reuma_sec:1,cir_menu:1,anat_menu:1,emergen_menu:1,fisio:1,general:1,vocabulario:1,"trauma-u1":1,favoritos:1,salud_mental:1,labs:1}[vista])||(vista&&vista.indexOf("anat_")===0&&vista!=="anatomia"))?{width:"100%",margin:0,padding:"0 0 80px"}:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
+    e("div",{style:(({home:1,reuma:1,reuma_sec:1,cir_menu:1,anat_menu:1,emergen_menu:1,fisio:1,general:1,vocabulario:1,"trauma-u1":1,favoritos:1,salud_mental:1,labs:1,epid:1}[vista])||(vista&&vista.indexOf("anat_")===0&&vista!=="anatomia"))?{width:"100%",margin:0,padding:"0 0 80px"}:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
 
     // ════════════ HOME ════════════
     vista==="home"&&e(HomeView,{user:ecuUser,vi:vi,favs:favs,bestStreak:bestStreak,go:go}),
@@ -26524,50 +26524,69 @@ function App(){
     ),
 
     // ════════════ EPIDEMIOLOGÍA (SALUD PÚBLICA) ════════════
-    vista==="epid"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"32px"}},
-        e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"📊"),
-        e("h2",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"24px",fontWeight:900,background:"linear-gradient(135deg,#00b4d8,#3b82f6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}},"Epidemiología"),
-        e("p",{style:{color:C.dm,fontSize:"13px"}},"Salud Pública · Lectura Crítica · MBE")
-      ),
-      // Tabs de epidemiología
-      e("div",{style:{display:"flex",gap:"6px",marginBottom:"24px",flexWrap:"wrap"}},
-        [{l:"🔺 Pirámide",i:0},{l:"📋 Estudios",i:1},{l:"⚠️ Sesgos",i:2},{l:"📐 Medidas",i:3},{l:"✅ Lectura Crítica",i:4}].map(function(tb){
-          var cols=["#22d3ee","#3b82f6","#ef4444","#34d399","#06b6d4"];
+    vista==="epid"&&e(ModuleShell,{title:"Epidemiología",subtitle:"Salud Pública · Lectura Crítica · Medicina Basada en Evidencia",icon:"📊",accent:"#22d3ee"},
+      // ── Tabs premium ──
+      e("div",{style:{display:"flex",gap:"6px",marginBottom:"28px",flexWrap:"wrap",padding:"6px",background:"linear-gradient(180deg,rgba(13,18,36,0.6),rgba(10,14,31,0.4))",border:"1px solid rgba(96,165,250,0.10)",borderRadius:"14px"}},
+        [{l:"🔺 Pirámide",i:0,c:"#22d3ee"},{l:"📋 Estudios",i:1,c:"#3b82f6"},{l:"⚠️ Sesgos",i:2,c:"#ef4444"},{l:"📐 Medidas",i:3,c:"#34d399"},{l:"✅ Lectura Crítica",i:4,c:"#06b6d4"}].map(function(tb){
+          var act=ingTab===tb.i;
           return e("button",{key:tb.i,onClick:function(){setIngTab(tb.i)},style:{
-            flex:"1 1 auto",minWidth:"80px",padding:"10px 12px",background:"transparent",
-            border:"1.5px solid "+(ingTab===tb.i?cols[tb.i]:C.bd),borderRadius:"10px",
-            cursor:"pointer",fontSize:"11px",fontWeight:700,color:ingTab===tb.i?cols[tb.i]:C.dm
+            flex:"1 1 auto",minWidth:"100px",padding:"10px 14px",
+            background:act?"linear-gradient(135deg,"+tb.c+"22,"+tb.c+"08)":"transparent",
+            border:"1px solid "+(act?tb.c+"44":"transparent"),
+            borderRadius:"10px",cursor:"pointer",
+            fontSize:"12px",fontWeight:700,
+            color:act?tb.c:"#94a3b8",
+            letterSpacing:"-0.005em",
+            fontFamily:"inherit",
+            transition:"all 200ms cubic-bezier(0.16,1,0.3,1)",
+            boxShadow:act?"0 2px 8px "+tb.c+"22":"none"
           }},tb.l)
         })
       ),
 
       // TAB 0: PIRÁMIDE
-      ingTab===0&&e(F,null,
-        e("div",{style:{textAlign:"center",marginBottom:"16px"}},e("h3",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"18px",fontWeight:800,color:"#22d3ee"}},"Pirámide de Evidencia")),
-        e("div",{style:{display:"flex",flexDirection:"column",alignItems:"center",gap:"3px",marginBottom:"24px"}},
-          PIRAMIDE.map(function(p,i){
+      ingTab===0&&e("div",{style:{animation:"ecept_fadeSlideUp 320ms cubic-bezier(0.16,1,0.3,1)"}},
+        e("div",{style:{textAlign:"center",marginBottom:"20px"}},
+          e("h3",{style:{fontSize:"20px",fontWeight:800,letterSpacing:"-0.02em",background:"linear-gradient(135deg,#22d3ee,#06b6d4)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",margin:0}},"Pirámide de Evidencia"),
+          e("p",{style:{color:"#94a3b8",fontSize:"13px",marginTop:"4px"}},"De mayor (1) a menor (7) calidad metodológica. Tocá para detalle.")
+        ),
+        e("div",{style:{display:"flex",flexDirection:"column",alignItems:"center",gap:"4px",marginBottom:"24px"}},
+          PIRAMIDE.map(function(pi,i){
             var isOpen=et===i;
-            return e("div",{key:i,style:{width:"100%",maxWidth:"600px"}},
+            return e("div",{key:i,style:{width:"100%",maxWidth:"720px",animation:"ecept_fadeSlideUp 380ms cubic-bezier(0.16,1,0.3,1) "+(i*40)+"ms both"}},
               e("div",{onClick:function(){setEt(isOpen?null:i)},style:{
-                width:p.ancho,margin:"0 auto",padding:"10px 14px",
-                background:isOpen?p.color+"20":p.color+"0a",border:"1.5px solid "+(isOpen?p.color:p.color+"30"),
-                borderRadius:i===0?"12px 12px 4px 4px":i===6?"4px 4px 12px 12px":"4px",
-                cursor:"pointer",textAlign:"center",transition:"all .2s",position:"relative"
-              }},
-                e("div",{style:{display:"flex",alignItems:"center",justifyContent:"center",gap:"8px"}},
-                  e("span",{style:{fontSize:"14px"}},p.icono),
-                  e("span",{style:{fontSize:"12px",fontWeight:700,color:p.color}},p.nombre)
+                width:pi.ancho,margin:"0 auto",padding:"12px 16px",
+                background:isOpen?"linear-gradient(135deg,"+pi.color+"20,"+pi.color+"08)":"linear-gradient(180deg,rgba(13,18,36,0.6),rgba(10,14,31,0.4))",
+                border:"1px solid "+(isOpen?pi.color+"60":pi.color+"22"),
+                borderRadius:i===0?"14px 14px 6px 6px":i===PIRAMIDE.length-1?"6px 6px 14px 14px":"6px",
+                cursor:"pointer",textAlign:"center",
+                transition:"all 220ms cubic-bezier(0.16,1,0.3,1)"
+              },
+                onMouseEnter:function(ev){if(isOpen)return;ev.currentTarget.style.borderColor=pi.color+"50";ev.currentTarget.style.background="linear-gradient(135deg,"+pi.color+"12,rgba(13,18,36,0.6))";},
+                onMouseLeave:function(ev){if(isOpen)return;ev.currentTarget.style.borderColor=pi.color+"22";ev.currentTarget.style.background="linear-gradient(180deg,rgba(13,18,36,0.6),rgba(10,14,31,0.4))";}
+              },
+                e("div",{style:{display:"flex",alignItems:"center",justifyContent:"center",gap:"10px"}},
+                  e("span",{style:{fontSize:"18px"}},pi.icono),
+                  e("span",{style:{fontSize:"13px",fontWeight:700,color:pi.color,letterSpacing:"-0.01em"}},pi.nombre)
                 ),
-                e("div",{style:{fontSize:"9px",color:C.dm,marginTop:"2px"}},"Nivel "+p.nivel)
+                e("div",{style:{fontSize:"10px",color:"#64748b",marginTop:"3px",letterSpacing:"0.06em",textTransform:"uppercase",fontWeight:600}},"Nivel "+pi.nivel)
               ),
-              isOpen&&e("div",{style:{width:"90%",margin:"4px auto 8px",background:C.cd,border:"1px solid "+p.color+"30",borderRadius:"10px",padding:"16px"}},
-                e("p",{style:{fontSize:"13px",color:C.tx,lineHeight:1.6,marginBottom:"10px"}},p.desc),
-                e("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}},
-                  e("div",{style:{padding:"10px",background:p.color+"08",borderRadius:"8px",borderLeft:"3px solid "+p.color}},e("div",{style:{fontSize:"10px",fontWeight:700,color:p.color,marginBottom:"4px"}},"¿PARA QUÉ SIRVE?"),e("p",{style:{fontSize:"11px",color:C.mt,lineHeight:1.5}},p.para)),
-                  e("div",{style:{padding:"10px",background:"rgba(255,255,255,.02)",borderRadius:"8px",borderLeft:"3px solid "+C.dm}},e("div",{style:{fontSize:"10px",fontWeight:700,color:C.dm,marginBottom:"4px"}},"MEDIDA QUE USA"),e("p",{style:{fontSize:"11px",color:C.mt,lineHeight:1.5}},p.medida))
+              isOpen&&e("div",{style:{width:"94%",margin:"6px auto 10px",background:"linear-gradient(180deg,rgba(13,18,36,0.7),rgba(10,14,31,0.5))",border:"1px solid "+pi.color+"30",borderRadius:"14px",padding:"18px 20px",animation:"ecept_fadeSlideDown 280ms ease-out"}},
+                e("p",{style:{fontSize:"13px",color:"#cbd5e1",lineHeight:1.65,marginBottom:"14px"}},pi.desc),
+                e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:"10px"}},
+                  e("div",{style:{padding:"12px 14px",background:pi.color+"0c",borderRadius:"10px",borderLeft:"3px solid "+pi.color}},
+                    e("div",{style:{fontSize:"10px",fontWeight:700,color:pi.color,marginBottom:"6px",letterSpacing:"0.08em",textTransform:"uppercase"}},"¿Para qué sirve?"),
+                    e("p",{style:{fontSize:"12px",color:"#cbd5e1",lineHeight:1.55}},pi.para)
+                  ),
+                  e("div",{style:{padding:"12px 14px",background:"rgba(255,255,255,0.025)",borderRadius:"10px",borderLeft:"3px solid #475569"}},
+                    e("div",{style:{fontSize:"10px",fontWeight:700,color:"#94a3b8",marginBottom:"6px",letterSpacing:"0.08em",textTransform:"uppercase"}},"Medida que usa"),
+                    e("p",{style:{fontSize:"12px",color:"#cbd5e1",lineHeight:1.55}},pi.medida)
+                  )
                 ),
-                e("div",{style:{marginTop:"8px",padding:"10px",background:"rgba(255,255,255,.02)",borderRadius:"8px"}},e("span",{style:{fontSize:"10px",fontWeight:700,color:C.dm}},"EJEMPLO: "),e("span",{style:{fontSize:"11px",color:C.mt}},p.ejemplo))
+                e("div",{style:{marginTop:"10px",padding:"10px 14px",background:"rgba(255,255,255,0.025)",borderRadius:"10px"}},
+                  e("span",{style:{fontSize:"10px",fontWeight:700,color:"#94a3b8",letterSpacing:"0.08em",textTransform:"uppercase"}},"Ejemplo: "),
+                  e("span",{style:{fontSize:"12px",color:"#cbd5e1"}},pi.ejemplo)
+                )
               )
             )
           })
@@ -26575,68 +26594,128 @@ function App(){
       ),
 
       // TAB 1: ESTUDIOS DETALLADOS
-      ingTab===1&&e(F,null,
-        ESTUDIOS.map(function(est,i){
-          var isOpen=abdOpen===est.nombre;
-          return e("div",{key:i,style:{marginBottom:"12px",animation:"slideUp .3s ease-out "+(i*0.06)+"s both"}},
-            e("button",{onClick:function(){setAbdOpen(isOpen?null:est.nombre)},style:{width:"100%",textAlign:"left",borderRadius:"12px",padding:"16px",cursor:"pointer",background:isOpen?est.col+"10":C.cd,border:"1px solid "+(isOpen?est.col+"44":C.bd),color:C.tx}},
-              e("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between"}},
-                e("div",{style:{display:"flex",alignItems:"center",gap:"12px"}},
-                  e("span",{style:{fontSize:"22px"}},est.ic),
-                  e("div",null,e("div",{style:{fontWeight:700,fontSize:"15px"}},est.nombre),e("div",{style:{fontSize:"11px",color:est.col,marginTop:"2px",fontWeight:600}},est.tipo+" · "+est.temporal))
+      ingTab===1&&e("div",{style:{animation:"ecept_fadeSlideUp 320ms cubic-bezier(0.16,1,0.3,1)"}},
+        e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(420px,1fr))",gap:"12px"}},
+          ESTUDIOS.map(function(est,i){
+            var isOpen=abdOpen===est.nombre;
+            return e("div",{key:i,style:{animation:"ecept_fadeSlideUp 320ms cubic-bezier(0.16,1,0.3,1) "+(i*40)+"ms both"}},
+              e("button",{onClick:function(){setAbdOpen(isOpen?null:est.nombre)},style:{
+                width:"100%",textAlign:"left",borderRadius:"14px",padding:"16px 18px",cursor:"pointer",
+                background:isOpen?"linear-gradient(135deg,"+est.col+"15,rgba(13,18,36,0.7))":"linear-gradient(180deg,rgba(13,18,36,0.7),rgba(10,14,31,0.5))",
+                border:"1px solid "+(isOpen?est.col+"50":est.col+"20"),
+                color:C.tx,fontFamily:"inherit",
+                transition:"all 200ms cubic-bezier(0.16,1,0.3,1)"
+              }},
+                e("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",gap:"12px"}},
+                  e("div",{style:{display:"flex",alignItems:"center",gap:"14px",minWidth:0,flex:1}},
+                    e("span",{style:{fontSize:"24px",width:"44px",height:"44px",display:"flex",alignItems:"center",justifyContent:"center",background:est.col+"14",border:"1px solid "+est.col+"24",borderRadius:"12px",flexShrink:0}},est.ic),
+                    e("div",{style:{minWidth:0}},
+                      e("div",{style:{fontWeight:700,fontSize:"15px",letterSpacing:"-0.01em",lineHeight:1.2}},est.nombre),
+                      e("div",{style:{fontSize:"11px",color:est.col,marginTop:"3px",fontWeight:600,letterSpacing:"0.04em",textTransform:"uppercase"}},est.tipo+" · "+est.temporal)
+                    )
+                  ),
+                  e("span",{style:{color:"#64748b",fontSize:"14px",transform:isOpen?"rotate(180deg)":"none",transition:"transform .25s",flexShrink:0}},"▼")
+                )
+              ),
+              isOpen&&e("div",{style:{marginTop:"8px",background:"linear-gradient(180deg,rgba(13,18,36,0.8),rgba(10,14,31,0.6))",border:"1px solid "+est.col+"22",borderRadius:"14px",padding:"18px 20px",animation:"ecept_fadeSlideDown 280ms ease-out"}},
+                e("p",{style:{fontSize:"13px",color:"#cbd5e1",lineHeight:1.7,marginBottom:"14px"}},est.def),
+                e("div",{style:{padding:"12px 14px",background:est.col+"0c",borderRadius:"10px",borderLeft:"3px solid "+est.col,marginBottom:"10px"}},
+                  e("div",{style:{fontSize:"10px",fontWeight:700,color:est.col,marginBottom:"6px",letterSpacing:"0.08em",textTransform:"uppercase"}},"Pregunta que responde"),
+                  e("p",{style:{fontSize:"13px",color:C.tx,fontWeight:600,lineHeight:1.5}},est.pregunta)
                 ),
-                e("span",{style:{color:C.dm,transform:isOpen?"rotate(180deg)":"none",transition:"transform .2s"}},"▼")
-              )
-            ),
-            isOpen&&e("div",{style:{marginTop:"8px",background:C.cd,border:"1px solid "+C.bd,borderRadius:"12px",padding:"18px"}},
-              e("p",{style:{fontSize:"13px",color:C.tx,lineHeight:1.7,marginBottom:"14px"}},est.def),
-              e("div",{style:{padding:"10px 14px",background:est.col+"08",borderRadius:"8px",borderLeft:"3px solid "+est.col,marginBottom:"12px"}},e("div",{style:{fontSize:"10px",fontWeight:700,color:est.col,marginBottom:"4px"}},"PREGUNTA QUE RESPONDE"),e("p",{style:{fontSize:"13px",color:C.tx,fontWeight:600}},est.pregunta)),
-              e("div",{style:{padding:"10px 14px",background:"rgba(255,255,255,.02)",borderRadius:"8px",marginBottom:"12px"}},e("div",{style:{fontSize:"10px",fontWeight:700,color:C.dm,marginBottom:"4px"}},"MEDIDA PRINCIPAL"),e("p",{style:{fontSize:"13px",color:C.mt}},est.medidas)),
-              e("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}},
-                e("div",{style:{padding:"12px",background:"rgba(52,211,153,.06)",borderRadius:"8px",borderLeft:"3px solid #34d399"}},e("div",{style:{fontSize:"10px",fontWeight:700,color:"#34d399",marginBottom:"6px"}},"✓ VENTAJAS"),e(Ls,{items:est.ventajas,color:"#34d399"})),
-                e("div",{style:{padding:"12px",background:"rgba(239,68,68,.06)",borderRadius:"8px",borderLeft:"3px solid #ef4444"}},e("div",{style:{fontSize:"10px",fontWeight:700,color:"#ef4444",marginBottom:"6px"}},"✗ LIMITACIONES"),e(Ls,{items:est.limitaciones,color:"#ef4444"}))
+                e("div",{style:{padding:"10px 14px",background:"rgba(255,255,255,0.025)",borderRadius:"10px",marginBottom:"12px"}},
+                  e("div",{style:{fontSize:"10px",fontWeight:700,color:"#94a3b8",marginBottom:"4px",letterSpacing:"0.08em",textTransform:"uppercase"}},"Medida principal"),
+                  e("p",{style:{fontSize:"13px",color:"#cbd5e1",fontFamily:"Inter, monospace"}},est.medidas)
+                ),
+                e("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}},
+                  e("div",{style:{padding:"12px 14px",background:"rgba(52,211,153,0.06)",borderRadius:"10px",borderLeft:"3px solid #34d399"}},
+                    e("div",{style:{fontSize:"10px",fontWeight:700,color:"#34d399",marginBottom:"8px",letterSpacing:"0.08em",textTransform:"uppercase"}},"✓ Ventajas"),
+                    e(Ls,{items:est.ventajas,color:"#34d399"})
+                  ),
+                  e("div",{style:{padding:"12px 14px",background:"rgba(239,68,68,0.06)",borderRadius:"10px",borderLeft:"3px solid #ef4444"}},
+                    e("div",{style:{fontSize:"10px",fontWeight:700,color:"#ef4444",marginBottom:"8px",letterSpacing:"0.08em",textTransform:"uppercase"}},"✗ Limitaciones"),
+                    e(Ls,{items:est.limitaciones,color:"#ef4444"})
+                  )
+                )
               )
             )
-          )
-        })
+          })
+        )
       ),
 
       // TAB 2: SESGOS
-      ingTab===2&&e(F,null,
-        SESGOS.map(function(sg,i){
-          return e("div",{key:i,style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"18px",marginBottom:"12px",borderLeft:"3px solid "+sg.col,animation:"slideUp .3s ease-out "+(i*0.06)+"s both"}},
-            e("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"10px"}},e("span",{style:{fontSize:"20px"}},sg.ic),e("h3",{style:{color:sg.col,fontSize:"15px",fontWeight:700,margin:0}},sg.nombre)),
-            e("p",{style:{color:C.tx,fontSize:"14px",lineHeight:1.6,marginBottom:"10px"}},sg.def),
-            e("div",{style:{padding:"10px 14px",background:sg.col+"08",borderRadius:"8px",marginBottom:"8px"}},e("span",{style:{fontSize:"10px",fontWeight:700,color:sg.col}},"EJEMPLO: "),e("span",{style:{fontSize:"12px",color:C.mt}},sg.ejemplo)),
-            e("div",{style:{padding:"10px 14px",background:"rgba(52,211,153,.06)",borderRadius:"8px"}},e("span",{style:{fontSize:"10px",fontWeight:700,color:"#34d399"}},"SOLUCIÓN: "),e("span",{style:{fontSize:"12px",color:C.mt}},sg.solucion))
-          )
-        })
+      ingTab===2&&e("div",{style:{animation:"ecept_fadeSlideUp 320ms cubic-bezier(0.16,1,0.3,1)"}},
+        e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(360px,1fr))",gap:"12px"}},
+          SESGOS.map(function(sg,i){
+            return e("div",{key:i,style:{
+              background:"linear-gradient(180deg,rgba(13,18,36,0.7),rgba(10,14,31,0.5))",
+              border:"1px solid "+sg.col+"24",
+              borderRadius:"14px",padding:"18px 20px",
+              borderLeft:"4px solid "+sg.col,
+              animation:"ecept_fadeSlideUp 320ms cubic-bezier(0.16,1,0.3,1) "+(i*40)+"ms both"
+            }},
+              e("div",{style:{display:"flex",alignItems:"center",gap:"12px",marginBottom:"12px"}},
+                e("span",{style:{fontSize:"22px",width:"40px",height:"40px",display:"flex",alignItems:"center",justifyContent:"center",background:sg.col+"14",border:"1px solid "+sg.col+"24",borderRadius:"10px",flexShrink:0}},sg.ic),
+                e("h3",{style:{color:sg.col,fontSize:"15px",fontWeight:700,margin:0,letterSpacing:"-0.01em",lineHeight:1.2}},sg.nombre)
+              ),
+              e("p",{style:{color:"#cbd5e1",fontSize:"13px",lineHeight:1.65,marginBottom:"12px"}},sg.def),
+              e("div",{style:{padding:"10px 14px",background:sg.col+"0c",borderRadius:"10px",marginBottom:"8px"}},
+                e("div",{style:{fontSize:"10px",fontWeight:700,color:sg.col,marginBottom:"4px",letterSpacing:"0.08em",textTransform:"uppercase"}},"Ejemplo"),
+                e("span",{style:{fontSize:"12px",color:"#cbd5e1",lineHeight:1.5}},sg.ejemplo)
+              ),
+              e("div",{style:{padding:"10px 14px",background:"rgba(52,211,153,0.06)",borderRadius:"10px",borderLeft:"3px solid #34d399"}},
+                e("div",{style:{fontSize:"10px",fontWeight:700,color:"#34d399",marginBottom:"4px",letterSpacing:"0.08em",textTransform:"uppercase"}},"Solución"),
+                e("span",{style:{fontSize:"12px",color:"#cbd5e1",lineHeight:1.5}},sg.solucion)
+              )
+            )
+          })
+        )
       ),
 
       // TAB 3: MEDIDAS
-      ingTab===3&&e(F,null,
-        MEDIDAS_EPI.map(function(med,i){
-          return e("div",{key:i,style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"18px",marginBottom:"12px",borderLeft:"3px solid "+med.col,animation:"slideUp .3s ease-out "+(i*0.05)+"s both"}},
-            e("h3",{style:{color:med.col,fontSize:"15px",fontWeight:700,marginBottom:"6px"}},med.nombre),
-            e("div",{style:{padding:"8px 14px",background:"rgba(255,255,255,.04)",borderRadius:"8px",marginBottom:"10px",fontFamily:"monospace",fontSize:"14px",color:C.tx,fontWeight:600,textAlign:"center",letterSpacing:"0.5px"}},med.formula),
-            e("p",{style:{color:C.mt,fontSize:"13px",lineHeight:1.6,marginBottom:"8px"}},med.desc),
-            e("div",{style:{padding:"8px 12px",background:med.col+"0a",borderRadius:"6px",borderLeft:"3px solid "+med.col}},e("span",{style:{fontSize:"11px",fontWeight:700,color:med.col}},"📌 "),e("span",{style:{fontSize:"12px",color:C.tx}},med.regla))
-          )
-        })
+      ingTab===3&&e("div",{style:{animation:"ecept_fadeSlideUp 320ms cubic-bezier(0.16,1,0.3,1)"}},
+        e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(340px,1fr))",gap:"12px"}},
+          MEDIDAS_EPI.map(function(med,i){
+            return e("div",{key:i,style:{
+              background:"linear-gradient(180deg,rgba(13,18,36,0.7),rgba(10,14,31,0.5))",
+              border:"1px solid "+med.col+"24",
+              borderRadius:"14px",padding:"18px 20px",
+              borderLeft:"4px solid "+med.col,
+              animation:"ecept_fadeSlideUp 320ms cubic-bezier(0.16,1,0.3,1) "+(i*40)+"ms both"
+            }},
+              e("h3",{style:{color:med.col,fontSize:"16px",fontWeight:700,marginBottom:"10px",letterSpacing:"-0.01em"}},med.nombre),
+              e("div",{style:{padding:"12px 16px",background:"rgba(0,0,0,0.30)",borderRadius:"10px",marginBottom:"12px",fontFamily:"Inter, Courier New, monospace",fontSize:"14px",color:med.col,fontWeight:700,textAlign:"center",letterSpacing:"0.04em",border:"1px solid "+med.col+"22"}},med.formula),
+              e("p",{style:{color:"#cbd5e1",fontSize:"13px",lineHeight:1.65,marginBottom:"10px"}},med.desc),
+              e("div",{style:{padding:"10px 14px",background:med.col+"0c",borderRadius:"10px",borderLeft:"3px solid "+med.col,display:"flex",gap:"8px",alignItems:"flex-start"}},
+                e("span",{style:{fontSize:"12px",flexShrink:0}},"📌"),
+                e("span",{style:{fontSize:"12px",color:"#cbd5e1",lineHeight:1.55}},med.regla)
+              )
+            )
+          })
+        )
       ),
 
-      // TAB 4: LECTURA CRÍTICA CHECKLIST
-      ingTab===4&&e(F,null,
-        e("div",{style:{textAlign:"center",marginBottom:"16px"}},e("h3",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"18px",fontWeight:800,color:"#06b6d4"}},"Checklist de Lectura Crítica")),
-        CHECKLIST_LC.map(function(ck,i){
-          return e("div",{key:i,style:{display:"flex",gap:"14px",alignItems:"flex-start",marginBottom:"14px",animation:"slideUp .3s ease-out "+(i*0.06)+"s both"}},
-            e("div",{style:{width:"36px",height:"36px",borderRadius:"50%",background:ck.col+"15",border:"2px solid "+ck.col,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:"14px",color:ck.col,flexShrink:0}},ck.paso),
-            e("div",{style:{flex:1,background:C.cd,border:"1px solid "+C.bd,borderRadius:"12px",padding:"14px 16px"}},
-              e("h4",{style:{fontSize:"14px",fontWeight:700,color:C.tx,marginBottom:"6px"}},ck.pregunta),
-              e("p",{style:{fontSize:"12px",color:C.dm,lineHeight:1.6}},ck.detalle)
+      // TAB 4: LECTURA CRÍTICA — timeline vertical
+      ingTab===4&&e("div",{style:{animation:"ecept_fadeSlideUp 320ms cubic-bezier(0.16,1,0.3,1)"}},
+        e("div",{style:{textAlign:"center",marginBottom:"20px"}},
+          e("h3",{style:{fontSize:"20px",fontWeight:800,letterSpacing:"-0.02em",background:"linear-gradient(135deg,#06b6d4,#22d3ee)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",margin:0}},"Checklist de Lectura Crítica"),
+          e("p",{style:{color:"#94a3b8",fontSize:"13px",marginTop:"4px"}},"Pasos para evaluar cualquier estudio clínico")
+        ),
+        e("div",{style:{maxWidth:"800px",margin:"0 auto",display:"flex",flexDirection:"column",gap:"14px"}},
+          CHECKLIST_LC.map(function(ck,i){
+            return e("div",{key:i,style:{display:"flex",gap:"16px",alignItems:"stretch",animation:"ecept_fadeSlideUp 320ms cubic-bezier(0.16,1,0.3,1) "+(i*60)+"ms both",position:"relative"}},
+              // Number badge + connecting line
+              e("div",{style:{display:"flex",flexDirection:"column",alignItems:"center",flexShrink:0}},
+                e("div",{style:{width:"42px",height:"42px",borderRadius:"50%",background:"linear-gradient(135deg,"+ck.col+"22,"+ck.col+"0c)",border:"2px solid "+ck.col,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:"15px",color:ck.col,boxShadow:"0 0 12px "+ck.col+"30"}},ck.paso),
+                i<CHECKLIST_LC.length-1&&e("div",{style:{flex:1,width:"2px",background:"linear-gradient(180deg,"+ck.col+"40,rgba(255,255,255,0.04))",marginTop:"4px",minHeight:"20px"}})
+              ),
+              e("div",{style:{flex:1,background:"linear-gradient(180deg,rgba(13,18,36,0.7),rgba(10,14,31,0.5))",border:"1px solid "+ck.col+"24",borderRadius:"14px",padding:"16px 20px",marginBottom:"4px"}},
+                e("h4",{style:{fontSize:"15px",fontWeight:700,color:C.tx,marginBottom:"6px",letterSpacing:"-0.01em"}},ck.pregunta),
+                e("p",{style:{fontSize:"12px",color:"#cbd5e1",lineHeight:1.65}},ck.detalle)
+              )
             )
-          )
-        })
+          })
+        )
       )
     )
 
