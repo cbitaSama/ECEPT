@@ -5,7 +5,7 @@
 // Título de sección principal (H2)
 function H2(p){
   var c=p.c||C.tx;
-  return e("h2",{style:{fontSize:23,fontWeight:800,color:c,marginTop:p.mt||32,marginBottom:12,letterSpacing:.2,lineHeight:1.2,paddingBottom:8,borderBottom:"2px solid "+ax(c,.3)}},p.children);
+  return e("h2",{style:{fontSize:23,fontWeight:800,color:c,marginTop:p.mt||32,marginBottom:12,letterSpacing:.2,lineHeight:1.2,paddingBottom:8,borderBottom:"2px solid "+ax(c,.12)}},p.children);
 }
 
 // Subsección (H3)
@@ -28,7 +28,7 @@ function Tag(p){
 // Caja de definición clara
 function Def(p){
   var c=p.c||C.anx;
-  return e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.1)+","+C.cd+" 90%)",border:"1px solid "+ax(c,.3),borderLeft:"4px solid "+c,borderRadius:10,margin:"8px 0 14px"}},
+  return e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.1)+","+C.cd+" 90%)",border:"1px solid "+ax(c,.12),borderLeft:"4px solid "+c,borderRadius:10,margin:"8px 0 14px"}},
     e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:1.5,textTransform:"uppercase",marginBottom:6}},"📖 Definición"),
     e("div",{className:"prose",style:{fontSize:14}},p.children)
   );
@@ -38,7 +38,7 @@ function Def(p){
 function Crit(p){
   var c=p.c||C.anx;
   return e("div",{style:{display:"flex",gap:12,padding:"11px 13px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:8,margin:"6px 0",alignItems:"flex-start"}},
-    e("div",{style:{minWidth:34,height:34,borderRadius:7,background:ax(c,.18),color:c,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0,border:"1px solid "+ax(c,.3)}},p.crit),
+    e("div",{style:{minWidth:34,height:34,borderRadius:7,background:ax(c,.18),color:c,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0,border:"1px solid "+ax(c,.12)}},p.crit),
     e("div",{style:{fontSize:13.5,lineHeight:1.55,color:C.tx,flex:1,paddingTop:4}},p.children)
   );
 }
@@ -47,7 +47,7 @@ function Crit(p){
 function CritBlock(p){
   var c=p.c||C.anx;
   return e("div",{style:{margin:"10px 0 14px"}},
-    e("div",{style:{display:"flex",alignItems:"center",gap:8,marginBottom:8,padding:"8px 12px",background:ax(c,.12),border:"1px solid "+ax(c,.3),borderRadius:8}},
+    e("div",{style:{display:"flex",alignItems:"center",gap:8,marginBottom:8,padding:"8px 12px",background:ax(c,.12),border:"1px solid "+ax(c,.12),borderRadius:8}},
       e("div",{style:{fontSize:11,fontWeight:800,color:c,letterSpacing:1,textTransform:"uppercase"}},"📋 Criterios DSM-5-TR · "+(p.title||""))
     ),
     p.children
@@ -136,7 +136,7 @@ function TrCard(p){
   return e("div",{style:{background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:11,padding:14,margin:"10px 0"}},
     e("div",{style:{display:"flex",alignItems:"center",gap:10,marginBottom:8,paddingBottom:8,borderBottom:"1px solid "+C.bd}},
       e("div",{style:{fontWeight:800,fontSize:15,color:c,flex:1}},p.n),
-      p.dur?e("div",{style:{fontSize:10.5,fontWeight:700,color:c,background:ax(c,.14),padding:"3px 8px",borderRadius:5,border:"1px solid "+ax(c,.3),letterSpacing:.3,whiteSpace:"nowrap"}},"⏱ "+p.dur):null
+      p.dur?e("div",{style:{fontSize:10.5,fontWeight:700,color:c,background:ax(c,.14),padding:"3px 8px",borderRadius:5,border:"1px solid "+ax(c,.12),letterSpacing:.3,whiteSpace:"nowrap"}},"⏱ "+p.dur):null
     ),
     e("div",{style:{fontSize:13.5,lineHeight:1.55,color:C.tx}},p.children)
   );

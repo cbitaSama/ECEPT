@@ -126,6 +126,7 @@ function DeckDetailView(props){
   s=useState("");      var DD_tagBulkInput=s[0],   DD_setTagBulkInput=s[1];
   s=useState(false);   var DD_tagBulkLoading=s[0], DD_setTagBulkLoading=s[1];
   s=useState("");      var DD_tagBulkErrMsg=s[0],  DD_setTagBulkErrMsg=s[1];
+  s=useState(false);   var DD_elionOpen=s[0],      DD_setElionOpen=s[1];
   var DD_pressTimer=useRef(null);
 
   // ── Inject CSS once ──
@@ -135,8 +136,8 @@ function DeckDetailView(props){
       st.textContent=
         "@keyframes DD_shimmer{0%{background-position:-300px 0}100%{background-position:300px 0}}" +
         ".dd-skel{background:linear-gradient(90deg,rgba(255,255,255,.03) 25%,rgba(255,255,255,.08) 50%,rgba(255,255,255,.03) 75%);background-size:600px 100%;animation:DD_shimmer 1.4s ease-in-out infinite;border-radius:6px}" +
-        ".dd-card-item{transition:box-shadow .15s ease,background .15s ease}" +
-        ".dd-card-item:hover{background:#111827!important;box-shadow:0 4px 18px rgba(0,0,0,.35)}";
+        ".dd-card-item{transition:transform 220ms cubic-bezier(0.32,0.72,0,1),box-shadow 220ms ease-out,border-color 220ms cubic-bezier(0.32,0.72,0,1)}" +
+        ".dd-card-item:hover{transform:translateY(-1px)!important;border-color:rgba(96,165,250,0.35)!important;box-shadow:0 8px 24px rgba(0,0,0,0.30), 0 2px 8px rgba(0,0,0,0.20)!important}";
       document.head.appendChild(st);
       DD_styleInjected=true;
     }
@@ -148,6 +149,12 @@ function DeckDetailView(props){
       return;
     }
     DD_setLoading(true); DD_setLoadErr("");
+    var DD_loadStart=Date.now();
+    function DD_finish(fn){
+      var elapsed=Date.now()-DD_loadStart;
+      var remaining=Math.max(0,400-elapsed);
+      setTimeout(fn,remaining);
+    }
 
     var cardsPromise=window.ECEPT_SUPABASE
       .from("flashcards")
@@ -165,19 +172,19 @@ function DeckDetailView(props){
     Promise.all([cardsPromise,progressPromise]).then(function(results){
       var cardRes=results[0], progRes=results[1];
       if(cardRes&&cardRes.error){
-        DD_setLoading(false);
-        DD_setLoadErr("No se pudieron cargar las tarjetas.");
+        DD_finish(function(){
+          DD_setLoading(false);
+          DD_setLoadErr("No se pudieron cargar las tarjetas.");
+        });
         return;
       }
       var allCards=(cardRes&&cardRes.data)||[];
-      DD_setCards(allCards);
 
       var progMap={};
       var progRows=(progRes&&progRes.data)||[];
       for(var i=0;i<progRows.length;i++){
         progMap[progRows[i].flashcard_id]=progRows[i];
       }
-      DD_setProgress(progMap);
       // Para barajas oficiales con sesión: cargar user_tags + user_card_tags
       if(deck.is_official&&user&&window.ECEPT_SUPABASE){
         var cids=[];
@@ -187,7 +194,7 @@ function DeckDetailView(props){
           ?window.ECEPT_SUPABASE.from("user_card_tags").select("flashcard_id,tag").eq("user_id",user.id).in("flashcard_id",cids)
           :Promise.resolve({data:[],error:null});
         Promise.all([utP,uctP]).then(function(r2){
-          DD_setUserTagsList((r2[0]&&!r2[0].error)?(r2[0].data||[]):[]);
+          var uTagsList=(r2[0]&&!r2[0].error)?(r2[0].data||[]):[];
           var uctMap={};
           var uctRows=(r2[1]&&!r2[1].error)?(r2[1].data||[]):[];
           for(var j=0;j<uctRows.length;j++){
@@ -195,15 +202,32 @@ function DeckDetailView(props){
             if(!uctMap[fid2]) uctMap[fid2]=[];
             uctMap[fid2].push(uctRows[j].tag);
           }
-          DD_setUserCardTags(uctMap);
-          DD_setLoading(false);
-        }).catch(function(){ DD_setLoading(false); });
+          DD_finish(function(){
+            DD_setCards(allCards);
+            DD_setProgress(progMap);
+            DD_setUserTagsList(uTagsList);
+            DD_setUserCardTags(uctMap);
+            DD_setLoading(false);
+          });
+        }).catch(function(){
+          DD_finish(function(){
+            DD_setCards(allCards);
+            DD_setProgress(progMap);
+            DD_setLoading(false);
+          });
+        });
       } else {
-        DD_setLoading(false);
+        DD_finish(function(){
+          DD_setCards(allCards);
+          DD_setProgress(progMap);
+          DD_setLoading(false);
+        });
       }
     }).catch(function(){
-      DD_setLoading(false);
-      DD_setLoadErr("Error de conexión.");
+      DD_finish(function(){
+        DD_setLoading(false);
+        DD_setLoadErr("Error de conexión.");
+      });
     });
   }
 
@@ -333,11 +357,14 @@ function DeckDetailView(props){
       for(var bdi=0;bdi<DD_cards.length;bdi++){
         if(!snap[DD_cards[bdi].id]) next.push(DD_cards[bdi]);
       }
+      var deletedCount=DD_cards.length-next.length;
       DD_setCards(next);
       DD_cancelSelect();
+      if(window.ECEPT_toast&&deletedCount>0){ window.ECEPT_toast(deletedCount+" tarjeta"+(deletedCount===1?"":"s")+" eliminada"+(deletedCount===1?"":"s"),"success"); }
     }catch(err){
       console.error("bulk delete error",err);
       DD_setBulkMsg("Error al eliminar. Intentá de nuevo.");
+      if(window.ECEPT_toast){ window.ECEPT_toast("Error al eliminar tarjetas","error"); }
     }
   }
 
@@ -400,6 +427,7 @@ function DeckDetailView(props){
       var n=newCards.length;
       DD_setBulkMsg(n+" card"+(n===1?"":"s")+" copiada"+(n===1?"":"s")+(targetDeck?" a "+targetDeck.name:""));
       setTimeout(function(){ DD_setBulkMsg(""); },3000);
+      if(window.ECEPT_toast){ window.ECEPT_toast(n+" tarjeta"+(n===1?"":"s")+" copiada"+(n===1?"":"s")+(targetDeck?" a "+targetDeck.name:""),"success"); }
     }catch(err){
       console.error("bulk copy error",err);
       DD_setBulkErrMsg("Error al copiar. Intentá de nuevo.");
@@ -741,10 +769,14 @@ function DeckDetailView(props){
       onPointerCancel:!isOfficial?DD_onPressEnd:null,
       style:{
         position:"relative",cursor:"pointer",
-        background:isSelected?"rgba(167,139,250,.10)":C.cd,
+        background:isSelected?"rgba(167,139,250,.10)":"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",
         border:"1px solid "+(isSelected?"rgba(167,139,250,.50)":C.bd),
-        borderRadius:"12px",padding:"14px 14px 12px",
-        marginBottom:"8px"
+        borderRadius:"14px",padding:"16px 18px",
+        marginBottom:0,
+        minHeight:"110px",
+        display:"flex",
+        flexDirection:"column",
+        boxSizing:"border-box"
       }
     },
       // Main row: icon + content + menu button
@@ -935,7 +967,9 @@ function DeckDetailView(props){
   }
 
   return e(F,null,
-    e("div",{style:{maxWidth:"760px",margin:"0 auto",padding:"20px 16px 80px",position:"relative"}},
+    e("div",{style:{width:"100%",maxWidth:"1280px",margin:"0 auto",padding:"24px max(16px, calc((100vw - 1280px) / 2 + 24px)) 80px",position:"relative",boxSizing:"border-box"}},
+      // VisitTracker para deck (al entrar al detalle)
+      window.VisitTracker && deck && deck.id && e(window.VisitTracker, { itemType:"deck", itemId: deck.id }),
 
     // ── Header ──
     e("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"14px"}},
@@ -948,7 +982,7 @@ function DeckDetailView(props){
         e("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"2px"}},
           e("h1",{style:{
             fontSize:"18px",fontWeight:800,color:C.tx,
-            fontFamily:"'Playfair Display',serif",
+            fontFamily:"'Inter','DM Sans',sans-serif",
             overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
             margin:0
           }},_deckName),
@@ -1102,6 +1136,17 @@ function DeckDetailView(props){
               fontSize:"14px",fontWeight:700,cursor:"pointer"
             }
           },"+ Nueva tarjeta"),
+          canEdit&&e("button",{
+            onClick:function(){ DD_setElionOpen(true); },
+            style:{
+              flex:"0 0 auto",minHeight:"52px",padding:"14px 18px",
+              borderRadius:"14px",
+              background:"linear-gradient(135deg,#a78bfa,#60a5fa)",
+              border:"none",color:"#fff",
+              fontSize:"14px",fontWeight:700,cursor:"pointer",
+              boxShadow:"0 4px 12px rgba(167,139,250,0.3)"
+            }
+          },"✨ Generar con IA"),
           canEdit&&DD_cards.length>0&&e("button",{
             onClick:function(){ DD_setSelectMode(true); },
             style:{
@@ -1203,22 +1248,25 @@ function DeckDetailView(props){
       padding:"10px 12px",fontSize:"13px",marginBottom:"16px"
     }},DD_loadErr),
 
-    // ── Loading skeletons ──
-    DD_loading && e("div",null,
-      DD_skeletonCard("dsk1"),DD_skeletonCard("dsk2"),DD_skeletonCard("dsk3")
-    ),
+    // ── Loading skeletons (premium SkeletonList) ──
+    DD_loading && e(window.SkeletonList || "div",{count:6,grid:true,minWidth:320,minHeight:110}),
 
     // ── Card list / empty states ──
-    !DD_loading && DD_cards.length===0 && e("div",{style:{
-      background:C.cd,border:"1px dashed "+C.bd,
-      borderRadius:"14px",padding:"40px 24px",textAlign:"center"
-    }},
-      e("div",{style:{fontSize:"48px",marginBottom:"12px"}},"🎴"),
-      e("p",{style:{fontSize:"14px",color:C.tx,fontWeight:600,marginBottom:"6px"}},"Esta baraja está vacía."),
-      e("p",{style:{fontSize:"12px",color:C.dm,lineHeight:1.5}},
-        canEdit?"¡Agrega tu primera tarjeta!":"Aún no se cargaron tarjetas oficiales."
-      )
-    ),
+    !DD_loading && DD_cards.length===0 && (canEdit
+      ? e(window.EmptyState||"div",{
+          icon:"🎴",
+          title:"Esta baraja está vacía",
+          description:"Empezá creando una tarjeta manualmente o dejá que Elion genere varias a partir de tus apuntes (texto, PDF o imagen).",
+          actions:[
+            {label:"+ Nueva tarjeta",onClick:function(){ DD_setEditCard(null); DD_setShowEditor(true); },variant:"primary"},
+            {label:"✨ Generar con IA",onClick:function(){ DD_setElionOpen(true); },variant:"premium"}
+          ]
+        })
+      : e(window.EmptyState||"div",{
+          icon:"🎴",
+          title:"Sin tarjetas todavía",
+          description:"Aún no se cargaron tarjetas oficiales en esta baraja. Volvé a revisar más tarde."
+        })),
 
     !DD_loading && DD_cards.length>0 && filteredCards.length===0 && e("div",{style:{
       background:C.cd,border:"1px dashed "+C.bd,
@@ -1237,7 +1285,7 @@ function DeckDetailView(props){
       },"Limpiar filtros")
     ),
 
-    !DD_loading && filteredCards.length>0 && e("div",null,
+    !DD_loading && filteredCards.length>0 && e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(320px, 1fr))",gap:"14px",width:"100%"}},
       filteredCards.map(function(c,i){ return DD_cardItem(c,i); })
     ),
 
@@ -1833,7 +1881,30 @@ function DeckDetailView(props){
         ),
         document.body
       );
-    })()
+    })(),
+    DD_elionOpen&&user&&deck&&e(ElionGenerator,{
+      user:user,
+      supabase:window.ECEPT_SUPABASE,
+      deckId:deck.id,
+      onImport:async function(cards){
+        var inserts=[];
+        for(var ni=0;ni<cards.length;ni++){
+          inserts.push({
+            deck_id:deck.id,
+            user_id:user.id,
+            is_official:false,
+            card_type:cards[ni].card_type,
+            front:cards[ni].front,
+            back:cards[ni].back||"",
+            tags:cards[ni].tags||[]
+          });
+        }
+        await window.ECEPT_SUPABASE.from("flashcards").insert(inserts);
+        DD_setElionOpen(false);
+        DD_loadCards();
+      },
+      onClose:function(){ DD_setElionOpen(false); }
+    })
   ));
 }
 

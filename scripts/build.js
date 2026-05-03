@@ -16,6 +16,7 @@ var shell = fs.readFileSync('src/index.html', 'utf8');
 var parts = [
   // styles
   'src/styles/theme.js',
+  'src/styles/tokens.js',
   // data (order matters: triadas before links)
   'src/data/reuma.js',
   'src/data/inmuno.js',
@@ -97,6 +98,23 @@ var parts = [
   'src/components/salud_mental/70-app.js',
   'src/components/salud_mental/_exposures.js',
   'src/components/salud_mental/_iife-close.js',
+  // logo + loading screen (premium primitives — must precede everything that consumes them)
+  'src/components/Logo.js',
+  'src/components/LoadingScreen.js',
+  'src/components/HomeView.js',
+  'src/components/ModuleShell.js',
+  'src/components/Layered.js',
+  'src/components/Toast.js',
+  'src/components/Button.js',
+  'src/components/Skeleton.js',
+  'src/components/EmptyState.js',
+  'src/components/VisitTracker.js',
+  'src/components/FavoriteHelper.js',
+  'src/components/FavoriteButton.js',
+  'src/components/FavoritesView.js',
+  'src/components/AnatomiaView.js',
+  'src/components/ElionIntro.js',
+  'src/components/ProjectsManager.js',
   // chatbot (must come after App? no — function hoisted; keep with components)
   'src/components/ChatBot.js',
   // supabase client (reads window.__ECEPT_ENV; exposes window.ECEPT_SUPABASE)
@@ -109,6 +127,8 @@ var parts = [
   'src/components/ProfileView.js',
   // decks view (flashcards deck list; exposes window.DecksView)
   'src/components/DecksView.js',
+  // elion generator (AI flashcard generation; exposes window.ElionGenerator)
+  'src/components/ElionGenerator.js',
   // flashcard editor (create/edit flashcards; exposes window.FlashcardEditor)
   'src/components/FlashcardEditor.js',
   // deck detail view (flashcards inside a deck; exposes window.DeckDetailView)
@@ -117,6 +137,8 @@ var parts = [
   'src/components/StudyView.js',
   // tag manager (user tag entities CRUD; exposes window.TagManager)
   'src/components/TagManager.js',
+  // debug panel (admin-only backend diagnostic; exposes window.DebugPanel)
+  'src/components/DebugPanel.js',
   // app
   'src/app.js'
 ];
@@ -137,6 +159,8 @@ var errors = [];
 var expectedGlobals = [
   // core data + existing modules
   'RD=', 'REUMA_SECS', 'SUB=', 'TR=', 'TC=',
+  // design tokens
+  'ECEPT_TOKENS', 'window.T',
   'ABD_DATA', 'QUEM_PASOS', 'ING_',
   'PIRAMIDE', 'ESTUDIOS', 'SESGOS', 'MEDIDAS_EPI', 'CHECKLIST_LC',
   'LAB_SECTIONS', 'var ADR', 'RECEPTOR_FAMILIES', 'RECEPTOR_QUIZZES', 'RECEPTOR_PEARLS', 'RECEPTOR_PROT_G',
@@ -169,6 +193,24 @@ var expectedGlobals = [
   'function PerView', 'function ImpView', 'function DprView',
   'function IntroView', 'function RootHub', 'function NeurosisHub',
   'window.SaludMentalView', 'window.SM_SEARCH_INDEX',
+  // logo + loading screen + home view
+  'function Logo', 'window.Logo', 'function LoadingScreen', 'window.LoadingScreen',
+  'function HomeView', 'window.HomeView',
+  'function ModuleShell', 'window.ModuleShell',
+  'function CollapsibleSection', 'window.CollapsibleSection',
+  'function ToastHost', 'window.ToastHost', 'window.ECEPT_toast',
+  'function Button', 'window.Button',
+  'function SkeletonCard', 'function SkeletonList', 'window.SkeletonCard', 'window.SkeletonList',
+  'function EmptyState', 'window.EmptyState',
+  'function ElionIntro', 'window.ElionIntro',
+  'function ProjectsManager', 'window.ProjectsManager',
+  'function VisitTracker', 'window.VisitTracker', 'window.ECEPT_FAVORITES',
+  'function FavoriteButton', 'window.FavoriteButton', 'function useLongPress', 'window.useLongPress',
+  'function FavoritesView', 'window.FavoritesView',
+  'function AnatomiaView', 'window.AnatomiaView', 'ANAT_SECCIONES', 'ANAT_SISTEMAS', 'ANAT_DATA',
+  'function LayeredCard', 'window.LayeredCard',
+  'function InfoLayer', 'window.InfoLayer',
+  'function Detail', 'window.Detail',
   // chatbot
   'function ChatBot', 'window.ChatBot',
   // supabase client
@@ -181,6 +223,8 @@ var expectedGlobals = [
   'function ProfileView', 'window.ProfileView',
   // decks view
   'function DecksView', 'window.DecksView',
+  // elion generator
+  'function ElionGenerator', 'window.ElionGenerator',
   // flashcard editor
   'function FlashcardEditor', 'window.FlashcardEditor',
   // deck detail view
@@ -188,7 +232,9 @@ var expectedGlobals = [
   // study view
   'function StudyView', 'window.StudyView',
   // tag manager
-  'function TagManager', 'window.TagManager'
+  'function TagManager', 'window.TagManager',
+  // debug panel
+  'function DebugPanel', 'window.DebugPanel'
 ];
 expectedGlobals.forEach(function(g) {
   if (output.indexOf(g) === -1) errors.push('missing global: ' + g);

@@ -37,7 +37,7 @@ var MODS=[
 {id:"endoc",n:"Endocrinología",ic:"⚗️",col:"#06b6d4",d:"Diabetes, Tiroides",st:"vacío"},
 {id:"hema",n:"Hematología",ic:"🩸",col:"#dc2626",d:"Anemias, Leucemias",st:"vacío"},
 {id:"fisio",n:"Fisiología",ic:"🔬",col:"#ec4899",d:"Receptores adrenérgicos, SNA simpático, Proteínas G",st:"lleno"},
-{id:"salud_mental",n:"Salud Mental II",ic:"🧠",col:"#a855f7",d:"Psiquiatría · 8 psicosis · 9 temas de neurosis · 202 flashcards · 81 casos",st:"lleno"},
+{id:"salud_mental",n:"Salud Mental",ic:"🧠",col:"#a855f7",d:"Psiquiatría · 8 psicosis · 9 temas de neurosis · 202 flashcards · 81 casos",st:"lleno"},
 {id:"emergen",n:"Emergenciología",ic:"🚑",col:"#ef4444",d:"Algoritmo de quemaduras, ATLS, RCP, Shock",st:"lleno"},
 {id:"dermato",n:"Dermatología",ic:"🧴",col:"#f472b6",d:"Dermatitis, Tumores",st:"vacío"},
 {id:"trauma",n:"Traumatología",ic:"🦴",col:"#78716c",d:"Fracturas, Luxaciones",st:"vacío"}

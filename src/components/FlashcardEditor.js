@@ -66,6 +66,7 @@ function FlashcardEditor(props){
   s=useState(false);      var FE_prevFlip=s[0], FE_setPrevFlip=s[1];
   s=useState(false);      var FE_draftAsk=s[0], FE_setDraftAsk=s[1];
   s=useState(null);       var FE_draftSnap=s[0],FE_setDraftSnap=s[1];
+  s=useState(false);      var FE_elionOpen=s[0], FE_setElionOpen=s[1];
   var FE_snapRef=useRef({});
 
   // Keep ref current every render (stale-closure-safe auto-save)
@@ -297,7 +298,8 @@ function FlashcardEditor(props){
   };
   var hintSt={fontSize:"11px",color:C.dm,marginTop:"4px",lineHeight:1.4};
 
-  return ReactDOM.createPortal(
+  return e(React.Fragment,null,
+  ReactDOM.createPortal(
     e("div",{
       className:"fe-bg",
       onClick:function(ev){ if(ev.target===ev.currentTarget&&!FE_saving) FE_cancel(); },
@@ -359,16 +361,30 @@ function FlashcardEditor(props){
             (deck.icon||"🎴")+"  "+deck.name
           )
         ),
-        e("button",{
-          onClick:FE_cancel,"aria-label":"Cerrar",disabled:FE_saving,
-          style:{
-            background:"none",border:"none",color:C.mt,fontSize:"24px",
-            cursor:FE_saving?"default":"pointer",
-            minWidth:"44px",minHeight:"44px",
-            display:"flex",alignItems:"center",justifyContent:"center",
-            borderRadius:"8px",flexShrink:0,opacity:FE_saving?0.5:1
-          }
-        },"×")
+        e("div",{style:{display:"flex",alignItems:"center",gap:"8px",flexShrink:0}},
+          user&&e("button",{
+            onClick:function(){FE_setElionOpen(true);},
+            disabled:FE_saving,
+            style:{
+              padding:"7px 12px",borderRadius:"8px",minHeight:"34px",
+              background:"linear-gradient(135deg,rgba(167,139,250,.15),rgba(96,165,250,.15))",
+              border:"1px solid rgba(167,139,250,.4)",
+              color:"#a78bfa",fontSize:"12px",fontWeight:700,
+              cursor:FE_saving?"default":"pointer",
+              whiteSpace:"nowrap",opacity:FE_saving?0.5:1
+            }
+          },"✨ Generar con Elion"),
+          e("button",{
+            onClick:FE_cancel,"aria-label":"Cerrar",disabled:FE_saving,
+            style:{
+              background:"none",border:"none",color:C.mt,fontSize:"24px",
+              cursor:FE_saving?"default":"pointer",
+              minWidth:"44px",minHeight:"44px",
+              display:"flex",alignItems:"center",justifyContent:"center",
+              borderRadius:"8px",flexShrink:0,opacity:FE_saving?0.5:1
+            }
+          },"×")
+        )
       ),
 
       // ── Card type segmented control (sliding pill) ──
@@ -639,7 +655,31 @@ function FlashcardEditor(props){
 
     )
   ),
-  document.body);
+  document.body),
+  FE_elionOpen&&user&&deck&&e(ElionGenerator,{
+    user:user,
+    supabase:window.ECEPT_SUPABASE,
+    deckId:deck.id,
+    onImport:function(newCards){
+      var inserts=[];
+      for(var ni=0;ni<newCards.length;ni++){
+        inserts.push({
+          deck_id:deck.id,
+          user_id:user.id,
+          is_official:false,
+          card_type:newCards[ni].card_type,
+          front:newCards[ni].front,
+          back:newCards[ni].back||"",
+          tags:newCards[ni].tags||[]
+        });
+      }
+      window.ECEPT_SUPABASE.from("flashcards").insert(inserts).then(function(res){
+        if(!res.error&&typeof props.onSaved==="function") props.onSaved();
+      });
+    },
+    onClose:function(){FE_setElionOpen(false);}
+  })
+  );
 }
 
 window.FlashcardEditor=FlashcardEditor;

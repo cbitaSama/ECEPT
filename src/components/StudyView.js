@@ -143,11 +143,12 @@ function StudyView(props){
       "@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}" +
       ".sv-wrap-out{animation:SV_slideOut .32s ease-in both}" +
       ".sv-wrap-in{animation:SV_slideIn .32s ease-out both}" +
-      ".sv-rating-btn{transition:transform .1s ease,opacity .15s ease}" +
-      ".sv-rating-btn:active{transform:scale(0.93)!important}" +
+      ".sv-rating-btn{transition:transform 200ms cubic-bezier(0.32,0.72,0,1),opacity .15s ease,background-color 240ms ease-out,box-shadow 240ms ease-out}" +
+      ".sv-rating-btn:hover:not(:disabled){transform:translateY(-2px) scale(1.02)!important}" +
+      ".sv-rating-btn:active{transform:scale(0.96)!important}" +
       ".sv-face{-webkit-backface-visibility:hidden;backface-visibility:hidden;" +
         "position:absolute;top:0;left:0;right:0;min-height:100%;" +
-        "border-radius:16px;padding:28px 24px;" +
+        "border-radius:24px;padding:48px 36px;" +
         "display:flex;flex-direction:column;justify-content:center;" +
         "box-sizing:border-box;overflow-y:auto}";
     document.head.appendChild(st);
@@ -456,7 +457,7 @@ function StudyView(props){
     ];
     var sliderMax=Math.min(100,available)||5;
 
-    return e("div",{style:{maxWidth:"760px",margin:"0 auto",padding:"20px 16px 80px"}},
+    return e("div",{style:{maxWidth:"760px",margin:"0 auto",padding:"20px 16px 80px",minHeight:"100vh",background:"radial-gradient(ellipse 80% 50% at 50% 0%, rgba(167,139,250,0.06) 0%, rgba(96,165,250,0.03) 35%, transparent 70%)"}},
       e("div",{style:{display:"flex",alignItems:"center",gap:"12px",marginBottom:"24px"}},
         e("h1",{style:{fontSize:"22px",fontWeight:700,color:C.tx,margin:0,flex:1}},"Modo estudio"),
         e("div",{style:{fontSize:"28px"}},"🎯")
@@ -722,15 +723,18 @@ function StudyView(props){
             onClick:function(){ if(!SV_rated) SV_setFlipped(!SV_flipped); },
             style:{
               position:"relative",
-              minHeight:"240px",
+              minHeight:"320px",
+              maxWidth:"680px",
+              margin:"0 auto",
+              perspective:"1200px",
               WebkitTransformStyle:"preserve-3d",
               transformStyle:"preserve-3d",
               transform:SV_flipped?"rotateY(180deg)":"rotateY(0deg)",
-              transition:"transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 300ms ease",
+              transition:"transform 600ms cubic-bezier(0.32, 0.72, 0, 1), box-shadow 320ms ease",
               cursor:SV_rated?"default":"pointer",
               boxShadow:SV_flipped
-                ?"0 24px 48px rgba(0,0,0,.45), 0 0 32px "+deckCol+"25"
-                :"0 4px 18px rgba(0,0,0,.22)"
+                ?"0 28px 56px rgba(0,0,0,0.5), 0 0 48px "+deckCol+"30, 0 8px 16px rgba(0,0,0,0.25)"
+                :"0 8px 24px rgba(0,0,0,0.30), 0 2px 8px rgba(0,0,0,0.20)"
             }
           },
 
@@ -811,8 +815,8 @@ function StudyView(props){
       },"Mostrar respuesta") : null,
 
       // ── Rating buttons ──
-      SV_flipped ? e("div",{style:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"8px"}},
-        ratingBtns.map(function(rb){
+      SV_flipped ? e("div",{style:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"10px",maxWidth:"680px",margin:"0 auto"}},
+        ratingBtns.map(function(rb,bi){
           return e("button",{
             key:rb.rating,
             className:"sv-rating-btn",
@@ -820,15 +824,17 @@ function StudyView(props){
             disabled:SV_rated||SV_sliding,
             style:{
               display:"flex",flexDirection:"column",alignItems:"center",
-              gap:"4px",padding:"12px 8px",borderRadius:"12px",
-              border:"1px solid "+rb.color+"40",
-              background:"rgba(0,0,0,.2)",
+              gap:"5px",padding:"16px 10px",borderRadius:"14px",
+              border:"1px solid "+rb.color+"55",
+              background:rb.color+"15",
+              boxShadow:"0 2px 8px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04)",
               cursor:SV_rated||SV_sliding?"not-allowed":"pointer",
-              opacity:SV_rated||SV_sliding?0.45:1
+              opacity:SV_rated||SV_sliding?0.45:1,
+              animation:"SV_slideIn 280ms cubic-bezier(0.16,1,0.3,1) "+(80+bi*40)+"ms both"
             }
           },
-            e("span",{style:{fontSize:"13px",fontWeight:700,color:rb.color}},rb.label),
-            e("span",{style:{fontSize:"11px",color:C.dm}},SV_intervalLabel(currentProg,rb.rating))
+            e("span",{style:{fontSize:"14px",fontWeight:700,color:rb.color,letterSpacing:"-0.01em"}},rb.label),
+            e("span",{style:{fontSize:"11px",color:C.dm,letterSpacing:"0.04em"}},SV_intervalLabel(currentProg,rb.rating))
           );
         })
       ) : null
@@ -866,6 +872,10 @@ function StudyView(props){
       padding:"40px 20px 80px",textAlign:"center",
       position:"relative",overflow:"hidden"
     }},
+
+      // VisitTracker: registra sesión completada (single-mount al entrar a summary)
+      // VisitTracker para sesión completada — itemId = deckId del primer card o 'mixed'.
+      window.VisitTracker && e(window.VisitTracker, { itemType:"study_session", itemId: ((SV_session && SV_session[0] && SV_session[0].deck_id) || "mixed") + ":" + (SV_startTime || Date.now()) }),
 
       // ── CSS-only confetti (30 dots) ──
       e("div",{style:{

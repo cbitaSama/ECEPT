@@ -2,42 +2,196 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<script>window._ECEPT_START = (typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>ECEPT · El Conocimiento Es Para Todos</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ECEPT">
 <meta name="theme-color" content="#060a14">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧬</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
-<script>
-  window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
-</script>
-<script defer src="/_vercel/speed-insights/script.js"></script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><defs><linearGradient id=%22g%22 x1=%220%22 y1=%220%22 x2=%22100%22 y2=%22100%22 gradientUnits=%22userSpaceOnUse%22><stop offset=%220%22 stop-color=%22%2360a5fa%22/><stop offset=%221%22 stop-color=%22%23a78bfa%22/></linearGradient></defs><path d=%22M22 12 C22 30 78 30 78 48 C78 66 22 66 22 84%22 stroke=%22url(%23g)%22 stroke-width=%224%22 stroke-linecap=%22round%22 fill=%22none%22/><line x1=%2228%22 y1=%2222%22 x2=%2272%22 y2=%2222%22 stroke=%22url(%23g)%22 stroke-width=%222.5%22 opacity=%22.7%22/><line x1=%2232%22 y1=%2236%22 x2=%2268%22 y2=%2236%22 stroke=%22url(%23g)%22 stroke-width=%222.5%22 opacity=%22.55%22/><line x1=%2232%22 y1=%2260%22 x2=%2268%22 y2=%2260%22 stroke=%22url(%23g)%22 stroke-width=%222.5%22 opacity=%22.55%22/><line x1=%2228%22 y1=%2274%22 x2=%2272%22 y2=%2274%22 stroke=%22url(%23g)%22 stroke-width=%222.5%22 opacity=%22.7%22/></svg>">
+<!-- Initial loader styles inline (sin depender del bundle) -->
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#060a14;font-family:'DM Sans',sans-serif;color:#e2e8f0;-webkit-tap-highlight-color:transparent;min-height:100vh;overflow-x:hidden}
-::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:#1a2040;border-radius:3px}
-input,button{font-family:inherit;-webkit-appearance:none}
+@keyframes ecept_il_strandFlow { to { stroke-dashoffset: -20; } }
+@keyframes ecept_il_strandFlowReverse { to { stroke-dashoffset: 20; } }
+@keyframes ecept_il_breathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+@keyframes ecept_il_bar {
+  0%   { transform: translateX(-160px); }
+  100% { transform: translateX(400px);  }
+}
+@keyframes ecept_il_pulse { 0%,100% { opacity: 0.65; } 50% { opacity: 1; } }
+@keyframes ecept_loaderFadeOut { to { opacity: 0; visibility: hidden; } }
+#initial-loader{position:fixed;inset:0;background:#060a14;z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;opacity:1;animation:ecept_loaderFadeOut 320ms cubic-bezier(0.16,1,0.3,1) forwards;animation-delay:1200ms;animation-play-state:paused}
+#initial-loader.go{animation-play-state:running}
+#initial-loader .il-logo{width:88px;height:88px;animation:ecept_il_breathe 3s ease-in-out infinite;filter:drop-shadow(0 0 18px rgba(167,139,250,0.45))}
+#initial-loader .il-logo .il-strand-a{stroke-dasharray:6 4;animation:ecept_il_strandFlow 2.5s linear infinite}
+#initial-loader .il-logo .il-strand-b{stroke-dasharray:6 4;animation:ecept_il_strandFlowReverse 2.5s linear infinite}
+#initial-loader .il-title{font-size:40px;font-weight:800;letter-spacing:-0.025em;background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.05}
+#initial-loader .il-tag{font-size:13px;color:#64748b;letter-spacing:0.04em;animation:ecept_il_pulse 1.8s ease-in-out infinite}
+#initial-loader .il-bar-wrap{width:160px;height:3px;background:rgba(96,165,250,0.14);border-radius:2px;overflow:hidden;margin-top:6px}
+#initial-loader .il-bar{width:60px;height:100%;background:linear-gradient(90deg,#60a5fa,#a78bfa);border-radius:2px;animation:ecept_il_bar 1.4s cubic-bezier(0.4,0,0.6,1) infinite}
+</style>
+</head>
+<body>
+<!-- Initial loader: visible al primer paint, sin depender de React/bundle -->
+<div id="initial-loader">
+  <div class="il-logo">
+    <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;">
+      <defs>
+        <linearGradient id="il_grad_a" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#60a5fa"/>
+          <stop offset="100%" stop-color="#a78bfa"/>
+        </linearGradient>
+        <linearGradient id="il_grad_b" x1="100" y1="0" x2="0" y2="100" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#a78bfa"/>
+          <stop offset="100%" stop-color="#60a5fa"/>
+        </linearGradient>
+      </defs>
+      <path class="il-strand-a" d="M 22 12 C 22 30, 78 30, 78 48 C 78 66, 22 66, 22 84" stroke="url(#il_grad_a)" stroke-width="4" stroke-linecap="round" fill="none"/>
+      <path class="il-strand-b" d="M 78 12 C 78 30, 22 30, 22 48 C 22 66, 78 66, 78 84" stroke="url(#il_grad_b)" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.5"/>
+      <line x1="28" y1="22" x2="72" y2="22" stroke="url(#il_grad_a)" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+      <line x1="32" y1="36" x2="68" y2="36" stroke="url(#il_grad_a)" stroke-width="2.5" stroke-linecap="round" opacity="0.55"/>
+      <line x1="32" y1="60" x2="68" y2="60" stroke="url(#il_grad_a)" stroke-width="2.5" stroke-linecap="round" opacity="0.55"/>
+      <line x1="28" y1="74" x2="72" y2="74" stroke="url(#il_grad_a)" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+      <circle cx="22" cy="12" r="3" fill="#60a5fa"/>
+      <circle cx="78" cy="12" r="3" fill="#a78bfa"/>
+      <circle cx="22" cy="84" r="3" fill="#a78bfa"/>
+      <circle cx="78" cy="84" r="3" fill="#60a5fa"/>
+    </svg>
+  </div>
+  <div class="il-title">ECEPT</div>
+  <div class="il-tag">El Conocimiento Es Para Todos</div>
+  <div class="il-bar-wrap"><div class="il-bar"></div></div>
+</div>
+<script>
+// Capturar errores globales en array para diagnóstico (NO reescribe el loader).
+// El loader solo muestra error si el fail-safe (12s) se dispara.
+window._ECEPT_ERRS = [];
+window.addEventListener('error', function(ev) {
+  try {
+    var src = ev && ev.filename ? (ev.filename + '').split('/').pop() : '';
+    var msg = (ev && ev.message ? ev.message : 'error') + (src ? ' @ ' + src + ':' + (ev.lineno || '?') : '');
+    window._ECEPT_ERRS.push(msg);
+  } catch(e2) {}
+});
+window.addEventListener('unhandledrejection', function(ev) {
+  try {
+    var r = ev && ev.reason;
+    var msg = r && r.message ? r.message : (typeof r === 'string' ? r : 'unhandled promise');
+    window._ECEPT_ERRS.push('promise: ' + msg);
+  } catch(e2) {}
+});
+(function(){
+  // Loader visible mínimo 1200ms desde primer paint (animation-delay CSS).
+  // Cuando React monta, dispara ECEPT_READY → desactivamos pause + cancelamos fail-safe.
+  // PATRÓN SIMPLE — sin listener error que reescriba loader (eso causaba el bloqueo de ronda 3).
+  var ECEPT_LOADER_FAILSAFE = null;
+  var loaderDismissed = false;
+  function dismiss() {
+    if (loaderDismissed) return;
+    loaderDismissed = true;
+    window._ECEPT_LOADED = true;
+    if (ECEPT_LOADER_FAILSAFE) { clearTimeout(ECEPT_LOADER_FAILSAFE); ECEPT_LOADER_FAILSAFE = null; }
+    var l = document.getElementById('initial-loader');
+    if (!l) return;
+    l.classList.add('go');
+    setTimeout(function(){ if(l && l.parentNode) l.parentNode.removeChild(l); }, 1700);
+  }
+  window.addEventListener('ECEPT_READY', dismiss);
+  // Fail-safe: 12s sin ECEPT_READY → mostrar error de carga + lista de _ECEPT_ERRS para diagnóstico.
+  ECEPT_LOADER_FAILSAFE = setTimeout(function(){
+    if (loaderDismissed || window._ECEPT_LOADED) return;
+    var l = document.getElementById('initial-loader');
+    if (!l) return;
+    if (l.classList.contains('go')) return;
+    var errs = window._ECEPT_ERRS || [];
+    var errSummary = errs.length
+      ? '<div style="font-size:11px;color:#fca5a5;text-align:left;max-width:600px;margin:16px auto 0;font-family:monospace;background:rgba(239,68,68,0.10);padding:12px;border-radius:8px;max-height:200px;overflow:auto;border:1px solid rgba(239,68,68,0.25);">' + errs.slice(-6).map(function(s){ return String(s).replace(/[<>&]/g, function(c){return c==='<'?'&lt;':c==='>'?'&gt;':'&amp;';}); }).join('<br>') + '</div>'
+      : '';
+    l.innerHTML = '<div style="text-align:center;padding:32px;max-width:700px;font-family:-apple-system,system-ui,sans-serif;"><div style="font-size:36px;margin-bottom:16px;">⚠️</div><div style="font-size:18px;color:#e2e8f0;margin-bottom:8px;font-weight:600;">No pudimos cargar la app</div><div style="font-size:14px;color:#94a3b8;margin-bottom:20px;">Verificá tu conexión a internet</div>' + errSummary + '<button onclick="window.location.reload()" style="margin-top:16px;background:linear-gradient(135deg,#60a5fa,#a78bfa);color:#fff;border:none;padding:12px 28px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;">Reintentar</button></div>';
+  }, 12000);
+})();
+</script>
+<style>
+:root {
+  --ease-standard: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-sharp: cubic-bezier(0.4, 0, 0.6, 1);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: #060a14;
+  font-family: 'Inter', 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-feature-settings: 'cv11', 'ss01', 'ss03';
+  color: #e2e8f0;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(96,165,250,0.15); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(96,165,250,0.3); }
+::selection { background: rgba(96,165,250,0.3); color: #e2e8f0; }
+input, button, textarea { font-family: inherit; -webkit-appearance: none; outline: none; border: none; }
+button { cursor: pointer; color: inherit; background: none; }
 @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-/* Salud Mental II · scoped styles (mirrors artifacts/salud_mental.html <style>) */
+@keyframes ecept_fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ecept_fadeSlideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes ecept_fadeSlideDown { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes ecept_scaleIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes ecept_modalIn { from { opacity: 0; transform: translateY(20px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes ecept_backdropIn { from { opacity: 0; backdrop-filter: blur(0px); } to { opacity: 1; backdrop-filter: blur(12px); } }
+@keyframes ecept_glowPulse { 0%, 100% { box-shadow: 0 0 20px rgba(96,165,250,0.2); } 50% { box-shadow: 0 0 40px rgba(96,165,250,0.4); } }
+@keyframes ecept_shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes ecept_logoSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes ecept_logoFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-6px); } }
+@keyframes ecept_messageIn { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes ecept_initialPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+@keyframes ecept_skel_shimmer {
+  0%   { background-position: -240px 0; }
+  100% { background-position: 240px 0; }
+}
+@keyframes ecept_strandFlow         { to { stroke-dashoffset: -20; } }
+@keyframes ecept_strandFlowReverse  { to { stroke-dashoffset:  20; } }
+@keyframes ecept_logoBreathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+@keyframes ecept_pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.55; transform: scale(0.88); }
+}
+@keyframes ecept_sidebarIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes ecept_chatPanelIn {
+  from { opacity: 0; transform: translateX(-20px) scale(0.98); filter: blur(8px); }
+  to   { opacity: 1; transform: translateX(0)     scale(1);    filter: blur(0); }
+}
+.ecept-strand-flow         { animation: ecept_strandFlow         2.5s linear infinite; }
+.ecept-strand-flow-reverse { animation: ecept_strandFlowReverse  2.5s linear infinite; }
+.ecept-logo-flow           { animation: ecept_logoBreathe        3s   ease-in-out infinite; }
+.ecept-logo-float          { animation: ecept_logoFloat          3.6s ease-in-out infinite; }
+/* Salud Mental II · scoped styles */
 .sm-root .prose{font-size:14.5px;line-height:1.7;color:#e2e8f0}
 .sm-root .prose b,.sm-root .prose strong{color:#fff;font-weight:700}
 .sm-root input,.sm-root button,.sm-root select{border:none;outline:none}
 .sm-root button{cursor:pointer;color:inherit;background:none}
 </style>
-</head>
-<body>
 <div id="root"></div>
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<!-- docx se carga bajo demanda desde src/components/ChatBot.js (CB_loadDocxLib) -->
 <script>window.__ECEPT_ENV={SUPABASE_URL:'__SUPABASE_URL__',SUPABASE_ANON_KEY:'__SUPABASE_ANON_KEY__'};</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script>
 /* BUNDLE */
 </script>

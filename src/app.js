@@ -21,11 +21,20 @@ function App(){
   s=_(0);var calcGotas=s[0],setCalcGotas=s[1]; s=_(null);var sbExp=s[0],setSbExp=s[1]; s=_(null);var sbSub=s[0],setSbSub=s[1];
   s=_([]);var favs=s[0],setFavs=s[1];
   s=_(null);var ecuUser=s[0],setEcuUser=s[1];
+  s=_(null);var ecuRole=s[0],setEcuRole=s[1];
+  s=_(false);var dpOpen=s[0],setDpOpen=s[1];
   s=_(false);var ecuShowAuth=s[0],setEcuShowAuth=s[1];
   s=_(0);var streak=s[0],setStreak=s[1]; s=_(0);var bestStreak=s[0],setBestStreak=s[1]; s=_(0);var calcHoras=s[0],setCalcHoras=s[1];
   s=_(function(){try{return JSON.parse(localStorage.getItem("ecept_v1")||"[]")}catch(e2){return[]}});
   var vi=s[0],setVi=s[1];
   useEffect(function(){try{localStorage.setItem("ecept_v1",JSON.stringify(vi))}catch(e2){}},[vi]);
+
+  // ─── INITIAL LOADER DISMISS ─── señalá al loader inline de index.html
+  // que React montó. La visibilidad mínima de 1200ms es CSS-only
+  // (animation-delay del #initial-loader). Acá solo despausamos.
+  useEffect(function(){
+    try { window.dispatchEvent(new Event('ECEPT_READY')); } catch(e2) {}
+  },[]);
 
   // ─── AUTH SESSION ─── restore on mount + keep in sync via onAuthStateChange
   useEffect(function(){
@@ -35,7 +44,10 @@ function App(){
         if(res&&res.data&&res.data.session) setEcuUser(res.data.session.user||null);
       }).catch(function(){});
       var authListener=window.ECEPT_SUPABASE.auth.onAuthStateChange(function(event,session){
-        setEcuUser(session&&session.user?session.user:null);
+        var newUser=session&&session.user?session.user:null;
+        setEcuUser(newUser);
+        // Dispatch global event para que componentes escuchen sin re-querying.
+        try { window.dispatchEvent(new CustomEvent('ECEPT_AUTH_CHANGE',{detail:{user:newUser,event:event}})); } catch(e4){}
       });
       return function(){
         try{
@@ -46,6 +58,13 @@ function App(){
       };
     }catch(e2){ console.error('[ECEPT] auth session hook failed:',e2); }
   },[]);
+
+  // ─── ROLE FETCH ─── load profile.role when user changes
+  useEffect(function(){
+    if(!ecuUser||!window.ECEPT_SUPABASE){setEcuRole(null);return;}
+    window.ECEPT_SUPABASE.from('profiles').select('role').eq('id',ecuUser.id).single()
+      .then(function(r){setEcuRole(r.data&&r.data.role||null);}).catch(function(){setEcuRole(null);});
+  },[ecuUser]);
 
   // ─── NAVIGATION ─── back-button history stack
   s=_([]); var hist=s[0],setHist=s[1];
@@ -75,10 +94,60 @@ function App(){
       setVista(x);setCs(sc||null);setCd(dc||null);setTab(0);setQm(false);setQa({});setEt(null);setAbdOpen(null);setAbdExp({});setIngTab(0);setAn(true);
       if(dc&&vi.indexOf(dc)===-1)setVi(function(p){return p.concat([dc])});
       window.scrollTo(0,0);
+      window._currentVista=x;
+      // Persistir vista top-level (sin params) en localStorage para sobrevivir reloads.
+      try {
+        var SAFE_VISTAS = {home:1,reuma:1,cir_menu:1,anat_menu:1,emergen_menu:1,fisio:1,general:1,vocabulario:1,"trauma-u1":1,salud_mental:1,favoritos:1,profile:1,flashcards:1,triadas:1,labs:1,receptores:1,mediadores:1};
+        if (SAFE_VISTAS[x] && !sc && !dc) localStorage.setItem('ECEPT_LAST_VISTA', x);
+        else if (x === 'home') localStorage.removeItem('ECEPT_LAST_VISTA');
+      } catch(e2) {}
     },120);
   },[vista,cs,cd,vi]);
-  // Expose go() to ChatBot (and any other window-scoped caller).
-  useEffect(function(){ window.CB_go=go; },[go]);
+
+  // ─── RESTAURAR vista al mount inicial ───
+  useEffect(function(){
+    try {
+      var lastVista = localStorage.getItem('ECEPT_LAST_VISTA');
+      if (!lastVista) return;
+      var SAFE_VISTAS = {home:1,reuma:1,cir_menu:1,anat_menu:1,emergen_menu:1,fisio:1,general:1,vocabulario:1,"trauma-u1":1,salud_mental:1,favoritos:1,profile:1,flashcards:1,triadas:1,labs:1,receptores:1,mediadores:1};
+      if (SAFE_VISTAS[lastVista] && lastVista !== 'home') {
+        setVista(lastVista);
+        window._currentVista = lastVista;
+      }
+    } catch(e2) {}
+  },[]);
+  // Expose go() to ChatBot. Supports "modId/subId" deeplinks + anti-double-click debounce.
+  useEffect(function(){
+    window.CB_go=function(target){
+      if(window._CB_navigating) return;
+      window._CB_navigating=true;
+      setTimeout(function(){window._CB_navigating=false;},500);
+      var parts=target.split('/');
+      var modId=parts[0];
+      var subId=parts[1]||null;
+      function fireSubFocus(){
+        try{
+          if(modId==='receptores'&&window._receptorFocus) window._receptorFocus(subId);
+          else if(modId==='mediadores'&&window._medFocus) window._medFocus(subId);
+          else if(modId==='labs'&&window._labFocus) window._labFocus(subId);
+          else if(modId==='salud_mental'&&window._smFocus) window._smFocus(subId);
+        }catch(err){console.warn('[ECEPT] deeplink subseccion inválida:',modId+'/'+subId,err);}
+      }
+      if(window._currentVista===modId){
+        if(subId) fireSubFocus();
+        return;
+      }
+      go(modId);
+      if(subId) setTimeout(fireSubFocus,420);
+    };
+  },[go]);
+  useEffect(function(){
+    var VALID=['coag','serieroja','serieblanca','hepaticas','plasmaticas','lipidico','inflam','pancreas','renal','ionograma','tiroideo','hba1c'];
+    window._labFocus=function(secId){
+      if(VALID.indexOf(secId)===-1){console.warn('[ECEPT] lab section not found:',secId);return;}
+      setAbdOpen(secId);
+    };
+  },[]);
 
   var goBack=useCallback(function(){
     if(hist.length>0){
@@ -139,31 +208,43 @@ function App(){
       {id:"hemato",ic:"🩸",n:"Hematología",d:"Hemostasia, eritropoyesis — Próximamente",col:"#dc2626",ready:false}
     ];
     var readyCount=topics.filter(function(t){return t.ready}).length;
-    return e("div",null,
-      e("div",{style:{marginBottom:"20px"}},
-        e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"24px",fontWeight:800,marginBottom:"4px",color:C.tx}},"🔬 Fisiología"),
-        e("p",{style:{fontSize:"13px",color:C.dm}},"Funcionamiento normal del cuerpo humano · "+readyCount+" tema"+(readyCount===1?"":"s")+" disponible"+(readyCount===1?"":"s"))
-      ),
-      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:"12px"}},
-        topics.map(function(t){
+    return e(ModuleShell,{
+      title:"Fisiología",
+      subtitle:"Funcionamiento normal del cuerpo humano · "+readyCount+" tema"+(readyCount===1?"":"s")+" disponible"+(readyCount===1?"":"s"),
+      icon:"🔬",
+      accent:"#ec4899"
+    },
+      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:"16px"}},
+        topics.map(function(t,ti){
           return e("div",{key:t.id,
             onClick:t.ready?function(){go(t.v)}:null,
             style:{
-              background:C.cd,
-              border:"1.5px solid "+(t.ready?t.col+"40":C.bd),
-              borderRadius:"14px",padding:"18px",
+              background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",
+              border:"1px solid "+(t.ready?t.col+"40":C.bd),
+              borderRadius:"16px",padding:"20px 22px",
               cursor:t.ready?"pointer":"default",
-              opacity:t.ready?1:0.55,
-              transition:"all .2s"}},
-            e("div",{style:{display:"flex",alignItems:"center",gap:"12px",marginBottom:"8px"}},
-              e("span",{style:{fontSize:"28px"}},t.ic),
-              e("div",{style:{flex:1}},
-                e("h3",{style:{fontSize:"15px",fontWeight:700,color:t.ready?t.col:C.mt,marginBottom:"2px"}},t.n),
-                t.ready&&e("span",{style:{fontSize:"9px",letterSpacing:"1.5px",textTransform:"uppercase",color:"#34d399",fontWeight:700}},"✓ Disponible")
+              opacity:t.ready?1:0.50,
+              minHeight:"150px",
+              display:"flex",
+              flexDirection:"column",
+              transition:"transform 240ms cubic-bezier(0.32,0.72,0,1),border-color 240ms cubic-bezier(0.32,0.72,0,1),box-shadow 240ms ease-out",
+              animation:"ecept_fadeSlideUp 480ms cubic-bezier(0.16,1,0.3,1) "+(ti*40+80)+"ms both",
+              boxSizing:"border-box"
+            },
+            onMouseEnter:t.ready?function(ev){ev.currentTarget.style.borderColor=t.col+"80";ev.currentTarget.style.transform="translateY(-2px)";ev.currentTarget.style.boxShadow="0 8px 24px rgba(0,0,0,0.30), 0 2px 8px rgba(0,0,0,0.20)";}:null,
+            onMouseLeave:t.ready?function(ev){ev.currentTarget.style.borderColor=t.col+"40";ev.currentTarget.style.transform="translateY(0)";ev.currentTarget.style.boxShadow="none";}:null
+          },
+            e("div",{style:{display:"flex",alignItems:"center",gap:"12px",marginBottom:"10px"}},
+              e("span",{style:{fontSize:"30px",width:"52px",height:"52px",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"14px",background:t.col+"14",border:"1px solid "+t.col+"24",flexShrink:0}},t.ic),
+              e("div",{style:{flex:1,minWidth:0}},
+                e("h3",{style:{fontSize:"16px",fontWeight:600,color:t.ready?C.tx:C.mt,letterSpacing:"-0.01em"}},t.n),
+                t.ready
+                  ?e("span",{style:{fontSize:"10px",letterSpacing:"0.10em",textTransform:"uppercase",color:"#34d399",fontWeight:700}},"✓ ACTIVO")
+                  :e("span",{style:{fontSize:"10px",letterSpacing:"0.10em",textTransform:"uppercase",color:C.dm,fontWeight:600}},"PRONTO")
               )
             ),
-            e("p",{style:{fontSize:"11.5px",color:C.dm,lineHeight:1.5}},t.d),
-            t.ready&&e("div",{style:{marginTop:"10px",fontSize:"12px",color:t.col,fontWeight:600}},"Abrir →")
+            e("p",{style:{fontSize:"13px",color:C.dm,lineHeight:1.5,flex:1}},t.d),
+            t.ready&&e("div",{style:{marginTop:"12px",fontSize:"12px",color:t.col,fontWeight:600,letterSpacing:"-0.01em"}},"Abrir →")
           )
         })
       )
@@ -171,12 +252,17 @@ function App(){
   }
 
   // ═══ RENDER ═══
-  return e("div",{style:{background:C.bg,minHeight:"100vh",fontFamily:"'DM Sans',sans-serif",color:C.tx}},
-    // HEADER
-    e("div",{style:{background:"linear-gradient(180deg,rgba(13,18,36,.98),rgba(6,10,20,.95))",borderBottom:"1px solid "+C.bd,padding:"12px 16px",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)"}},
-      e("div",{style:{maxWidth:"900px",margin:"0 auto",display:"flex",alignItems:"center",gap:"10px"}},
+  return e("div",{style:{background:C.bg,minHeight:"100vh",fontFamily:"'Inter','DM Sans',sans-serif",color:C.tx}},
+    // Toast host (montado una sola vez)
+    typeof ToastHost === 'function' && e(ToastHost),
+    // HEADER (sticky top, full-width edge-to-edge, contenido centrado hasta 1400px)
+    e("div",{style:{background:"linear-gradient(180deg,rgba(13,18,36,.92),rgba(6,10,20,.85))",borderBottom:"1px solid "+C.bd,padding:"12px max(16px, calc((100vw - 1400px) / 2 + 16px))",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)",boxSizing:"border-box"}},
+      e("div",{style:{maxWidth:"1400px",margin:"0 auto",display:"flex",alignItems:"center",gap:"10px",width:"100%"}},
         e("button",{onClick:function(){setSb(!sb)},style:{background:"none",border:"none",color:C.mt,fontSize:"20px",cursor:"pointer"}},"☰"),
-        e("div",{onClick:function(){go("home")},style:{fontFamily:"'Playfair Display',serif",fontSize:"18px",fontWeight:900,background:"linear-gradient(135deg,#3b82f6,#8b5cf6,#f472b6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",cursor:"pointer",flexShrink:0,letterSpacing:"2px"}},"ECEPT"),
+        e("div",{onClick:function(){go("home")},style:{display:"flex",alignItems:"center",gap:"8px",cursor:"pointer",flexShrink:0}},
+          e(window.Logo||"span",{ size: 24, idSuffix:"navhdr" }),
+          e("span",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"18px",fontWeight:800,background:"linear-gradient(135deg,#60a5fa,#a78bfa)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",letterSpacing:"-0.01em"}},"ECEPT")
+        ),
         vista!=="home"&&e("div",{style:{display:"flex",alignItems:"center",gap:"4px",fontSize:"11px",flexShrink:0}},
           e("span",{onClick:function(){go("home")},style:{color:C.dm,cursor:"pointer"}},"Inicio"),
           vista==="reuma_sec"&&e(F,null,e("span",{style:{color:"rgba(255,255,255,.15)"}}," › "),e("span",{style:{color:C.mt}},"Reuma")),
@@ -215,7 +301,7 @@ function App(){
             var isDisease=smView==="disease"&&smLeaf;
             var isSection=smView==="section"&&smLeaf;
             var sep=e("span",{style:{color:"rgba(255,255,255,.15)"}}," › ");
-            var smLabel=e("span",{style:{color:smView==="root"?C.mt:C.dm,cursor:smView==="root"?"default":"pointer"},onClick:smView==="root"?null:function(){if(window._smFocus)window._smFocus("root")}},"Salud Mental II");
+            var smLabel=e("span",{style:{color:smView==="root"?C.mt:C.dm,cursor:smView==="root"?"default":"pointer"},onClick:smView==="root"?null:function(){if(window._smFocus)window._smFocus("root")}},"Salud Mental");
             // Leaf crumbs (disease + section share the same shape {name, parent}).
             // Parent in ["psicosis"] → "Psicosis › <name>"; parent ∈ neurosis themes
             // → "Neurosis › <theme> › <name>"; parent "intro" → "Psiquiatría › <name>";
@@ -245,23 +331,84 @@ function App(){
             );
           })()
         ),
-        e("div",{style:{flex:1,position:"relative"}},
-          e("span",{style:{position:"absolute",left:"10px",top:"50%",transform:"translateY(-50%)",color:C.dm,fontSize:"13px",pointerEvents:"none"}},"🔍"),
-          e("input",{style:{width:"100%",background:"rgba(255,255,255,.04)",border:"1px solid "+C.bd,borderRadius:"12px",padding:"8px 12px 8px 34px",color:C.tx,fontSize:"14px",outline:"none"},placeholder:"Buscar todo...",value:sq,onChange:function(ev){setSq(ev.target.value);setSo(true)},onFocus:function(){setSo(true)},onBlur:function(){setTimeout(function(){setSo(false)},250)}}),
-          so&&sr.length>0&&e("div",{style:{position:"absolute",top:"100%",left:0,right:0,background:C.cd,border:"1px solid "+C.bd,borderRadius:"12px",marginTop:"4px",maxHeight:"350px",overflow:"auto",zIndex:200,boxShadow:"0 20px 40px rgba(0,0,0,.5)"}},sr.map(function(r,i){return e("div",{key:i,onMouseDown:function(){setSq("");setSo(false);go(r.go,r.sec||null,r.id||null);if(r.secId&&window._traumaFocus)setTimeout(function(){window._traumaFocus(r.secId)},200);if(r.vocTx&&window._vocabFocus)setTimeout(function(){window._vocabFocus(r.vocTx)},200);if(r.smRoute&&window._smFocus)setTimeout(function(){window._smFocus(r.smRoute)},200)},style:{padding:"10px 16px",cursor:"pointer",borderBottom:"1px solid "+C.bd,fontSize:"13px"}},e("div",{style:{fontWeight:600}},r.name),e("div",{style:{fontSize:"11px",color:C.dm,marginTop:"2px"}},r.sub))}))
+        e("div",{style:{flex:1,position:"relative",maxWidth:"600px"}},
+          e("span",{style:{position:"absolute",left:"18px",top:"50%",transform:"translateY(-50%)",color:"rgba(96,165,250,0.65)",fontSize:"18px",pointerEvents:"none"}},"🔍"),
+          e("input",{
+            style:{
+              width:"100%",
+              background:"linear-gradient(180deg,rgba(13,18,36,0.92),rgba(10,14,31,0.92))",
+              border:"1px solid rgba(96,165,250,0.28)",
+              borderRadius:"16px",
+              padding:"14px 20px 14px 50px",
+              color:C.tx,
+              fontSize:"14px",
+              fontWeight:500,
+              letterSpacing:"-0.005em",
+              outline:"none",
+              fontFamily:"inherit",
+              boxShadow:"inset 0 1px 0 rgba(255,255,255,0.04), 0 2px 8px rgba(0,0,0,0.20)",
+              transition:"border-color 220ms cubic-bezier(0.16,1,0.3,1), box-shadow 220ms ease-out, background 220ms ease-out",
+              boxSizing:"border-box"
+            },
+            placeholder:"Buscar enfermedades, síndromes, valores...",
+            value:sq,
+            onChange:function(ev){setSq(ev.target.value);setSo(true)},
+            onFocus:function(ev){
+              setSo(true);
+              ev.currentTarget.style.borderColor="rgba(96,165,250,0.50)";
+              ev.currentTarget.style.boxShadow="0 0 0 4px rgba(96,165,250,0.12), inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 16px rgba(96,165,250,0.10)";
+              ev.currentTarget.style.background="linear-gradient(180deg,rgba(13,18,36,0.98),rgba(10,14,31,0.98))";
+            },
+            onBlur:function(ev){
+              setTimeout(function(){setSo(false)},250);
+              ev.currentTarget.style.borderColor="rgba(96,165,250,0.28)";
+              ev.currentTarget.style.boxShadow="inset 0 1px 0 rgba(255,255,255,0.04), 0 2px 8px rgba(0,0,0,0.20)";
+              ev.currentTarget.style.background="linear-gradient(180deg,rgba(13,18,36,0.92),rgba(10,14,31,0.92))";
+            }
+          }),
+          so&&sr.length>0&&e("div",{style:{
+            position:"absolute",top:"calc(100% + 6px)",left:0,right:0,
+            background:"rgba(17,23,58,0.95)",
+            backdropFilter:"blur(12px)",
+            WebkitBackdropFilter:"blur(12px)",
+            border:"1px solid rgba(96,165,250,0.20)",
+            borderRadius:"14px",
+            maxHeight:"400px",
+            overflow:"auto",
+            zIndex:200,
+            boxShadow:"0 20px 48px rgba(0,0,0,0.40), 0 8px 16px rgba(0,0,0,0.25)",
+            animation:"ecept_modalIn 220ms cubic-bezier(0.16,1,0.3,1)"
+          }},sr.map(function(r,i){
+            return e("div",{
+              key:i,
+              onMouseDown:function(){setSq("");setSo(false);go(r.go,r.sec||null,r.id||null);if(r.secId&&window._traumaFocus)setTimeout(function(){window._traumaFocus(r.secId)},200);if(r.vocTx&&window._vocabFocus)setTimeout(function(){window._vocabFocus(r.vocTx)},200);if(r.smRoute&&window._smFocus)setTimeout(function(){window._smFocus(r.smRoute)},200)},
+              style:{
+                padding:"12px 18px",
+                cursor:"pointer",
+                borderBottom:i<sr.length-1?"1px solid rgba(255,255,255,0.04)":"none",
+                fontSize:"13px",
+                transition:"background 160ms ease-out"
+              },
+              onMouseEnter:function(ev){ev.currentTarget.style.background="rgba(96,165,250,0.10)";},
+              onMouseLeave:function(ev){ev.currentTarget.style.background="transparent";}
+            },
+              e("div",{style:{fontWeight:600,color:C.tx,letterSpacing:"-0.01em"}},r.name),
+              e("div",{style:{fontSize:"11px",color:C.dm,marginTop:"3px",letterSpacing:"0.02em"}},r.sub)
+            );
+          }))
         )
       )
     ),
     // SIDEBAR
-    sb&&e("div",{style:{position:"fixed",top:0,left:0,width:"100%",height:"100%",zIndex:150,display:"flex"}},
-      e("div",{style:{background:C.cd,width:"290px",height:"100%",borderRight:"1px solid "+C.bd,overflow:"auto",padding:"20px",boxShadow:"4px 0 30px rgba(0,0,0,.5)"}},
+    sb&&e("div",{style:{position:"fixed",top:0,left:0,width:"100%",height:"100%",zIndex:150,display:"flex",animation:"ecept_fadeIn 240ms cubic-bezier(0.16,1,0.3,1)"}},
+      e("div",{style:{background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",width:"300px",height:"100%",borderRight:"1px solid rgba(96,165,250,0.18)",overflow:"auto",padding:"20px 18px",boxShadow:"4px 0 30px rgba(0,0,0,0.55), inset -1px 0 0 rgba(96,165,250,0.04)",animation:"ecept_sidebarIn 280ms cubic-bezier(0.16,1,0.3,1)",boxSizing:"border-box"}},
         // Header
-        e("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"20px"}},
-          e("div",{style:{display:"flex",alignItems:"center",gap:"8px"}},
-            e("span",{style:{fontSize:"18px"}},"🧬"),
-            e("span",{style:{fontFamily:"'Playfair Display',serif",fontSize:"18px",fontWeight:900,background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",letterSpacing:"2px"}},"ECEPT")
+        e("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"22px",paddingBottom:"14px",borderBottom:"1px solid rgba(96,165,250,0.10)"}},
+          e("div",{style:{display:"flex",alignItems:"center",gap:"10px"}},
+            e(window.Logo||"span",{ size:28, idSuffix:"appsb" }),
+            e("span",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"19px",fontWeight:800,letterSpacing:"-0.015em",background:"linear-gradient(135deg,#60a5fa,#a78bfa)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}},"ECEPT")
           ),
-          e("button",{onClick:function(){setSb(false)},style:{background:"none",border:"none",color:C.mt,fontSize:"20px",cursor:"pointer"}},"✕")
+          e("button",{onClick:function(){setSb(false)},'aria-label':"Cerrar menú",style:{background:"transparent",border:"1px solid "+C.bd,borderRadius:"10px",color:C.mt,fontSize:"14px",cursor:"pointer",width:"32px",height:"32px",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 200ms ease-out"},onMouseEnter:function(ev){ev.currentTarget.style.background="rgba(255,255,255,0.04)";ev.currentTarget.style.borderColor="rgba(96,165,250,0.30)";},onMouseLeave:function(ev){ev.currentTarget.style.background="transparent";ev.currentTarget.style.borderColor=C.bd;}},"✕")
         ),
         // UserMenu — session state at top of sidebar
         e(UserMenu,{
@@ -271,7 +418,9 @@ function App(){
           onLogout:function(){}
         }),
         // Home
-        e("div",{onClick:function(){go("home");setSb(false)},style:{padding:"10px 14px",borderRadius:"10px",cursor:"pointer",marginBottom:"16px",background:vista==="home"?"rgba(59,130,246,.1)":"rgba(255,255,255,.03)",color:vista==="home"?C.ac:C.mt,fontWeight:700,fontSize:"13px",display:"flex",alignItems:"center",gap:"8px",border:"1px solid "+(vista==="home"?C.ac+"30":"transparent")}},"🏠 Inicio"),
+        e("div",{onClick:function(){go("home");setSb(false)},style:{padding:"10px 14px",borderRadius:"10px",cursor:"pointer",marginBottom:"6px",background:vista==="home"?"rgba(59,130,246,.1)":"rgba(255,255,255,.03)",color:vista==="home"?C.ac:C.mt,fontWeight:700,fontSize:"13px",display:"flex",alignItems:"center",gap:"8px",border:"1px solid "+(vista==="home"?C.ac+"30":"transparent")}},"🏠 Inicio"),
+        // Favoritos
+        ecuUser&&e("div",{onClick:function(){go("favoritos");setSb(false);},style:{padding:"10px 14px",borderRadius:"10px",cursor:"pointer",marginBottom:"16px",background:vista==="favoritos"?"rgba(251,191,36,.10)":"rgba(255,255,255,.03)",color:vista==="favoritos"?"#fbbf24":C.mt,fontWeight:700,fontSize:"13px",display:"flex",alignItems:"center",gap:"8px",border:"1px solid "+(vista==="favoritos"?"rgba(251,191,36,.30)":"transparent")}},"⭐ Mis favoritos"),
 
         // ── SECCIONES ESPECIALES ──
         e("div",{style:{fontSize:"9px",fontWeight:700,color:C.dm,textTransform:"uppercase",letterSpacing:"2px",padding:"0 4px",marginBottom:"8px"}},"⚡ SECCIONES ESPECIALES"),
@@ -362,126 +511,79 @@ function App(){
       e("div",{onClick:function(){setSb(false)},style:{flex:1,background:"rgba(0,0,0,.6)"}})
     ),
     // ════════════ MAIN (content wrapper — Trauma + Vocab now render natively inside) ════════════
-    e("div",{style:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
+    // Vistas que usan ModuleShell o gestionan su propio ancho escapan del
+    // wrapper de 900px. El resto mantiene wrapper estrecho para legibilidad
+    // de prosa larga.
+    e("div",{style:(({home:1,reuma:1,reuma_sec:1,cir_menu:1,anat_menu:1,emergen_menu:1,fisio:1,general:1,vocabulario:1,"trauma-u1":1,favoritos:1,salud_mental:1,labs:1,epid:1}[vista])||(vista&&vista.indexOf("anat_")===0&&vista!=="anatomia"))?{width:"100%",margin:0,padding:"0 0 80px"}:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
 
     // ════════════ HOME ════════════
-    vista==="home"&&e(F,null,
-      e("div",{style:{textAlign:"center",padding:"40px 20px 32px",marginBottom:"32px",background:"radial-gradient(ellipse at center top,rgba(59,130,246,.06) 0%,transparent 70%)",borderRadius:"20px"}},
-        e("div",{style:{fontSize:"48px",marginBottom:"12px",animation:"float 3s ease-in-out infinite"}},"🧬"),
-        e("h1",{style:{fontFamily:"'Playfair Display',serif",fontSize:"clamp(28px,6vw,42px)",fontWeight:900,background:"linear-gradient(135deg,#3b82f6,#8b5cf6,#f472b6,#fbbf24)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginBottom:"8px",letterSpacing:"3px"}},"ECEPT"),
-        e("p",{style:{fontFamily:"'Playfair Display',serif",fontSize:"14px",color:C.mt,fontWeight:700,letterSpacing:"1px"}},"El Conocimiento Es Para Todos"),
-        // Stats row
-        e("div",{style:{display:"flex",justifyContent:"center",gap:"16px",marginTop:"20px",flexWrap:"wrap"}},
-          e("div",{style:{textAlign:"center",padding:"10px 18px",background:"rgba(59,130,246,.08)",borderRadius:"12px",border:"1px solid rgba(59,130,246,.15)"}},
-            e("div",{style:{fontSize:"22px",fontWeight:800,color:C.ac,fontFamily:"monospace"}},vi.length+"/"+RD.length),
-            e("div",{style:{fontSize:"10px",color:C.dm,marginTop:"2px"}},"Revisadas")
-          ),
-          e("div",{style:{textAlign:"center",padding:"10px 18px",background:"rgba(245,158,11,.08)",borderRadius:"12px",border:"1px solid rgba(245,158,11,.15)"}},
-            e("div",{style:{fontSize:"22px",fontWeight:800,color:"#f59e0b",fontFamily:"monospace"}},favs.length),
-            e("div",{style:{fontSize:"10px",color:C.dm,marginTop:"2px"}},"Favoritos")
-          ),
-          e("div",{style:{textAlign:"center",padding:"10px 18px",background:"rgba(52,211,153,.08)",borderRadius:"12px",border:"1px solid rgba(52,211,153,.15)"}},
-            e("div",{style:{fontSize:"22px",fontWeight:800,color:"#34d399",fontFamily:"monospace"}},bestStreak),
-            e("div",{style:{fontSize:"10px",color:C.dm,marginTop:"2px"}},"Mejor racha")
-          )
-        ),
-        // Progress bar
-        e("div",{style:{maxWidth:"300px",margin:"16px auto 0"}},
-          e("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:"5px"}},
-            e("span",{style:{fontSize:"10px",color:C.dm}},"Progreso Reumatología"),
-            e("span",{style:{fontSize:"10px",color:C.ac,fontWeight:700}},Math.round(vi.length/RD.length*100)+"%")
-          ),
-          e("div",{style:{height:"4px",background:"rgba(255,255,255,.06)",borderRadius:"2px",overflow:"hidden"}},
-            e("div",{style:{width:Math.round(vi.length/RD.length*100)+"%",height:"100%",background:"linear-gradient(90deg,#3b82f6,#8b5cf6)",borderRadius:"2px",transition:"width .5s"}})
-          )
-        )
-      ),
-      // Favorites section (only if there are favorites)
-      favs.length>0&&e("div",{style:{marginBottom:"24px",padding:"16px 18px",background:"linear-gradient(135deg,"+C.cd+",rgba(245,158,11,.04))",border:"1px solid rgba(245,158,11,.2)",borderRadius:"16px"}},
-        e("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"12px"}},e("span",{style:{fontSize:"18px"}},"⭐"),e("h3",{style:{fontSize:"14px",fontWeight:700,color:"#f59e0b"}},"Tus Favoritos")),
-        e("div",{style:{display:"flex",flexWrap:"wrap",gap:"8px"}},
-          favs.map(function(fid){
-            var enf=RD.find(function(d){return d.id===fid});
-            if(!enf) return null;
-            return e("div",{key:fid,onClick:function(){go("reuma_dis",enf.s,enf.id)},style:{padding:"8px 14px",background:"rgba(255,255,255,.04)",border:"1px solid "+C.bd,borderRadius:"10px",cursor:"pointer",fontSize:"12px",fontWeight:600,color:C.tx,display:"flex",alignItems:"center",gap:"6px"}},
-              e("span",{style:{fontSize:"14px"}},"⭐"),enf.n
-            )
-          })
-        )
-      ),
-      e("div",{style:{marginBottom:"36px"}},
-        e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"16px",fontWeight:800,color:C.mt,marginBottom:"14px",display:"flex",alignItems:"center",gap:"8px",textTransform:"uppercase",letterSpacing:"1px",fontSize:"12px"}},"⚡ Secciones Especiales"),
-        e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))",gap:"12px"}},
-          MODS.filter(function(m){return["triadas","labs","imagenes","general","flashcards"].indexOf(m.id)>-1}).map(function(m,i){
-            var lleno=m.st==="lleno";
-            return e("div",{key:m.id,onClick:function(){if(lleno)go(m.id)},style:{
-              background:"linear-gradient(135deg,"+C.cd+","+m.col+"06)",border:"1px solid "+m.col+"25",borderRadius:"14px",padding:"16px",
-              cursor:lleno?"pointer":"default",opacity:lleno?1:.4,transition:"all .2s",
-              animation:"slideUp .4s ease-out "+(i*0.05)+"s both"
-            }},
-              e("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"8px"}},
-                e("span",{style:{fontSize:"24px"}},m.ic),
-                e("h3",{style:{fontSize:"14px",fontWeight:700}},m.n)
-              ),
-              e("p",{style:{fontSize:"11px",color:C.dm,lineHeight:1.4}},m.d),
-              !lleno&&e("span",{style:{display:"inline-block",marginTop:"6px",fontSize:"9px",padding:"3px 8px",borderRadius:"6px",background:"rgba(255,255,255,.05)",color:C.dm}},"Próximamente")
-            )
-          })
-        )
-      ),
-      e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"12px",fontWeight:800,color:C.mt,marginBottom:"14px",display:"flex",alignItems:"center",gap:"8px",textTransform:"uppercase",letterSpacing:"1px"}},"📋 Materias"),
-      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:"14px"}},
-        MODS.filter(function(m){return["triadas","labs","imagenes","general","flashcards"].indexOf(m.id)===-1}).map(function(m,i){
-          var lleno=m.st==="lleno";
-          return e("div",{key:m.id,onClick:function(){if(lleno)go(m.id==="cirugia"?"cir_menu":m.id==="anatomia"?"anat_menu":m.id==="labs"?"labs":m.id==="epid"?"epid":m.id==="emergen"?"emergen_menu":m.id==="fisio"?"fisio":m.id)},style:{
-            background:C.cd,border:"1px solid "+(lleno?m.col+"30":C.bd),borderRadius:"16px",padding:"20px",
-            cursor:lleno?"pointer":"default",opacity:lleno?1:.4,transition:"all .2s",
-            animation:"slideUp .4s ease-out "+(i*0.04)+"s both"
-          }},
-            e("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"10px"}},
-              e("span",{style:{fontSize:"28px",width:"46px",height:"46px",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"12px",background:m.col+"10"}},m.ic),
-              lleno?e("span",{style:{fontSize:"9px",padding:"3px 8px",borderRadius:"6px",background:m.col+"15",color:m.col,fontWeight:700}},"Activo"):e("span",{style:{fontSize:"9px",padding:"3px 8px",borderRadius:"6px",background:"rgba(255,255,255,.05)",color:C.dm}},"Pronto")
-            ),
-            e("h3",{style:{fontSize:"15px",fontWeight:700,marginBottom:"4px"}},m.n),
-            e("p",{style:{fontSize:"11px",color:C.dm,lineHeight:1.5}},m.d)
-          )
+    vista==="home"&&e(HomeView,{user:ecuUser,vi:vi,favs:favs,bestStreak:bestStreak,go:go}),
+
+    // ════════════ CIRUGÍA MENÚ ════════════
+    vista==="cir_menu"&&e(ModuleShell,{title:"Cirugía",subtitle:"Algoritmos quirúrgicos y abdomen agudo",icon:"🔪",accent:"#ef4444"},
+      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:"16px"}},
+        [{v:"cir_abd",ic:"🔴",n:"Abdomen Agudo Infeccioso",d:"Peritonitis, Apendicitis, Colecistitis, Pancreatitis, Colangitis"}].map(function(it,si){
+          return e("div",{key:it.v,onClick:function(){go(it.v)},style:{background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",border:"1px solid "+C.bd,borderRadius:"16px",padding:"20px 22px",cursor:"pointer",display:"flex",alignItems:"center",gap:"16px",minHeight:"96px",transition:"transform 240ms cubic-bezier(0.32,0.72,0,1),border-color 240ms cubic-bezier(0.32,0.72,0,1),box-shadow 240ms ease-out",animation:"ecept_fadeSlideUp 480ms cubic-bezier(0.16,1,0.3,1) "+(si*40+80)+"ms both",boxSizing:"border-box"},onMouseEnter:function(ev){ev.currentTarget.style.borderColor="rgba(239,68,68,0.35)";ev.currentTarget.style.transform="translateY(-2px)";ev.currentTarget.style.boxShadow="0 8px 24px rgba(0,0,0,0.30), 0 2px 8px rgba(0,0,0,0.20)";},onMouseLeave:function(ev){ev.currentTarget.style.borderColor=C.bd;ev.currentTarget.style.transform="translateY(0)";ev.currentTarget.style.boxShadow="none";}},
+            e("span",{style:{fontSize:"30px",width:"56px",height:"56px",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"14px",background:"rgba(239,68,68,0.10)",border:"1px solid rgba(239,68,68,0.20)",flexShrink:0}},it.ic),
+            e("div",{style:{flex:1,minWidth:0}},e("h3",{style:{fontSize:"16px",fontWeight:600,letterSpacing:"-0.01em",marginBottom:"4px"}},it.n),e("p",{style:{fontSize:"13px",color:C.dm,lineHeight:1.5}},it.d)),
+            e("span",{style:{color:C.dm,fontSize:"20px",flexShrink:0}},"›"))
         })
       )
     ),
 
-    // ════════════ CIRUGÍA MENÚ ════════════
-    vista==="cir_menu"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🔪"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"24px",fontWeight:800,color:"#ef4444"}},"Cirugía")),
-      [{v:"cir_abd",ic:"🔴",n:"Abdomen Agudo Infeccioso",d:"Peritonitis, Apendicitis, Colecistitis, Pancreatitis, Colangitis"}].map(function(it){
-        return e("div",{key:it.v,onClick:function(){go(it.v)},style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"18px",cursor:"pointer",marginBottom:"12px",display:"flex",alignItems:"center",gap:"14px"}},
-          e("span",{style:{fontSize:"28px"}},it.ic),e("div",null,e("h3",{style:{fontSize:"15px",fontWeight:700}},it.n),e("p",{style:{fontSize:"12px",color:C.dm}},it.d)),e("span",{style:{color:C.dm,marginLeft:"auto"}},"›"))
-      })
-    ),
-
     // ════════════ ANATOMÍA MENÚ ════════════
-    vista==="anat_menu"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🩻"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"24px",fontWeight:800,color:"#f59e0b"}},"Anatomía")),
-      [{v:"anatomia",ic:"🧠",n:"Pares Craneales",d:"Mapa interactivo · 12 pares · Origen, función y clínica"},{v:"cir_ing",ic:"🧱",n:"Conducto Inguinal",d:"Conducto · Anillos · Cordón Espermático"}].map(function(it){
-        return e("div",{key:it.v,onClick:function(){go(it.v)},style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"18px",cursor:"pointer",marginBottom:"12px",display:"flex",alignItems:"center",gap:"14px"}},
-          e("span",{style:{fontSize:"28px"}},it.ic),e("div",null,e("h3",{style:{fontSize:"15px",fontWeight:700}},it.n),e("p",{style:{fontSize:"12px",color:C.dm}},it.d)),e("span",{style:{color:C.dm,marginLeft:"auto"}},"›"))
-      })
-    ),
+    vista==="anat_menu"&&e(AnatomiaView,{user:ecuUser,view:"menu",go:go}),
+    vista&&vista.indexOf("anat_")===0&&vista!=="anat_menu"&&vista!=="anatomia"&&e(AnatomiaView,{user:ecuUser,view:vista,go:go}),
 
     // ════════════ REUMATOLOGÍA HOME ════════════
-    vista==="reuma"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"28px"}},e("h1",{style:{fontFamily:"'Playfair Display',serif",fontSize:"28px",fontWeight:800,background:"linear-gradient(135deg,#60a5fa,#a78bfa,#f472b6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}},"Reumatología"),e("p",{style:{color:C.mt,fontSize:"14px"}},tot+" enfermedades · "+vi.length+" revisadas")),
-      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(250px,1fr))",gap:"12px"}},REUMA_SECS.map(function(sec){var cn=RD.filter(function(d){return d.s===sec.id}).length;return e("div",{key:sec.id,onClick:function(){go("reuma_sec",sec.id)},style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"18px",cursor:"pointer"}},e("div",{style:{fontSize:"24px",marginBottom:"8px"}},sec.i),e("h3",{style:{fontSize:"14px",fontWeight:700,marginBottom:"3px"}},sec.n),e("p",{style:{fontSize:"11px",color:C.dm}},sec.d),e("span",{style:{fontSize:"11px",color:C.mt}},cn+" enf"))}))
+    // Test de ModuleShell: header consistente + grid auto-fit. Si rompe el
+    // layout, revertir a la versión anterior (queda commited).
+    vista==="reuma"&&e(ModuleShell,{
+      title:"Reumatología",
+      subtitle:tot+" enfermedades · "+vi.length+" revisadas",
+      icon:"🦴",
+      accent:"#60a5fa"
+    },
+      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:"16px"}},REUMA_SECS.map(function(sec,si){var cn=RD.filter(function(d){return d.s===sec.id}).length;return e("div",{key:sec.id,onClick:function(){go("reuma_sec",sec.id)},style:{background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",border:"1px solid "+C.bd,borderRadius:"16px",padding:"20px 22px",cursor:"pointer",minHeight:"140px",display:"flex",flexDirection:"column",transition:"transform 240ms cubic-bezier(0.32,0.72,0,1),border-color 240ms cubic-bezier(0.32,0.72,0,1),box-shadow 240ms ease-out",animation:"ecept_fadeSlideUp 480ms cubic-bezier(0.16,1,0.3,1) "+(si*40+80)+"ms both",boxSizing:"border-box"},onMouseEnter:function(ev){ev.currentTarget.style.borderColor="rgba(96,165,250,0.4)";ev.currentTarget.style.transform="translateY(-2px)";ev.currentTarget.style.boxShadow="0 8px 24px rgba(0,0,0,0.30), 0 2px 8px rgba(0,0,0,0.20)";},onMouseLeave:function(ev){ev.currentTarget.style.borderColor=C.bd;ev.currentTarget.style.transform="translateY(0)";ev.currentTarget.style.boxShadow="none";}},e("div",{style:{fontSize:"30px",marginBottom:"10px"}},sec.i),e("h3",{style:{fontSize:"16px",fontWeight:600,marginBottom:"4px",letterSpacing:"-0.01em"}},sec.n),e("p",{style:{fontSize:"13px",color:C.dm,lineHeight:1.5,flex:1}},sec.d),e("span",{style:{fontSize:"11px",color:C.mt,marginTop:"10px",fontWeight:600,letterSpacing:"0.04em"}},cn+" ENFERMEDADES"))}))
     ),
 
     // ════════════ REUMATOLOGÍA SECCIÓN ════════════
-    vista==="reuma_sec"&&e(F,null,
-      e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"22px",fontWeight:700,marginBottom:"16px"}},(REUMA_SECS.find(function(s2){return s2.id===cs})||{}).i+" "+(REUMA_SECS.find(function(s2){return s2.id===cs})||{}).n),
-      e("div",{style:{display:"flex",flexDirection:"column",gap:"10px"}},sd.map(function(d){return e("div",{key:d.id,onClick:function(){go("reuma_dis",d.s,d.id)},style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"12px",padding:"14px 18px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between"}},e("div",{style:{display:"flex",alignItems:"center",gap:"10px"}},isFav(d.id)&&e("span",{style:{fontSize:"14px"}},"⭐"),vi.indexOf(d.id)>-1&&e("span",{style:{color:"#34d399",fontSize:"12px"}},"✓"),e("span",{style:{fontWeight:600,fontSize:"15px"}},d.n)),e("span",{style:{color:C.dm}},"›"))}))
-    ),
+    vista==="reuma_sec"&&(function(){
+      var sec=REUMA_SECS.find(function(s2){return s2.id===cs})||{};
+      return e(ModuleShell,{title:sec.n||"Reumatología",subtitle:sd.length+" enfermedad"+(sd.length===1?"":"es"),icon:sec.i||"🦴",accent:"#60a5fa",onBack:function(){go("reuma");}},
+        e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(320px,1fr))",gap:"12px"}},sd.map(function(d,di){
+          return e("div",{
+            key:d.id,
+            onClick:function(){ go("reuma_dis",d.s,d.id); },
+            style:{background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",border:"1px solid "+C.bd,borderRadius:"14px",padding:"16px 20px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"12px",minHeight:"68px",transition:"transform 220ms cubic-bezier(0.32,0.72,0,1),border-color 220ms cubic-bezier(0.32,0.72,0,1),box-shadow 220ms ease-out",animation:"ecept_fadeSlideUp 380ms cubic-bezier(0.16,1,0.3,1) "+(di*30+40)+"ms both",boxSizing:"border-box"},
+            onMouseEnter:function(ev){ev.currentTarget.style.borderColor="rgba(96,165,250,0.40)";ev.currentTarget.style.transform="translateY(-1px)";ev.currentTarget.style.boxShadow="0 6px 18px rgba(0,0,0,0.25)";},
+            onMouseLeave:function(ev){ev.currentTarget.style.borderColor=C.bd;ev.currentTarget.style.transform="translateY(0)";ev.currentTarget.style.boxShadow="none";}
+          },
+            e("div",{style:{display:"flex",alignItems:"center",gap:"12px",flex:1,minWidth:0}},
+              vi.indexOf(d.id)>-1&&e("span",{style:{color:"#34d399",fontSize:"13px"}},"✓"),
+              e("span",{style:{fontWeight:600,fontSize:"15px",letterSpacing:"-0.01em"}},d.n)
+            ),
+            ecuUser&&window.FavoriteButton&&e(window.FavoriteButton,{itemType:"enfermedad",itemId:d.id,user:ecuUser,size:18}),
+            e("span",{style:{color:C.dm,fontSize:"18px",flexShrink:0}},"›")
+          );
+        }))
+      );
+    })(),
 
     // ════════════ REUMATOLOGÍA ENFERMEDAD ════════════
     vista==="reuma_dis"&&dis&&e(F,null,
-      e("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"18px",flexWrap:"wrap",gap:"8px"}},e("div",{style:{display:"flex",alignItems:"center",gap:"10px"}},e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"20px",fontWeight:700,margin:0}},dis.n),e("button",{onClick:function(){toggleFav(dis.id)},style:{background:"none",border:"none",fontSize:"20px",cursor:"pointer",padding:"4px"}},isFav(dis.id)?"⭐":"☆")),dis.qz&&dis.qz.length>0&&e("button",{onClick:function(){setQm(!qm);setQa({})},style:{padding:"6px 14px",borderRadius:"20px",cursor:"pointer",fontSize:"13px",background:qm?C.ac:"rgba(255,255,255,.05)",color:qm?"#fff":C.mt,border:"none"}},qm?"✕ Cerrar":"🧠 Quiz")),
+      // Track visit + sync favorites con Supabase
+      window.VisitTracker && e(window.VisitTracker, { itemType:"enfermedad", itemId:dis.id, user:ecuUser }),
+      e("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"18px",flexWrap:"wrap",gap:"8px"}},
+        e("div",{style:{display:"flex",alignItems:"center",gap:"10px"}},
+          e("h2",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"20px",fontWeight:700,margin:0}},dis.n),
+          // Favorito persistente (Supabase) si hay usuario; fallback a local-only si no
+          ecuUser && window.FavoriteButton
+            ? e(window.FavoriteButton, { itemType:"enfermedad", itemId:dis.id, user:ecuUser, size:22 })
+            : e("button",{onClick:function(){toggleFav(dis.id)},style:{background:"none",border:"none",fontSize:"20px",cursor:"pointer",padding:"4px"}},isFav(dis.id)?"⭐":"☆")
+        ),
+        dis.qz&&dis.qz.length>0&&e("button",{onClick:function(){setQm(!qm);setQa({})},style:{padding:"6px 14px",borderRadius:"20px",cursor:"pointer",fontSize:"13px",background:qm?C.ac:"rgba(255,255,255,.05)",color:qm?"#fff":C.mt,border:"none"}},qm?"✕ Cerrar":"🧠 Quiz")
+      ),
       qm?e("div",{style:cb},e("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"16px"}},e("h3",{style:{color:C.ac,fontSize:"16px",fontWeight:700,margin:0}},"🧠 Quiz"),streak>0&&e("div",{style:{display:"flex",alignItems:"center",gap:"6px",padding:"4px 12px",background:"rgba(52,211,153,.12)",borderRadius:"20px",border:"1px solid rgba(52,211,153,.25)"}},e("span",{style:{fontSize:"14px"}},"🔥"),e("span",{style:{fontSize:"12px",fontWeight:700,color:"#34d399"}},streak+" racha"))),dis.qz.map(function(q,qi){return e("div",{key:qi,style:{marginBottom:"18px",padding:"14px",background:"rgba(255,255,255,.02)",borderRadius:"12px"}},e("p",{style:{color:C.tx,fontWeight:600,marginBottom:"10px",fontSize:"14px"}},(qi+1)+". "+q.p),e("div",{style:{display:"flex",flexDirection:"column",gap:"6px"}},q.o.map(function(o,oi){var an2=qa[qi]!==undefined,sl=qa[qi]===oi,cr=oi===q.r;var bg2="rgba(255,255,255,.04)",bd2=C.bd;if(an2&&cr){bg2="rgba(52,211,153,.15)";bd2="#34d399"}if(an2&&sl&&!cr){bg2="rgba(239,68,68,.15)";bd2="#ef4444"}return e("button",{key:oi,onClick:function(){if(!an2){setQa(function(p2){var n2={};for(var k in p2)n2[k]=p2[k];n2[qi]=oi;return n2});if(oi===q.r){setStreak(function(s2){var ns=s2+1;if(ns>bestStreak)setBestStreak(ns);return ns})}else{setStreak(0)}}},style:{padding:"10px 14px",borderRadius:"8px",border:"1px solid "+bd2,background:bg2,color:C.tx,textAlign:"left",cursor:an2?"default":"pointer",fontSize:"13px"}},String.fromCharCode(65+oi)+") "+o+(an2&&cr?" ✓":"")+(an2&&sl&&!cr?" ✗":""))})),qa[qi]!==undefined&&e("p",{style:{marginTop:"8px",padding:"10px",background:qa[qi]===q.r?"rgba(52,211,153,.1)":"rgba(239,68,68,.1)",borderRadius:"8px",fontSize:"13px",color:qa[qi]===q.r?"#34d399":"#fca5a5",lineHeight:1.5}},q.x))}))
       :e(F,null,
         e("div",{style:{display:"flex",gap:"4px",overflowX:"auto",padding:"4px",background:"rgba(255,255,255,.03)",borderRadius:"14px",marginBottom:"18px",flexWrap:"wrap"}},SUB.map(function(s2,i){return e("div",{key:i,onClick:function(){setTab(i)},style:{padding:"7px 12px",borderRadius:"10px",cursor:"pointer",fontSize:"12px",fontWeight:600,background:tab===i?s2.c+"22":"transparent",color:tab===i?s2.c:C.mt,border:tab===i?"1px solid "+s2.c+"44":"1px solid transparent",whiteSpace:"nowrap"}},s2.i+" "+s2.l)})),
@@ -491,7 +593,9 @@ function App(){
 
     // ════════════ TRÍADAS ════════════
     vista==="triadas"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"10px"}},"🔺"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"22px",fontWeight:800,background:"linear-gradient(135deg,#e879f9,#f472b6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}},"Tríadas y Síndromes"),e("p",{style:{color:C.dm,fontSize:"13px"}},TR.length+" asociaciones clásicas")),
+      // Track visita a tríada activa cuando hay una expandida
+      et!==null && TR[et] && window.VisitTracker && e(window.VisitTracker, { itemType:"triada", itemId: String(et), user:ecuUser }),
+      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"10px"}},"🔺"),e("h2",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"22px",fontWeight:800,background:"linear-gradient(135deg,#e879f9,#f472b6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}},"Tríadas y Síndromes"),e("p",{style:{color:C.dm,fontSize:"13px"}},TR.length+" asociaciones clásicas")),
       e("div",{style:{display:"flex",flexDirection:"column",gap:"10px"}},TR.map(function(t,i){
         var op=et===i;var ci=TC.find(function(c2){return c2.id===t.ct});
         return e("div",{key:i,style:{background:C.cd,border:"1px solid "+(op?t.cl+"66":C.bd),borderRadius:"14px",overflow:"hidden",transition:"all .3s"}},
@@ -518,7 +622,7 @@ function App(){
 
     // ════════════ ABDOMEN AGUDO ════════════
     vista==="cir_abd"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🔴"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"22px",fontWeight:800,color:"#ef4444"}},"Abdomen Agudo Infeccioso"),e("p",{style:{color:C.dm,fontSize:"13px"}},"Clasificación completa de etiologías y subtipos")),
+      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🔴"),e("h2",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"22px",fontWeight:800,color:"#ef4444"}},"Abdomen Agudo Infeccioso"),e("p",{style:{color:C.dm,fontSize:"13px"}},"Clasificación completa de etiologías y subtipos")),
       e("div",{style:{padding:"10px 14px",background:"rgba(120,53,15,.3)",border:"1px solid rgba(180,83,9,.4)",borderRadius:"10px",marginBottom:"20px"}},e("p",{style:{color:"#fcd34d",fontSize:"12px"}},"⚠️ El abdomen agudo es un SÍNDROME, no una enfermedad.")),
       ABD_DATA.map(function(item){
         var isOpen=abdOpen===item.id;
@@ -555,26 +659,33 @@ function App(){
     ),
 
     // ════════════ EMERGENCIOLOGÍA MENÚ ════════════
-    vista==="emergen_menu"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🚑"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"24px",fontWeight:800,color:"#ef4444"}},"Emergenciología")),
-      [{v:"cir_quem",ic:"🔥",n:"Algoritmo de Quemaduras",d:"Tratamiento paso a paso + Calculadoras de Parkland y Goteo"},{v:"trauma-u1",ic:"🩸",n:"Trauma — Unidad 1",d:"Vía aérea, Shock, Tórax, Triage, Deontología — 5 temas completos"}].map(function(it){
-        return e("div",{key:it.v,onClick:function(){go(it.v)},style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"18px",cursor:"pointer",marginBottom:"12px",display:"flex",alignItems:"center",gap:"14px"}},
-          e("span",{style:{fontSize:"28px"}},it.ic),e("div",null,e("h3",{style:{fontSize:"15px",fontWeight:700}},it.n),e("p",{style:{fontSize:"12px",color:C.dm}},it.d)),e("span",{style:{color:C.dm,marginLeft:"auto"}},"›"))
-      }),
-      // Placeholders
-      [{ic:"💓",n:"RCP — Reanimación",d:"ACLS, BLS, algoritmos — Próximamente"},{ic:"🩸",n:"Shock",d:"Hipovolémico, Distributivo, Cardiogénico, Obstructivo — Próximamente"}].map(function(ph,i){
-        return e("div",{key:i,style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"16px",marginBottom:"10px",opacity:.4,display:"flex",alignItems:"center",gap:"14px"}},
-          e("span",{style:{fontSize:"22px"}},ph.ic),e("div",null,e("h3",{style:{fontSize:"14px",fontWeight:700}},ph.n),e("p",{style:{fontSize:"11px",color:C.dm}},ph.d)),
-          e("span",{style:{fontSize:"9px",padding:"3px 8px",borderRadius:"6px",background:"rgba(255,255,255,.05)",color:C.dm,marginLeft:"auto"}},"Pronto")
-        )
-      })
+    vista==="emergen_menu"&&e(ModuleShell,{title:"Emergenciología",subtitle:"Trauma · Quemaduras · RCP · Shock",icon:"🚑",accent:"#ef4444"},
+      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:"16px"}},
+        [{v:"cir_quem",ic:"🔥",n:"Algoritmo de Quemaduras",d:"Tratamiento paso a paso + Calculadoras de Parkland y Goteo"},{v:"trauma-u1",ic:"🩸",n:"Trauma — Unidad 1",d:"Vía aérea, Shock, Tórax, Triage, Deontología — 5 temas completos"}].map(function(it,si){
+          return e("div",{key:it.v,onClick:function(){go(it.v)},style:{background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",border:"1px solid "+C.bd,borderRadius:"16px",padding:"20px 22px",cursor:"pointer",display:"flex",alignItems:"center",gap:"16px",minHeight:"96px",transition:"transform 240ms cubic-bezier(0.32,0.72,0,1),border-color 240ms cubic-bezier(0.32,0.72,0,1),box-shadow 240ms ease-out",animation:"ecept_fadeSlideUp 480ms cubic-bezier(0.16,1,0.3,1) "+(si*40+80)+"ms both",boxSizing:"border-box"},onMouseEnter:function(ev){ev.currentTarget.style.borderColor="rgba(239,68,68,0.40)";ev.currentTarget.style.transform="translateY(-2px)";ev.currentTarget.style.boxShadow="0 8px 24px rgba(0,0,0,0.30), 0 2px 8px rgba(0,0,0,0.20)";},onMouseLeave:function(ev){ev.currentTarget.style.borderColor=C.bd;ev.currentTarget.style.transform="translateY(0)";ev.currentTarget.style.boxShadow="none";}},
+            e("span",{style:{fontSize:"30px",width:"56px",height:"56px",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"14px",background:"rgba(239,68,68,0.10)",border:"1px solid rgba(239,68,68,0.20)",flexShrink:0}},it.ic),
+            e("div",{style:{flex:1,minWidth:0}},e("h3",{style:{fontSize:"16px",fontWeight:600,letterSpacing:"-0.01em",marginBottom:"4px"}},it.n),e("p",{style:{fontSize:"13px",color:C.dm,lineHeight:1.5}},it.d)),
+            e("span",{style:{color:C.dm,fontSize:"20px",flexShrink:0}},"›"))
+        }),
+        [{ic:"💓",n:"RCP — Reanimación",d:"ACLS, BLS, algoritmos — Próximamente"},{ic:"🩸",n:"Shock",d:"Hipovolémico, Distributivo, Cardiogénico, Obstructivo — Próximamente"}].map(function(ph,i){
+          return e("div",{key:"ph"+i,style:{background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",border:"1px dashed "+C.bd,borderRadius:"16px",padding:"20px 22px",opacity:.5,display:"flex",alignItems:"center",gap:"16px",minHeight:"96px",boxSizing:"border-box"}},
+            e("span",{style:{fontSize:"28px",width:"56px",height:"56px",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"14px",background:"rgba(255,255,255,0.03)",flexShrink:0}},ph.ic),
+            e("div",{style:{flex:1,minWidth:0}},e("h3",{style:{fontSize:"15px",fontWeight:600,marginBottom:"3px"}},ph.n),e("p",{style:{fontSize:"12px",color:C.dm,lineHeight:1.5}},ph.d)),
+            e("span",{style:{fontSize:"10px",padding:"4px 10px",borderRadius:"999px",background:"rgba(255,255,255,.05)",color:C.dm,fontWeight:600,letterSpacing:"0.04em",flexShrink:0}},"PRONTO")
+          )
+        })
+      )
     ),
 
     // ════════════ TRAUMA — UNIDAD 1 (NATIVE) ════════════
-    vista==="trauma-u1"&&e(TraumaView,{widgets:traumaWidgets,onBackRef:traumaBackRef}),
+    vista==="trauma-u1"&&e(ModuleShell,{title:"Trauma — Unidad 1",subtitle:"Vía aérea · Shock · Tórax · Triage · Deontología",icon:"🩸",accent:"#ef4444"},
+      e(TraumaView,{widgets:traumaWidgets,onBackRef:traumaBackRef})
+    ),
 
     // ════════════ VOCABULARIO MÉDICO (NATIVE) ════════════
-    vista==="vocabulario"&&e(VocabularioView),
+    vista==="vocabulario"&&e(ModuleShell,{title:"Vocabulario Médico",subtitle:"Raíces, prefijos y sufijos · Decoder + Quiz",icon:"🔤",accent:"#06b6d4"},
+      e(VocabularioView)
+    ),
 
     // ════════════ MEDIADORES DE LA INFLAMACIÓN ════════════
     vista==="mediadores"&&e(MediadoresView),
@@ -585,13 +696,15 @@ function App(){
     // onViewChange — SM calls this on every internal view change so ECEPT can
     //                render the deeper breadcrumb. Module itself is headless.
     // className "sm-root" scopes the SM-specific CSS (.prose + button resets).
-    vista==="salud_mental"&&e("div",{className:"sm-root"},e(SaludMentalView,{onHome:function(){go("home")},onBackRef:smBackRef,onViewChange:onSmViewChange,goFlashcards:function(deck){if(deck){window.ECEPT_DECK_SELECTED=deck;go("flashcards_deck");}else{go("flashcards");}}})),
+    vista==="salud_mental"&&e(ModuleShell,{title:"Salud Mental",subtitle:"Psiquiatría · Psicosis · Neurosis · Flashcards y Casos",icon:"🧠",accent:"#a78bfa"},
+      e("div",{className:"sm-root"},e(SaludMentalView,{onHome:function(){go("home")},onBackRef:smBackRef,onViewChange:onSmViewChange,goFlashcards:function(deck){if(deck){window.ECEPT_DECK_SELECTED=deck;go("flashcards_deck");}else{go("flashcards");}}}))
+    ),
 
     // ════════════ QUEMADURAS ════════════
     vista==="cir_quem"&&e(F,null,
       e("div",{style:{textAlign:"center",marginBottom:"32px"}},
         e("span",{style:{display:"inline-block",fontSize:"10px",letterSpacing:"3px",textTransform:"uppercase",color:"#ef4444",background:"rgba(239,68,68,.15)",border:"1px solid rgba(239,68,68,.3)",padding:"5px 14px",borderRadius:"4px",marginBottom:"12px"}},"Emergenciología"),
-        e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"24px",fontWeight:800,color:C.tx}},"Algoritmo de Quemaduras"),
+        e("h2",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"24px",fontWeight:800,color:C.tx}},"Algoritmo de Quemaduras"),
         e("p",{style:{color:C.dm,fontSize:"13px"}},"Abordaje sistemático paso a paso · Incluye calculadoras clínicas")
       ),
       QUEM_PASOS.map(function(paso,i){
@@ -610,7 +723,7 @@ function App(){
 
       // ═══ CALCULADORAS ═══
       e("div",{style:{marginTop:"8px"}},
-        e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"20px",fontWeight:800,color:"#f59e0b",textAlign:"center",marginBottom:"20px"}},"🧮 Calculadoras Clínicas"),
+        e("h2",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"20px",fontWeight:800,color:"#f59e0b",textAlign:"center",marginBottom:"20px"}},"🧮 Calculadoras Clínicas"),
 
         // CALCULADORA PARKLAND
         e("div",{style:{background:"linear-gradient(135deg,"+C.cd+",rgba(245,158,11,.04))",border:"1px solid rgba(245,158,11,.25)",borderRadius:"16px",padding:"22px",marginBottom:"16px"}},
@@ -722,7 +835,7 @@ function App(){
 
     // ════════════ ANATOMÍA INGUINAL ════════════
     vista==="cir_ing"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🧱"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"22px",fontWeight:800,color:"#f59e0b"}},"Anatomía Inguinal"),e("p",{style:{color:C.dm,fontSize:"13px"}},"Conducto · Anillos · Cordón Espermático")),
+      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🧱"),e("h2",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"22px",fontWeight:800,color:"#f59e0b"}},"Anatomía Inguinal"),e("p",{style:{color:C.dm,fontSize:"13px"}},"Conducto · Anillos · Cordón Espermático")),
       // Tabs
       e("div",{style:{display:"flex",gap:"6px",marginBottom:"20px",flexWrap:"wrap"}},
         [{l:"🧱 Conducto",i:0},{l:"🔵 Superficial",i:1},{l:"🔴 Profundo",i:2},{l:"🧬 Cordón",i:3}].map(function(tb){
@@ -776,7 +889,7 @@ function App(){
     
     // ════════════ ANATOMÍA (PARES CRANEALES) ════════════
     vista==="anatomia"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🩻"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"22px",fontWeight:800,color:"#f59e0b"}},"Anatomía"),e("p",{style:{color:C.dm,fontSize:"13px"}},"Pares Craneales · Origen, función y clínica")),
+      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"🩻"),e("h2",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"22px",fontWeight:800,color:"#f59e0b"}},"Anatomía"),e("p",{style:{color:C.dm,fontSize:"13px"}},"Pares Craneales · Origen, función y clínica")),
       // Interactive brain map (collapsible)
       e("div",{style:{marginBottom:"16px"}},
         e("div",{onClick:function(){setAbdOpen(abdOpen==="mapa_nc"?null:"mapa_nc")},style:{background:C.cd,border:"1px solid "+(abdOpen==="mapa_nc"?"#a78bfa44":C.bd),borderRadius:"14px",padding:"16px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between"}},
@@ -789,7 +902,7 @@ function App(){
         var isExp2=abdExp["nc_"+n.id];
         return e("div",{key:n.id,style:{background:C.cd,border:"1px solid "+(isExp2?n.color+"44":C.bd),borderRadius:"12px",marginBottom:"8px",overflow:"hidden",animation:"fadeIn .3s ease"}},
           e("div",{onClick:function(){var nw={};for(var k in abdExp)nw[k]=abdExp[k];nw["nc_"+n.id]=!isExp2;setAbdExp(nw)},style:{padding:"14px 16px",cursor:"pointer",display:"flex",alignItems:"center",gap:"12px"}},
-            e("span",{style:{fontFamily:"'Playfair Display',serif",fontSize:"20px",fontWeight:900,color:n.color,minWidth:"36px"}},n.id),
+            e("span",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"20px",fontWeight:900,color:n.color,minWidth:"36px"}},n.id),
             e("div",{style:{flex:1}},
               e("div",{style:{fontWeight:700,fontSize:"14px",color:C.tx}},n.name),
               e("div",{style:{fontSize:"11px",color:C.dm,fontStyle:"italic"}},n.latin)
@@ -813,37 +926,96 @@ function App(){
     ),
 
     // ════════════ LABORATORIOS ════════════
-    vista==="labs"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"📊"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"22px",fontWeight:800,color:"#4caf82"}},"Valores de Laboratorio"),e("p",{style:{color:C.dm,fontSize:"13px"}},"Rangos normales e interpretación clínica")),
+    vista==="labs"&&e(ModuleShell,{title:"Valores de Laboratorio",subtitle:"Rangos normales · Interpretación clínica",icon:"📊",accent:"#4caf82"},
+      abdOpen&&window.VisitTracker&&e(window.VisitTracker,{itemType:"lab",itemId:abdOpen}),
       LAB_SECTIONS.map(function(sec,si){
         var isOpen=abdOpen===sec.id;
-        return e("div",{key:sec.id,style:{marginBottom:"12px",animation:"slideUp .4s ease-out "+(si*0.05)+"s both"}},
-          e("button",{onClick:function(){setAbdOpen(isOpen?null:sec.id)},style:{width:"100%",textAlign:"left",borderRadius:"12px",padding:"16px",cursor:"pointer",background:isOpen?sec.accent+"12":C.cd,border:"1px solid "+(isOpen?sec.accent+"44":C.bd),color:C.tx,fontSize:"14px"}},
+        return e("div",{key:sec.id,style:{marginBottom:"14px",animation:"ecept_fadeSlideUp 380ms cubic-bezier(0.16,1,0.3,1) "+(si*40)+"ms both"}},
+          // Header de sección — gradient sutil + hover translateY
+          e("button",{
+            onClick:function(){setAbdOpen(isOpen?null:sec.id)},
+            style:{
+              width:"100%",textAlign:"left",borderRadius:"16px",
+              padding:"18px 22px",cursor:"pointer",
+              background: isOpen
+                ? "linear-gradient(135deg, "+sec.accent+"15, rgba(13,18,36,0.8))"
+                : "linear-gradient(180deg, rgba(13,18,36,0.7), rgba(10,14,31,0.5))",
+              border:"1px solid "+(isOpen?sec.accent+"44":"rgba(96,165,250,0.10)"),
+              color:C.tx,fontSize:"14px",
+              transition:"transform 220ms cubic-bezier(0.16,1,0.3,1), border-color 220ms ease-out, box-shadow 220ms ease-out",
+              boxSizing:"border-box"
+            },
+            onMouseEnter:function(ev){if(isOpen)return;ev.currentTarget.style.transform="translateY(-1px)";ev.currentTarget.style.borderColor=sec.accent+"35";ev.currentTarget.style.boxShadow="0 6px 18px rgba(0,0,0,0.20)";},
+            onMouseLeave:function(ev){if(isOpen)return;ev.currentTarget.style.transform="translateY(0)";ev.currentTarget.style.borderColor="rgba(96,165,250,0.10)";ev.currentTarget.style.boxShadow="none";}
+          },
             e("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between"}},
-              e("div",{style:{display:"flex",alignItems:"center",gap:"12px"}},e("span",{style:{fontSize:"20px"}},sec.icon),e("div",null,e("div",{style:{fontWeight:700}},sec.label),e("div",{style:{fontSize:"11px",color:C.dm,marginTop:"2px"}},sec.subtitle))),
-              e("div",{style:{display:"flex",alignItems:"center",gap:"8px"}},e("span",{style:{fontSize:"10px",padding:"2px 8px",borderRadius:"10px",background:"rgba(255,255,255,.06)",color:C.dm}},sec.analytes.length+" analitos"),e("span",{style:{color:C.dm,transform:isOpen?"rotate(180deg)":"none",transition:"transform .2s"}},"▼"))
+              e("div",{style:{display:"flex",alignItems:"center",gap:"14px",minWidth:0,flex:1}},
+                e("span",{style:{fontSize:"24px",width:"44px",height:"44px",display:"flex",alignItems:"center",justifyContent:"center",background:sec.accent+"14",border:"1px solid "+sec.accent+"24",borderRadius:"12px",flexShrink:0}},sec.icon),
+                e("div",{style:{minWidth:0}},
+                  e("div",{style:{fontWeight:700,fontSize:"15px",letterSpacing:"-0.01em",lineHeight:1.2}},sec.label),
+                  e("div",{style:{fontSize:"12px",color:C.dm,marginTop:"3px",lineHeight:1.4}},sec.subtitle)
+                )
+              ),
+              e("div",{style:{display:"flex",alignItems:"center",gap:"10px",flexShrink:0}},
+                e("span",{style:{fontSize:"10px",padding:"4px 10px",borderRadius:"999px",background:sec.accent+"16",color:sec.accent,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase"}},sec.analytes.length+" analitos"),
+                e("span",{style:{color:C.dm,transform:isOpen?"rotate(180deg)":"none",transition:"transform .25s"}},"▼")
+              )
             )
           ),
-          isOpen&&e("div",{style:{marginTop:"8px",display:"flex",flexDirection:"column",gap:"8px"}},
+          // Analitos: grid responsive cuando expandido
+          isOpen&&e("div",{style:{marginTop:"10px",display:"flex",flexDirection:"column",gap:"10px"}},
             sec.analytes.map(function(an,ai){
               var akey=sec.id+"-"+ai;var aExp=abdExp[akey];
-              return e("div",{key:ai,style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"10px",overflow:"hidden"}},
-                e("button",{onClick:function(){var nw={};for(var k in abdExp)nw[k]=abdExp[k];nw[akey]=!aExp;setAbdExp(nw)},style:{width:"100%",textAlign:"left",padding:"14px 18px",cursor:"pointer",background:"none",border:"none",color:C.tx,display:"flex",alignItems:"center",gap:"14px"}},
-                  e("span",{style:{width:"6px",height:"6px",borderRadius:"50%",background:sec.accent,flexShrink:0}}),
-                  e("span",{style:{flex:1,fontSize:"14px",fontWeight:500}},an.name),
-                  e("span",{style:{fontSize:"11px",color:C.mt,background:"rgba(255,255,255,.04)",padding:"4px 10px",borderRadius:"5px",border:"1px solid "+C.bd,flexShrink:0,maxWidth:"200px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},an.range),
+              return e("div",{key:ai,style:{
+                background:"linear-gradient(180deg, rgba(13,18,36,0.6), rgba(10,14,31,0.4))",
+                border:"1px solid "+(aExp?sec.accent+"30":"rgba(96,165,250,0.10)"),
+                borderRadius:"14px",
+                overflow:"hidden",
+                transition:"border-color 200ms ease-out"
+              }},
+                e("button",{
+                  onClick:function(){var nw={};for(var k in abdExp)nw[k]=abdExp[k];nw[akey]=!aExp;setAbdExp(nw)},
+                  style:{width:"100%",textAlign:"left",padding:"14px 18px",cursor:"pointer",background:"none",border:"none",color:C.tx,display:"flex",alignItems:"center",gap:"14px",fontFamily:"inherit"}
+                },
+                  e("span",{style:{width:"7px",height:"7px",borderRadius:"50%",background:sec.accent,flexShrink:0,boxShadow:"0 0 6px "+sec.accent+"80"}}),
+                  e("span",{style:{flex:1,fontSize:"14px",fontWeight:500,letterSpacing:"-0.005em"}},an.name),
+                  e("span",{style:{fontSize:"11px",color:sec.accent,background:sec.accent+"10",padding:"4px 10px",borderRadius:"6px",fontWeight:600,flexShrink:0,maxWidth:"200px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontFamily:"Inter, monospace"}},an.range),
                   e("span",{style:{color:C.dm,fontSize:"11px",transform:aExp?"rotate(180deg)":"none",transition:"transform .2s",flexShrink:0}},"▾")
                 ),
-                aExp&&e("div",{style:{padding:"0 18px 16px",borderTop:"1px solid "+C.bd}},
-                  e("div",{style:{fontSize:"13px",color:C.mt,lineHeight:1.65,padding:"14px 0 12px",borderBottom:"1px solid "+C.bd},dangerouslySetInnerHTML:{__html:an.note}}),
-                  (an.up||an.down)&&e("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px",marginTop:"12px"}},
-                    an.up&&e("div",{style:{background:"rgba(255,255,255,.03)",borderRadius:"8px",padding:"12px 14px",borderLeft:"3px solid #e05252"}},
-                      e("div",{style:{fontSize:"10px",fontWeight:700,color:"#e05252",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:"8px"}},"▲ Se eleva en"),
-                      e("div",{style:{display:"flex",flexDirection:"column",gap:"5px"}},an.up.map(function(u,ui){return e("div",{key:ui,style:{fontSize:"12px",color:C.mt,lineHeight:1.4,paddingLeft:"12px",position:"relative"}},e("span",{style:{position:"absolute",left:0,color:C.dm,fontSize:"10px"}},"—"),u)}))
+                aExp&&e("div",{style:{padding:"0 20px 18px"}},
+                  e("div",{style:{fontSize:"13px",color:"#cbd5e1",lineHeight:1.65,padding:"4px 0 16px",marginBottom:"14px",borderBottom:"1px solid rgba(96,165,250,0.06)"},dangerouslySetInnerHTML:{__html:an.note}}),
+                  (an.up||an.down)&&e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:"12px"}},
+                    an.up&&e("div",{style:{
+                      background:"linear-gradient(135deg, rgba(239,68,68,0.07), rgba(239,68,68,0.03))",
+                      border:"1px solid rgba(239,68,68,0.20)",
+                      borderRadius:"12px",
+                      padding:"14px 16px"
+                    }},
+                      e("div",{style:{fontSize:"10px",fontWeight:700,color:"rgba(239,68,68,0.85)",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:"10px",display:"flex",alignItems:"center",gap:"6px"}},
+                        e("span",{style:{fontSize:"11px"}},"▲"),"Se eleva en"
+                      ),
+                      e("div",{style:{display:"flex",flexDirection:"column",gap:"6px"}},
+                        an.up.map(function(u,ui){return e("div",{key:ui,style:{fontSize:"12px",color:"#cbd5e1",lineHeight:1.55,display:"flex",alignItems:"flex-start",gap:"8px"}},
+                          e("span",{style:{color:"rgba(239,68,68,0.6)",fontSize:"10px",marginTop:"5px",flexShrink:0}},"●"),
+                          e("span",null,u)
+                        )})
+                      )
                     ),
-                    an.down&&e("div",{style:{background:"rgba(255,255,255,.03)",borderRadius:"8px",padding:"12px 14px",borderLeft:"3px solid #5b8dee"}},
-                      e("div",{style:{fontSize:"10px",fontWeight:700,color:"#5b8dee",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:"8px"}},"▼ Disminuye en"),
-                      e("div",{style:{display:"flex",flexDirection:"column",gap:"5px"}},an.down.map(function(d2,di){return e("div",{key:di,style:{fontSize:"12px",color:C.mt,lineHeight:1.4,paddingLeft:"12px",position:"relative"}},e("span",{style:{position:"absolute",left:0,color:C.dm,fontSize:"10px"}},"—"),d2)}))
+                    an.down&&e("div",{style:{
+                      background:"linear-gradient(135deg, rgba(59,130,246,0.07), rgba(59,130,246,0.03))",
+                      border:"1px solid rgba(59,130,246,0.20)",
+                      borderRadius:"12px",
+                      padding:"14px 16px"
+                    }},
+                      e("div",{style:{fontSize:"10px",fontWeight:700,color:"rgba(59,130,246,0.85)",textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:"10px",display:"flex",alignItems:"center",gap:"6px"}},
+                        e("span",{style:{fontSize:"11px"}},"▼"),"Disminuye en"
+                      ),
+                      e("div",{style:{display:"flex",flexDirection:"column",gap:"6px"}},
+                        an.down.map(function(d2,di){return e("div",{key:di,style:{fontSize:"12px",color:"#cbd5e1",lineHeight:1.55,display:"flex",alignItems:"flex-start",gap:"8px"}},
+                          e("span",{style:{color:"rgba(59,130,246,0.6)",fontSize:"10px",marginTop:"5px",flexShrink:0}},"●"),
+                          e("span",null,d2)
+                        )})
+                      )
                     )
                   )
                 )
@@ -870,7 +1042,7 @@ function App(){
     vista==="imagenes"&&e(F,null,
       e("div",{style:{textAlign:"center",padding:"60px 20px"}},
         e("div",{style:{fontSize:"56px",marginBottom:"16px",opacity:.3}},"📷"),
-        e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"22px",fontWeight:800,color:"#06b6d4",marginBottom:"12px"}},"Imágenes Diagnósticas"),
+        e("h2",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"22px",fontWeight:800,color:"#06b6d4",marginBottom:"12px"}},"Imágenes Diagnósticas"),
         e("p",{style:{color:C.dm,fontSize:"14px",maxWidth:"400px",margin:"0 auto",lineHeight:1.6}},"Radiografías, Ecografías, Tomografías y Resonancias organizadas por región anatómica y patología."),
         e("div",{style:{marginTop:"24px",padding:"16px 24px",background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",display:"inline-block"}},
           e("p",{style:{color:C.mt,fontSize:"13px"}},"🚧 Sección en construcción. Se irá completando con imágenes clínicas.")
@@ -880,8 +1052,7 @@ function App(){
 
 
         // ════════════ GENERALIDADES ════════════
-    vista==="general"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"28px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"📚"),e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"22px",fontWeight:800,color:"#8b5cf6"}},"Generalidades"),e("p",{style:{color:C.dm,fontSize:"13px"}},"Contenidos transversales para toda la carrera")),
+    vista==="general"&&e(ModuleShell,{title:"Generalidades",subtitle:"Contenidos transversales para toda la carrera",icon:"📚",accent:"#8b5cf6"},
       // Bases Inmunológicas
       e("div",{style:{marginBottom:"24px"}},
         e("div",{onClick:function(){setAbdOpen(abdOpen==="inmuno"?null:"inmuno")},style:{background:C.cd,border:"1px solid "+(abdOpen==="inmuno"?"#3b82f644":C.bd),borderRadius:"14px",padding:"18px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between"}},
@@ -949,50 +1120,69 @@ function App(){
     ),
 
     // ════════════ EPIDEMIOLOGÍA (SALUD PÚBLICA) ════════════
-    vista==="epid"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"32px"}},
-        e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"📊"),
-        e("h2",{style:{fontFamily:"'Playfair Display',serif",fontSize:"24px",fontWeight:900,background:"linear-gradient(135deg,#00b4d8,#3b82f6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}},"Epidemiología"),
-        e("p",{style:{color:C.dm,fontSize:"13px"}},"Salud Pública · Lectura Crítica · MBE")
-      ),
-      // Tabs de epidemiología
-      e("div",{style:{display:"flex",gap:"6px",marginBottom:"24px",flexWrap:"wrap"}},
-        [{l:"🔺 Pirámide",i:0},{l:"📋 Estudios",i:1},{l:"⚠️ Sesgos",i:2},{l:"📐 Medidas",i:3},{l:"✅ Lectura Crítica",i:4}].map(function(tb){
-          var cols=["#22d3ee","#3b82f6","#ef4444","#34d399","#06b6d4"];
+    vista==="epid"&&e(ModuleShell,{title:"Epidemiología",subtitle:"Salud Pública · Lectura Crítica · Medicina Basada en Evidencia",icon:"📊",accent:"#22d3ee"},
+      // ── Tabs premium ──
+      e("div",{style:{display:"flex",gap:"6px",marginBottom:"28px",flexWrap:"wrap",padding:"6px",background:"linear-gradient(180deg,rgba(13,18,36,0.6),rgba(10,14,31,0.4))",border:"1px solid rgba(96,165,250,0.10)",borderRadius:"14px"}},
+        [{l:"🔺 Pirámide",i:0,c:"#22d3ee"},{l:"📋 Estudios",i:1,c:"#3b82f6"},{l:"⚠️ Sesgos",i:2,c:"#ef4444"},{l:"📐 Medidas",i:3,c:"#34d399"},{l:"✅ Lectura Crítica",i:4,c:"#06b6d4"}].map(function(tb){
+          var act=ingTab===tb.i;
           return e("button",{key:tb.i,onClick:function(){setIngTab(tb.i)},style:{
-            flex:"1 1 auto",minWidth:"80px",padding:"10px 12px",background:"transparent",
-            border:"1.5px solid "+(ingTab===tb.i?cols[tb.i]:C.bd),borderRadius:"10px",
-            cursor:"pointer",fontSize:"11px",fontWeight:700,color:ingTab===tb.i?cols[tb.i]:C.dm
+            flex:"1 1 auto",minWidth:"100px",padding:"10px 14px",
+            background:act?"linear-gradient(135deg,"+tb.c+"22,"+tb.c+"08)":"transparent",
+            border:"1px solid "+(act?tb.c+"44":"transparent"),
+            borderRadius:"10px",cursor:"pointer",
+            fontSize:"12px",fontWeight:700,
+            color:act?tb.c:"#94a3b8",
+            letterSpacing:"-0.005em",
+            fontFamily:"inherit",
+            transition:"all 200ms cubic-bezier(0.16,1,0.3,1)",
+            boxShadow:act?"0 2px 8px "+tb.c+"22":"none"
           }},tb.l)
         })
       ),
 
       // TAB 0: PIRÁMIDE
-      ingTab===0&&e(F,null,
-        e("div",{style:{textAlign:"center",marginBottom:"16px"}},e("h3",{style:{fontFamily:"'Playfair Display',serif",fontSize:"18px",fontWeight:800,color:"#22d3ee"}},"Pirámide de Evidencia")),
-        e("div",{style:{display:"flex",flexDirection:"column",alignItems:"center",gap:"3px",marginBottom:"24px"}},
-          PIRAMIDE.map(function(p,i){
+      ingTab===0&&e("div",{style:{animation:"ecept_fadeSlideUp 320ms cubic-bezier(0.16,1,0.3,1)"}},
+        e("div",{style:{textAlign:"center",marginBottom:"20px"}},
+          e("h3",{style:{fontSize:"20px",fontWeight:800,letterSpacing:"-0.02em",background:"linear-gradient(135deg,#22d3ee,#06b6d4)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",margin:0}},"Pirámide de Evidencia"),
+          e("p",{style:{color:"#94a3b8",fontSize:"13px",marginTop:"4px"}},"De mayor (1) a menor (7) calidad metodológica. Tocá para detalle.")
+        ),
+        e("div",{style:{display:"flex",flexDirection:"column",alignItems:"center",gap:"4px",marginBottom:"24px"}},
+          PIRAMIDE.map(function(pi,i){
             var isOpen=et===i;
-            return e("div",{key:i,style:{width:"100%",maxWidth:"600px"}},
+            return e("div",{key:i,style:{width:"100%",maxWidth:"720px",animation:"ecept_fadeSlideUp 380ms cubic-bezier(0.16,1,0.3,1) "+(i*40)+"ms both"}},
               e("div",{onClick:function(){setEt(isOpen?null:i)},style:{
-                width:p.ancho,margin:"0 auto",padding:"10px 14px",
-                background:isOpen?p.color+"20":p.color+"0a",border:"1.5px solid "+(isOpen?p.color:p.color+"30"),
-                borderRadius:i===0?"12px 12px 4px 4px":i===6?"4px 4px 12px 12px":"4px",
-                cursor:"pointer",textAlign:"center",transition:"all .2s",position:"relative"
-              }},
-                e("div",{style:{display:"flex",alignItems:"center",justifyContent:"center",gap:"8px"}},
-                  e("span",{style:{fontSize:"14px"}},p.icono),
-                  e("span",{style:{fontSize:"12px",fontWeight:700,color:p.color}},p.nombre)
+                width:pi.ancho,margin:"0 auto",padding:"12px 16px",
+                background:isOpen?"linear-gradient(135deg,"+pi.color+"20,"+pi.color+"08)":"linear-gradient(180deg,rgba(13,18,36,0.6),rgba(10,14,31,0.4))",
+                border:"1px solid "+(isOpen?pi.color+"60":pi.color+"22"),
+                borderRadius:i===0?"14px 14px 6px 6px":i===PIRAMIDE.length-1?"6px 6px 14px 14px":"6px",
+                cursor:"pointer",textAlign:"center",
+                transition:"all 220ms cubic-bezier(0.16,1,0.3,1)"
+              },
+                onMouseEnter:function(ev){if(isOpen)return;ev.currentTarget.style.borderColor=pi.color+"50";ev.currentTarget.style.background="linear-gradient(135deg,"+pi.color+"12,rgba(13,18,36,0.6))";},
+                onMouseLeave:function(ev){if(isOpen)return;ev.currentTarget.style.borderColor=pi.color+"22";ev.currentTarget.style.background="linear-gradient(180deg,rgba(13,18,36,0.6),rgba(10,14,31,0.4))";}
+              },
+                e("div",{style:{display:"flex",alignItems:"center",justifyContent:"center",gap:"10px"}},
+                  e("span",{style:{fontSize:"18px"}},pi.icono),
+                  e("span",{style:{fontSize:"13px",fontWeight:700,color:pi.color,letterSpacing:"-0.01em"}},pi.nombre)
                 ),
-                e("div",{style:{fontSize:"9px",color:C.dm,marginTop:"2px"}},"Nivel "+p.nivel)
+                e("div",{style:{fontSize:"10px",color:"#64748b",marginTop:"3px",letterSpacing:"0.06em",textTransform:"uppercase",fontWeight:600}},"Nivel "+pi.nivel)
               ),
-              isOpen&&e("div",{style:{width:"90%",margin:"4px auto 8px",background:C.cd,border:"1px solid "+p.color+"30",borderRadius:"10px",padding:"16px"}},
-                e("p",{style:{fontSize:"13px",color:C.tx,lineHeight:1.6,marginBottom:"10px"}},p.desc),
-                e("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}},
-                  e("div",{style:{padding:"10px",background:p.color+"08",borderRadius:"8px",borderLeft:"3px solid "+p.color}},e("div",{style:{fontSize:"10px",fontWeight:700,color:p.color,marginBottom:"4px"}},"¿PARA QUÉ SIRVE?"),e("p",{style:{fontSize:"11px",color:C.mt,lineHeight:1.5}},p.para)),
-                  e("div",{style:{padding:"10px",background:"rgba(255,255,255,.02)",borderRadius:"8px",borderLeft:"3px solid "+C.dm}},e("div",{style:{fontSize:"10px",fontWeight:700,color:C.dm,marginBottom:"4px"}},"MEDIDA QUE USA"),e("p",{style:{fontSize:"11px",color:C.mt,lineHeight:1.5}},p.medida))
+              isOpen&&e("div",{style:{width:"94%",margin:"6px auto 10px",background:"linear-gradient(180deg,rgba(13,18,36,0.7),rgba(10,14,31,0.5))",border:"1px solid "+pi.color+"30",borderRadius:"14px",padding:"18px 20px",animation:"ecept_fadeSlideDown 280ms ease-out"}},
+                e("p",{style:{fontSize:"13px",color:"#cbd5e1",lineHeight:1.65,marginBottom:"14px"}},pi.desc),
+                e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:"10px"}},
+                  e("div",{style:{padding:"12px 14px",background:pi.color+"0c",borderRadius:"10px",borderLeft:"3px solid "+pi.color}},
+                    e("div",{style:{fontSize:"10px",fontWeight:700,color:pi.color,marginBottom:"6px",letterSpacing:"0.08em",textTransform:"uppercase"}},"¿Para qué sirve?"),
+                    e("p",{style:{fontSize:"12px",color:"#cbd5e1",lineHeight:1.55}},pi.para)
+                  ),
+                  e("div",{style:{padding:"12px 14px",background:"rgba(255,255,255,0.025)",borderRadius:"10px",borderLeft:"3px solid #475569"}},
+                    e("div",{style:{fontSize:"10px",fontWeight:700,color:"#94a3b8",marginBottom:"6px",letterSpacing:"0.08em",textTransform:"uppercase"}},"Medida que usa"),
+                    e("p",{style:{fontSize:"12px",color:"#cbd5e1",lineHeight:1.55}},pi.medida)
+                  )
                 ),
-                e("div",{style:{marginTop:"8px",padding:"10px",background:"rgba(255,255,255,.02)",borderRadius:"8px"}},e("span",{style:{fontSize:"10px",fontWeight:700,color:C.dm}},"EJEMPLO: "),e("span",{style:{fontSize:"11px",color:C.mt}},p.ejemplo))
+                e("div",{style:{marginTop:"10px",padding:"10px 14px",background:"rgba(255,255,255,0.025)",borderRadius:"10px"}},
+                  e("span",{style:{fontSize:"10px",fontWeight:700,color:"#94a3b8",letterSpacing:"0.08em",textTransform:"uppercase"}},"Ejemplo: "),
+                  e("span",{style:{fontSize:"12px",color:"#cbd5e1"}},pi.ejemplo)
+                )
               )
             )
           })
@@ -1000,72 +1190,133 @@ function App(){
       ),
 
       // TAB 1: ESTUDIOS DETALLADOS
-      ingTab===1&&e(F,null,
-        ESTUDIOS.map(function(est,i){
-          var isOpen=abdOpen===est.nombre;
-          return e("div",{key:i,style:{marginBottom:"12px",animation:"slideUp .3s ease-out "+(i*0.06)+"s both"}},
-            e("button",{onClick:function(){setAbdOpen(isOpen?null:est.nombre)},style:{width:"100%",textAlign:"left",borderRadius:"12px",padding:"16px",cursor:"pointer",background:isOpen?est.col+"10":C.cd,border:"1px solid "+(isOpen?est.col+"44":C.bd),color:C.tx}},
-              e("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between"}},
-                e("div",{style:{display:"flex",alignItems:"center",gap:"12px"}},
-                  e("span",{style:{fontSize:"22px"}},est.ic),
-                  e("div",null,e("div",{style:{fontWeight:700,fontSize:"15px"}},est.nombre),e("div",{style:{fontSize:"11px",color:est.col,marginTop:"2px",fontWeight:600}},est.tipo+" · "+est.temporal))
+      ingTab===1&&e("div",{style:{animation:"ecept_fadeSlideUp 320ms cubic-bezier(0.16,1,0.3,1)"}},
+        e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(420px,1fr))",gap:"12px"}},
+          ESTUDIOS.map(function(est,i){
+            var isOpen=abdOpen===est.nombre;
+            return e("div",{key:i,style:{animation:"ecept_fadeSlideUp 320ms cubic-bezier(0.16,1,0.3,1) "+(i*40)+"ms both"}},
+              e("button",{onClick:function(){setAbdOpen(isOpen?null:est.nombre)},style:{
+                width:"100%",textAlign:"left",borderRadius:"14px",padding:"16px 18px",cursor:"pointer",
+                background:isOpen?"linear-gradient(135deg,"+est.col+"15,rgba(13,18,36,0.7))":"linear-gradient(180deg,rgba(13,18,36,0.7),rgba(10,14,31,0.5))",
+                border:"1px solid "+(isOpen?est.col+"50":est.col+"20"),
+                color:C.tx,fontFamily:"inherit",
+                transition:"all 200ms cubic-bezier(0.16,1,0.3,1)"
+              }},
+                e("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",gap:"12px"}},
+                  e("div",{style:{display:"flex",alignItems:"center",gap:"14px",minWidth:0,flex:1}},
+                    e("span",{style:{fontSize:"24px",width:"44px",height:"44px",display:"flex",alignItems:"center",justifyContent:"center",background:est.col+"14",border:"1px solid "+est.col+"24",borderRadius:"12px",flexShrink:0}},est.ic),
+                    e("div",{style:{minWidth:0}},
+                      e("div",{style:{fontWeight:700,fontSize:"15px",letterSpacing:"-0.01em",lineHeight:1.2}},est.nombre),
+                      e("div",{style:{fontSize:"11px",color:est.col,marginTop:"3px",fontWeight:600,letterSpacing:"0.04em",textTransform:"uppercase"}},est.tipo+" · "+est.temporal)
+                    )
+                  ),
+                  e("span",{style:{color:"#64748b",fontSize:"14px",transform:isOpen?"rotate(180deg)":"none",transition:"transform .25s",flexShrink:0}},"▼")
+                )
+              ),
+              isOpen&&e("div",{style:{marginTop:"8px",background:"linear-gradient(180deg,rgba(13,18,36,0.8),rgba(10,14,31,0.6))",border:"1px solid "+est.col+"22",borderRadius:"14px",padding:"18px 20px",animation:"ecept_fadeSlideDown 280ms ease-out"}},
+                e("p",{style:{fontSize:"13px",color:"#cbd5e1",lineHeight:1.7,marginBottom:"14px"}},est.def),
+                e("div",{style:{padding:"12px 14px",background:est.col+"0c",borderRadius:"10px",borderLeft:"3px solid "+est.col,marginBottom:"10px"}},
+                  e("div",{style:{fontSize:"10px",fontWeight:700,color:est.col,marginBottom:"6px",letterSpacing:"0.08em",textTransform:"uppercase"}},"Pregunta que responde"),
+                  e("p",{style:{fontSize:"13px",color:C.tx,fontWeight:600,lineHeight:1.5}},est.pregunta)
                 ),
-                e("span",{style:{color:C.dm,transform:isOpen?"rotate(180deg)":"none",transition:"transform .2s"}},"▼")
-              )
-            ),
-            isOpen&&e("div",{style:{marginTop:"8px",background:C.cd,border:"1px solid "+C.bd,borderRadius:"12px",padding:"18px"}},
-              e("p",{style:{fontSize:"13px",color:C.tx,lineHeight:1.7,marginBottom:"14px"}},est.def),
-              e("div",{style:{padding:"10px 14px",background:est.col+"08",borderRadius:"8px",borderLeft:"3px solid "+est.col,marginBottom:"12px"}},e("div",{style:{fontSize:"10px",fontWeight:700,color:est.col,marginBottom:"4px"}},"PREGUNTA QUE RESPONDE"),e("p",{style:{fontSize:"13px",color:C.tx,fontWeight:600}},est.pregunta)),
-              e("div",{style:{padding:"10px 14px",background:"rgba(255,255,255,.02)",borderRadius:"8px",marginBottom:"12px"}},e("div",{style:{fontSize:"10px",fontWeight:700,color:C.dm,marginBottom:"4px"}},"MEDIDA PRINCIPAL"),e("p",{style:{fontSize:"13px",color:C.mt}},est.medidas)),
-              e("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}},
-                e("div",{style:{padding:"12px",background:"rgba(52,211,153,.06)",borderRadius:"8px",borderLeft:"3px solid #34d399"}},e("div",{style:{fontSize:"10px",fontWeight:700,color:"#34d399",marginBottom:"6px"}},"✓ VENTAJAS"),e(Ls,{items:est.ventajas,color:"#34d399"})),
-                e("div",{style:{padding:"12px",background:"rgba(239,68,68,.06)",borderRadius:"8px",borderLeft:"3px solid #ef4444"}},e("div",{style:{fontSize:"10px",fontWeight:700,color:"#ef4444",marginBottom:"6px"}},"✗ LIMITACIONES"),e(Ls,{items:est.limitaciones,color:"#ef4444"}))
+                e("div",{style:{padding:"10px 14px",background:"rgba(255,255,255,0.025)",borderRadius:"10px",marginBottom:"12px"}},
+                  e("div",{style:{fontSize:"10px",fontWeight:700,color:"#94a3b8",marginBottom:"4px",letterSpacing:"0.08em",textTransform:"uppercase"}},"Medida principal"),
+                  e("p",{style:{fontSize:"13px",color:"#cbd5e1",fontFamily:"Inter, monospace"}},est.medidas)
+                ),
+                e("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}},
+                  e("div",{style:{padding:"12px 14px",background:"rgba(52,211,153,0.06)",borderRadius:"10px",borderLeft:"3px solid #34d399"}},
+                    e("div",{style:{fontSize:"10px",fontWeight:700,color:"#34d399",marginBottom:"8px",letterSpacing:"0.08em",textTransform:"uppercase"}},"✓ Ventajas"),
+                    e(Ls,{items:est.ventajas,color:"#34d399"})
+                  ),
+                  e("div",{style:{padding:"12px 14px",background:"rgba(239,68,68,0.06)",borderRadius:"10px",borderLeft:"3px solid #ef4444"}},
+                    e("div",{style:{fontSize:"10px",fontWeight:700,color:"#ef4444",marginBottom:"8px",letterSpacing:"0.08em",textTransform:"uppercase"}},"✗ Limitaciones"),
+                    e(Ls,{items:est.limitaciones,color:"#ef4444"})
+                  )
+                )
               )
             )
-          )
-        })
+          })
+        )
       ),
 
       // TAB 2: SESGOS
-      ingTab===2&&e(F,null,
-        SESGOS.map(function(sg,i){
-          return e("div",{key:i,style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"18px",marginBottom:"12px",borderLeft:"3px solid "+sg.col,animation:"slideUp .3s ease-out "+(i*0.06)+"s both"}},
-            e("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"10px"}},e("span",{style:{fontSize:"20px"}},sg.ic),e("h3",{style:{color:sg.col,fontSize:"15px",fontWeight:700,margin:0}},sg.nombre)),
-            e("p",{style:{color:C.tx,fontSize:"14px",lineHeight:1.6,marginBottom:"10px"}},sg.def),
-            e("div",{style:{padding:"10px 14px",background:sg.col+"08",borderRadius:"8px",marginBottom:"8px"}},e("span",{style:{fontSize:"10px",fontWeight:700,color:sg.col}},"EJEMPLO: "),e("span",{style:{fontSize:"12px",color:C.mt}},sg.ejemplo)),
-            e("div",{style:{padding:"10px 14px",background:"rgba(52,211,153,.06)",borderRadius:"8px"}},e("span",{style:{fontSize:"10px",fontWeight:700,color:"#34d399"}},"SOLUCIÓN: "),e("span",{style:{fontSize:"12px",color:C.mt}},sg.solucion))
-          )
-        })
+      ingTab===2&&e("div",{style:{animation:"ecept_fadeSlideUp 320ms cubic-bezier(0.16,1,0.3,1)"}},
+        e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(360px,1fr))",gap:"12px"}},
+          SESGOS.map(function(sg,i){
+            return e("div",{key:i,style:{
+              background:"linear-gradient(180deg,rgba(13,18,36,0.7),rgba(10,14,31,0.5))",
+              border:"1px solid "+sg.col+"24",
+              borderRadius:"14px",padding:"18px 20px",
+              borderLeft:"4px solid "+sg.col,
+              animation:"ecept_fadeSlideUp 320ms cubic-bezier(0.16,1,0.3,1) "+(i*40)+"ms both"
+            }},
+              e("div",{style:{display:"flex",alignItems:"center",gap:"12px",marginBottom:"12px"}},
+                e("span",{style:{fontSize:"22px",width:"40px",height:"40px",display:"flex",alignItems:"center",justifyContent:"center",background:sg.col+"14",border:"1px solid "+sg.col+"24",borderRadius:"10px",flexShrink:0}},sg.ic),
+                e("h3",{style:{color:sg.col,fontSize:"15px",fontWeight:700,margin:0,letterSpacing:"-0.01em",lineHeight:1.2}},sg.nombre)
+              ),
+              e("p",{style:{color:"#cbd5e1",fontSize:"13px",lineHeight:1.65,marginBottom:"12px"}},sg.def),
+              e("div",{style:{padding:"10px 14px",background:sg.col+"0c",borderRadius:"10px",marginBottom:"8px"}},
+                e("div",{style:{fontSize:"10px",fontWeight:700,color:sg.col,marginBottom:"4px",letterSpacing:"0.08em",textTransform:"uppercase"}},"Ejemplo"),
+                e("span",{style:{fontSize:"12px",color:"#cbd5e1",lineHeight:1.5}},sg.ejemplo)
+              ),
+              e("div",{style:{padding:"10px 14px",background:"rgba(52,211,153,0.06)",borderRadius:"10px",borderLeft:"3px solid #34d399"}},
+                e("div",{style:{fontSize:"10px",fontWeight:700,color:"#34d399",marginBottom:"4px",letterSpacing:"0.08em",textTransform:"uppercase"}},"Solución"),
+                e("span",{style:{fontSize:"12px",color:"#cbd5e1",lineHeight:1.5}},sg.solucion)
+              )
+            )
+          })
+        )
       ),
 
       // TAB 3: MEDIDAS
-      ingTab===3&&e(F,null,
-        MEDIDAS_EPI.map(function(med,i){
-          return e("div",{key:i,style:{background:C.cd,border:"1px solid "+C.bd,borderRadius:"14px",padding:"18px",marginBottom:"12px",borderLeft:"3px solid "+med.col,animation:"slideUp .3s ease-out "+(i*0.05)+"s both"}},
-            e("h3",{style:{color:med.col,fontSize:"15px",fontWeight:700,marginBottom:"6px"}},med.nombre),
-            e("div",{style:{padding:"8px 14px",background:"rgba(255,255,255,.04)",borderRadius:"8px",marginBottom:"10px",fontFamily:"monospace",fontSize:"14px",color:C.tx,fontWeight:600,textAlign:"center",letterSpacing:"0.5px"}},med.formula),
-            e("p",{style:{color:C.mt,fontSize:"13px",lineHeight:1.6,marginBottom:"8px"}},med.desc),
-            e("div",{style:{padding:"8px 12px",background:med.col+"0a",borderRadius:"6px",borderLeft:"3px solid "+med.col}},e("span",{style:{fontSize:"11px",fontWeight:700,color:med.col}},"📌 "),e("span",{style:{fontSize:"12px",color:C.tx}},med.regla))
-          )
-        })
+      ingTab===3&&e("div",{style:{animation:"ecept_fadeSlideUp 320ms cubic-bezier(0.16,1,0.3,1)"}},
+        e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(340px,1fr))",gap:"12px"}},
+          MEDIDAS_EPI.map(function(med,i){
+            return e("div",{key:i,style:{
+              background:"linear-gradient(180deg,rgba(13,18,36,0.7),rgba(10,14,31,0.5))",
+              border:"1px solid "+med.col+"24",
+              borderRadius:"14px",padding:"18px 20px",
+              borderLeft:"4px solid "+med.col,
+              animation:"ecept_fadeSlideUp 320ms cubic-bezier(0.16,1,0.3,1) "+(i*40)+"ms both"
+            }},
+              e("h3",{style:{color:med.col,fontSize:"16px",fontWeight:700,marginBottom:"10px",letterSpacing:"-0.01em"}},med.nombre),
+              e("div",{style:{padding:"12px 16px",background:"rgba(0,0,0,0.30)",borderRadius:"10px",marginBottom:"12px",fontFamily:"Inter, Courier New, monospace",fontSize:"14px",color:med.col,fontWeight:700,textAlign:"center",letterSpacing:"0.04em",border:"1px solid "+med.col+"22"}},med.formula),
+              e("p",{style:{color:"#cbd5e1",fontSize:"13px",lineHeight:1.65,marginBottom:"10px"}},med.desc),
+              e("div",{style:{padding:"10px 14px",background:med.col+"0c",borderRadius:"10px",borderLeft:"3px solid "+med.col,display:"flex",gap:"8px",alignItems:"flex-start"}},
+                e("span",{style:{fontSize:"12px",flexShrink:0}},"📌"),
+                e("span",{style:{fontSize:"12px",color:"#cbd5e1",lineHeight:1.55}},med.regla)
+              )
+            )
+          })
+        )
       ),
 
-      // TAB 4: LECTURA CRÍTICA CHECKLIST
-      ingTab===4&&e(F,null,
-        e("div",{style:{textAlign:"center",marginBottom:"16px"}},e("h3",{style:{fontFamily:"'Playfair Display',serif",fontSize:"18px",fontWeight:800,color:"#06b6d4"}},"Checklist de Lectura Crítica")),
-        CHECKLIST_LC.map(function(ck,i){
-          return e("div",{key:i,style:{display:"flex",gap:"14px",alignItems:"flex-start",marginBottom:"14px",animation:"slideUp .3s ease-out "+(i*0.06)+"s both"}},
-            e("div",{style:{width:"36px",height:"36px",borderRadius:"50%",background:ck.col+"15",border:"2px solid "+ck.col,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:"14px",color:ck.col,flexShrink:0}},ck.paso),
-            e("div",{style:{flex:1,background:C.cd,border:"1px solid "+C.bd,borderRadius:"12px",padding:"14px 16px"}},
-              e("h4",{style:{fontSize:"14px",fontWeight:700,color:C.tx,marginBottom:"6px"}},ck.pregunta),
-              e("p",{style:{fontSize:"12px",color:C.dm,lineHeight:1.6}},ck.detalle)
+      // TAB 4: LECTURA CRÍTICA — timeline vertical
+      ingTab===4&&e("div",{style:{animation:"ecept_fadeSlideUp 320ms cubic-bezier(0.16,1,0.3,1)"}},
+        e("div",{style:{textAlign:"center",marginBottom:"20px"}},
+          e("h3",{style:{fontSize:"20px",fontWeight:800,letterSpacing:"-0.02em",background:"linear-gradient(135deg,#06b6d4,#22d3ee)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",margin:0}},"Checklist de Lectura Crítica"),
+          e("p",{style:{color:"#94a3b8",fontSize:"13px",marginTop:"4px"}},"Pasos para evaluar cualquier estudio clínico")
+        ),
+        e("div",{style:{maxWidth:"800px",margin:"0 auto",display:"flex",flexDirection:"column",gap:"14px"}},
+          CHECKLIST_LC.map(function(ck,i){
+            return e("div",{key:i,style:{display:"flex",gap:"16px",alignItems:"stretch",animation:"ecept_fadeSlideUp 320ms cubic-bezier(0.16,1,0.3,1) "+(i*60)+"ms both",position:"relative"}},
+              // Number badge + connecting line
+              e("div",{style:{display:"flex",flexDirection:"column",alignItems:"center",flexShrink:0}},
+                e("div",{style:{width:"42px",height:"42px",borderRadius:"50%",background:"linear-gradient(135deg,"+ck.col+"22,"+ck.col+"0c)",border:"2px solid "+ck.col,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:"15px",color:ck.col,boxShadow:"0 0 12px "+ck.col+"30"}},ck.paso),
+                i<CHECKLIST_LC.length-1&&e("div",{style:{flex:1,width:"2px",background:"linear-gradient(180deg,"+ck.col+"40,rgba(255,255,255,0.04))",marginTop:"4px",minHeight:"20px"}})
+              ),
+              e("div",{style:{flex:1,background:"linear-gradient(180deg,rgba(13,18,36,0.7),rgba(10,14,31,0.5))",border:"1px solid "+ck.col+"24",borderRadius:"14px",padding:"16px 20px",marginBottom:"4px"}},
+                e("h4",{style:{fontSize:"15px",fontWeight:700,color:C.tx,marginBottom:"6px",letterSpacing:"-0.01em"}},ck.pregunta),
+                e("p",{style:{fontSize:"12px",color:"#cbd5e1",lineHeight:1.65}},ck.detalle)
+              )
             )
-          )
-        })
+          })
+        )
       )
     )
 
     ,vista==="profile"&&e(ProfileView,{user:ecuUser,onBack:function(){go("home");}})
+    ,vista==="favoritos"&&e(FavoritesView,{user:ecuUser,go:go})
     ,vista==="flashcards"&&e(DecksView,{user:ecuUser,onBack:function(){go("home");},go:go,onLoginRequest:function(){setEcuShowAuth(true);}})
     ,vista==="flashcards_deck"&&e(DeckDetailView,{user:ecuUser,deck:window.ECEPT_DECK_SELECTED,onBack:function(){go("flashcards");},go:go})
     ,vista==="flashcards_study"&&e(StudyView,{user:ecuUser,deck:window.ECEPT_DECK_SELECTED||null,onBack:function(){go(window.ECEPT_DECK_SELECTED?"flashcards_deck":"flashcards");},go:go,onLoginRequest:function(){setEcuShowAuth(true);}})
@@ -1073,7 +1324,11 @@ function App(){
     // ════════════ BACK BUTTON (floating, hidden on home only) ════════════
     vista!=="home"&&e("button",{onClick:handleBack,style:{position:"fixed",bottom:"20px",left:"20px",background:C.ac,color:"#fff",border:"none",borderRadius:"50%",width:"48px",height:"48px",fontSize:"20px",cursor:"pointer",boxShadow:"0 4px 20px "+C.gl,zIndex:90,display:"flex",alignItems:"center",justifyContent:"center"}},"←"),
     // ════════════ CHATBOT (floating bottom-right) ════════════
-    e(ChatBot,{onLoginRequest:function(){setEcuShowAuth(true);}}),
+    e(ChatBot,{user:ecuUser,onLoginRequest:function(){setEcuShowAuth(true);}}),
+    // ════════════ DEBUG BUTTON (admin-only, bottom-right above chat) ════════════
+    ecuUser&&ecuRole==="admin"&&!dpOpen&&e("button",{onClick:function(){setDpOpen(true);},style:{position:"fixed",bottom:80,right:20,zIndex:100,background:"#1a2040",color:"#e2e8f0",border:"1px solid #3b82f6",borderRadius:12,padding:"10px 14px",fontSize:13,cursor:"pointer"}},"🛠 Debug"),
+    // ════════════ DEBUG PANEL (modal overlay) ════════════
+    dpOpen&&e("div",{style:{position:"fixed",inset:0,zIndex:200,overflowY:"auto",background:"#080e1f"}},e(DebugPanel,{user:ecuUser,onClose:function(){setDpOpen(false);}})),
     // ════════════ AUTH MODAL ════════════
     ecuShowAuth&&e(AuthModal,{onSuccess:function(){setEcuShowAuth(false);},onClose:function(){setEcuShowAuth(false);}})
   );

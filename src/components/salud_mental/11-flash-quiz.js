@@ -82,9 +82,9 @@ function FlashDeck(p){
     ),
     // Tarjeta
     e("div",{style:{position:"relative"}},
-      e("button",{onClick:toggle,style:{width:"100%",minHeight:220,padding:"26px 20px",background:revealed?"linear-gradient(135deg,"+ax(c,.14)+","+C.cd+" 90%)":C.cd,border:"1px solid "+(revealed?ax(c,.4):C.bd),borderLeft:"4px solid "+c,borderRadius:14,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:12,animation:"fadeIn .25s",transition:"all .2s"}},
+      e("button",{onClick:toggle,style:{width:"100%",minHeight:220,padding:"26px 20px",background:revealed?"linear-gradient(135deg,"+ax(c,.14)+","+C.cd+" 90%)":C.cd,border:"1px solid "+(revealed?ax(c,.14):C.bd),borderLeft:"4px solid "+c,borderRadius:14,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:12,animation:"fadeIn .25s",transition:"all .2s"}},
         e("div",{style:{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}},
-          e("div",{style:{fontSize:10,fontWeight:800,color:c,letterSpacing:1.8,textTransform:"uppercase",padding:"3px 9px",background:ax(c,.15),borderRadius:5,border:"1px solid "+ax(c,.3)}},revealed?"✓ Respuesta":"❓ Pregunta"),
+          e("div",{style:{fontSize:10,fontWeight:800,color:c,letterSpacing:1.8,textTransform:"uppercase",padding:"3px 9px",background:ax(c,.15),borderRadius:5,border:"1px solid "+ax(c,.12)}},revealed?"✓ Respuesta":"❓ Pregunta"),
           card.own?e("div",{style:{fontSize:9.5,fontWeight:800,color:C.pearl,letterSpacing:1.3,textTransform:"uppercase",padding:"3px 8px",background:ax(C.pearl,.15),borderRadius:5,border:"1px solid "+ax(C.pearl,.3)}},"✦ Mía"):null,
           e("div",{style:{flex:1,textAlign:"right",fontSize:10.5,color:C.mt,fontStyle:"italic"}},"Toca para "+(revealed?"volver":"revelar"))
         ),
@@ -118,7 +118,7 @@ function FlashDeck(p){
       e("div",{style:{background:C.cd,border:"1px solid "+ax(C.pearl,.4),borderLeft:"4px solid "+C.pearl,borderRadius:14,padding:18,maxWidth:500,width:"100%",maxHeight:"90vh",overflowY:"auto"}},
         e("div",{style:{display:"flex",alignItems:"center",gap:8,marginBottom:14}},
           e("div",{style:{fontSize:20}},"✦"),
-          e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",fontFamily:"Playfair Display",flex:1}},editingIdx===null?"Nueva flashcard":"Editar flashcard"),
+          e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",fontFamily:"Inter,DM Sans",flex:1}},editingIdx===null?"Nueva flashcard":"Editar flashcard"),
           e("button",{onClick:function(){setEditorOpen(false);},style:{padding:"5px 9px",background:C.bd,border:"1px solid "+C.bd2,color:C.mt,borderRadius:7,fontSize:11,fontWeight:700,cursor:"pointer"}},"✕")
         ),
         e("label",{style:{display:"block",fontSize:10.5,fontWeight:800,color:C.pearl,letterSpacing:1.5,textTransform:"uppercase",marginBottom:5}},"❓ Pregunta"),
@@ -151,9 +151,9 @@ function Quiz(p){
   if(done){
     var pct=Math.round(score/p.items.length*100);
     var msg=pct>=80?"🏆 Dominas el tema":pct>=60?"💪 Bien, repasa lo fallado":"📚 Toca releer";
-    return e("div",{style:{padding:24,background:"linear-gradient(135deg,"+ax(c,.15)+","+ax(c,.04)+")",border:"1px solid "+ax(c,.4),borderRadius:14,textAlign:"center"}},
+    return e("div",{style:{padding:24,background:"linear-gradient(135deg,"+ax(c,.15)+","+ax(c,.04)+")",border:"1px solid "+ax(c,.14),borderRadius:14,textAlign:"center"}},
       e("div",{style:{fontSize:42,marginBottom:8}},pct>=80?"🏆":pct>=60?"💪":"📚"),
-      e("div",{style:{fontFamily:"Playfair Display",fontSize:28,fontWeight:900,color:c,marginBottom:4}},score+" / "+p.items.length),
+      e("div",{style:{fontFamily:"Inter,DM Sans",fontSize:28,fontWeight:900,color:c,marginBottom:4}},score+" / "+p.items.length),
       e("div",{style:{fontSize:13,color:C.mt,marginBottom:18}},msg),
       e("button",{onClick:reset,style:{padding:"10px 22px",background:c,color:"#fff",border:"none",borderRadius:9,fontWeight:700,fontSize:13,letterSpacing:.3}},"🔄 Reintentar")
     );
@@ -182,7 +182,7 @@ function Quiz(p){
         e("div",{style:{flex:1}},op)
       );
     }),
-    pick!==null?e("div",{style:{marginTop:10,padding:13,background:ax(c,.08),border:"1px solid "+ax(c,.3),borderLeft:"4px solid "+c,borderRadius:9,animation:"fadeIn .25s"}},
+    pick!==null?e("div",{style:{marginTop:10,padding:13,background:ax(c,.08),border:"1px solid "+ax(c,.12),borderLeft:"4px solid "+c,borderRadius:9,animation:"fadeIn .25s"}},
       e("div",{style:{fontSize:10,fontWeight:800,color:c,letterSpacing:1,marginBottom:5,textTransform:"uppercase"}},pick===q.r?"✓ Correcto":"✗ Explicación"),
       e("div",{style:{fontSize:13,lineHeight:1.55,color:C.tx}},q.x),
       e("button",{onClick:next,style:{marginTop:11,padding:"8px 18px",background:c,color:"#fff",border:"none",borderRadius:7,fontWeight:700,fontSize:12.5}},ix+1>=p.items.length?"Ver resultado":"Siguiente →")

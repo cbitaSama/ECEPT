@@ -21,7 +21,7 @@ function RootHub(p){
           e("div",{style:{fontSize:30,width:56,height:56,borderRadius:14,background:ax(r.c,.22),border:"1px solid "+ax(r.c,.45),display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}},r.ic),
           e("div",{style:{flex:1,minWidth:0}},
             e("div",{style:{fontSize:10,fontWeight:800,color:r.c,letterSpacing:1.8,textTransform:"uppercase",marginBottom:2}},r.count),
-            e("div",{style:{fontSize:22,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.15,fontFamily:"Playfair Display"}},r.t)
+            e("div",{style:{fontSize:22,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.15,fontFamily:"Inter,DM Sans"}},r.t)
           ),
           e("div",{style:{fontSize:24,color:r.c,fontWeight:300}},"›")
         ),
@@ -33,18 +33,18 @@ function RootHub(p){
     // === REPASO GLOBAL DE TODO SALUD MENTAL ===
     e("div",{style:{padding:"13px 15px",background:"linear-gradient(135deg,"+ax(C.pearl,.12)+","+ax(C.pearl,.02)+" 90%)",border:"1px solid "+ax(C.pearl,.35),borderRadius:14,margin:"8px 0 12px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:C.pearl,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Repaso combinado"),
-      e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Playfair Display"}},"Toda Salud Mental II"),
+      e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Inter,DM Sans"}},"Toda Salud Mental"),
       e("div",{style:{fontSize:12,color:C.mt,marginTop:4,lineHeight:1.45}},"Psicosis + Neurosis · filtra por tema, busca, añade las tuyas")
     ),
     e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:10,marginBottom:18}},
       e("button",{onClick:function(){p.go("flash-all");},style:{padding:"16px 14px",background:"linear-gradient(135deg,"+ax(C.pearl,.18)+","+C.cd+" 90%)",border:"1px solid "+ax(C.pearl,.4),borderLeft:"4px solid "+C.pearl,borderRadius:12,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:5,minHeight:95}},
         e("div",{style:{fontSize:22,marginBottom:3}},"🃏"),
-        e("div",{style:{fontSize:13.5,fontWeight:800,color:"#fff",lineHeight:1.25,fontFamily:"Playfair Display"}},"Flashcards globales"),
+        e("div",{style:{fontSize:13.5,fontWeight:800,color:"#fff",lineHeight:1.25,fontFamily:"Inter,DM Sans"}},"Flashcards globales"),
         e("div",{style:{fontSize:11,color:C.mt,lineHeight:1.4}},"Todas las flashcards oficiales + las tuyas, filtros por tema")
       ),
       e("button",{onClick:function(){p.go("quiz-all");},style:{padding:"16px 14px",background:"linear-gradient(135deg,"+ax(C.pearl,.18)+","+C.cd+" 90%)",border:"1px solid "+ax(C.pearl,.4),borderLeft:"4px solid "+C.pearl,borderRadius:12,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:5,minHeight:95}},
         e("div",{style:{fontSize:22,marginBottom:3}},"❓"),
-        e("div",{style:{fontSize:13.5,fontWeight:800,color:"#fff",lineHeight:1.25,fontFamily:"Playfair Display"}},"Quiz global"),
+        e("div",{style:{fontSize:13.5,fontWeight:800,color:"#fff",lineHeight:1.25,fontFamily:"Inter,DM Sans"}},"Quiz global"),
         e("div",{style:{fontSize:11,color:C.mt,lineHeight:1.4}},"Todos los casos clínicos · modo tarjeta o lista")
       )
     ),

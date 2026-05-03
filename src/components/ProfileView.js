@@ -152,10 +152,10 @@ function ProfileView(props){
     }, loading?loadLabel:label);
   }
 
-  return e("div",{style:{maxWidth:"540px",margin:"0 auto",padding:"20px 16px 80px"}},
+  return e("div",{style:{maxWidth:"640px",margin:"0 auto",padding:"32px 20px 80px",animation:"ecept_fadeSlideUp 420ms cubic-bezier(0.16,1,0.3,1)"}},
 
     // ── Back + title ──
-    e("div",{style:{display:"flex",alignItems:"center",gap:"12px",marginBottom:"24px"}},
+    e("div",{style:{display:"flex",alignItems:"center",gap:"12px",marginBottom:"32px"}},
       e("button",{
         onClick:props.onBack,
         style:{
@@ -163,26 +163,35 @@ function ProfileView(props){
           fontSize:"20px", cursor:"pointer",
           minWidth:"44px", minHeight:"44px",
           display:"flex", alignItems:"center", justifyContent:"center",
-          borderRadius:"10px"
-        }
+          borderRadius:"10px",
+          transition:"background-color 200ms ease-out"
+        },
+        onMouseEnter:function(ev){ ev.currentTarget.style.background="rgba(255,255,255,0.04)"; },
+        onMouseLeave:function(ev){ ev.currentTarget.style.background="none"; }
       },"←"),
-      e("div",{style:{fontSize:"18px",fontWeight:700,color:C.tx}},"Mi perfil")
+      e("div",{style:{display:"flex",alignItems:"center",gap:"10px"}},
+        e(window.Logo||"span",{ size: 28, idSuffix:"profhdr" }),
+        e("div",{style:{fontSize:"24px",fontWeight:700,color:C.tx,letterSpacing:"-0.015em"}},"Mi perfil")
+      )
     ),
 
     // ── 1. HEADER: avatar + name + email + role ──
     e("div",{style:{
-      background:C.cd, border:"1px solid "+C.bd, borderRadius:"14px",
-      padding:"24px 16px 20px", marginBottom:"14px", textAlign:"center"
+      background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",
+      border:"1px solid "+C.bd, borderRadius:"20px",
+      padding:"32px 24px 24px", marginBottom:"20px", textAlign:"center",
+      boxShadow:"0 2px 8px rgba(0,0,0,0.25)"
     }},
       e("div",{style:{
-        width:"56px", height:"56px", borderRadius:"50%",
+        width:"72px", height:"72px", borderRadius:"50%",
         background:"linear-gradient(135deg,#60a5fa,#a78bfa)",
         display:"flex", alignItems:"center", justifyContent:"center",
-        fontSize:"22px", fontWeight:700, color:"#fff",
-        margin:"0 auto 12px"
+        fontSize:"28px", fontWeight:800, color:"#fff",
+        margin:"0 auto 14px",
+        boxShadow:"0 0 24px rgba(167,139,250,0.30), 0 4px 12px rgba(0,0,0,0.25)"
       }},initial),
-      e("div",{style:{fontSize:"16px",fontWeight:700,color:C.tx,marginBottom:"4px"}},displayName),
-      e("div",{style:{fontSize:"12px",color:C.dm,marginBottom:"10px"}},email),
+      e("div",{style:{fontSize:"20px",fontWeight:700,color:C.tx,marginBottom:"4px",letterSpacing:"-0.015em"}},displayName),
+      e("div",{style:{fontSize:"13px",color:C.dm,marginBottom:"12px"}},email),
       PV_roleBadge(role)
     ),
 

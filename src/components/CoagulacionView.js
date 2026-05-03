@@ -7,7 +7,7 @@ function CoagulacionView(props){
     // Header
     e("div",{style:{textAlign:"center",marginBottom:"22px"}},
       e("div",{style:{fontSize:"40px",marginBottom:"4px"}},"🩸"),
-      e("h1",{style:{fontFamily:"'Playfair Display',serif",fontSize:"26px",fontWeight:900,
+      e("h1",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"26px",fontWeight:900,
         background:"linear-gradient(135deg,#dc2626 0%,#ef4444 50%,#f59e0b 100%)",
         WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",letterSpacing:"-0.5px"}},
         "Cascada de Coagulación"),
@@ -27,7 +27,7 @@ function CoagulacionView(props){
     ),
 
     // Cascada visual
-    e("h4",{style:{fontFamily:"'Playfair Display',serif",fontSize:"16px",fontWeight:700,marginBottom:"12px",color:"#34d399"}},"🌊 Cascada de Coagulación"),
+    e("h4",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"16px",fontWeight:700,marginBottom:"12px",color:"#34d399"}},"🌊 Cascada de Coagulación"),
     e("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px",marginBottom:"12px"}},
       // Extrínseca
       e("div",{style:{padding:"14px",borderRadius:"12px",border:"1.5px solid rgba(244,114,182,.3)",background:"rgba(244,114,182,.04)"}},

@@ -42,6 +42,7 @@ function DecksView(props){
   s=useState(null);  var DV_importData=s[0],    DV_setImportData=s[1];
   s=useState("");    var DV_importError=s[0],   DV_setImportError=s[1];
   s=useState(false); var DV_importLoading=s[0], DV_setImportLoading=s[1];
+  s=useState({open:false,deckId:null,mode:null}); var DV_elionFlow=s[0], DV_setElionFlow=s[1];
 
   // ── Inject CSS once ──
   useEffect(function(){
@@ -49,8 +50,8 @@ function DecksView(props){
       var st=document.createElement("style");
       st.textContent=
         "@keyframes DV_shimmer{0%{background-position:-300px 0}100%{background-position:300px 0}}" +
-        ".dv-card{transition:transform .15s ease-out,border-color .15s ease-out}" +
-        ".dv-card:hover{transform:translateY(-2px)}" +
+        ".dv-card{transition:transform 240ms cubic-bezier(0.32,0.72,0,1),border-color 240ms cubic-bezier(0.32,0.72,0,1),box-shadow 240ms ease-out}" +
+        ".dv-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.30), 0 2px 8px rgba(0,0,0,0.20)}" +
         ".dv-skel{background:linear-gradient(90deg,rgba(255,255,255,.03) 25%,rgba(255,255,255,.08) 50%,rgba(255,255,255,.03) 75%);background-size:600px 100%;animation:DV_shimmer 1.4s ease-in-out infinite;border-radius:6px}";
       document.head.appendChild(st);
       DV_styleInjected=true;
@@ -60,6 +61,13 @@ function DecksView(props){
   function DV_loadData(){
     if((!user&&!DV_guestMode)||!window.ECEPT_SUPABASE){ DV_setLoading(false); return; }
     DV_setLoading(true); DV_setLoadErr("");
+    var DV_loadStart=Date.now();
+    var DV_minLoading=400;
+    function DV_finishLoading(fn){
+      var elapsed=Date.now()-DV_loadStart;
+      var remaining=Math.max(0,DV_minLoading-elapsed);
+      setTimeout(fn,remaining);
+    }
 
     var deckPromise;
     if(user&&!DV_guestMode){
@@ -94,24 +102,30 @@ function DecksView(props){
     Promise.all([deckPromise,cardsPromise,duePromise]).then(function(results){
       var deckRes=results[0], cardRes=results[1], dueRes=results[2];
       if(deckRes&&deckRes.error){
-        DV_setLoading(false);
-        DV_setLoadErr("No se pudieron cargar las barajas.");
+        DV_finishLoading(function(){
+          DV_setLoading(false);
+          DV_setLoadErr("No se pudieron cargar las barajas.");
+        });
         return;
       }
-      DV_setDecks((deckRes&&deckRes.data)||[]);
-
       var counts={};
       var cards=(cardRes&&cardRes.data)?cardRes.data:[];
       for(var i=0;i<cards.length;i++){
         var did=cards[i].deck_id;
         counts[did]=(counts[did]||0)+1;
       }
-      DV_setCounts(counts);
-      DV_setDueToday((dueRes&&typeof dueRes.count==="number")?dueRes.count:0);
-      DV_setLoading(false);
+      var dueCount=(dueRes&&typeof dueRes.count==="number")?dueRes.count:0;
+      DV_finishLoading(function(){
+        DV_setDecks((deckRes&&deckRes.data)||[]);
+        DV_setCounts(counts);
+        DV_setDueToday(dueCount);
+        DV_setLoading(false);
+      });
     }).catch(function(){
-      DV_setLoading(false);
-      DV_setLoadErr("Error de conexión.");
+      DV_finishLoading(function(){
+        DV_setLoading(false);
+        DV_setLoadErr("Error de conexión.");
+      });
     });
   }
 
@@ -212,9 +226,11 @@ function DecksView(props){
       DV_setImportData(null);
       DV_setImportError("");
       DV_loadData();
+      if(window.ECEPT_toast){ window.ECEPT_toast("Baraja importada con éxito","success"); }
     }catch(err){
       console.error("import error",err);
       DV_setImportError("Error al importar. Intentá de nuevo.");
+      if(window.ECEPT_toast){ window.ECEPT_toast("Error al importar la baraja","error"); }
     }finally{
       DV_setImportLoading(false);
     }
@@ -304,7 +320,7 @@ function DecksView(props){
     return e("div",{style:{maxWidth:"540px",margin:"0 auto",padding:"20px 20px 60px"}},
       e("div",{style:{textAlign:"center",padding:"20px 0"}},
         e("div",{style:{fontSize:"56px",marginBottom:"16px"}},"🎴"),
-        e("h2",{style:{fontSize:"22px",fontWeight:800,color:C.tx,fontFamily:"'Playfair Display',serif",marginBottom:"12px"}},"Flashcards"),
+        e("h2",{style:{fontSize:"22px",fontWeight:800,color:C.tx,fontFamily:"'Inter','DM Sans',sans-serif",marginBottom:"12px"}},"Flashcards"),
         e("p",{style:{fontSize:"14px",color:C.dm,lineHeight:1.6,maxWidth:"300px",margin:"0 auto 28px"}},"Iniciá sesión para crear tus barajas personales, guardar tu progreso y acceder a todas las funciones."),
         e("button",{
           onClick:function(){ if(typeof props.onLoginRequest==="function") props.onLoginRequest(); },
@@ -358,14 +374,17 @@ function DecksView(props){
       onClick:function(){ if(!isMenuOpen&&DV_dragIdx===null) DV_openDeck(deck); },
       style:{
         position:"relative",
-        background:"linear-gradient(135deg,"+C.cd+","+col+"08)",
-        border:"1px solid "+col+"35",
-        borderRadius:"12px",padding:"16px",
+        background:"linear-gradient(135deg,"+C.cd+","+col+"0a)",
+        border:"1px solid "+col+"38",
+        borderRadius:"16px",padding:"18px 20px",
+        minHeight:"160px",
         cursor:isDragging?"grabbing":"pointer",
         animation:"slideUp .4s ease-out "+(i*0.05)+"s both",
         opacity:isDragging?0.4:1,
         transition:"opacity .15s",
         boxSizing:"border-box",
+        display:"flex",
+        flexDirection:"column",
         boxShadow:isDropTarget?"inset 0 3px 0 #a78bfa":"none"
       }
     },
@@ -504,10 +523,12 @@ function DecksView(props){
       onClick:function(){ if(!isMenuOpen) DV_openDeck(deck); },
       style:{
         position:"relative",
-        background:"linear-gradient(135deg,"+C.cd+","+col+"08)",
-        border:"1px solid "+col+"35",
-        borderRadius:"12px",padding:"16px",cursor:"pointer",
-        animation:"slideUp .4s ease-out "+(i*0.05)+"s both"
+        background:"linear-gradient(135deg,"+C.cd+","+col+"0a)",
+        border:"1px solid "+col+"38",
+        borderRadius:"16px",padding:"18px 20px",cursor:"pointer",
+        minHeight:"160px",
+        animation:"slideUp .4s ease-out "+(i*0.05)+"s both",
+        display:"flex",flexDirection:"column",boxSizing:"border-box"
       }
     },
       // Header row: icon + name + (menu OR badge)
@@ -591,11 +612,11 @@ function DecksView(props){
   var officialDecks=DV_decks.filter(function(d){ return d.is_official; });
   var userDecks=DV_decks.filter(function(d){ return !d.is_official; });
 
-  return e("div",{style:{maxWidth:"960px",margin:"0 auto",padding:"20px 16px 80px",position:"relative"}},
+  return e("div",{style:{width:"100%",maxWidth:"1400px",margin:"0 auto",padding:"24px max(16px, calc((100vw - 1400px) / 2 + 24px)) 80px",position:"relative",boxSizing:"border-box"}},
 
     // ── Header ──
     e("div",{style:{marginBottom:"4px"}},
-      e("div",{style:{fontSize:"22px",fontWeight:800,color:C.tx,fontFamily:"'Playfair Display',serif"}},"🎴 Flashcards")
+      e("div",{style:{fontSize:"22px",fontWeight:800,color:C.tx,fontFamily:"'Inter','DM Sans',sans-serif"}},"🎴 Flashcards")
     ),
     e("div",{style:{fontSize:"13px",color:C.dm,marginLeft:"54px",marginBottom:"22px"}},DV_guestMode?"Barajas oficiales":"Tus barajas de estudio"),
 
@@ -679,7 +700,18 @@ function DecksView(props){
           color:C.dm,
           fontSize:"14px",fontWeight:700,cursor:"pointer"
         }
-      },"⬆ Importar")
+      },"⬆ Importar"),
+      user&&e("button",{
+        onClick:function(){ DV_setElionFlow({open:true,deckId:null,mode:"new"}); },
+        style:{
+          flex:"0 0 auto",minHeight:"52px",padding:"14px 18px",
+          borderRadius:"14px",
+          background:"linear-gradient(135deg,#a78bfa,#60a5fa)",
+          border:"none",color:"#fff",
+          fontSize:"14px",fontWeight:700,cursor:"pointer",
+          boxShadow:"0 4px 12px rgba(167,139,250,0.3)"
+        }
+      },"✨ Crear con IA")
     ),
 
     // ── Load error ──
@@ -689,18 +721,13 @@ function DecksView(props){
       padding:"10px 12px",fontSize:"13px",marginBottom:"16px"
     }},DV_loadErr),
 
-    // ── Loading skeletons ──
-    DV_loading && e("div",{style:{
-      display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:"12px"
-    }},
-      DV_skeletonCard("sk1"),DV_skeletonCard("sk2"),
-      DV_skeletonCard("sk3"),DV_skeletonCard("sk4")
-    ),
+    // ── Loading skeletons (premium SkeletonList) ──
+    DV_loading && e(window.SkeletonList || "div",{count:6,grid:true,minWidth:280,minHeight:160}),
 
     // ── Official decks section ──
     !DV_loading && officialDecks.length>0 && e("div",{style:{marginBottom:"28px"}},
       e("h2",{style:sectionTitleStyle},"Barajas oficiales de ECEPT"),
-      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:"12px"}},
+      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:"16px"}},
         officialDecks.map(function(d,i){ return DV_deckCard(d,i); })
       )
     ),
@@ -726,15 +753,16 @@ function DecksView(props){
             },"Iniciar sesión / Registrarse")
           )
         : (userDecks.length===0
-            ? e("div",{style:{
-                background:C.cd,border:"1px dashed "+C.bd,
-                borderRadius:"14px",padding:"32px 20px",textAlign:"center"
-              }},
-                e("div",{style:{fontSize:"40px",marginBottom:"10px"}},"📋"),
-                e("p",{style:{fontSize:"14px",color:C.tx,fontWeight:600,marginBottom:"4px"}},"Aún no creaste ninguna baraja."),
-                e("p",{style:{fontSize:"12px",color:C.dm,lineHeight:1.5}},"¡Empezá ahora! Tocá «+ Crear baraja» arriba.")
-              )
-            : e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:"12px"}},
+            ? e(window.EmptyState||"div",{
+                icon:"🎴",
+                title:"Todavía no tenés barajas",
+                description:"Creá tu primera baraja desde cero o importá una desde JSON. Cada baraja agrupa flashcards que estudiás con repetición espaciada.",
+                actions:[
+                  {label:"+ Crear baraja",onClick:DV_openCreate,variant:"primary"},
+                  {label:"⬇ Importar JSON",onClick:function(){DV_setImportOpen(true);DV_setImportData(null);DV_setImportError("");},variant:"secondary"}
+                ]
+              })
+            : e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:"16px"}},
                 userDecks.map(function(d,i){ return DV_userDeckCard(d,i); })
               )
           )
@@ -1113,7 +1141,42 @@ function DecksView(props){
         )
       ),
       document.body
-    )
+    ),
+    DV_elionFlow.open&&user&&e(ElionGenerator,{
+      user:user,
+      supabase:window.ECEPT_SUPABASE,
+      deckId:DV_elionFlow.deckId||null,
+      onImport:async function(cards,sourceName){
+        var targetDeckId=DV_elionFlow.deckId;
+        if(!targetDeckId){
+          var deckRes=await window.ECEPT_SUPABASE.from("decks").insert({
+            user_id:user.id,
+            name:sourceName||"Generado con IA",
+            is_official:false,
+            color:"#a78bfa",
+            icon:"✨"
+          }).select("id").single();
+          if(deckRes.error) return;
+          targetDeckId=deckRes.data.id;
+        }
+        var inserts=[];
+        for(var ni=0;ni<cards.length;ni++){
+          inserts.push({
+            deck_id:targetDeckId,
+            user_id:user.id,
+            is_official:false,
+            card_type:cards[ni].card_type,
+            front:cards[ni].front,
+            back:cards[ni].back||"",
+            tags:cards[ni].tags||[]
+          });
+        }
+        await window.ECEPT_SUPABASE.from("flashcards").insert(inserts);
+        DV_setElionFlow({open:false,deckId:null,mode:null});
+        DV_loadData();
+      },
+      onClose:function(){ DV_setElionFlow({open:false,deckId:null,mode:null}); }
+    })
   );
 }
 

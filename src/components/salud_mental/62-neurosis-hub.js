@@ -20,7 +20,7 @@ function NeurosisHub(p){
         e("div",{style:{fontSize:30}},"🌀"),
         e("div",null,
           e("div",{style:{fontSize:10,fontWeight:800,color:C.anx,letterSpacing:2,textTransform:"uppercase",marginBottom:2}},"60 entidades DSM-5-TR"),
-          e("h1",{style:{fontSize:26,fontWeight:900,color:"#fff",letterSpacing:.15,lineHeight:1.1,fontFamily:"Playfair Display"}},"Neurosis")
+          e("h1",{style:{fontSize:26,fontWeight:900,color:"#fff",letterSpacing:.15,lineHeight:1.1,fontFamily:"Inter,DM Sans"}},"Neurosis")
         )
       ),
       e("div",{className:"prose",style:{fontSize:13.5}},"Grupo clásico de trastornos mentales donde la ",e("b",null,"prueba de realidad está conservada"),". El paciente reconoce que sus síntomas son parte de sí mismo y le generan sufrimiento. En DSM-5-TR ya no se usa el término 'neurosis' formalmente, pero clínicamente sigue siendo útil para agrupar estos 4 capítulos.")
@@ -31,7 +31,7 @@ function NeurosisHub(p){
           e("div",{style:{fontSize:26,width:48,height:48,borderRadius:12,background:ax(t.c,.2),border:"1px solid "+ax(t.c,.4),display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}},t.ic),
           e("div",{style:{flex:1,minWidth:0}},
             e("div",{style:{fontSize:10,fontWeight:800,color:t.c,letterSpacing:1.8,textTransform:"uppercase",marginBottom:2}},"Tema "+t.n),
-            e("div",{style:{fontSize:17,fontWeight:800,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Playfair Display"}},t.t)
+            e("div",{style:{fontSize:17,fontWeight:800,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Inter,DM Sans"}},t.t)
           ),
           e("div",{style:{fontSize:22,color:t.c,fontWeight:300}},"›")
         ),
