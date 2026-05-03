@@ -132,6 +132,18 @@ function CB_stripExportMeta(text) {
   return String(text).replace(/===EXPORT_DOCUMENT===[\s\S]*?===END_EXPORT===/, '').trim();
 }
 
+function CB_stripMdPlain(text) {
+  if (!text) return '';
+  return String(text)
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/__([^_]+)__/g, '$1')
+    .replace(/\*([^*\n]+)\*/g, '$1')
+    .replace(/_([^_\n]+)_/g, '$1')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .trim();
+}
+
 function CB_extractFlashcardsBlock(text) {
   if (!text) return null;
   var match = String(text).match(/===FLASHCARDS_GEN===\s*([\s\S]*?)\s*===END_FLASHCARDS===/);
@@ -139,6 +151,15 @@ function CB_extractFlashcardsBlock(text) {
   try {
     var parsed = JSON.parse(match[1]);
     if (!parsed || !Array.isArray(parsed.cards) || parsed.cards.length === 0) return null;
+    // Strip markdown defensive — el LLM a veces ignora la regla.
+    parsed.deckName = CB_stripMdPlain(parsed.deckName || '');
+    parsed.cards = parsed.cards.map(function(c) {
+      return {
+        q: CB_stripMdPlain(c.q || ''),
+        a: CB_stripMdPlain(c.a || ''),
+        tag: c.tag ? CB_stripMdPlain(c.tag) : null
+      };
+    });
     return parsed;
   } catch(e) { return null; }
 }
@@ -222,28 +243,216 @@ function CB_exportToDOCX(content, meta) {
   });
 }
 
+// ── Helpers DOCX: parser markdown serio ──────────────────────
+function CB_stripInlineMd(text) {
+  if (!text) return '';
+  return String(text)
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/__([^_]+)__/g, '$1')
+    .replace(/\*([^*]+)\*/g, '$1')
+    .replace(/_([^_]+)_/g, '$1')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+}
+
+function CB_parseInlineToRuns(text, docxLib) {
+  var TextRun = docxLib.TextRun;
+  // Strip links → solo texto del label
+  var cleaned = String(text || '').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+  var runs = [];
+  // Pattern combinado: bold ** __ | italics * _ | code `
+  var re = /(\*\*[^*]+\*\*|__[^_]+__|`[^`]+`|\*[^*\n]+\*|_[^_\n]+_)/g;
+  var lastIdx = 0;
+  var m;
+  while ((m = re.exec(cleaned)) !== null) {
+    if (m.index > lastIdx) runs.push(new TextRun({ text: cleaned.slice(lastIdx, m.index) }));
+    var token = m[0];
+    if (token.indexOf('**') === 0) runs.push(new TextRun({ text: token.slice(2, -2), bold: true }));
+    else if (token.indexOf('__') === 0) runs.push(new TextRun({ text: token.slice(2, -2), bold: true }));
+    else if (token.indexOf('`') === 0) runs.push(new TextRun({ text: token.slice(1, -1), font: 'Courier New' }));
+    else if (token.indexOf('*') === 0) runs.push(new TextRun({ text: token.slice(1, -1), italics: true }));
+    else if (token.indexOf('_') === 0) runs.push(new TextRun({ text: token.slice(1, -1), italics: true }));
+    lastIdx = m.index + token.length;
+  }
+  if (lastIdx < cleaned.length) runs.push(new TextRun({ text: cleaned.slice(lastIdx) }));
+  if (runs.length === 0) runs.push(new TextRun({ text: cleaned }));
+  return runs;
+}
+
+function CB_parseMdTable(lines) {
+  if (lines.length < 2) return null;
+  function splitRow(line) {
+    var s = line.trim();
+    if (s.indexOf('|') === 0) s = s.slice(1);
+    if (s.lastIndexOf('|') === s.length - 1) s = s.slice(0, -1);
+    return s.split('|').map(function(c){ return c.trim(); });
+  }
+  var headers = splitRow(lines[0]);
+  var rows = [];
+  for (var j = 2; j < lines.length; j++) {
+    var cells = splitRow(lines[j]);
+    if (cells.length > 0 && cells.some(function(c){ return c.length > 0; })) rows.push(cells);
+  }
+  return { headers: headers, rows: rows };
+}
+
+function CB_buildDocxTable(tableData, docxLib) {
+  var Table = docxLib.Table;
+  var TableRow = docxLib.TableRow;
+  var TableCell = docxLib.TableCell;
+  var Paragraph = docxLib.Paragraph;
+  var TextRun = docxLib.TextRun;
+  var WidthType = docxLib.WidthType;
+  var BorderStyle = docxLib.BorderStyle;
+  var border = {
+    top:    { style: BorderStyle.SINGLE, size: 4, color: 'cccccc' },
+    bottom: { style: BorderStyle.SINGLE, size: 4, color: 'cccccc' },
+    left:   { style: BorderStyle.SINGLE, size: 4, color: 'cccccc' },
+    right:  { style: BorderStyle.SINGLE, size: 4, color: 'cccccc' }
+  };
+  var headerCells = tableData.headers.map(function(h) {
+    return new TableCell({
+      children: [new Paragraph({ children: [new TextRun({ text: CB_stripInlineMd(h), bold: true })] })],
+      shading: { type: 'solid', color: 'auto', fill: 'F0F0F0' },
+      borders: border
+    });
+  });
+  var rows = [new TableRow({ children: headerCells, tableHeader: true })];
+  tableData.rows.forEach(function(row) {
+    var cells = row.map(function(c) {
+      return new TableCell({
+        children: [new Paragraph({ children: CB_parseInlineToRuns(c, docxLib) })],
+        borders: border
+      });
+    });
+    rows.push(new TableRow({ children: cells }));
+  });
+  return new Table({ rows: rows, width: { size: 100, type: WidthType.PERCENTAGE } });
+}
+
 function CB_doExportToDOCX(content, meta, docxLib) {
   var Document = docxLib.Document;
   var Packer = docxLib.Packer;
   var Paragraph = docxLib.Paragraph;
   var TextRun = docxLib.TextRun;
   var HeadingLevel = docxLib.HeadingLevel;
-  var paragraphs = [];
-  paragraphs.push(new Paragraph({ text: meta.title || 'Documento ECEPT', heading: HeadingLevel.TITLE }));
-  paragraphs.push(new Paragraph({ text: '' }));
+  var AlignmentType = docxLib.AlignmentType;
+
+  var children = [];
+
+  // Título
+  children.push(new Paragraph({
+    text: CB_stripInlineMd(meta.title || 'Documento ECEPT'),
+    heading: HeadingLevel.TITLE,
+    spacing: { after: 240 }
+  }));
+
   var lines = String(content || '').split('\n');
-  for (var i = 0; i < lines.length; i++) {
+  var i = 0;
+  while (i < lines.length) {
     var line = lines[i];
-    if (line.indexOf('## ') === 0) paragraphs.push(new Paragraph({ text: line.slice(3), heading: HeadingLevel.HEADING_2 }));
-    else if (line.indexOf('### ') === 0) paragraphs.push(new Paragraph({ text: line.slice(4), heading: HeadingLevel.HEADING_3 }));
-    else if (line.indexOf('# ') === 0) paragraphs.push(new Paragraph({ text: line.slice(2), heading: HeadingLevel.HEADING_1 }));
-    else if (line.trim() === '') paragraphs.push(new Paragraph({ text: '' }));
-    else {
-      var clean = line.replace(/\*\*/g, '').replace(/`/g, '');
-      paragraphs.push(new Paragraph({ children: [new TextRun(clean)] }));
+    var trimmed = line.trim();
+
+    // Skip horizontal rules
+    if (trimmed === '---' || trimmed === '***' || trimmed === '___') {
+      i++;
+      continue;
     }
+
+    // Tabla markdown: detectar header + separator
+    if (trimmed.indexOf('|') === 0 && i + 1 < lines.length &&
+        /^\|[\s:|\-]+\|?\s*$/.test(lines[i + 1].trim())) {
+      var tableLines = [];
+      while (i < lines.length && lines[i].trim().indexOf('|') === 0) {
+        tableLines.push(lines[i]);
+        i++;
+      }
+      var td = CB_parseMdTable(tableLines);
+      if (td && td.headers.length > 0) {
+        children.push(CB_buildDocxTable(td, docxLib));
+        children.push(new Paragraph({ text: '', spacing: { after: 200 } }));
+      }
+      continue;
+    }
+
+    // Code block (skip — agrega como texto plano para no perder)
+    if (/^\s*```/.test(line)) {
+      i++;
+      var codeLines = [];
+      while (i < lines.length && !/^\s*```/.test(lines[i])) { codeLines.push(lines[i]); i++; }
+      i++; // skip closing ```
+      if (codeLines.length > 0) {
+        codeLines.forEach(function(cl) {
+          children.push(new Paragraph({ children: [new TextRun({ text: cl, font: 'Courier New' })] }));
+        });
+      }
+      continue;
+    }
+
+    // Headers
+    var hMatch = trimmed.match(/^(#{1,4})\s+(.+)$/);
+    if (hMatch) {
+      var level = hMatch[1].length;
+      var hLevel = HeadingLevel.HEADING_1;
+      if (level === 2) hLevel = HeadingLevel.HEADING_2;
+      else if (level === 3) hLevel = HeadingLevel.HEADING_3;
+      else if (level === 4) hLevel = HeadingLevel.HEADING_4;
+      children.push(new Paragraph({
+        text: CB_stripInlineMd(hMatch[2]),
+        heading: hLevel,
+        spacing: { before: 200, after: 120 }
+      }));
+      i++;
+      continue;
+    }
+
+    // Bullet
+    var bMatch = trimmed.match(/^[\*\-]\s+(.+)$/);
+    if (bMatch) {
+      children.push(new Paragraph({
+        children: CB_parseInlineToRuns(bMatch[1], docxLib),
+        bullet: { level: 0 },
+        spacing: { after: 80 }
+      }));
+      i++;
+      continue;
+    }
+
+    // Numbered list (sin reference numbering avanzado, usa bullet de fallback)
+    var nMatch = trimmed.match(/^\d+\.\s+(.+)$/);
+    if (nMatch) {
+      children.push(new Paragraph({
+        children: CB_parseInlineToRuns(nMatch[1], docxLib),
+        bullet: { level: 0 },
+        spacing: { after: 80 }
+      }));
+      i++;
+      continue;
+    }
+
+    // Empty line
+    if (trimmed === '') {
+      children.push(new Paragraph({ text: '' }));
+      i++;
+      continue;
+    }
+
+    // Párrafo regular
+    children.push(new Paragraph({
+      children: CB_parseInlineToRuns(trimmed, docxLib),
+      spacing: { after: 120 }
+    }));
+    i++;
   }
-  var doc = new Document({ sections: [{ properties: {}, children: paragraphs }] });
+
+  // Footer
+  children.push(new Paragraph({
+    children: [new TextRun({ text: 'Generado por Elion · ECEPT · ' + new Date().toLocaleDateString('es'), italics: true, size: 18, color: '888888' })],
+    alignment: AlignmentType.CENTER,
+    spacing: { before: 400 }
+  }));
+
+  var doc = new Document({ sections: [{ properties: {}, children: children }] });
   Packer.toBlob(doc).then(function(blob) {
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
@@ -254,7 +463,7 @@ function CB_doExportToDOCX(content, meta, docxLib) {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 200);
   });
 }
 
@@ -1441,7 +1650,8 @@ function ChatBot(props) {
             onMouseEnter: function(ev) { ev.currentTarget.style.transform='scale(1.08)'; },
             onMouseLeave: function(ev) { ev.currentTarget.style.transform='scale(1)'; }
           }, '+'),
-          e('button', {
+          // ✕ cerrar sidebar — SOLO si NO es fullscreen permanente
+          !permanent && e('button', {
             onClick: function() { CB_setSidebarOpen(false); },
             'aria-label':'Cerrar sidebar',
             title:'Cerrar',
@@ -1792,39 +2002,55 @@ function ChatBot(props) {
     CB_settingsOpen && CB_renderSettings(),
 
     // ── Floating button ──
+    // Reescrito: Logo fill width/height del button, zIndex 1; dot SOLO si
+    // logged in. Sin dot gris cuando no hay sesión.
     !CB_open && e('button', {
       onClick: function() {
         if (CB_session === false) { if (typeof props.onLoginRequest === 'function') props.onLoginRequest(); }
         else { CB_setOpen(true); CB_setConnErr(''); }
       },
-      'aria-label':'Abrir asistente Elion',
-      style:{ position:'fixed', bottom:24, right:24, width:60, height:60, minWidth:44, minHeight:44, padding:0, overflow:'visible', borderRadius:'50%', background:'linear-gradient(135deg,#60a5fa 0%,#a78bfa 100%)', border:'none', color:'#fff', cursor:'pointer', boxShadow:'0 0 32px rgba(167,139,250,0.35), 0 8px 24px rgba(0,0,0,0.3)', zIndex:95, display:'flex', alignItems:'center', justifyContent:'center', transition:'transform 240ms cubic-bezier(0.32,0.72,0,1), box-shadow 240ms ease-out', animation:'ecept_scaleIn 360ms cubic-bezier(0.34,1.56,0.64,1) 600ms both' },
+      'aria-label': CB_session === true ? 'Abrir asistente Elion' : 'Iniciar sesión para chatear',
+      style:{
+        position:'fixed', bottom:24, right:24,
+        width:60, height:60, minWidth:44, minHeight:44,
+        padding:0, overflow:'visible',
+        borderRadius:'50%',
+        background:'linear-gradient(135deg,#60a5fa 0%,#a78bfa 100%)',
+        border:'none', color:'#fff', cursor:'pointer',
+        boxShadow:'0 8px 24px rgba(167,139,250,0.40), 0 0 24px rgba(96,165,250,0.30)',
+        zIndex:9000,
+        display:'flex', alignItems:'center', justifyContent:'center',
+        transition:'transform 240ms cubic-bezier(0.32,0.72,0,1), box-shadow 240ms ease-out',
+        animation:'ecept_scaleIn 360ms cubic-bezier(0.34,1.56,0.64,1) 600ms both'
+      },
       onMouseEnter: function(ev) {
         ev.currentTarget.style.transform = 'scale(1.06)';
-        ev.currentTarget.style.boxShadow = '0 0 40px rgba(167,139,250,0.5), 0 12px 28px rgba(0,0,0,0.35)';
+        ev.currentTarget.style.boxShadow = '0 12px 32px rgba(167,139,250,0.50), 0 0 32px rgba(96,165,250,0.40)';
       },
       onMouseLeave: function(ev) {
         ev.currentTarget.style.transform = 'scale(1)';
-        ev.currentTarget.style.boxShadow = '0 0 32px rgba(167,139,250,0.35), 0 8px 24px rgba(0,0,0,0.3)';
+        ev.currentTarget.style.boxShadow = '0 8px 24px rgba(167,139,250,0.40), 0 0 24px rgba(96,165,250,0.30)';
       }
     },
-      // Logo wrapper: zIndex 1 (debajo del dot indicator). drop-shadow despega del gradient.
-      e('div', { style:{ position:'relative', zIndex:1, width:38, height:38, display:'flex', alignItems:'center', justifyContent:'center', filter:'drop-shadow(0 0 6px rgba(255,255,255,0.30)) drop-shadow(0 1px 2px rgba(0,0,0,0.40))' } },
-        e(window.Logo || 'span', { size: 38, animated: true, idSuffix:'fab' })
+      // Logo: ocupa el button completo, drop-shadow doble para destacar contra
+      // el gradient. zIndex 1.
+      e('div', {
+        style:{
+          position:'relative', zIndex:1,
+          width:'100%', height:'100%',
+          display:'flex', alignItems:'center', justifyContent:'center',
+          filter:'drop-shadow(0 0 4px rgba(255,255,255,0.30)) drop-shadow(0 1px 2px rgba(0,0,0,0.30))'
+        }
+      },
+        e(window.Logo || 'span', { size: 36, animated: true, idSuffix:'fab' })
       ),
-      // Indicador de estado: zIndex 2 explícito, esquina inferior derecha (NO centro).
+      // Dot verde SOLO si logged in. Sin sesión = sin dot.
       CB_session === true && e('span', { 'aria-hidden':'true', style:{
         position:'absolute', bottom:4, right:4, width:12, height:12,
         borderRadius:'50%', background:'#34d399',
         border:'2px solid #060a14',
         boxShadow:'0 0 8px rgba(52,211,153,0.6)',
-        animation:'ecept_pulseDot 2.4s ease-in-out infinite',
-        pointerEvents:'none', zIndex:2
-      }}),
-      CB_session === false && e('span', { 'aria-hidden':'true', style:{
-        position:'absolute', bottom:4, right:4, width:12, height:12,
-        borderRadius:'50%', background:'#94a3b8',
-        border:'2px solid #060a14',
+        animation:'ecept_pulseDot 2s ease-in-out infinite',
         pointerEvents:'none', zIndex:2
       }})
     ),

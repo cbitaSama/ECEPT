@@ -397,6 +397,9 @@ module.exports = async function handler(req, res) {
     'Generá entre 5 y 15 cards según el contenido. Cards concisas, una sola idea ' +
     'por card. Preguntas que requieran recall, no solo reconocimiento. JSON ' +
     'válido y parseable. Cada card opcionalmente puede tener un "tag" string.\n' +
+    'REGLA CRÍTICA: el contenido de "q" y "a" debe ser TEXTO PLANO. NO uses ' +
+    'markdown (** _ ` # > | etc.). Las cards se renderizan sin parser de markdown — ' +
+    'cualquier asterisco se ve literal.\n' +
     '=== FIN GENERACIÓN DE FLASHCARDS ===';
 
   // ── 8. Build Gemini contents ──
