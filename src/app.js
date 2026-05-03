@@ -936,8 +936,7 @@ function App(){
     ),
 
     // ════════════ LABORATORIOS ════════════
-    vista==="labs"&&e(F,null,
-      e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"8px"}},"📊"),e("h2",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"22px",fontWeight:800,color:"#4caf82"}},"Valores de Laboratorio"),e("p",{style:{color:C.dm,fontSize:"13px"}},"Rangos normales e interpretación clínica")),
+    vista==="labs"&&e(ModuleShell,{title:"Valores de Laboratorio",subtitle:"Rangos normales · Interpretación clínica",icon:"📊",accent:"#4caf82"},
       LAB_SECTIONS.map(function(sec,si){
         var isOpen=abdOpen===sec.id;
         return e("div",{key:sec.id,style:{marginBottom:"12px",animation:"slideUp .4s ease-out "+(si*0.05)+"s both"}},
