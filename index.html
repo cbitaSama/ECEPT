@@ -188,7 +188,7 @@ button { cursor: pointer; color: inherit; background: none; }
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://unpkg.com/docx@8.5.0/build/index.umd.min.js"></script>
+<!-- docx se carga bajo demanda desde src/components/ChatBot.js (CB_loadDocxLib) -->
 <script>window.__ECEPT_ENV={SUPABASE_URL:'__SUPABASE_URL__',SUPABASE_ANON_KEY:'__SUPABASE_ANON_KEY__'};</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script>
@@ -16006,13 +16006,44 @@ function CB_exportToPDF(content, meta) {
   doc.save(fname);
 }
 
+// Lazy-load de docx con fallback de CDNs.
+var CB_DOCX_LOADING = null;
+function CB_loadDocxLib() {
+  if (window.docx) return Promise.resolve(window.docx);
+  if (CB_DOCX_LOADING) return CB_DOCX_LOADING;
+  CB_DOCX_LOADING = new Promise(function(resolve, reject) {
+    var urls = [
+      'https://unpkg.com/docx@8.5.0/build/index.umd.min.js',
+      'https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js'
+    ];
+    var idx = 0;
+    function tryLoad() {
+      if (idx >= urls.length) return reject(new Error('No se pudo cargar docx'));
+      var sc = document.createElement('script');
+      sc.src = urls[idx];
+      sc.async = true;
+      sc.onload = function() {
+        if (window.docx) { resolve(window.docx); }
+        else { idx++; sc.parentNode && sc.parentNode.removeChild(sc); tryLoad(); }
+      };
+      sc.onerror = function() { idx++; sc.parentNode && sc.parentNode.removeChild(sc); tryLoad(); };
+      document.head.appendChild(sc);
+    }
+    tryLoad();
+  });
+  return CB_DOCX_LOADING;
+}
+
 function CB_exportToDOCX(content, meta) {
-  // Detectar el namespace global. UMD bundle expone docxLib.
-  var docxLib = window.docx || window.Docx || (window.DocX ? window.DocX : null);
-  if (!docxLib || !docxLib.Document || !docxLib.Packer) {
-    if (window.ECEPT_toast) window.ECEPT_toast('La generación de DOCX no está disponible. Probá descargar como PDF.', 'warning');
-    return;
-  }
+  if (window.ECEPT_toast) window.ECEPT_toast('Generando documento Word...', 'info');
+  CB_loadDocxLib().then(function(docxLib) {
+    CB_doExportToDOCX(content, meta, docxLib);
+  }, function() {
+    if (window.ECEPT_toast) window.ECEPT_toast('No se pudo cargar el generador de Word. Intentá con PDF.', 'error');
+  });
+}
+
+function CB_doExportToDOCX(content, meta, docxLib) {
   var Document = docxLib.Document;
   var Packer = docxLib.Packer;
   var Paragraph = docxLib.Paragraph;
@@ -16459,7 +16490,7 @@ function ChatBot(props) {
       if (!r.ok) { CB_setMsgsTransitioning(false); return; }
       var data = await r.json();
       var mapped = (data.messages || []).map(function(m) {
-        return { role:m.role, text:m.content, ts: new Date(m.created_at).getTime() };
+        return { role:m.role, text:m.content, ts: new Date(m.created_at).getTime(), attachments: m.attachments || null };
       });
       // Min 220ms transitioning para evitar flash
       var elapsed = Date.now() - t0;
@@ -16473,6 +16504,20 @@ function ChatBot(props) {
       CB_setMsgsTransitioning(false);
     }
   }
+
+  // Carga preventiva de memoria cuando hay sesión: evita el lag al abrir Settings.
+  useEffect(function() {
+    if (CB_session !== true || CB_userNotesLoaded) return;
+    CB_loadUserNotes();
+  }, [CB_session, CB_userNotesLoaded]);
+
+  // Reset de memoria al cerrar sesión.
+  useEffect(function() {
+    if (CB_session === false) {
+      CB_setUserNotes('');
+      CB_setUserNotesLoaded(false);
+    }
+  }, [CB_session]);
 
   async function CB_loadUserNotes() {
     if (CB_userNotesLoaded) return;
@@ -16581,16 +16626,20 @@ function ChatBot(props) {
     var history = CB_msgs.slice(-9).map(function(m) { return { role:m.role, content:m.text }; });
     history.push({ role:'user', content:txt });
 
-    // Snapshot de attachments antes de limpiarlos
+    // Snapshot de attachments antes de limpiarlos. Incluye name para persistir.
     var pendingAttachments = CB_pendingFiles.map(function(f) {
-      return { mimeType: f.mimeType, data: f.data };
+      return { name: f.name, mimeType: f.mimeType, data: f.data };
     });
 
     CB_setInput('');
     CB_setPendingFiles([]);
     CB_setLoading(true);
     CB_setConnErr('');
-    CB_setMsgs(function(prev) { return prev.concat([{ role:'user', text:txt, ts:Date.now() }]); });
+    // Meta-only de attachments para mostrar chips en el bubble (no incluir base64).
+    var attachmentsMeta = (CB_pendingFiles || []).map(function(a) {
+      return { name: a.name, mimeType: a.mimeType, size: a.size };
+    });
+    CB_setMsgs(function(prev) { return prev.concat([{ role:'user', text:txt, ts:Date.now(), attachments: attachmentsMeta }]); });
     // Guardar último user msg para Reintentar
     CB_lastMsgRef.current = { txt: txt, model: CB_selectedModel, modelName: modelName };
 
@@ -17481,7 +17530,19 @@ function ChatBot(props) {
                   var isUser = m.role === 'user';
                   return e('div', { key:i, style:{ display:'flex', flexDirection:'column', alignItems:isUser?'flex-end':'flex-start', gap:4, animation:'ecept_messageIn 320ms cubic-bezier(0.32,0.72,0,1)' } },
                     isUser
-                      ? e('div', { style:{ maxWidth:'85%', padding:'13px 18px', borderRadius:'20px 20px 6px 20px', background:'linear-gradient(135deg,rgba(59,130,246,.20),rgba(96,165,250,.10))', border:'1px solid rgba(96,165,250,.28)', color:C.tx, fontSize:14, lineHeight:1.55, wordBreak:'break-word', whiteSpace:'pre-wrap', boxShadow:'0 1px 2px rgba(0,0,0,0.2)' } }, m.text)
+                      ? e('div', { style:{ maxWidth:'85%', padding:'13px 18px', borderRadius:'20px 20px 6px 20px', background:'linear-gradient(135deg,rgba(59,130,246,.20),rgba(96,165,250,.10))', border:'1px solid rgba(96,165,250,.28)', color:C.tx, fontSize:14, lineHeight:1.55, wordBreak:'break-word', whiteSpace:'pre-wrap', boxShadow:'0 1px 2px rgba(0,0,0,0.2)' } },
+                          // Chips de adjuntos arriba del texto del mensaje.
+                          m.attachments && m.attachments.length > 0 && e('div', { style:{ display:'flex', flexWrap:'wrap', gap:6, marginBottom: m.text ? 8 : 0 } },
+                            m.attachments.map(function(a, ai) {
+                              var icon = a.mimeType && a.mimeType.indexOf('image/') === 0 ? '🖼' : '📄';
+                              return e('div', { key: ai, style:{ display:'inline-flex', alignItems:'center', gap:6, padding:'6px 10px', background:'rgba(96,165,250,0.18)', border:'1px solid rgba(96,165,250,0.32)', borderRadius:10, fontSize:11, color:'#cbd5e1' } },
+                                e('span', null, icon),
+                                e('span', { style:{ maxWidth:180, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' } }, a.name || 'archivo')
+                              );
+                            })
+                          ),
+                          m.text
+                        )
                       : (function(){
                           var exportMeta = !m.error ? CB_extractExportMeta(m.text) : null;
                           var displayText = exportMeta ? CB_stripExportMeta(m.text) : m.text;
@@ -24865,31 +24926,18 @@ function App(){
       var sec=REUMA_SECS.find(function(s2){return s2.id===cs})||{};
       return e(ModuleShell,{title:sec.n||"Reumatología",subtitle:sd.length+" enfermedad"+(sd.length===1?"":"es"),icon:sec.i||"🦴",accent:"#60a5fa",onBack:function(){go("reuma");}},
         e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(320px,1fr))",gap:"12px"}},sd.map(function(d,di){
-          // Long-press timer ref para favoritear (mantenido en closure por item)
-          var lpTimer = { id:null, fired:false };
           return e("div",{
             key:d.id,
-            onClick:function(){ if(!lpTimer.fired) go("reuma_dis",d.s,d.id); lpTimer.fired=false; },
-            onPointerDown: ecuUser ? function(){
-              lpTimer.fired = false;
-              lpTimer.id = setTimeout(function(){
-                lpTimer.fired = true;
-                if (window.ECEPT_FAVORITES) window.ECEPT_FAVORITES.toggle(ecuUser.id, 'enfermedad', d.id);
-              }, 500);
-            } : null,
-            onPointerUp: ecuUser ? function(){ if(lpTimer.id) { clearTimeout(lpTimer.id); lpTimer.id=null; } } : null,
-            onPointerLeave: ecuUser ? function(){ if(lpTimer.id) { clearTimeout(lpTimer.id); lpTimer.id=null; } lpTimer.fired=false; } : null,
-            onPointerCancel: ecuUser ? function(){ if(lpTimer.id) { clearTimeout(lpTimer.id); lpTimer.id=null; } lpTimer.fired=false; } : null,
-            onContextMenu: function(ev){ ev.preventDefault(); },
-            style:{background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",border:"1px solid "+C.bd,borderRadius:"14px",padding:"16px 20px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"12px",minHeight:"68px",transition:"transform 220ms cubic-bezier(0.32,0.72,0,1),border-color 220ms cubic-bezier(0.32,0.72,0,1),box-shadow 220ms ease-out",animation:"ecept_fadeSlideUp 380ms cubic-bezier(0.16,1,0.3,1) "+(di*30+40)+"ms both",boxSizing:"border-box",userSelect:"none",WebkitUserSelect:"none"},
+            onClick:function(){ go("reuma_dis",d.s,d.id); },
+            style:{background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",border:"1px solid "+C.bd,borderRadius:"14px",padding:"16px 20px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"12px",minHeight:"68px",transition:"transform 220ms cubic-bezier(0.32,0.72,0,1),border-color 220ms cubic-bezier(0.32,0.72,0,1),box-shadow 220ms ease-out",animation:"ecept_fadeSlideUp 380ms cubic-bezier(0.16,1,0.3,1) "+(di*30+40)+"ms both",boxSizing:"border-box"},
             onMouseEnter:function(ev){ev.currentTarget.style.borderColor="rgba(96,165,250,0.40)";ev.currentTarget.style.transform="translateY(-1px)";ev.currentTarget.style.boxShadow="0 6px 18px rgba(0,0,0,0.25)";},
             onMouseLeave:function(ev){ev.currentTarget.style.borderColor=C.bd;ev.currentTarget.style.transform="translateY(0)";ev.currentTarget.style.boxShadow="none";}
           },
             e("div",{style:{display:"flex",alignItems:"center",gap:"12px",flex:1,minWidth:0}},
-              isFav(d.id)&&e("span",{style:{fontSize:"15px"}},"⭐"),
               vi.indexOf(d.id)>-1&&e("span",{style:{color:"#34d399",fontSize:"13px"}},"✓"),
               e("span",{style:{fontWeight:600,fontSize:"15px",letterSpacing:"-0.01em"}},d.n)
             ),
+            ecuUser&&window.FavoriteButton&&e(window.FavoriteButton,{itemType:"enfermedad",itemId:d.id,user:ecuUser,size:18}),
             e("span",{style:{color:C.dm,fontSize:"18px",flexShrink:0}},"›")
           );
         }))

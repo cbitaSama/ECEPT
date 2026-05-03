@@ -552,31 +552,18 @@ function App(){
       var sec=REUMA_SECS.find(function(s2){return s2.id===cs})||{};
       return e(ModuleShell,{title:sec.n||"Reumatología",subtitle:sd.length+" enfermedad"+(sd.length===1?"":"es"),icon:sec.i||"🦴",accent:"#60a5fa",onBack:function(){go("reuma");}},
         e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(320px,1fr))",gap:"12px"}},sd.map(function(d,di){
-          // Long-press timer ref para favoritear (mantenido en closure por item)
-          var lpTimer = { id:null, fired:false };
           return e("div",{
             key:d.id,
-            onClick:function(){ if(!lpTimer.fired) go("reuma_dis",d.s,d.id); lpTimer.fired=false; },
-            onPointerDown: ecuUser ? function(){
-              lpTimer.fired = false;
-              lpTimer.id = setTimeout(function(){
-                lpTimer.fired = true;
-                if (window.ECEPT_FAVORITES) window.ECEPT_FAVORITES.toggle(ecuUser.id, 'enfermedad', d.id);
-              }, 500);
-            } : null,
-            onPointerUp: ecuUser ? function(){ if(lpTimer.id) { clearTimeout(lpTimer.id); lpTimer.id=null; } } : null,
-            onPointerLeave: ecuUser ? function(){ if(lpTimer.id) { clearTimeout(lpTimer.id); lpTimer.id=null; } lpTimer.fired=false; } : null,
-            onPointerCancel: ecuUser ? function(){ if(lpTimer.id) { clearTimeout(lpTimer.id); lpTimer.id=null; } lpTimer.fired=false; } : null,
-            onContextMenu: function(ev){ ev.preventDefault(); },
-            style:{background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",border:"1px solid "+C.bd,borderRadius:"14px",padding:"16px 20px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"12px",minHeight:"68px",transition:"transform 220ms cubic-bezier(0.32,0.72,0,1),border-color 220ms cubic-bezier(0.32,0.72,0,1),box-shadow 220ms ease-out",animation:"ecept_fadeSlideUp 380ms cubic-bezier(0.16,1,0.3,1) "+(di*30+40)+"ms both",boxSizing:"border-box",userSelect:"none",WebkitUserSelect:"none"},
+            onClick:function(){ go("reuma_dis",d.s,d.id); },
+            style:{background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",border:"1px solid "+C.bd,borderRadius:"14px",padding:"16px 20px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"12px",minHeight:"68px",transition:"transform 220ms cubic-bezier(0.32,0.72,0,1),border-color 220ms cubic-bezier(0.32,0.72,0,1),box-shadow 220ms ease-out",animation:"ecept_fadeSlideUp 380ms cubic-bezier(0.16,1,0.3,1) "+(di*30+40)+"ms both",boxSizing:"border-box"},
             onMouseEnter:function(ev){ev.currentTarget.style.borderColor="rgba(96,165,250,0.40)";ev.currentTarget.style.transform="translateY(-1px)";ev.currentTarget.style.boxShadow="0 6px 18px rgba(0,0,0,0.25)";},
             onMouseLeave:function(ev){ev.currentTarget.style.borderColor=C.bd;ev.currentTarget.style.transform="translateY(0)";ev.currentTarget.style.boxShadow="none";}
           },
             e("div",{style:{display:"flex",alignItems:"center",gap:"12px",flex:1,minWidth:0}},
-              isFav(d.id)&&e("span",{style:{fontSize:"15px"}},"⭐"),
               vi.indexOf(d.id)>-1&&e("span",{style:{color:"#34d399",fontSize:"13px"}},"✓"),
               e("span",{style:{fontWeight:600,fontSize:"15px",letterSpacing:"-0.01em"}},d.n)
             ),
+            ecuUser&&window.FavoriteButton&&e(window.FavoriteButton,{itemType:"enfermedad",itemId:d.id,user:ecuUser,size:18}),
             e("span",{style:{color:C.dm,fontSize:"18px",flexShrink:0}},"›")
           );
         }))

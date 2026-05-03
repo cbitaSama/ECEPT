@@ -170,13 +170,44 @@ function CB_exportToPDF(content, meta) {
   doc.save(fname);
 }
 
+// Lazy-load de docx con fallback de CDNs.
+var CB_DOCX_LOADING = null;
+function CB_loadDocxLib() {
+  if (window.docx) return Promise.resolve(window.docx);
+  if (CB_DOCX_LOADING) return CB_DOCX_LOADING;
+  CB_DOCX_LOADING = new Promise(function(resolve, reject) {
+    var urls = [
+      'https://unpkg.com/docx@8.5.0/build/index.umd.min.js',
+      'https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js'
+    ];
+    var idx = 0;
+    function tryLoad() {
+      if (idx >= urls.length) return reject(new Error('No se pudo cargar docx'));
+      var sc = document.createElement('script');
+      sc.src = urls[idx];
+      sc.async = true;
+      sc.onload = function() {
+        if (window.docx) { resolve(window.docx); }
+        else { idx++; sc.parentNode && sc.parentNode.removeChild(sc); tryLoad(); }
+      };
+      sc.onerror = function() { idx++; sc.parentNode && sc.parentNode.removeChild(sc); tryLoad(); };
+      document.head.appendChild(sc);
+    }
+    tryLoad();
+  });
+  return CB_DOCX_LOADING;
+}
+
 function CB_exportToDOCX(content, meta) {
-  // Detectar el namespace global. UMD bundle expone docxLib.
-  var docxLib = window.docx || window.Docx || (window.DocX ? window.DocX : null);
-  if (!docxLib || !docxLib.Document || !docxLib.Packer) {
-    if (window.ECEPT_toast) window.ECEPT_toast('La generación de DOCX no está disponible. Probá descargar como PDF.', 'warning');
-    return;
-  }
+  if (window.ECEPT_toast) window.ECEPT_toast('Generando documento Word...', 'info');
+  CB_loadDocxLib().then(function(docxLib) {
+    CB_doExportToDOCX(content, meta, docxLib);
+  }, function() {
+    if (window.ECEPT_toast) window.ECEPT_toast('No se pudo cargar el generador de Word. Intentá con PDF.', 'error');
+  });
+}
+
+function CB_doExportToDOCX(content, meta, docxLib) {
   var Document = docxLib.Document;
   var Packer = docxLib.Packer;
   var Paragraph = docxLib.Paragraph;
@@ -623,7 +654,7 @@ function ChatBot(props) {
       if (!r.ok) { CB_setMsgsTransitioning(false); return; }
       var data = await r.json();
       var mapped = (data.messages || []).map(function(m) {
-        return { role:m.role, text:m.content, ts: new Date(m.created_at).getTime() };
+        return { role:m.role, text:m.content, ts: new Date(m.created_at).getTime(), attachments: m.attachments || null };
       });
       // Min 220ms transitioning para evitar flash
       var elapsed = Date.now() - t0;
@@ -637,6 +668,20 @@ function ChatBot(props) {
       CB_setMsgsTransitioning(false);
     }
   }
+
+  // Carga preventiva de memoria cuando hay sesión: evita el lag al abrir Settings.
+  useEffect(function() {
+    if (CB_session !== true || CB_userNotesLoaded) return;
+    CB_loadUserNotes();
+  }, [CB_session, CB_userNotesLoaded]);
+
+  // Reset de memoria al cerrar sesión.
+  useEffect(function() {
+    if (CB_session === false) {
+      CB_setUserNotes('');
+      CB_setUserNotesLoaded(false);
+    }
+  }, [CB_session]);
 
   async function CB_loadUserNotes() {
     if (CB_userNotesLoaded) return;
@@ -745,16 +790,20 @@ function ChatBot(props) {
     var history = CB_msgs.slice(-9).map(function(m) { return { role:m.role, content:m.text }; });
     history.push({ role:'user', content:txt });
 
-    // Snapshot de attachments antes de limpiarlos
+    // Snapshot de attachments antes de limpiarlos. Incluye name para persistir.
     var pendingAttachments = CB_pendingFiles.map(function(f) {
-      return { mimeType: f.mimeType, data: f.data };
+      return { name: f.name, mimeType: f.mimeType, data: f.data };
     });
 
     CB_setInput('');
     CB_setPendingFiles([]);
     CB_setLoading(true);
     CB_setConnErr('');
-    CB_setMsgs(function(prev) { return prev.concat([{ role:'user', text:txt, ts:Date.now() }]); });
+    // Meta-only de attachments para mostrar chips en el bubble (no incluir base64).
+    var attachmentsMeta = (CB_pendingFiles || []).map(function(a) {
+      return { name: a.name, mimeType: a.mimeType, size: a.size };
+    });
+    CB_setMsgs(function(prev) { return prev.concat([{ role:'user', text:txt, ts:Date.now(), attachments: attachmentsMeta }]); });
     // Guardar último user msg para Reintentar
     CB_lastMsgRef.current = { txt: txt, model: CB_selectedModel, modelName: modelName };
 
@@ -1645,7 +1694,19 @@ function ChatBot(props) {
                   var isUser = m.role === 'user';
                   return e('div', { key:i, style:{ display:'flex', flexDirection:'column', alignItems:isUser?'flex-end':'flex-start', gap:4, animation:'ecept_messageIn 320ms cubic-bezier(0.32,0.72,0,1)' } },
                     isUser
-                      ? e('div', { style:{ maxWidth:'85%', padding:'13px 18px', borderRadius:'20px 20px 6px 20px', background:'linear-gradient(135deg,rgba(59,130,246,.20),rgba(96,165,250,.10))', border:'1px solid rgba(96,165,250,.28)', color:C.tx, fontSize:14, lineHeight:1.55, wordBreak:'break-word', whiteSpace:'pre-wrap', boxShadow:'0 1px 2px rgba(0,0,0,0.2)' } }, m.text)
+                      ? e('div', { style:{ maxWidth:'85%', padding:'13px 18px', borderRadius:'20px 20px 6px 20px', background:'linear-gradient(135deg,rgba(59,130,246,.20),rgba(96,165,250,.10))', border:'1px solid rgba(96,165,250,.28)', color:C.tx, fontSize:14, lineHeight:1.55, wordBreak:'break-word', whiteSpace:'pre-wrap', boxShadow:'0 1px 2px rgba(0,0,0,0.2)' } },
+                          // Chips de adjuntos arriba del texto del mensaje.
+                          m.attachments && m.attachments.length > 0 && e('div', { style:{ display:'flex', flexWrap:'wrap', gap:6, marginBottom: m.text ? 8 : 0 } },
+                            m.attachments.map(function(a, ai) {
+                              var icon = a.mimeType && a.mimeType.indexOf('image/') === 0 ? '🖼' : '📄';
+                              return e('div', { key: ai, style:{ display:'inline-flex', alignItems:'center', gap:6, padding:'6px 10px', background:'rgba(96,165,250,0.18)', border:'1px solid rgba(96,165,250,0.32)', borderRadius:10, fontSize:11, color:'#cbd5e1' } },
+                                e('span', null, icon),
+                                e('span', { style:{ maxWidth:180, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' } }, a.name || 'archivo')
+                              );
+                            })
+                          ),
+                          m.text
+                        )
                       : (function(){
                           var exportMeta = !m.error ? CB_extractExportMeta(m.text) : null;
                           var displayText = exportMeta ? CB_stripExportMeta(m.text) : m.text;
