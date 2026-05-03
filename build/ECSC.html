@@ -188,6 +188,7 @@ button { cursor: pointer; color: inherit; background: none; }
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <!-- docx se carga bajo demanda desde src/components/ChatBot.js (CB_loadDocxLib) -->
 <script>window.__ECEPT_ENV={SUPABASE_URL:'__SUPABASE_URL__',SUPABASE_ANON_KEY:'__SUPABASE_ANON_KEY__'};</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -16380,41 +16381,180 @@ function CB_stripFlashcardsBlock(text) {
   return String(text).replace(/===FLASHCARDS_GEN===[\s\S]*?===END_FLASHCARDS===/, '').trim();
 }
 
+// Strip emojis y caracteres Unicode no-Latin que jsPDF no puede renderizar
+// con la fuente Helvetica default (default sin embed Unicode).
+function CB_stripEmojisForPDF(text) {
+  if (!text) return '';
+  return String(text)
+    .replace(/[\u{1F300}-\u{1FFFF}]/gu, '')
+    .replace(/[\u{2600}-\u{26FF}]/gu, '')
+    .replace(/[\u{2700}-\u{27BF}]/gu, '')
+    .replace(/[\u{1F000}-\u{1F2FF}]/gu, '')
+    .replace(/[\u{1F600}-\u{1F64F}]/gu, '')
+    .trim();
+}
+
+function CB_parseMdTableForPDF(tableLines) {
+  if (tableLines.length < 2) return null;
+  function splitRow(line) {
+    var s = line.trim();
+    if (s.charAt(0) === '|') s = s.slice(1);
+    if (s.charAt(s.length - 1) === '|') s = s.slice(0, -1);
+    return s.split('|').map(function(c) { return CB_stripMdPlain(CB_stripEmojisForPDF(c.trim())); });
+  }
+  var headers = splitRow(tableLines[0]);
+  var rows = [];
+  for (var j = 2; j < tableLines.length; j++) {
+    var cells = splitRow(tableLines[j]);
+    if (cells.some(function(c) { return c.length > 0; })) rows.push(cells);
+  }
+  return { headers: headers, rows: rows };
+}
+
 function CB_exportToPDF(content, meta) {
   if (!window.jspdf || !window.jspdf.jsPDF) {
     if (window.ECEPT_toast) window.ECEPT_toast('jsPDF no disponible. Recargá la página.', 'error');
     return;
   }
+  if (window.ECEPT_toast) window.ECEPT_toast('Generando PDF...', 'info');
   var jsPDF = window.jspdf.jsPDF;
-  var doc = new jsPDF();
+  var doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  var pageW = doc.internal.pageSize.getWidth();
+  var margin = 20;
+  var contentW = pageW - margin * 2;
+  var y = 25;
+
+  function pageBreakIfNeeded(needed) {
+    if (y + needed > 280) { doc.addPage(); y = 20; }
+  }
+  function addText(text, opts) {
+    opts = opts || {};
+    var fontSize = opts.fontSize || 11;
+    var fontStyle = opts.fontStyle || 'normal';
+    var color = opts.color || [30, 30, 30];
+    var indent = opts.indent || 0;
+    doc.setFontSize(fontSize);
+    doc.setFont('helvetica', fontStyle);
+    doc.setTextColor(color[0], color[1], color[2]);
+    var lines = doc.splitTextToSize(text, contentW - indent);
+    pageBreakIfNeeded(lines.length * (fontSize * 0.42));
+    doc.text(lines, margin + indent, y);
+    y += lines.length * (fontSize * 0.42) + (opts.spacingAfter || 4);
+  }
+
+  // Título
   doc.setFontSize(20);
   doc.setFont('helvetica', 'bold');
-  doc.text(meta.title || 'Documento ECEPT', 20, 25, { maxWidth: 170 });
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'normal');
-  // Markdown → texto plano simple
-  var plain = String(content || '')
-    .replace(/^#+\s+/gm, '')
-    .replace(/\*\*(.+?)\*\*/g, '$1')
-    .replace(/\*(.+?)\*/g, '$1')
-    .replace(/`([^`]+)`/g, '$1')
-    .replace(/```[\s\S]*?```/g, '')
-    .replace(/\[(.+?)\]\((.+?)\)/g, '$1 ($2)')
-    .trim();
-  var lines = doc.splitTextToSize(plain, 170);
-  // Pagination simple
-  var y = 38;
-  var lineH = 6;
-  for (var i = 0; i < lines.length; i++) {
-    if (y > 275) { doc.addPage(); y = 20; }
-    doc.text(lines[i], 20, y);
-    y += lineH;
+  doc.setTextColor(30, 30, 60);
+  doc.text(CB_stripEmojisForPDF(meta.title || 'Documento ECEPT'), margin, y, { maxWidth: contentW });
+  y += 12;
+  // Línea decorativa
+  doc.setDrawColor(96, 165, 250);
+  doc.setLineWidth(0.8);
+  doc.line(margin, y, pageW - margin, y);
+  y += 8;
+
+  var lines = String(content || '').split('\n');
+  var i = 0;
+  while (i < lines.length) {
+    var line = lines[i];
+    var trimmed = line.trim();
+
+    // Skip horizontal rules + vacíos
+    if (trimmed === '---' || trimmed === '***' || trimmed === '___') { y += 4; i++; continue; }
+    if (trimmed === '') { y += 2; i++; continue; }
+
+    // Tabla markdown
+    if (trimmed.indexOf('|') === 0 && i + 1 < lines.length &&
+        /^\|[\s:|\-]+\|?\s*$/.test(lines[i + 1].trim())) {
+      var tableLines = [];
+      while (i < lines.length && lines[i].trim().indexOf('|') === 0) {
+        tableLines.push(lines[i]); i++;
+      }
+      var td = CB_parseMdTableForPDF(tableLines);
+      if (td && doc.autoTable) {
+        if (y > 240) { doc.addPage(); y = 20; }
+        doc.autoTable({
+          startY: y,
+          head: [td.headers],
+          body: td.rows,
+          margin: { left: margin, right: margin },
+          styles: { fontSize: 9, cellPadding: 3, textColor: [30, 30, 30], lineColor: [200, 200, 220], lineWidth: 0.3 },
+          headStyles: { fillColor: [40, 60, 130], textColor: [220, 230, 255], fontStyle: 'bold', fontSize: 9 },
+          alternateRowStyles: { fillColor: [245, 247, 255] },
+          theme: 'grid'
+        });
+        y = (doc.lastAutoTable && doc.lastAutoTable.finalY ? doc.lastAutoTable.finalY : y + 30) + 8;
+      } else if (td) {
+        // Fallback: tabla como texto cuando autoTable no cargó
+        addText('[Tabla] ' + td.headers.join(' | '), { fontStyle: 'bold', fontSize: 10, spacingAfter: 2 });
+        td.rows.forEach(function(r) { addText('  ' + r.join(' | '), { fontSize: 10, spacingAfter: 1 }); });
+        y += 4;
+      }
+      continue;
+    }
+
+    // Code block
+    if (/^\s*```/.test(line)) {
+      i++;
+      var codeLines = [];
+      while (i < lines.length && !/^\s*```/.test(lines[i])) { codeLines.push(lines[i]); i++; }
+      i++;
+      codeLines.forEach(function(cl) {
+        addText(CB_stripEmojisForPDF(cl), { fontSize: 9, color: [100, 100, 120], spacingAfter: 1 });
+      });
+      y += 4;
+      continue;
+    }
+
+    // Headers
+    var hMatch = trimmed.match(/^(#{1,4})\s+(.+)$/);
+    if (hMatch) {
+      var hLevel = hMatch[1].length;
+      var hText = CB_stripMdPlain(CB_stripEmojisForPDF(hMatch[2]));
+      var hSizes = [16, 14, 12, 11];
+      y += 4;
+      addText(hText, {
+        fontSize: hSizes[hLevel - 1] || 11,
+        fontStyle: 'bold',
+        color: hLevel <= 2 ? [40, 80, 180] : [30, 30, 80],
+        spacingAfter: 4
+      });
+      continue;
+    }
+
+    // Bullets
+    var bMatch = trimmed.match(/^[\*\-]\s+(.+)$/);
+    if (bMatch) {
+      addText('• ' + CB_stripMdPlain(CB_stripEmojisForPDF(bMatch[1])), { indent: 4, spacingAfter: 2 });
+      i++; continue;
+    }
+
+    // Numbered
+    var nMatch = trimmed.match(/^(\d+)\.\s+(.+)$/);
+    if (nMatch) {
+      addText(nMatch[1] + '. ' + CB_stripMdPlain(CB_stripEmojisForPDF(nMatch[2])), { indent: 4, spacingAfter: 2 });
+      i++; continue;
+    }
+
+    // Párrafo regular
+    addText(CB_stripMdPlain(CB_stripEmojisForPDF(trimmed)), { spacingAfter: 4 });
+    i++;
   }
-  doc.setFontSize(9);
-  doc.setTextColor(120);
-  doc.text('Generado por Elion · ECEPT · ' + new Date().toLocaleDateString('es'), 20, 290);
-  var fname = meta.filename || 'documento_ecept.pdf';
-  if (!/\.pdf$/i.test(fname)) fname += '.pdf';
+
+  // Footer en cada página
+  var totalPages = doc.internal.getNumberOfPages();
+  for (var p = 1; p <= totalPages; p++) {
+    doc.setPage(p);
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text('Generado por Elion · ECEPT · ' + new Date().toLocaleDateString('es'), margin, 290);
+    doc.text('Pagina ' + p + ' de ' + totalPages, pageW - margin - 25, 290);
+  }
+
+  // Forzar extensión .pdf (independiente de lo que diga meta.filename)
+  var fname = (meta.filename || 'documento_ecept').replace(/\.(docx|pdf)$/i, '');
+  fname += '.pdf';
   doc.save(fname);
 }
 
@@ -16669,8 +16809,9 @@ function CB_doExportToDOCX(content, meta, docxLib) {
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
-    var fname = meta.filename || 'documento_ecept.docx';
-    if (!/\.docx$/i.test(fname)) fname += '.docx';
+    // Forzar extensión .docx (independiente de lo que diga meta.filename)
+    var fname = (meta.filename || 'documento_ecept').replace(/\.(docx|pdf)$/i, '');
+    fname += '.docx';
     a.download = fname;
     document.body.appendChild(a);
     a.click();
