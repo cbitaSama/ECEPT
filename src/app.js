@@ -396,7 +396,9 @@ function App(){
           onLogout:function(){}
         }),
         // Home
-        e("div",{onClick:function(){go("home");setSb(false)},style:{padding:"10px 14px",borderRadius:"10px",cursor:"pointer",marginBottom:"16px",background:vista==="home"?"rgba(59,130,246,.1)":"rgba(255,255,255,.03)",color:vista==="home"?C.ac:C.mt,fontWeight:700,fontSize:"13px",display:"flex",alignItems:"center",gap:"8px",border:"1px solid "+(vista==="home"?C.ac+"30":"transparent")}},"🏠 Inicio"),
+        e("div",{onClick:function(){go("home");setSb(false)},style:{padding:"10px 14px",borderRadius:"10px",cursor:"pointer",marginBottom:"6px",background:vista==="home"?"rgba(59,130,246,.1)":"rgba(255,255,255,.03)",color:vista==="home"?C.ac:C.mt,fontWeight:700,fontSize:"13px",display:"flex",alignItems:"center",gap:"8px",border:"1px solid "+(vista==="home"?C.ac+"30":"transparent")}},"🏠 Inicio"),
+        // Favoritos
+        ecuUser&&e("div",{onClick:function(){go("favoritos");setSb(false);},style:{padding:"10px 14px",borderRadius:"10px",cursor:"pointer",marginBottom:"16px",background:vista==="favoritos"?"rgba(251,191,36,.10)":"rgba(255,255,255,.03)",color:vista==="favoritos"?"#fbbf24":C.mt,fontWeight:700,fontSize:"13px",display:"flex",alignItems:"center",gap:"8px",border:"1px solid "+(vista==="favoritos"?"rgba(251,191,36,.30)":"transparent")}},"⭐ Mis favoritos"),
 
         // ── SECCIONES ESPECIALES ──
         e("div",{style:{fontSize:"9px",fontWeight:700,color:C.dm,textTransform:"uppercase",letterSpacing:"2px",padding:"0 4px",marginBottom:"8px"}},"⚡ SECCIONES ESPECIALES"),
@@ -490,7 +492,7 @@ function App(){
     // Vistas que usan ModuleShell o gestionan su propio ancho escapan del
     // wrapper de 900px. El resto mantiene wrapper estrecho para legibilidad
     // de prosa larga.
-    e("div",{style:({home:1,reuma:1,reuma_sec:1,cir_menu:1,anat_menu:1,emergen_menu:1,fisio:1,general:1,vocabulario:1,"trauma-u1":1}[vista])?{width:"100%",margin:0,padding:"0 0 80px"}:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
+    e("div",{style:({home:1,reuma:1,reuma_sec:1,cir_menu:1,anat_menu:1,emergen_menu:1,fisio:1,general:1,vocabulario:1,"trauma-u1":1,favoritos:1}[vista])?{width:"100%",margin:0,padding:"0 0 80px"}:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
 
     // ════════════ HOME ════════════
     vista==="home"&&e(HomeView,{user:ecuUser,vi:vi,favs:favs,bestStreak:bestStreak,go:go}),
@@ -1141,6 +1143,7 @@ function App(){
     )
 
     ,vista==="profile"&&e(ProfileView,{user:ecuUser,onBack:function(){go("home");}})
+    ,vista==="favoritos"&&e(FavoritesView,{user:ecuUser,go:go})
     ,vista==="flashcards"&&e(DecksView,{user:ecuUser,onBack:function(){go("home");},go:go,onLoginRequest:function(){setEcuShowAuth(true);}})
     ,vista==="flashcards_deck"&&e(DeckDetailView,{user:ecuUser,deck:window.ECEPT_DECK_SELECTED,onBack:function(){go("flashcards");},go:go})
     ,vista==="flashcards_study"&&e(StudyView,{user:ecuUser,deck:window.ECEPT_DECK_SELECTED||null,onBack:function(){go(window.ECEPT_DECK_SELECTED?"flashcards_deck":"flashcards");},go:go,onLoginRequest:function(){setEcuShowAuth(true);}})
