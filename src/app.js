@@ -492,7 +492,7 @@ function App(){
     // Vistas que usan ModuleShell o gestionan su propio ancho escapan del
     // wrapper de 900px. El resto mantiene wrapper estrecho para legibilidad
     // de prosa larga.
-    e("div",{style:({home:1,reuma:1,reuma_sec:1,cir_menu:1,anat_menu:1,emergen_menu:1,fisio:1,general:1,vocabulario:1,"trauma-u1":1,favoritos:1}[vista])?{width:"100%",margin:0,padding:"0 0 80px"}:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
+    e("div",{style:(({home:1,reuma:1,reuma_sec:1,cir_menu:1,anat_menu:1,emergen_menu:1,fisio:1,general:1,vocabulario:1,"trauma-u1":1,favoritos:1}[vista])||(vista&&vista.indexOf("anat_")===0&&vista!=="anatomia"))?{width:"100%",margin:0,padding:"0 0 80px"}:{maxWidth:"900px",margin:"0 auto",padding:"20px 16px 80px"}},e("div",{style:fi},
 
     // ════════════ HOME ════════════
     vista==="home"&&e(HomeView,{user:ecuUser,vi:vi,favs:favs,bestStreak:bestStreak,go:go}),
@@ -510,16 +510,8 @@ function App(){
     ),
 
     // ════════════ ANATOMÍA MENÚ ════════════
-    vista==="anat_menu"&&e(ModuleShell,{title:"Anatomía",subtitle:"Pares craneales · Conducto inguinal",icon:"🩻",accent:"#f59e0b"},
-      e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:"16px"}},
-        [{v:"anatomia",ic:"🧠",n:"Pares Craneales",d:"Mapa interactivo · 12 pares · Origen, función y clínica"},{v:"cir_ing",ic:"🧱",n:"Conducto Inguinal",d:"Conducto · Anillos · Cordón Espermático"}].map(function(it,si){
-          return e("div",{key:it.v,onClick:function(){go(it.v)},style:{background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",border:"1px solid "+C.bd,borderRadius:"16px",padding:"20px 22px",cursor:"pointer",display:"flex",alignItems:"center",gap:"16px",minHeight:"96px",transition:"transform 240ms cubic-bezier(0.32,0.72,0,1),border-color 240ms cubic-bezier(0.32,0.72,0,1),box-shadow 240ms ease-out",animation:"ecept_fadeSlideUp 480ms cubic-bezier(0.16,1,0.3,1) "+(si*40+80)+"ms both",boxSizing:"border-box"},onMouseEnter:function(ev){ev.currentTarget.style.borderColor="rgba(245,158,11,0.40)";ev.currentTarget.style.transform="translateY(-2px)";ev.currentTarget.style.boxShadow="0 8px 24px rgba(0,0,0,0.30), 0 2px 8px rgba(0,0,0,0.20)";},onMouseLeave:function(ev){ev.currentTarget.style.borderColor=C.bd;ev.currentTarget.style.transform="translateY(0)";ev.currentTarget.style.boxShadow="none";}},
-            e("span",{style:{fontSize:"30px",width:"56px",height:"56px",display:"flex",alignItems:"center",justifyContent:"center",borderRadius:"14px",background:"rgba(245,158,11,0.10)",border:"1px solid rgba(245,158,11,0.20)",flexShrink:0}},it.ic),
-            e("div",{style:{flex:1,minWidth:0}},e("h3",{style:{fontSize:"16px",fontWeight:600,letterSpacing:"-0.01em",marginBottom:"4px"}},it.n),e("p",{style:{fontSize:"13px",color:C.dm,lineHeight:1.5}},it.d)),
-            e("span",{style:{color:C.dm,fontSize:"20px",flexShrink:0}},"›"))
-        })
-      )
-    ),
+    vista==="anat_menu"&&e(AnatomiaView,{user:ecuUser,view:"menu",go:go}),
+    vista&&vista.indexOf("anat_")===0&&vista!=="anat_menu"&&vista!=="anatomia"&&e(AnatomiaView,{user:ecuUser,view:vista,go:go}),
 
     // ════════════ REUMATOLOGÍA HOME ════════════
     // Test de ModuleShell: header consistente + grid auto-fit. Si rompe el

@@ -163,3 +163,31 @@ var NERVES=[
     lesion:"Desviación lengua al lado afectado (NMI)"
   }
 ];
+
+// ══════════════════════════════════════════════════════════════
+// ESQUELETO ANATOMÍA — 4 secciones × 4 sistemas (F5)
+// Sebas llenará el contenido. Por ahora solo shape.
+// ══════════════════════════════════════════════════════════════
+
+var ANAT_SECCIONES=[
+  {id:"cab_cuello",n:"Cabeza y Cuello",d:"Cráneo, cara, cuello, vías aéreas superiores",i:"🧠",c:"#a78bfa"},
+  {id:"torax_abd",n:"Tórax y Abdomen",d:"Caja torácica, vísceras, pared abdominal",i:"🫀",c:"#f472b6"},
+  {id:"miembros",n:"Miembros",d:"Superior + inferior — huesos, músculos y vasos",i:"🦴",c:"#60a5fa"},
+  {id:"neuro_anat",n:"Sistema Nervioso",d:"SNC + SNP — anatomía estructural",i:"⚡",c:"#34d399"}
+];
+
+var ANAT_SISTEMAS=[
+  {id:"huesos",n:"Huesos",i:"🦴",c:"#fbbf24"},
+  {id:"musculos",n:"Músculos",i:"💪",c:"#ef4444"},
+  {id:"vasos",n:"Vasos",i:"🩸",c:"#f472b6"},
+  {id:"nervios",n:"Nervios",i:"⚡",c:"#a78bfa"}
+];
+
+// Contenido por sección × sistema. Cada combo retorna array de items.
+// Items tendrán shape: {id, n, descripcion, detalles, ...}
+var ANAT_DATA={
+  cab_cuello:{huesos:[],musculos:[],vasos:[],nervios:[]},
+  torax_abd: {huesos:[],musculos:[],vasos:[],nervios:[]},
+  miembros:  {huesos:[],musculos:[],vasos:[],nervios:[]},
+  neuro_anat:{huesos:[],musculos:[],vasos:[],nervios:[]}
+};
