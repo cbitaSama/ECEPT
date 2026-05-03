@@ -26537,7 +26537,7 @@ function App(){
             )
           ),
           // Analitos: grid responsive cuando expandido
-          isOpen&&e("div",{style:{marginTop:"10px",display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(360px,1fr))",gap:"10px"}},
+          isOpen&&e("div",{style:{marginTop:"10px",display:"flex",flexDirection:"column",gap:"10px"}},
             sec.analytes.map(function(an,ai){
               var akey=sec.id+"-"+ai;var aExp=abdExp[akey];
               return e("div",{key:ai,style:{
@@ -26545,8 +26545,6 @@ function App(){
                 border:"1px solid "+(aExp?sec.accent+"30":"rgba(96,165,250,0.10)"),
                 borderRadius:"14px",
                 overflow:"hidden",
-                gridColumn:aExp?"1 / -1":"auto",
-                alignSelf:"start",
                 transition:"border-color 200ms ease-out"
               }},
                 e("button",{
