@@ -10,7 +10,7 @@ function IntroView(p){
          e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:1.8,textTransform:"uppercase",marginBottom:6}},"🌐 Salud · OMS"),
          e("div",{style:{fontSize:14,color:C.tx,lineHeight:1.6,fontStyle:"italic"}},"Estado de completo bienestar ",e("b",null,"físico, mental y social"),", y no solamente la ausencia de afecciones o enfermedades.")
        ),
-       e("div",{style:{padding:"16px 18px",background:"linear-gradient(135deg,"+ax(c,.12)+","+C.cd+" 85%)",border:"1px solid "+ax(c,.3),borderLeft:"4px solid "+c,borderRadius:12,marginBottom:14}},
+       e("div",{style:{padding:"16px 18px",background:"linear-gradient(135deg,"+ax(c,.12)+","+C.cd+" 85%)",border:"1px solid "+ax(c,.12),borderLeft:"4px solid "+c,borderRadius:12,marginBottom:14}},
          e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:1.8,textTransform:"uppercase",marginBottom:6}},"🧠 Salud mental · OMS"),
          e("div",{style:{fontSize:14,color:C.tx,lineHeight:1.6,fontStyle:"italic"}},"Estado de bienestar en el que el individuo es consciente de ",e("b",null,"sus capacidades"),", puede afrontar el ",e("b",null,"estrés"),", puede ",e("b",null,"trabajar de forma productiva")," y ",e("b",null,"contribuir a la comunidad"),".")
        ),
@@ -178,7 +178,7 @@ function IntroView(p){
       "Marco conceptual común a toda la materia. Definiciones de la OMS, historia, qué es un trastorno mental, la división clínica ",e("b",null,"psicosis vs neurosis"),", causas multicausales y los 3 pilares del tratamiento. Toca cada tarjeta para profundizar."
     ),
 
-    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.3),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
+    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.12),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Secciones del tema"),
       e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Inter,DM Sans"}},"Conceptos fundamentales"),
       e("div",{style:{fontSize:12,color:C.mt,marginTop:4,lineHeight:1.45}},"OMS · Historia · Psicosis vs Neurosis · Causas · Tratamientos · Navegación")

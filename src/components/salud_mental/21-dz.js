@@ -1,7 +1,7 @@
 function DzCard(p){
   var c=p.c||C.anx;
   return e("div",{style:{margin:"22px 0 8px",padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.22)+","+ax(c,.06)+" 80%)",border:"1px solid "+ax(c,.45),borderRadius:12,display:"flex",alignItems:"center",gap:12}},
-    p.n?e("div",{style:{width:40,height:40,borderRadius:10,background:ax(c,.25),color:c,fontSize:16,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontFamily:"Inter,DM Sans",border:"1px solid "+ax(c,.4)}},p.n):null,
+    p.n?e("div",{style:{width:40,height:40,borderRadius:10,background:ax(c,.25),color:c,fontSize:16,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontFamily:"Inter,DM Sans",border:"1px solid "+ax(c,.14)}},p.n):null,
     e("div",{style:{flex:1,minWidth:0}},
       p.kicker?e("div",{style:{fontSize:10,fontWeight:800,color:c,letterSpacing:1.5,textTransform:"uppercase",marginBottom:1,opacity:.85}},p.kicker):null,
       e("div",{style:{fontSize:18,fontWeight:800,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Inter,DM Sans"}},p.name)
@@ -21,7 +21,7 @@ function DzGrid(p){
       p.items.map(function(it,i){
         return e("button",{key:i,onClick:function(){if(p&&p.onOpen)p.onOpen(it);},style:{padding:"14px 12px",background:"linear-gradient(135deg,"+ax(c,.15)+","+ax(c,.04)+" 85%)",border:"1px solid "+ax(c,.35),borderRadius:12,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:110,transition:"transform .15s"}},
           e("div",{style:{display:"flex",alignItems:"center",gap:8,marginBottom:5}},
-            e("div",{style:{minWidth:28,height:28,borderRadius:7,background:ax(c,.25),color:c,fontSize:13,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Inter,DM Sans",border:"1px solid "+ax(c,.4)}},it.n),
+            e("div",{style:{minWidth:28,height:28,borderRadius:7,background:ax(c,.25),color:c,fontSize:13,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Inter,DM Sans",border:"1px solid "+ax(c,.14)}},it.n),
             e("div",{style:{fontSize:9,fontWeight:800,color:c,letterSpacing:1.3,textTransform:"uppercase"}},it.kicker||"Enfermedad")
           ),
           e("div",{style:{fontSize:13.5,fontWeight:800,color:"#fff",lineHeight:1.25,fontFamily:"Inter,DM Sans",flex:1}},it.name),
@@ -83,7 +83,7 @@ function DzDetail(p){
       e("div",{style:{display:"flex",gap:6,overflowX:"auto",paddingBottom:2}},
         tabs.map(function(t){
           var active=tab===t.k;
-          return e("button",{key:t.k,onClick:function(){setTab(t.k);window.scrollTo({top:0,behavior:"instant"});},style:{padding:"7px 12px",background:active?c:ax(c,.1),border:"1px solid "+(active?c:ax(c,.3)),color:active?"#fff":c,borderRadius:8,fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5,whiteSpace:"nowrap",flexShrink:0}},
+          return e("button",{key:t.k,onClick:function(){setTab(t.k);window.scrollTo({top:0,behavior:"instant"});},style:{padding:"7px 12px",background:active?c:ax(c,.1),border:"1px solid "+(active?c:ax(c,.12)),color:active?"#fff":c,borderRadius:8,fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5,whiteSpace:"nowrap",flexShrink:0}},
             e("span",null,t.ic),
             e("span",null,t.l)
           );

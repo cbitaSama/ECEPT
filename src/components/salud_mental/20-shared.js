@@ -1,7 +1,7 @@
 // Hero de tema
 function Hero(p){
   var c=p.c;
-  return e("div",{style:{padding:22,background:"linear-gradient(135deg,"+ax(c,.18)+" 0%,"+C.cd+" 80%)",border:"1px solid "+ax(c,.4),borderRadius:16,marginBottom:18}},
+  return e("div",{style:{padding:22,background:"linear-gradient(135deg,"+ax(c,.18)+" 0%,"+C.cd+" 80%)",border:"1px solid "+ax(c,.14),borderRadius:16,marginBottom:18}},
     e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:6}},p.kicker),
     e("h1",{style:{fontSize:28,fontWeight:900,color:c,letterSpacing:.15,lineHeight:1.15,marginBottom:10}},p.title),
     e("div",{className:"prose",style:{fontSize:14}},p.children)
@@ -11,7 +11,7 @@ function Hero(p){
 // Glosario de abreviaturas
 function Abbrev(p){
   var c=p.c||C.anx;
-  return e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.08)+","+C.cd+" 80%)",border:"1px solid "+ax(c,.3),borderRadius:12,margin:"12px 0 20px"}},
+  return e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.08)+","+C.cd+" 80%)",border:"1px solid "+ax(c,.12),borderRadius:12,margin:"12px 0 20px"}},
     e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:1.5,textTransform:"uppercase",marginBottom:10,display:"flex",alignItems:"center",gap:6}},"🔤 Abreviaturas de este tema"),
     e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:8}},
       p.items.map(function(it,i){
@@ -59,15 +59,15 @@ function DiseaseBlock(p){
   return e("div",{style:{margin:"18px 0",padding:"2px 0"}},
     p.id?e(Anchor,{id:p.id}):null,
     // Header de enfermedad
-    e("div",{style:{display:"flex",alignItems:"center",gap:12,padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.2)+","+ax(c,.05)+" 80%)",border:"1px solid "+ax(c,.4),borderRadius:"12px 12px 0 0",borderBottom:"none"}},
-      e("div",{style:{minWidth:42,height:42,borderRadius:10,background:ax(c,.25),border:"1px solid "+ax(c,.4),color:c,fontSize:17,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontFamily:"Inter,DM Sans"}},p.n),
+    e("div",{style:{display:"flex",alignItems:"center",gap:12,padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.2)+","+ax(c,.05)+" 80%)",border:"1px solid "+ax(c,.14),borderRadius:"12px 12px 0 0",borderBottom:"none"}},
+      e("div",{style:{minWidth:42,height:42,borderRadius:10,background:ax(c,.25),border:"1px solid "+ax(c,.14),color:c,fontSize:17,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontFamily:"Inter,DM Sans"}},p.n),
       e("div",{style:{flex:1,minWidth:0}},
         e("div",{style:{fontSize:10,fontWeight:800,color:c,letterSpacing:1.5,textTransform:"uppercase",marginBottom:1,opacity:.8}},p.kicker||"Enfermedad"),
         e("div",{style:{fontSize:18,fontWeight:800,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Inter,DM Sans"}},p.name)
       )
     ),
     // Contenido
-    e("div",{style:{padding:"14px 16px 16px",background:ax(c,.03),border:"1px solid "+ax(c,.3),borderRadius:"0 0 12px 12px",borderTop:"none"}},
+    e("div",{style:{padding:"14px 16px 16px",background:ax(c,.03),border:"1px solid "+ax(c,.12),borderRadius:"0 0 12px 12px",borderTop:"none"}},
       p.children
     )
   );

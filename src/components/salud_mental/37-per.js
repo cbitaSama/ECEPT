@@ -359,7 +359,7 @@ function PerView(p){
       "Patrones persistentes de experiencia interna y comportamiento que se apartan notablemente de las expectativas culturales, son inflexibles y generalizados, inician en la adolescencia/adultez temprana y son estables en el tiempo. Se organizan en ",e("b",null,"3 clusters")," (A, B y C) y son en total ",e("b",null,"10 entidades"),"."
     ),
 
-    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.3),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
+    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.12),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Secciones del tema"),
       e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Inter,DM Sans"}},"Conceptos · Clusters · DDx · Flashcards · Quiz")
     ),

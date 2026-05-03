@@ -6892,7 +6892,7 @@ function ax(hex,a){var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),1
 // Título de sección principal (H2)
 function H2(p){
   var c=p.c||C.tx;
-  return e("h2",{style:{fontSize:23,fontWeight:800,color:c,marginTop:p.mt||32,marginBottom:12,letterSpacing:.2,lineHeight:1.2,paddingBottom:8,borderBottom:"2px solid "+ax(c,.3)}},p.children);
+  return e("h2",{style:{fontSize:23,fontWeight:800,color:c,marginTop:p.mt||32,marginBottom:12,letterSpacing:.2,lineHeight:1.2,paddingBottom:8,borderBottom:"2px solid "+ax(c,.12)}},p.children);
 }
 
 // Subsección (H3)
@@ -6915,7 +6915,7 @@ function Tag(p){
 // Caja de definición clara
 function Def(p){
   var c=p.c||C.anx;
-  return e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.1)+","+C.cd+" 90%)",border:"1px solid "+ax(c,.3),borderLeft:"4px solid "+c,borderRadius:10,margin:"8px 0 14px"}},
+  return e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.1)+","+C.cd+" 90%)",border:"1px solid "+ax(c,.12),borderLeft:"4px solid "+c,borderRadius:10,margin:"8px 0 14px"}},
     e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:1.5,textTransform:"uppercase",marginBottom:6}},"📖 Definición"),
     e("div",{className:"prose",style:{fontSize:14}},p.children)
   );
@@ -6925,7 +6925,7 @@ function Def(p){
 function Crit(p){
   var c=p.c||C.anx;
   return e("div",{style:{display:"flex",gap:12,padding:"11px 13px",background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:8,margin:"6px 0",alignItems:"flex-start"}},
-    e("div",{style:{minWidth:34,height:34,borderRadius:7,background:ax(c,.18),color:c,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0,border:"1px solid "+ax(c,.3)}},p.crit),
+    e("div",{style:{minWidth:34,height:34,borderRadius:7,background:ax(c,.18),color:c,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0,border:"1px solid "+ax(c,.12)}},p.crit),
     e("div",{style:{fontSize:13.5,lineHeight:1.55,color:C.tx,flex:1,paddingTop:4}},p.children)
   );
 }
@@ -6934,7 +6934,7 @@ function Crit(p){
 function CritBlock(p){
   var c=p.c||C.anx;
   return e("div",{style:{margin:"10px 0 14px"}},
-    e("div",{style:{display:"flex",alignItems:"center",gap:8,marginBottom:8,padding:"8px 12px",background:ax(c,.12),border:"1px solid "+ax(c,.3),borderRadius:8}},
+    e("div",{style:{display:"flex",alignItems:"center",gap:8,marginBottom:8,padding:"8px 12px",background:ax(c,.12),border:"1px solid "+ax(c,.12),borderRadius:8}},
       e("div",{style:{fontSize:11,fontWeight:800,color:c,letterSpacing:1,textTransform:"uppercase"}},"📋 Criterios DSM-5-TR · "+(p.title||""))
     ),
     p.children
@@ -7023,7 +7023,7 @@ function TrCard(p){
   return e("div",{style:{background:C.cd,border:"1px solid "+C.bd,borderLeft:"4px solid "+c,borderRadius:11,padding:14,margin:"10px 0"}},
     e("div",{style:{display:"flex",alignItems:"center",gap:10,marginBottom:8,paddingBottom:8,borderBottom:"1px solid "+C.bd}},
       e("div",{style:{fontWeight:800,fontSize:15,color:c,flex:1}},p.n),
-      p.dur?e("div",{style:{fontSize:10.5,fontWeight:700,color:c,background:ax(c,.14),padding:"3px 8px",borderRadius:5,border:"1px solid "+ax(c,.3),letterSpacing:.3,whiteSpace:"nowrap"}},"⏱ "+p.dur):null
+      p.dur?e("div",{style:{fontSize:10.5,fontWeight:700,color:c,background:ax(c,.14),padding:"3px 8px",borderRadius:5,border:"1px solid "+ax(c,.12),letterSpacing:.3,whiteSpace:"nowrap"}},"⏱ "+p.dur):null
     ),
     e("div",{style:{fontSize:13.5,lineHeight:1.55,color:C.tx}},p.children)
   );
@@ -7526,9 +7526,9 @@ function FlashDeck(p){
     ),
     // Tarjeta
     e("div",{style:{position:"relative"}},
-      e("button",{onClick:toggle,style:{width:"100%",minHeight:220,padding:"26px 20px",background:revealed?"linear-gradient(135deg,"+ax(c,.14)+","+C.cd+" 90%)":C.cd,border:"1px solid "+(revealed?ax(c,.4):C.bd),borderLeft:"4px solid "+c,borderRadius:14,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:12,animation:"fadeIn .25s",transition:"all .2s"}},
+      e("button",{onClick:toggle,style:{width:"100%",minHeight:220,padding:"26px 20px",background:revealed?"linear-gradient(135deg,"+ax(c,.14)+","+C.cd+" 90%)":C.cd,border:"1px solid "+(revealed?ax(c,.14):C.bd),borderLeft:"4px solid "+c,borderRadius:14,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:12,animation:"fadeIn .25s",transition:"all .2s"}},
         e("div",{style:{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}},
-          e("div",{style:{fontSize:10,fontWeight:800,color:c,letterSpacing:1.8,textTransform:"uppercase",padding:"3px 9px",background:ax(c,.15),borderRadius:5,border:"1px solid "+ax(c,.3)}},revealed?"✓ Respuesta":"❓ Pregunta"),
+          e("div",{style:{fontSize:10,fontWeight:800,color:c,letterSpacing:1.8,textTransform:"uppercase",padding:"3px 9px",background:ax(c,.15),borderRadius:5,border:"1px solid "+ax(c,.12)}},revealed?"✓ Respuesta":"❓ Pregunta"),
           card.own?e("div",{style:{fontSize:9.5,fontWeight:800,color:C.pearl,letterSpacing:1.3,textTransform:"uppercase",padding:"3px 8px",background:ax(C.pearl,.15),borderRadius:5,border:"1px solid "+ax(C.pearl,.3)}},"✦ Mía"):null,
           e("div",{style:{flex:1,textAlign:"right",fontSize:10.5,color:C.mt,fontStyle:"italic"}},"Toca para "+(revealed?"volver":"revelar"))
         ),
@@ -7595,7 +7595,7 @@ function Quiz(p){
   if(done){
     var pct=Math.round(score/p.items.length*100);
     var msg=pct>=80?"🏆 Dominas el tema":pct>=60?"💪 Bien, repasa lo fallado":"📚 Toca releer";
-    return e("div",{style:{padding:24,background:"linear-gradient(135deg,"+ax(c,.15)+","+ax(c,.04)+")",border:"1px solid "+ax(c,.4),borderRadius:14,textAlign:"center"}},
+    return e("div",{style:{padding:24,background:"linear-gradient(135deg,"+ax(c,.15)+","+ax(c,.04)+")",border:"1px solid "+ax(c,.14),borderRadius:14,textAlign:"center"}},
       e("div",{style:{fontSize:42,marginBottom:8}},pct>=80?"🏆":pct>=60?"💪":"📚"),
       e("div",{style:{fontFamily:"Inter,DM Sans",fontSize:28,fontWeight:900,color:c,marginBottom:4}},score+" / "+p.items.length),
       e("div",{style:{fontSize:13,color:C.mt,marginBottom:18}},msg),
@@ -7626,7 +7626,7 @@ function Quiz(p){
         e("div",{style:{flex:1}},op)
       );
     }),
-    pick!==null?e("div",{style:{marginTop:10,padding:13,background:ax(c,.08),border:"1px solid "+ax(c,.3),borderLeft:"4px solid "+c,borderRadius:9,animation:"fadeIn .25s"}},
+    pick!==null?e("div",{style:{marginTop:10,padding:13,background:ax(c,.08),border:"1px solid "+ax(c,.12),borderLeft:"4px solid "+c,borderRadius:9,animation:"fadeIn .25s"}},
       e("div",{style:{fontSize:10,fontWeight:800,color:c,letterSpacing:1,marginBottom:5,textTransform:"uppercase"}},pick===q.r?"✓ Correcto":"✗ Explicación"),
       e("div",{style:{fontSize:13,lineHeight:1.55,color:C.tx}},q.x),
       e("button",{onClick:next,style:{marginTop:11,padding:"8px 18px",background:c,color:"#fff",border:"none",borderRadius:7,fontWeight:700,fontSize:12.5}},ix+1>=p.items.length?"Ver resultado":"Siguiente →")
@@ -8037,7 +8037,7 @@ function GlobalQuiz(p){
 // Hero de tema
 function Hero(p){
   var c=p.c;
-  return e("div",{style:{padding:22,background:"linear-gradient(135deg,"+ax(c,.18)+" 0%,"+C.cd+" 80%)",border:"1px solid "+ax(c,.4),borderRadius:16,marginBottom:18}},
+  return e("div",{style:{padding:22,background:"linear-gradient(135deg,"+ax(c,.18)+" 0%,"+C.cd+" 80%)",border:"1px solid "+ax(c,.14),borderRadius:16,marginBottom:18}},
     e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:6}},p.kicker),
     e("h1",{style:{fontSize:28,fontWeight:900,color:c,letterSpacing:.15,lineHeight:1.15,marginBottom:10}},p.title),
     e("div",{className:"prose",style:{fontSize:14}},p.children)
@@ -8047,7 +8047,7 @@ function Hero(p){
 // Glosario de abreviaturas
 function Abbrev(p){
   var c=p.c||C.anx;
-  return e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.08)+","+C.cd+" 80%)",border:"1px solid "+ax(c,.3),borderRadius:12,margin:"12px 0 20px"}},
+  return e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.08)+","+C.cd+" 80%)",border:"1px solid "+ax(c,.12),borderRadius:12,margin:"12px 0 20px"}},
     e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:1.5,textTransform:"uppercase",marginBottom:10,display:"flex",alignItems:"center",gap:6}},"🔤 Abreviaturas de este tema"),
     e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:8}},
       p.items.map(function(it,i){
@@ -8095,15 +8095,15 @@ function DiseaseBlock(p){
   return e("div",{style:{margin:"18px 0",padding:"2px 0"}},
     p.id?e(Anchor,{id:p.id}):null,
     // Header de enfermedad
-    e("div",{style:{display:"flex",alignItems:"center",gap:12,padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.2)+","+ax(c,.05)+" 80%)",border:"1px solid "+ax(c,.4),borderRadius:"12px 12px 0 0",borderBottom:"none"}},
-      e("div",{style:{minWidth:42,height:42,borderRadius:10,background:ax(c,.25),border:"1px solid "+ax(c,.4),color:c,fontSize:17,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontFamily:"Inter,DM Sans"}},p.n),
+    e("div",{style:{display:"flex",alignItems:"center",gap:12,padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.2)+","+ax(c,.05)+" 80%)",border:"1px solid "+ax(c,.14),borderRadius:"12px 12px 0 0",borderBottom:"none"}},
+      e("div",{style:{minWidth:42,height:42,borderRadius:10,background:ax(c,.25),border:"1px solid "+ax(c,.14),color:c,fontSize:17,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontFamily:"Inter,DM Sans"}},p.n),
       e("div",{style:{flex:1,minWidth:0}},
         e("div",{style:{fontSize:10,fontWeight:800,color:c,letterSpacing:1.5,textTransform:"uppercase",marginBottom:1,opacity:.8}},p.kicker||"Enfermedad"),
         e("div",{style:{fontSize:18,fontWeight:800,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Inter,DM Sans"}},p.name)
       )
     ),
     // Contenido
-    e("div",{style:{padding:"14px 16px 16px",background:ax(c,.03),border:"1px solid "+ax(c,.3),borderRadius:"0 0 12px 12px",borderTop:"none"}},
+    e("div",{style:{padding:"14px 16px 16px",background:ax(c,.03),border:"1px solid "+ax(c,.12),borderRadius:"0 0 12px 12px",borderTop:"none"}},
       p.children
     )
   );
@@ -8150,7 +8150,7 @@ function Sub(p){
 function DzCard(p){
   var c=p.c||C.anx;
   return e("div",{style:{margin:"22px 0 8px",padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.22)+","+ax(c,.06)+" 80%)",border:"1px solid "+ax(c,.45),borderRadius:12,display:"flex",alignItems:"center",gap:12}},
-    p.n?e("div",{style:{width:40,height:40,borderRadius:10,background:ax(c,.25),color:c,fontSize:16,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontFamily:"Inter,DM Sans",border:"1px solid "+ax(c,.4)}},p.n):null,
+    p.n?e("div",{style:{width:40,height:40,borderRadius:10,background:ax(c,.25),color:c,fontSize:16,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontFamily:"Inter,DM Sans",border:"1px solid "+ax(c,.14)}},p.n):null,
     e("div",{style:{flex:1,minWidth:0}},
       p.kicker?e("div",{style:{fontSize:10,fontWeight:800,color:c,letterSpacing:1.5,textTransform:"uppercase",marginBottom:1,opacity:.85}},p.kicker):null,
       e("div",{style:{fontSize:18,fontWeight:800,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Inter,DM Sans"}},p.name)
@@ -8170,7 +8170,7 @@ function DzGrid(p){
       p.items.map(function(it,i){
         return e("button",{key:i,onClick:function(){if(p&&p.onOpen)p.onOpen(it);},style:{padding:"14px 12px",background:"linear-gradient(135deg,"+ax(c,.15)+","+ax(c,.04)+" 85%)",border:"1px solid "+ax(c,.35),borderRadius:12,cursor:"pointer",textAlign:"left",display:"flex",flexDirection:"column",gap:4,minHeight:110,transition:"transform .15s"}},
           e("div",{style:{display:"flex",alignItems:"center",gap:8,marginBottom:5}},
-            e("div",{style:{minWidth:28,height:28,borderRadius:7,background:ax(c,.25),color:c,fontSize:13,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Inter,DM Sans",border:"1px solid "+ax(c,.4)}},it.n),
+            e("div",{style:{minWidth:28,height:28,borderRadius:7,background:ax(c,.25),color:c,fontSize:13,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Inter,DM Sans",border:"1px solid "+ax(c,.14)}},it.n),
             e("div",{style:{fontSize:9,fontWeight:800,color:c,letterSpacing:1.3,textTransform:"uppercase"}},it.kicker||"Enfermedad")
           ),
           e("div",{style:{fontSize:13.5,fontWeight:800,color:"#fff",lineHeight:1.25,fontFamily:"Inter,DM Sans",flex:1}},it.name),
@@ -8232,7 +8232,7 @@ function DzDetail(p){
       e("div",{style:{display:"flex",gap:6,overflowX:"auto",paddingBottom:2}},
         tabs.map(function(t){
           var active=tab===t.k;
-          return e("button",{key:t.k,onClick:function(){setTab(t.k);window.scrollTo({top:0,behavior:"instant"});},style:{padding:"7px 12px",background:active?c:ax(c,.1),border:"1px solid "+(active?c:ax(c,.3)),color:active?"#fff":c,borderRadius:8,fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5,whiteSpace:"nowrap",flexShrink:0}},
+          return e("button",{key:t.k,onClick:function(){setTab(t.k);window.scrollTo({top:0,behavior:"instant"});},style:{padding:"7px 12px",background:active?c:ax(c,.1),border:"1px solid "+(active?c:ax(c,.12)),color:active?"#fff":c,borderRadius:8,fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:5,whiteSpace:"nowrap",flexShrink:0}},
             e("span",null,t.ic),
             e("span",null,t.l)
           );
@@ -8676,7 +8676,7 @@ function AnxView(p){
     ),
 
     // === LAS 9 ENFERMEDADES COMO GRID ===
-    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.3),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
+    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.12),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Secciones del tema"),
       e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Inter,DM Sans"}},"Información general + Quiz")
     ),
@@ -9312,7 +9312,7 @@ function PsicosisView(p){
       "Grupo de trastornos caracterizados por ",e("b",null,"pérdida del contacto con la realidad"),": delirios, alucinaciones, pensamiento desorganizado. El ",e("b",null,"espectro esquizofrénico")," se distingue principalmente por la ",e("b",null,"duración")," de los síntomas. Incluye también los trastornos del estado de ánimo graves (bipolar y depresión mayor) en la clasificación clínica que seguimos."
     ),
 
-    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.3),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
+    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.12),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Secciones del tema"),
       e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Inter,DM Sans"}},"Conceptos, fármacos + Quiz + Flashcards")
     ),
@@ -9675,7 +9675,7 @@ function OCDView(p){
       "Capítulo creado en DSM-5 (antes el TOC estaba en ansiedad). Comparten neurobiología (circuito órbito-fronto-estriatal hiperactivo), fenomenología (pensamientos/preocupaciones repetitivos + conductas repetitivas) y respuesta a tratamiento. Son ",e("b",null,"7 entidades"),"."
     ),
 
-    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.3),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
+    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.12),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Secciones del tema"),
       e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Inter,DM Sans"}},"Información general + Flashcards + Quiz")
     ),
@@ -10031,7 +10031,7 @@ function TraumaView(p){
       "Capítulo creado en DSM-5. Reúne trastornos en los que la ",e("b",null,"exposición a un evento estresante o traumático")," es un criterio ",e("b",null,"explícito y necesario")," para el diagnóstico. Son ",e("b",null,"6 entidades"),"."
     ),
 
-    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.3),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
+    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.12),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Secciones del tema"),
       e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Inter,DM Sans"}},"Conceptos · Criterio A · Flashcards · Quiz")
     ),
@@ -10373,7 +10373,7 @@ function SomView(p){
       "Dos capítulos del DSM-5 que se presentan juntos por afinidad clínica y diagnóstico diferencial frecuente. ",e("b",null,"5 trastornos somáticos")," (síntomas físicos como centro del sufrimiento) + ",e("b",null,"3 disociativos")," (discontinuidad en conciencia, memoria, identidad o percepción). Total: ",e("b",null,"8 entidades"),"."
     ),
 
-    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.3),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
+    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.12),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Secciones del tema"),
       e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Inter,DM Sans"}},"Conceptos · DDx claves · Flashcards · Quiz")
     ),
@@ -10819,7 +10819,7 @@ function TCAView(p){
       "Cuadros con alteraciones persistentes en la conducta de alimentación. Incluyen desde la anorexia nerviosa — el trastorno psiquiátrico con ",e("b",null,"mortalidad más alta")," — hasta entidades de presentación más sutil como ARFID y pica. Son ",e("b",null,"6 entidades DSM-5"),"."
     ),
 
-    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.3),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
+    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.12),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Secciones del tema"),
       e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Inter,DM Sans"}},"Conceptos · Tratamiento · Realimentación · Flashcards · Quiz")
     ),
@@ -11331,7 +11331,7 @@ function SueView(p){
       "Alteraciones persistentes de la cantidad, calidad o momento del sueño que causan malestar o deterioro diurno. El capítulo DSM-5 incluye ",e("b",null,"múltiples entidades")," — cubrimos las 9 más relevantes para el examen, desde el insomnio (el más frecuente) hasta el TCSR (predictor de enfermedad neurodegenerativa)."
     ),
 
-    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.3),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
+    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.12),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Secciones del tema"),
       e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Inter,DM Sans"}},"Conceptos · NREM vs REM · Tratamiento · Flashcards · Quiz")
     ),
@@ -11735,7 +11735,7 @@ function PerView(p){
       "Patrones persistentes de experiencia interna y comportamiento que se apartan notablemente de las expectativas culturales, son inflexibles y generalizados, inician en la adolescencia/adultez temprana y son estables en el tiempo. Se organizan en ",e("b",null,"3 clusters")," (A, B y C) y son en total ",e("b",null,"10 entidades"),"."
     ),
 
-    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.3),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
+    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.12),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Secciones del tema"),
       e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Inter,DM Sans"}},"Conceptos · Clusters · DDx · Flashcards · Quiz")
     ),
@@ -11988,7 +11988,7 @@ function ImpView(p){
       "Capítulo del DSM-5 que agrupa trastornos caracterizados por ",e("b",null,"dificultad en el control de emociones y comportamiento"),", con transgresión de derechos ajenos o conflicto con autoridades/normas. Incluye entidades infantiles (negativista, conducta) y del adulto (TEI, piromanía, cleptomanía). Son ",e("b",null,"5 entidades principales"),"."
     ),
 
-    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.3),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
+    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.12),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Secciones del tema"),
       e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Inter,DM Sans"}},"Conceptos · DDx · Flashcards · Quiz")
     ),
@@ -12361,7 +12361,7 @@ function DprView(p){
       "Capítulo del DSM-5 separado del bipolar. Incluye entidades con episodios de ánimo bajo SIN antecedente maníaco/hipomaníaco. El ",e("b",null,"trastorno depresivo mayor (TDM)")," es el más común, pero el capítulo incluye también distimia, TDPM y TDDD. Son ",e("b",null,"4 entidades principales"),"."
     ),
 
-    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.3),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
+    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.12),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Secciones del tema"),
       e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Inter,DM Sans"}},"Conceptos · DDx · Tratamiento · Perlas · Flashcards · Quiz")
     ),
@@ -12792,7 +12792,7 @@ function IntroView(p){
          e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:1.8,textTransform:"uppercase",marginBottom:6}},"🌐 Salud · OMS"),
          e("div",{style:{fontSize:14,color:C.tx,lineHeight:1.6,fontStyle:"italic"}},"Estado de completo bienestar ",e("b",null,"físico, mental y social"),", y no solamente la ausencia de afecciones o enfermedades.")
        ),
-       e("div",{style:{padding:"16px 18px",background:"linear-gradient(135deg,"+ax(c,.12)+","+C.cd+" 85%)",border:"1px solid "+ax(c,.3),borderLeft:"4px solid "+c,borderRadius:12,marginBottom:14}},
+       e("div",{style:{padding:"16px 18px",background:"linear-gradient(135deg,"+ax(c,.12)+","+C.cd+" 85%)",border:"1px solid "+ax(c,.12),borderLeft:"4px solid "+c,borderRadius:12,marginBottom:14}},
          e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:1.8,textTransform:"uppercase",marginBottom:6}},"🧠 Salud mental · OMS"),
          e("div",{style:{fontSize:14,color:C.tx,lineHeight:1.6,fontStyle:"italic"}},"Estado de bienestar en el que el individuo es consciente de ",e("b",null,"sus capacidades"),", puede afrontar el ",e("b",null,"estrés"),", puede ",e("b",null,"trabajar de forma productiva")," y ",e("b",null,"contribuir a la comunidad"),".")
        ),
@@ -12960,7 +12960,7 @@ function IntroView(p){
       "Marco conceptual común a toda la materia. Definiciones de la OMS, historia, qué es un trastorno mental, la división clínica ",e("b",null,"psicosis vs neurosis"),", causas multicausales y los 3 pilares del tratamiento. Toca cada tarjeta para profundizar."
     ),
 
-    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.3),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
+    e("div",{style:{padding:"14px 16px",background:"linear-gradient(135deg,"+ax(c,.12)+","+ax(c,.03)+" 90%)",border:"1px solid "+ax(c,.12),borderRadius:14,margin:"22px 0 4px",textAlign:"center"}},
       e("div",{style:{fontSize:10.5,fontWeight:800,color:c,letterSpacing:2,textTransform:"uppercase",marginBottom:3}},"Secciones del tema"),
       e("div",{style:{fontSize:16,fontWeight:900,color:"#fff",letterSpacing:.1,lineHeight:1.2,fontFamily:"Inter,DM Sans"}},"Conceptos fundamentales"),
       e("div",{style:{fontSize:12,color:C.mt,marginTop:4,lineHeight:1.45}},"OMS · Historia · Psicosis vs Neurosis · Causas · Tratamientos · Navegación")
