@@ -47,7 +47,7 @@ function DzSectionView(p){
       e("div",{style:{fontSize:9.5,fontWeight:800,color:c,letterSpacing:1.8,textTransform:"uppercase",marginBottom:1,opacity:.85}},p.kicker||"Sección del tema"),
       e("div",{style:{fontSize:15,fontWeight:800,color:"#fff",lineHeight:1.2,fontFamily:"Inter,DM Sans"}},p.name)
     ),
-    e("div",{style:{padding:"14px 14px 40px",maxWidth:720,margin:"0 auto",animation:"fadeIn .2s"}},
+    e("div",{style:{padding:"14px 14px 40px",maxWidth:1200,margin:"0 auto",animation:"fadeIn .2s"}},
       p.content
     )
   );
@@ -90,7 +90,7 @@ function DzDetail(p){
         })
       )
     ),
-    e("div",{style:{padding:"14px 14px 40px",maxWidth:720,margin:"0 auto",animation:"fadeIn .2s"}},
+    e("div",{style:{padding:"14px 14px 40px",maxWidth:1200,margin:"0 auto",animation:"fadeIn .2s"}},
       p.sections&&p.sections[tab]?p.sections[tab]:e(P,null,"(sin contenido)")
     )
   );

@@ -166,7 +166,7 @@ function App(p){
 
   if(view==="intro"){
     return e("div",null,
-      e("div",{style:{padding:"14px 14px 90px",maxWidth:720,margin:"0 auto",animation:"fadeIn .3s"}},
+      e("div",{style:{padding:"14px 14px 90px",maxWidth:1200,margin:"0 auto",animation:"fadeIn .3s"}},
         e(IntroView,{onOpenSection:openSection})
       ),
       scrollTopBtn(C.intro)
@@ -182,7 +182,7 @@ function App(p){
 
   if(view==="psicosis"){
     return e("div",null,
-      e("div",{style:{padding:"14px 14px 90px",maxWidth:720,margin:"0 auto",animation:"fadeIn .3s"}},
+      e("div",{style:{padding:"14px 14px 90px",maxWidth:1200,margin:"0 auto",animation:"fadeIn .3s"}},
         e(PsicosisView,{go:go,onOpen:function(item){openDisease(item,C.psi);},onOpenSection:openSection})
       ),
       scrollTopBtn(C.psi)
@@ -227,7 +227,7 @@ function App(p){
     var hc=group==="psicosis"?C.psi:(group==="all"?C.pearl:C.anx);
     var groupLabel=group==="psicosis"?"Psicosis":(group==="all"?"toda Salud Mental":"Neurosis");
     return e("div",null,
-      e("div",{style:{padding:"16px 14px 90px",maxWidth:720,margin:"0 auto",animation:"fadeIn .3s"}},
+      e("div",{style:{padding:"16px 14px 90px",maxWidth:1200,margin:"0 auto",animation:"fadeIn .3s"}},
         e("div",{style:{padding:"18px 18px",background:"linear-gradient(135deg,"+ax(hc,.15)+","+C.cd+" 85%)",border:"1px solid "+ax(hc,.35),borderLeft:"4px solid "+hc,borderRadius:14,marginBottom:18}},
           e("div",{style:{fontSize:10.5,fontWeight:800,color:hc,letterSpacing:2,textTransform:"uppercase",marginBottom:4}},isFlash?"Flashcards globales":"Quiz global"),
           e("div",{style:{fontSize:18,fontWeight:900,color:"#fff",lineHeight:1.2,fontFamily:"Inter,DM Sans",marginBottom:5}},isFlash?"Repaso combinado":"Casos clínicos combinados"),
@@ -244,7 +244,7 @@ function App(p){
   var V=views[view];
   var tc=colors[view];
   return e("div",null,
-    e("div",{style:{padding:"14px 14px 90px",maxWidth:720,margin:"0 auto",animation:"fadeIn .3s"}},
+    e("div",{style:{padding:"14px 14px 90px",maxWidth:1200,margin:"0 auto",animation:"fadeIn .3s"}},
       e(V,{onOpen:function(item){openDisease(item,tc);},onOpenSection:openSection})
     ),
     scrollTopBtn(tc)
