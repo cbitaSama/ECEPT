@@ -664,7 +664,17 @@ function ChatBot(props) {
   } else if (CB_fullscreen) {
     panelStyle = { position:'fixed', inset:0, background:C.bg, zIndex:9999, display:'flex', flexDirection:'row', overflow:'hidden', animation:'CB_panelIn 280ms cubic-bezier(0.32,0.72,0,1)' };
   } else {
-    panelStyle = { position:'fixed', top:24, left:24, bottom:24, width:'460px', borderRadius:28, background:'linear-gradient(180deg,#0d1224 0%,#060a14 100%)', border:'1px solid rgba(96,165,250,.20)', boxShadow:'0 20px 48px rgba(0,0,0,0.4), 0 8px 16px rgba(0,0,0,0.25), 0 0 0 1px rgba(96,165,250,.08) inset', zIndex:9999, display:'flex', flexDirection:'column', overflow:'hidden', animation:'CB_panelIn 320ms cubic-bezier(0.16,1,0.3,1)' };
+    panelStyle = {
+      position:'fixed', top:24, left:24, bottom:24, width:'460px',
+      borderRadius:24,
+      background:'linear-gradient(180deg, rgba(13,18,36,0.95) 0%, rgba(10,14,31,0.95) 100%)',
+      backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)',
+      border:'1px solid rgba(96,165,250,0.20)',
+      boxShadow:'0 24px 60px rgba(0,0,0,0.50), 0 0 40px rgba(96,165,250,0.08), inset 0 1px 0 rgba(255,255,255,0.05)',
+      zIndex:5000,
+      display:'flex', flexDirection:'column', overflow:'hidden',
+      animation:'ecept_chatPanelIn 320ms cubic-bezier(0.16,1,0.3,1)'
+    };
   }
 
   var inputContainerStyle = {
@@ -1119,6 +1129,14 @@ function ChatBot(props) {
       onClick:function() { CB_setSidebarOpen(false); },
       style:{ position:'fixed', inset:0, zIndex:9999 }
     }),
+
+    // ── Ambient glow detrás del panel floating (desktop) ──
+    CB_open && CB_isDesktop && !CB_fullscreen && e('div', { 'aria-hidden':'true', style:{
+      position:'fixed', top:0, left:0, width:'520px', height:'100vh',
+      background:'radial-gradient(ellipse at left, rgba(167,139,250,0.08), transparent 60%)',
+      pointerEvents:'none', zIndex:4999,
+      animation:'ecept_fadeIn 400ms ease-out'
+    }}),
 
     // ── Panel ──
     CB_open && e('div', { id:'CB_panel', style:Object.assign({},panelStyle,{position:'fixed'}), onClick:function() { CB_setConvMenuId(null); } },
