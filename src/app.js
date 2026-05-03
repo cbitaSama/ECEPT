@@ -332,35 +332,38 @@ function App(){
           })()
         ),
         e("div",{style:{flex:1,position:"relative",maxWidth:"600px"}},
-          e("span",{style:{position:"absolute",left:"16px",top:"50%",transform:"translateY(-50%)",color:C.mt,fontSize:"15px",pointerEvents:"none"}},"🔍"),
+          e("span",{style:{position:"absolute",left:"18px",top:"50%",transform:"translateY(-50%)",color:"rgba(96,165,250,0.65)",fontSize:"18px",pointerEvents:"none"}},"🔍"),
           e("input",{
             style:{
               width:"100%",
-              background:"linear-gradient(180deg,rgba(13,18,36,0.80),rgba(10,14,31,0.80))",
-              border:"1px solid rgba(96,165,250,0.15)",
-              borderRadius:"14px",
-              padding:"12px 18px 12px 44px",
+              background:"linear-gradient(180deg,rgba(13,18,36,0.92),rgba(10,14,31,0.92))",
+              border:"1px solid rgba(96,165,250,0.28)",
+              borderRadius:"16px",
+              padding:"14px 20px 14px 50px",
               color:C.tx,
               fontSize:"14px",
+              fontWeight:500,
+              letterSpacing:"-0.005em",
               outline:"none",
               fontFamily:"inherit",
-              transition:"border-color 200ms cubic-bezier(0.16,1,0.3,1), box-shadow 200ms ease-out, background 200ms ease-out",
+              boxShadow:"inset 0 1px 0 rgba(255,255,255,0.04), 0 2px 8px rgba(0,0,0,0.20)",
+              transition:"border-color 220ms cubic-bezier(0.16,1,0.3,1), box-shadow 220ms ease-out, background 220ms ease-out",
               boxSizing:"border-box"
             },
-            placeholder:"Buscar enfermedades, síndromes, tríadas...",
+            placeholder:"Buscar enfermedades, síndromes, valores...",
             value:sq,
             onChange:function(ev){setSq(ev.target.value);setSo(true)},
             onFocus:function(ev){
               setSo(true);
-              ev.currentTarget.style.borderColor="rgba(96,165,250,0.40)";
-              ev.currentTarget.style.boxShadow="0 0 0 4px rgba(96,165,250,0.08)";
-              ev.currentTarget.style.background="linear-gradient(180deg,rgba(13,18,36,0.95),rgba(10,14,31,0.95))";
+              ev.currentTarget.style.borderColor="rgba(96,165,250,0.50)";
+              ev.currentTarget.style.boxShadow="0 0 0 4px rgba(96,165,250,0.12), inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 16px rgba(96,165,250,0.10)";
+              ev.currentTarget.style.background="linear-gradient(180deg,rgba(13,18,36,0.98),rgba(10,14,31,0.98))";
             },
             onBlur:function(ev){
               setTimeout(function(){setSo(false)},250);
-              ev.currentTarget.style.borderColor="rgba(96,165,250,0.15)";
-              ev.currentTarget.style.boxShadow="none";
-              ev.currentTarget.style.background="linear-gradient(180deg,rgba(13,18,36,0.80),rgba(10,14,31,0.80))";
+              ev.currentTarget.style.borderColor="rgba(96,165,250,0.28)";
+              ev.currentTarget.style.boxShadow="inset 0 1px 0 rgba(255,255,255,0.04), 0 2px 8px rgba(0,0,0,0.20)";
+              ev.currentTarget.style.background="linear-gradient(180deg,rgba(13,18,36,0.92),rgba(10,14,31,0.92))";
             }
           }),
           so&&sr.length>0&&e("div",{style:{

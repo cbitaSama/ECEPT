@@ -1399,7 +1399,11 @@ function ChatBot(props) {
         ev.currentTarget.style.boxShadow = '0 0 32px rgba(167,139,250,0.35), 0 8px 24px rgba(0,0,0,0.3)';
       }
     },
-      e(window.Logo || 'span', { size: 34, animated: true, idSuffix:'fab' }),
+      // Logo en FAB: forzado size 38 + container con bg sutil para mejorar contraste
+      // sobre el gradient azul/violeta del botón.
+      e('div', { style:{ width:38, height:38, display:'flex', alignItems:'center', justifyContent:'center', filter:'drop-shadow(0 1px 2px rgba(0,0,0,0.30))' } },
+        e(window.Logo || 'span', { size: 38, animated: true, idSuffix:'fab' })
+      ),
       // Indicador de estado: verde pulsante si hay sesión, gris estático si no.
       CB_session === true && e('span', { 'aria-hidden':'true', style:{
         position:'absolute', bottom:4, right:4, width:12, height:12,
