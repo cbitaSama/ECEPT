@@ -187,6 +187,8 @@ button { cursor: pointer; color: inherit; background: none; }
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.js"></script>
 <script>window.__ECEPT_ENV={SUPABASE_URL:'__SUPABASE_URL__',SUPABASE_ANON_KEY:'__SUPABASE_ANON_KEY__'};</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script>
@@ -15954,6 +15956,103 @@ function CB_parseInline(text) {
 }
 
 // ── Block markdown renderer ───────────────────────────────────
+// ── Pro 2.5 export helpers ──
+function CB_extractExportMeta(text) {
+  if (!text) return null;
+  var match = String(text).match(/===EXPORT_DOCUMENT===\s*([\s\S]*?)\s*===END_EXPORT===/);
+  if (!match) return null;
+  try { return JSON.parse(match[1]); } catch(e) { return null; }
+}
+function CB_stripExportMeta(text) {
+  if (!text) return text;
+  return String(text).replace(/===EXPORT_DOCUMENT===[\s\S]*?===END_EXPORT===/, '').trim();
+}
+
+function CB_exportToPDF(content, meta) {
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    if (window.ECEPT_toast) window.ECEPT_toast('jsPDF no disponible. Recargá la página.', 'error');
+    return;
+  }
+  var jsPDF = window.jspdf.jsPDF;
+  var doc = new jsPDF();
+  doc.setFontSize(20);
+  doc.setFont('helvetica', 'bold');
+  doc.text(meta.title || 'Documento ECEPT', 20, 25, { maxWidth: 170 });
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'normal');
+  // Markdown → texto plano simple
+  var plain = String(content || '')
+    .replace(/^#+\s+/gm, '')
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/\*(.+?)\*/g, '$1')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/\[(.+?)\]\((.+?)\)/g, '$1 ($2)')
+    .trim();
+  var lines = doc.splitTextToSize(plain, 170);
+  // Pagination simple
+  var y = 38;
+  var lineH = 6;
+  for (var i = 0; i < lines.length; i++) {
+    if (y > 275) { doc.addPage(); y = 20; }
+    doc.text(lines[i], 20, y);
+    y += lineH;
+  }
+  doc.setFontSize(9);
+  doc.setTextColor(120);
+  doc.text('Generado por Elion · ECEPT · ' + new Date().toLocaleDateString('es'), 20, 290);
+  var fname = meta.filename || 'documento_ecept.pdf';
+  if (!/\.pdf$/i.test(fname)) fname += '.pdf';
+  doc.save(fname);
+}
+
+function CB_exportToDOCX(content, meta) {
+  if (!window.docx) {
+    if (window.ECEPT_toast) window.ECEPT_toast('Librería DOCX no disponible. Recargá la página.', 'error');
+    return;
+  }
+  var Document = window.docx.Document;
+  var Packer = window.docx.Packer;
+  var Paragraph = window.docx.Paragraph;
+  var TextRun = window.docx.TextRun;
+  var HeadingLevel = window.docx.HeadingLevel;
+  var paragraphs = [];
+  paragraphs.push(new Paragraph({ text: meta.title || 'Documento ECEPT', heading: HeadingLevel.TITLE }));
+  paragraphs.push(new Paragraph({ text: '' }));
+  var lines = String(content || '').split('\n');
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i];
+    if (line.indexOf('## ') === 0) paragraphs.push(new Paragraph({ text: line.slice(3), heading: HeadingLevel.HEADING_2 }));
+    else if (line.indexOf('### ') === 0) paragraphs.push(new Paragraph({ text: line.slice(4), heading: HeadingLevel.HEADING_3 }));
+    else if (line.indexOf('# ') === 0) paragraphs.push(new Paragraph({ text: line.slice(2), heading: HeadingLevel.HEADING_1 }));
+    else if (line.trim() === '') paragraphs.push(new Paragraph({ text: '' }));
+    else {
+      var clean = line.replace(/\*\*/g, '').replace(/`/g, '');
+      paragraphs.push(new Paragraph({ children: [new TextRun(clean)] }));
+    }
+  }
+  var doc = new Document({ sections: [{ properties: {}, children: paragraphs }] });
+  Packer.toBlob(doc).then(function(blob) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    var fname = meta.filename || 'documento_ecept.docx';
+    if (!/\.docx$/i.test(fname)) fname += '.docx';
+    a.download = fname;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+}
+
+function CB_exportDocument(content, meta) {
+  if (!meta || !meta.format) return;
+  if (meta.format === 'pdf') CB_exportToPDF(content, meta);
+  else if (meta.format === 'docx') CB_exportToDOCX(content, meta);
+  else CB_exportToPDF(content, meta);
+}
+
 function CB_renderMarkdown(text) {
   var lines = String(text || '').split('\n');
   var elems = [];
@@ -17285,10 +17384,51 @@ function ChatBot(props) {
                   return e('div', { key:i, style:{ display:'flex', flexDirection:'column', alignItems:isUser?'flex-end':'flex-start', gap:4, animation:'ecept_messageIn 320ms cubic-bezier(0.32,0.72,0,1)' } },
                     isUser
                       ? e('div', { style:{ maxWidth:'85%', padding:'13px 18px', borderRadius:'20px 20px 6px 20px', background:'linear-gradient(135deg,rgba(59,130,246,.20),rgba(96,165,250,.10))', border:'1px solid rgba(96,165,250,.28)', color:C.tx, fontSize:14, lineHeight:1.55, wordBreak:'break-word', whiteSpace:'pre-wrap', boxShadow:'0 1px 2px rgba(0,0,0,0.2)' } }, m.text)
-                      : e('div', { style:{ display:'flex', alignItems:'flex-start', gap:10, maxWidth:'92%' } },
-                          CB_elionAvatar(30),
-                          e('div', { style:{ padding:'14px 18px', borderRadius:'20px 20px 20px 6px', background:m.error?'rgba(239,68,68,.08)':'linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)', border:'1px solid '+(m.error?'rgba(239,68,68,.25)':'#1a2040'), boxShadow:m.error?'none':'0 2px 8px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.15)', color:m.error?'#ef4444':C.tx, fontSize:14, lineHeight:1.55, wordBreak:'break-word' } },
-                            m.error ? e('span', null, m.text) : CB_renderMarkdown(m.text),
+                      : (function(){
+                          var exportMeta = !m.error ? CB_extractExportMeta(m.text) : null;
+                          var displayText = exportMeta ? CB_stripExportMeta(m.text) : m.text;
+                          return e('div', { style:{ display:'flex', alignItems:'flex-start', gap:10, maxWidth:'92%' } },
+                            CB_elionAvatar(30),
+                            e('div', { style:{ padding:'14px 18px', borderRadius:'20px 20px 20px 6px', background:m.error?'rgba(239,68,68,.08)':'linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)', border:'1px solid '+(m.error?'rgba(239,68,68,.25)':'#1a2040'), boxShadow:m.error?'none':'0 2px 8px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.15)', color:m.error?'#ef4444':C.tx, fontSize:14, lineHeight:1.55, wordBreak:'break-word' } },
+                            m.error ? e('span', null, m.text) : CB_renderMarkdown(displayText),
+                            // Pro 2.5: botón download premium si hay export meta
+                            exportMeta && e('div', { style:{
+                              marginTop:'14px',
+                              padding:'12px 16px',
+                              background:'linear-gradient(135deg, rgba(251,191,36,0.12), rgba(251,191,36,0.05))',
+                              border:'1px solid rgba(251,191,36,0.30)',
+                              borderRadius:12,
+                              display:'flex',
+                              alignItems:'center',
+                              justifyContent:'space-between',
+                              gap:12,
+                              flexWrap:'wrap'
+                            } },
+                              e('div', { style:{ minWidth:0, flex:1 } },
+                                e('div', { style:{ fontSize:13, fontWeight:700, color:'#fbbf24', letterSpacing:'-0.01em', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' } }, '📄 ' + (exportMeta.title || 'Documento')),
+                                e('div', { style:{ fontSize:11, color:'#94a3b8', marginTop:2, letterSpacing:'0.04em' } }, 'Documento ' + String(exportMeta.format || 'pdf').toUpperCase() + ' listo para descargar')
+                              ),
+                              e('button', {
+                                onClick: function() { CB_exportDocument(displayText, exportMeta); },
+                                style:{
+                                  background:'linear-gradient(135deg,#fbbf24,#f59e0b)',
+                                  color:'#0a0e1f',
+                                  border:'none',
+                                  padding:'10px 18px',
+                                  borderRadius:10,
+                                  fontSize:13,
+                                  fontWeight:700,
+                                  cursor:'pointer',
+                                  fontFamily:'inherit',
+                                  letterSpacing:'-0.01em',
+                                  boxShadow:'0 4px 12px rgba(251,191,36,0.25)',
+                                  transition:'transform 200ms cubic-bezier(0.16,1,0.3,1)',
+                                  flexShrink:0
+                                },
+                                onMouseEnter: function(ev) { ev.currentTarget.style.transform = 'translateY(-1px)'; },
+                                onMouseLeave: function(ev) { ev.currentTarget.style.transform = 'translateY(0)'; }
+                              }, '📥 Descargar')
+                            ),
                             // Botón Reintentar inline para errores transitorios (último error, no loading)
                             m.error && m.retryable && i === CB_msgs.length - 1 && !CB_loading && CB_lastMsgRef.current && e('button', {
                               onClick: CB_retryLast,
@@ -17310,7 +17450,8 @@ function ChatBot(props) {
                               onMouseLeave: function(ev) { ev.currentTarget.style.background='rgba(96,165,250,0.14)'; }
                             }, '↻ Reintentar')
                           )
-                        )
+                        );
+                        })()
                   );
                 }),
 

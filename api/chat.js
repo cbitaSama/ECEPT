@@ -326,6 +326,28 @@ module.exports = async function handler(req, res) {
       '\n\n=== FIN INSTRUCCIONES PERSONALIZADAS ===';
   }
 
+  // Capacidades extra para Pro 2.5
+  if (model === 'gemini-2.5-pro') {
+    systemPromptFull +=
+      '\n\n=== CAPACIDADES PRO 2.5 ===\n' +
+      'Cuando el usuario pida explícitamente generar un documento (PDF, Word, ' +
+      'DOCX, ensayo, monografía, resumen exportable):\n' +
+      '1. Producí contenido bien estructurado en markdown — usá headers (##, ###), ' +
+      '   listas, tablas, citas si corresponden.\n' +
+      '2. Si se mencionan referencias bibliográficas, formateá según APA 7ma edición.\n' +
+      '3. Al FINAL del mensaje (no al inicio), agregá EXACTAMENTE este bloque para ' +
+      '   que el frontend ofrezca botón de descarga:\n\n' +
+      '   ===EXPORT_DOCUMENT===\n' +
+      '   {"format":"pdf","filename":"sugerencia.pdf","title":"Título del documento"}\n' +
+      '   ===END_EXPORT===\n\n' +
+      '   format puede ser "pdf" o "docx" según lo pida el usuario (default pdf).\n' +
+      '   filename: kebab-case sin tildes (ej: "betabloqueantes-resumen.pdf").\n' +
+      '   title: título legible para portada del documento.\n' +
+      'NO agregues el bloque si el usuario no está pidiendo un documento exportable. ' +
+      'Para preguntas normales, respondé como siempre.\n' +
+      '=== FIN CAPACIDADES PRO 2.5 ===';
+  }
+
   // ── 8. Build Gemini contents ──
   const recent = messages.slice(-10);
   const contents = recent.map((m, idx) => {
