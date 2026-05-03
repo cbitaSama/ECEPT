@@ -357,6 +357,43 @@ function ChatBot(props) {
     return function() { window.removeEventListener('resize', CB_onResize); };
   }, []);
 
+  // ── React to global auth changes (dispatched by App) ──
+  useEffect(function() {
+    function CB_onAuth(ev) {
+      var newUser = ev && ev.detail && ev.detail.user;
+      if (newUser) {
+        CB_setSession(true);
+        CB_setUid(newUser.id);
+        // Reload role + credits para el nuevo user
+        if (window.ECEPT_SUPABASE) {
+          window.ECEPT_SUPABASE.from('profiles').select('role,credits').eq('id', newUser.id).single()
+            .then(function(prof) {
+              if (prof && prof.data) {
+                CB_setRole(prof.data.role || 'student');
+                CB_setCredits(prof.data.credits || 0);
+              }
+            }).catch(function() {});
+        }
+        // Forzar reload de conversations en próxima apertura
+        CB_convLoadedRef.current = false;
+        if (CB_open) {
+          // Si el panel ya está abierto, cargar inmediato
+          CB_loadConversations();
+          CB_convLoadedRef.current = true;
+        }
+      } else {
+        CB_setSession(false);
+        CB_setUid(null);
+        CB_setConversations([]);
+        CB_setMsgs([]);
+        CB_setActiveConvId(null);
+        CB_convLoadedRef.current = false;
+      }
+    }
+    window.addEventListener('ECEPT_AUTH_CHANGE', CB_onAuth);
+    return function() { window.removeEventListener('ECEPT_AUTH_CHANGE', CB_onAuth); };
+  }, [CB_open]);
+
   // ── Load conversations when panel opens ──
   useEffect(function() {
     if (CB_open && CB_session === true && !CB_convLoadedRef.current) {

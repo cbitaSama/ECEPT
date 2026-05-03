@@ -44,7 +44,10 @@ function App(){
         if(res&&res.data&&res.data.session) setEcuUser(res.data.session.user||null);
       }).catch(function(){});
       var authListener=window.ECEPT_SUPABASE.auth.onAuthStateChange(function(event,session){
-        setEcuUser(session&&session.user?session.user:null);
+        var newUser=session&&session.user?session.user:null;
+        setEcuUser(newUser);
+        // Dispatch global event para que componentes escuchen sin re-querying.
+        try { window.dispatchEvent(new CustomEvent('ECEPT_AUTH_CHANGE',{detail:{user:newUser,event:event}})); } catch(e4){}
       });
       return function(){
         try{
@@ -1145,7 +1148,7 @@ function App(){
     // ════════════ BACK BUTTON (floating, hidden on home only) ════════════
     vista!=="home"&&e("button",{onClick:handleBack,style:{position:"fixed",bottom:"20px",left:"20px",background:C.ac,color:"#fff",border:"none",borderRadius:"50%",width:"48px",height:"48px",fontSize:"20px",cursor:"pointer",boxShadow:"0 4px 20px "+C.gl,zIndex:90,display:"flex",alignItems:"center",justifyContent:"center"}},"←"),
     // ════════════ CHATBOT (floating bottom-right) ════════════
-    e(ChatBot,{onLoginRequest:function(){setEcuShowAuth(true);}}),
+    e(ChatBot,{user:ecuUser,onLoginRequest:function(){setEcuShowAuth(true);}}),
     // ════════════ DEBUG BUTTON (admin-only, bottom-right above chat) ════════════
     ecuUser&&ecuRole==="admin"&&!dpOpen&&e("button",{onClick:function(){setDpOpen(true);},style:{position:"fixed",bottom:80,right:20,zIndex:100,background:"#1a2040",color:"#e2e8f0",border:"1px solid #3b82f6",borderRadius:12,padding:"10px 14px",fontSize:13,cursor:"pointer"}},"🛠 Debug"),
     // ════════════ DEBUG PANEL (modal overlay) ════════════
