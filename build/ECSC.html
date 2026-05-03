@@ -16179,6 +16179,7 @@ function ChatBot(props) {
   s=useState([]);                        var CB_conversations=s[0],   CB_setConversations=s[1];
   s=useState(null);                      var CB_activeConvId=s[0],    CB_setActiveConvId=s[1];
   s=useState(false);                     var CB_loadingConvs=s[0],    CB_setLoadingConvs=s[1];
+  s=useState(false);                     var CB_convsLoaded=s[0],     CB_setConvsLoaded=s[1];
   s=useState(false);                     var CB_sidebarOpen=s[0],     CB_setSidebarOpen=s[1];
   s=useState('');                        var CB_sidebarQ=s[0],        CB_setSidebarQ=s[1];
   s=useState(null);                      var CB_convMenuId=s[0],      CB_setConvMenuId=s[1];
@@ -16416,11 +16417,11 @@ function ChatBot(props) {
     try {
       var sess = await window.ECEPT_SUPABASE.auth.getSession();
       var token = sess && sess.data && sess.data.session && sess.data.session.access_token;
-      if (!token) { CB_finish(function(){ CB_setLoadingConvs(false); }); return; }
+      if (!token) { CB_finish(function(){ CB_setLoadingConvs(false); CB_setConvsLoaded(true); }); return; }
       var r = await fetch('/api/conversations', {
         headers: { 'Authorization':'Bearer '+token }
       });
-      if (!r.ok) { CB_finish(function(){ CB_setLoadingConvs(false); }); return; }
+      if (!r.ok) { CB_finish(function(){ CB_setLoadingConvs(false); CB_setConvsLoaded(true); }); return; }
       var convs = await r.json();
       var convsList = Array.isArray(convs) ? convs : [];
 
@@ -16437,11 +16438,11 @@ function ChatBot(props) {
       CB_finish(function(){
         CB_setConversations(convsList);
         if (pendingActiveId) CB_setActiveConvId(pendingActiveId);
-        CB_setLoadingConvs(false);
+        CB_setLoadingConvs(false); CB_setConvsLoaded(true);
       });
     } catch(err) {
       console.error('CB_loadConversations:', err.message);
-      CB_finish(function(){ CB_setLoadingConvs(false); });
+      CB_finish(function(){ CB_setLoadingConvs(false); CB_setConvsLoaded(true); });
     }
   }
 
@@ -17235,25 +17236,24 @@ function ChatBot(props) {
         ev.currentTarget.style.boxShadow = '0 0 32px rgba(167,139,250,0.35), 0 8px 24px rgba(0,0,0,0.3)';
       }
     },
-      // Logo en FAB: forzado size 38 + container con bg sutil para mejorar contraste
-      // sobre el gradient azul/violeta del botón.
-      e('div', { style:{ width:38, height:38, display:'flex', alignItems:'center', justifyContent:'center', filter:'drop-shadow(0 1px 2px rgba(0,0,0,0.30))' } },
+      // Logo wrapper: zIndex 1 (debajo del dot indicator). drop-shadow despega del gradient.
+      e('div', { style:{ position:'relative', zIndex:1, width:38, height:38, display:'flex', alignItems:'center', justifyContent:'center', filter:'drop-shadow(0 0 6px rgba(255,255,255,0.30)) drop-shadow(0 1px 2px rgba(0,0,0,0.40))' } },
         e(window.Logo || 'span', { size: 38, animated: true, idSuffix:'fab' })
       ),
-      // Indicador de estado: verde pulsante si hay sesión, gris estático si no.
+      // Indicador de estado: zIndex 2 explícito, esquina inferior derecha (NO centro).
       CB_session === true && e('span', { 'aria-hidden':'true', style:{
         position:'absolute', bottom:4, right:4, width:12, height:12,
         borderRadius:'50%', background:'#34d399',
         border:'2px solid #060a14',
         boxShadow:'0 0 8px rgba(52,211,153,0.6)',
         animation:'ecept_pulseDot 2.4s ease-in-out infinite',
-        pointerEvents:'none'
+        pointerEvents:'none', zIndex:2
       }}),
       CB_session === false && e('span', { 'aria-hidden':'true', style:{
         position:'absolute', bottom:4, right:4, width:12, height:12,
         borderRadius:'50%', background:'#94a3b8',
         border:'2px solid #060a14',
-        pointerEvents:'none'
+        pointerEvents:'none', zIndex:2
       }})
     ),
 
@@ -17379,29 +17379,29 @@ function ChatBot(props) {
             )
           ),
           e('div', { style:{ display:'flex', alignItems:'center', gap:2, flexShrink:0 } },
+            // ⚙️ Settings (memoria + config)
             e('button', {
               onClick:function(ev) { ev.stopPropagation(); CB_loadUserNotes(); CB_setSettingsOpen(true); },
-              title:'Memoria de Elion',
+              title:'Memoria y configuración',
+              'aria-label':'Memoria y configuración',
               style:{ background:'none', border:'none', color:C.mt, fontSize:15, cursor:'pointer', minWidth:32, minHeight:32, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:8 }
             }, '⚙️'),
+            // ⛶ Fullscreen toggle (solo desktop)
             CB_isDesktop && e('button', {
               onClick: function() { CB_setFullscreen(function(f) { return !f; }); },
+              title: CB_fullscreen ? 'Salir de pantalla completa' : 'Pantalla completa',
               'aria-label': CB_fullscreen ? 'Salir de pantalla completa' : 'Pantalla completa',
               style:{ background:'none', border:'none', color:C.mt, fontSize:15, cursor:'pointer', minWidth:32, minHeight:32, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:8 }
             }, CB_fullscreen ? '↙' : '⛶'),
+            // ✕ Cerrar chat completo (siempre)
             e('button', {
               onClick: function() {
-                if (CB_fullscreen) {
-                  // En fullscreen: salir a floating (no perder el chat)
-                  CB_setFullscreen(false);
-                } else {
-                  // En floating o mobile: cerrar todo
-                  CB_setOpen(false);
-                  CB_setSidebarOpen(false);
-                }
+                CB_setOpen(false);
+                CB_setFullscreen(false);
+                CB_setSidebarOpen(false);
               },
-              'aria-label': CB_fullscreen ? 'Salir de pantalla completa' : 'Cerrar chat',
-              title: CB_fullscreen ? 'Salir de pantalla completa' : 'Cerrar chat',
+              title: 'Cerrar chat',
+              'aria-label':'Cerrar chat',
               style:{ background:'none', border:'none', color:C.mt, fontSize:20, cursor:'pointer', minWidth:32, minHeight:32, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:8 }
             }, '×')
           )
@@ -17426,7 +17426,9 @@ function ChatBot(props) {
               e('div', { ref:CB_scrollRef, style:{ flex:1, overflowY:'auto', padding:16, display:'flex', flexDirection:'column', gap:14 } },
 
                 // Empty state — primera vez (sin conversaciones previas) → presentación de Elion
-                CB_msgs.length === 0 && !CB_loading && CB_conversations.length === 0 && window.ElionIntro
+                // Gate todos los empty states hasta que conversations carguen.
+                // Esto elimina el flash 'capabilities → ECEPT' al inicio.
+                CB_convsLoaded && CB_msgs.length === 0 && !CB_loading && CB_conversations.length === 0 && window.ElionIntro
                   && e(window.ElionIntro, {
                     onPromptSelect: function(p) {
                       CB_setInput(p);
@@ -17435,7 +17437,7 @@ function ChatBot(props) {
                   }),
 
                 // Empty state — conversación nueva (ya tiene historial previo) → versión simple
-                CB_msgs.length === 0 && !CB_loading && CB_conversations.length > 0 && e('div', {
+                CB_convsLoaded && CB_msgs.length === 0 && !CB_loading && CB_conversations.length > 0 && e('div', {
                   style:{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flex:1, gap:14, minHeight:200, paddingTop:32 }
                 },
                   e('div', { style:{ marginBottom: 4 } }, e(window.Logo || 'span', { size: 64, animated: true, glow: true, idSuffix:'empty' })),
