@@ -108,6 +108,8 @@ var parts = [
   'src/components/Button.js',
   'src/components/Skeleton.js',
   'src/components/EmptyState.js',
+  'src/components/VisitTracker.js',
+  'src/components/FavoriteHelper.js',
   'src/components/ElionIntro.js',
   // chatbot (must come after App? no — function hoisted; keep with components)
   'src/components/ChatBot.js',
@@ -197,6 +199,7 @@ var expectedGlobals = [
   'function SkeletonCard', 'function SkeletonList', 'window.SkeletonCard', 'window.SkeletonList',
   'function EmptyState', 'window.EmptyState',
   'function ElionIntro', 'window.ElionIntro',
+  'function VisitTracker', 'window.VisitTracker', 'window.ECEPT_FAVORITES',
   'function LayeredCard', 'window.LayeredCard',
   'function InfoLayer', 'window.InfoLayer',
   'function Detail', 'window.Detail',

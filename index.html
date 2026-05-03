@@ -14829,6 +14829,190 @@ function EmptyState(props) {
 window.EmptyState = EmptyState;
 
 // ══════════════════════════════════════════════════════════════
+// VisitTracker — registra visitas a items en user_visits.
+// ══════════════════════════════════════════════════════════════
+// Componente invisible. Solo monta el tracking en useEffect.
+//
+// Props:
+//   itemType — string ('enfermedad', 'triada', 'lab', 'receptor',
+//              'mediador', 'salud_mental_trastorno', 'trauma_entry',
+//              'vocab_entry', 'deck', 'study_session', 'anatomia_item').
+//   itemId   — string identificador único.
+//
+// Notas:
+// - Usa SELECT-luego-INSERT/UPDATE para evitar conflictos de upsert sin
+//   constraint únicos garantizados.
+// - Si no hay sesión: no-op silencioso.
+// - Cache local _ECEPT_VISIT_RECENT evita doble registro en mounts rápidos
+//   del mismo item (debounce 60s).
+// ══════════════════════════════════════════════════════════════
+
+window._ECEPT_VISIT_RECENT = window._ECEPT_VISIT_RECENT || {};
+
+function VisitTracker(props) {
+  useEffect(function() {
+    if (!props.itemType || !props.itemId) return;
+    if (!window.ECEPT_SUPABASE) return;
+
+    var key = props.itemType + ':' + props.itemId;
+    var lastSeen = window._ECEPT_VISIT_RECENT[key] || 0;
+    var nowMs = Date.now();
+    if (nowMs - lastSeen < 60000) return; // debounce 60s
+    window._ECEPT_VISIT_RECENT[key] = nowMs;
+
+    window.ECEPT_SUPABASE.auth.getSession().then(function(res) {
+      var user = res && res.data && res.data.session && res.data.session.user;
+      if (!user) return;
+
+      var nowIso = new Date().toISOString();
+      window.ECEPT_SUPABASE
+        .from('user_visits')
+        .select('visit_count')
+        .eq('user_id', user.id)
+        .eq('item_type', props.itemType)
+        .eq('item_id', props.itemId)
+        .maybeSingle()
+        .then(function(r) {
+          if (r && r.data) {
+            window.ECEPT_SUPABASE
+              .from('user_visits')
+              .update({ visit_count: (r.data.visit_count || 0) + 1, last_visited: nowIso })
+              .eq('user_id', user.id)
+              .eq('item_type', props.itemType)
+              .eq('item_id', props.itemId)
+              .then(function(){}, function(){});
+          } else {
+            window.ECEPT_SUPABASE
+              .from('user_visits')
+              .insert({
+                user_id: user.id,
+                item_type: props.itemType,
+                item_id: props.itemId,
+                visit_count: 1,
+                last_visited: nowIso
+              }).then(function(){}, function(){});
+          }
+        }, function(){});
+    }, function(){});
+  }, [props.itemType, props.itemId]);
+
+  return null;
+}
+
+window.VisitTracker = VisitTracker;
+
+// ══════════════════════════════════════════════════════════════
+// ECEPT_FAVORITES — helper global para gestión de favoritos.
+// ══════════════════════════════════════════════════════════════
+// API:
+//   window.ECEPT_FAVORITES.load(userId)            → Promise<Set<key>>
+//   window.ECEPT_FAVORITES.isFavorite(type, id)    → boolean
+//   window.ECEPT_FAVORITES.toggle(userId, type, id) → Promise<bool nuevo>
+//   window.ECEPT_FAVORITES.list(userId)            → Promise<array>
+//   window.ECEPT_FAVORITES.clearCache()
+//
+// Eventos:
+//   window.dispatchEvent('ECEPT_FAVORITES_CHANGE', detail:{itemType,itemId,isFavorite})
+// ══════════════════════════════════════════════════════════════
+
+window.ECEPT_FAVORITES = {
+  _cache: null,
+  _cacheUserId: null,
+  _loadPromise: null,
+
+  load: function(userId) {
+    if (!userId || !window.ECEPT_SUPABASE) {
+      this._cache = null;
+      this._cacheUserId = null;
+      return Promise.resolve(new Set());
+    }
+    if (this._cache && this._cacheUserId === userId) return Promise.resolve(this._cache);
+    if (this._loadPromise && this._cacheUserId === userId) return this._loadPromise;
+
+    var self = this;
+    self._cacheUserId = userId;
+    self._loadPromise = window.ECEPT_SUPABASE
+      .from('user_favorites')
+      .select('item_type, item_id')
+      .eq('user_id', userId)
+      .then(function(res) {
+        var set = new Set();
+        if (res && res.data) {
+          res.data.forEach(function(r) { set.add(r.item_type + ':' + r.item_id); });
+        }
+        self._cache = set;
+        self._loadPromise = null;
+        return set;
+      }, function() {
+        self._loadPromise = null;
+        return new Set();
+      });
+    return self._loadPromise;
+  },
+
+  isFavorite: function(itemType, itemId) {
+    if (!this._cache) return false;
+    return this._cache.has(itemType + ':' + itemId);
+  },
+
+  toggle: function(userId, itemType, itemId) {
+    if (!userId || !window.ECEPT_SUPABASE) return Promise.resolve(false);
+    var self = this;
+    var key = itemType + ':' + itemId;
+    var isFav = self._cache && self._cache.has(key);
+
+    var op = isFav
+      ? window.ECEPT_SUPABASE.from('user_favorites').delete()
+          .eq('user_id', userId).eq('item_type', itemType).eq('item_id', itemId)
+      : window.ECEPT_SUPABASE.from('user_favorites').insert({
+          user_id: userId, item_type: itemType, item_id: itemId
+        });
+
+    return op.then(function(res) {
+      if (res && res.error) {
+        if (window.ECEPT_toast) window.ECEPT_toast('Error guardando favorito', 'error');
+        return isFav;
+      }
+      if (self._cache) {
+        if (isFav) self._cache.delete(key);
+        else self._cache.add(key);
+      }
+      try {
+        window.dispatchEvent(new CustomEvent('ECEPT_FAVORITES_CHANGE', {
+          detail: { itemType: itemType, itemId: itemId, isFavorite: !isFav }
+        }));
+      } catch(e2) {}
+      return !isFav;
+    }, function() {
+      if (window.ECEPT_toast) window.ECEPT_toast('Error guardando favorito', 'error');
+      return isFav;
+    });
+  },
+
+  list: function(userId) {
+    if (!userId || !window.ECEPT_SUPABASE) return Promise.resolve([]);
+    return window.ECEPT_SUPABASE
+      .from('user_favorites')
+      .select('item_type, item_id, created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .then(function(res) { return (res && res.data) || []; },
+            function() { return []; });
+  },
+
+  clearCache: function() {
+    this._cache = null;
+    this._cacheUserId = null;
+    this._loadPromise = null;
+  }
+};
+
+// Limpiar cache cuando cambia el user (auth event)
+window.addEventListener('ECEPT_AUTH_CHANGE', function() {
+  window.ECEPT_FAVORITES.clearCache();
+});
+
+// ══════════════════════════════════════════════════════════════
 // ElionIntro — presentación oficial cuando el user abre el chat
 // por primera vez (sin conversaciones previas, sin mensajes).
 // ══════════════════════════════════════════════════════════════
