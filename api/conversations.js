@@ -43,6 +43,46 @@ module.exports = async function handler(req, res) {
   // ── GET ──────────────────────────────────────────────────────
   if (req.method === 'GET') {
     const convId = req.query && req.query.id;
+    const searchQ = req.query && req.query.q;
+
+    // Búsqueda en title + content de mensajes
+    if (searchQ && String(searchQ).trim().length >= 2) {
+      const q = encodeURIComponent('%' + String(searchQ).trim().slice(0, 100) + '%');
+      const titleR = await fetch(
+        `${SUPABASE_URL}/rest/v1/chat_conversations?user_id=eq.${uid}&archived=eq.false&title=ilike.${q}&select=id,title,updated_at,project_id&limit=20`,
+        { headers: SVC_HEADERS }
+      );
+      const titleRows = await titleR.json();
+      // Buscar en messages y joinar a conversation
+      const msgR = await fetch(
+        `${SUPABASE_URL}/rest/v1/chat_messages?content=ilike.${q}&select=conversation_id,content,role,chat_conversations!inner(id,title,user_id,archived,project_id)&chat_conversations.user_id=eq.${uid}&chat_conversations.archived=eq.false&limit=50`,
+        { headers: SVC_HEADERS }
+      );
+      const msgRows = await msgR.json();
+      const seen = {};
+      const out = [];
+      (Array.isArray(titleRows) ? titleRows : []).forEach(c => {
+        if (seen[c.id]) return;
+        seen[c.id] = 1;
+        out.push({ id: c.id, title: c.title, project_id: c.project_id, snippet: null, matchType: 'title' });
+      });
+      (Array.isArray(msgRows) ? msgRows : []).forEach(m => {
+        const cid = m.conversation_id;
+        if (seen[cid]) return;
+        seen[cid] = 1;
+        const txt = String(m.content || '');
+        const idx = txt.toLowerCase().indexOf(String(searchQ).toLowerCase());
+        let snippet = txt.slice(0, 100);
+        if (idx > 0) {
+          const start = Math.max(0, idx - 30);
+          const end = Math.min(txt.length, idx + searchQ.length + 30);
+          snippet = (start > 0 ? '...' : '') + txt.slice(start, end) + (end < txt.length ? '...' : '');
+        }
+        out.push({ id: cid, title: (m.chat_conversations && m.chat_conversations.title) || 'Conversación', project_id: m.chat_conversations && m.chat_conversations.project_id, snippet: snippet, matchType: 'content' });
+      });
+      res.status(200).json({ results: out });
+      return;
+    }
 
     if (convId) {
       // Single conversation + its messages

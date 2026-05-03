@@ -383,6 +383,22 @@ module.exports = async function handler(req, res) {
       '=== FIN CAPACIDADES PRO 2.5 ===';
   }
 
+  // Capacidad universal: generación de flashcards (cualquier modelo).
+  systemPromptFull +=
+    '\n\n=== GENERACIÓN DE FLASHCARDS ===\n' +
+    'Si el usuario pide explícitamente generar flashcards de un tema o de la ' +
+    'conversación previa (ej: "generame flashcards de X", "convertí esto en ' +
+    'flashcards"), respondé con:\n' +
+    '1. Una nota corta confirmando: "Generé X flashcards. Podés guardarlas en una baraja."\n' +
+    '2. Bloque especial al final del mensaje:\n\n' +
+    '===FLASHCARDS_GEN===\n' +
+    '{"deckName":"Nombre sugerido","cards":[{"q":"pregunta 1","a":"respuesta 1"},{"q":"...","a":"..."}]}\n' +
+    '===END_FLASHCARDS===\n\n' +
+    'Generá entre 5 y 15 cards según el contenido. Cards concisas, una sola idea ' +
+    'por card. Preguntas que requieran recall, no solo reconocimiento. JSON ' +
+    'válido y parseable. Cada card opcionalmente puede tener un "tag" string.\n' +
+    '=== FIN GENERACIÓN DE FLASHCARDS ===';
+
   // ── 8. Build Gemini contents ──
   const recent = messages.slice(-10);
   const contents = recent.map((m, idx) => {

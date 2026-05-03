@@ -16311,6 +16311,21 @@ function CB_stripExportMeta(text) {
   return String(text).replace(/===EXPORT_DOCUMENT===[\s\S]*?===END_EXPORT===/, '').trim();
 }
 
+function CB_extractFlashcardsBlock(text) {
+  if (!text) return null;
+  var match = String(text).match(/===FLASHCARDS_GEN===\s*([\s\S]*?)\s*===END_FLASHCARDS===/);
+  if (!match) return null;
+  try {
+    var parsed = JSON.parse(match[1]);
+    if (!parsed || !Array.isArray(parsed.cards) || parsed.cards.length === 0) return null;
+    return parsed;
+  } catch(e) { return null; }
+}
+function CB_stripFlashcardsBlock(text) {
+  if (!text) return text;
+  return String(text).replace(/===FLASHCARDS_GEN===[\s\S]*?===END_FLASHCARDS===/, '').trim();
+}
+
 function CB_exportToPDF(content, meta) {
   if (!window.jspdf || !window.jspdf.jsPDF) {
     if (window.ECEPT_toast) window.ECEPT_toast('jsPDF no disponible. Recargá la página.', 'error');
@@ -16785,6 +16800,51 @@ function ChatBot(props) {
   }, [CB_msgs, CB_loading]);
 
   // ── Conversation loaders ──
+  async function CB_saveGeneratedFlashcards(deckName, cards) {
+    if (!window.ECEPT_SUPABASE) return;
+    try {
+      var sess = await window.ECEPT_SUPABASE.auth.getSession();
+      var user = sess && sess.data && sess.data.session && sess.data.session.user;
+      if (!user) {
+        if (window.ECEPT_toast) window.ECEPT_toast('Iniciá sesión para guardar flashcards', 'warning');
+        return;
+      }
+      // Crear deck custom del user
+      var deckRes = await window.ECEPT_SUPABASE.from('decks').insert({
+        user_id: user.id,
+        name: String(deckName || 'Generadas por Elion').slice(0,80),
+        description: 'Generado desde chat con Elion',
+        color: '#a78bfa',
+        icon: '🎴',
+        is_official: false
+      }).select().single();
+      if (deckRes.error || !deckRes.data) {
+        if (window.ECEPT_toast) window.ECEPT_toast('Error creando baraja', 'error');
+        return;
+      }
+      var deck = deckRes.data;
+      // Insertar cards
+      var rows = cards.slice(0,30).map(function(c) {
+        return {
+          deck_id: deck.id,
+          user_id: user.id,
+          card_type: 'basic',
+          front: String(c.q || '').slice(0, 1000),
+          back: String(c.a || '').slice(0, 2000),
+          tags: c.tag ? [String(c.tag).slice(0,40)] : []
+        };
+      });
+      var insRes = await window.ECEPT_SUPABASE.from('flashcards').insert(rows);
+      if (insRes.error) {
+        if (window.ECEPT_toast) window.ECEPT_toast('Error guardando cards', 'error');
+        return;
+      }
+      if (window.ECEPT_toast) window.ECEPT_toast(rows.length + ' cards guardadas en "' + deck.name + '"', 'success');
+    } catch(e) {
+      if (window.ECEPT_toast) window.ECEPT_toast('Error inesperado', 'error');
+    }
+  }
+
   async function CB_loadProjects() {
     if (!window.ECEPT_SUPABASE) return;
     try {
@@ -17433,6 +17493,25 @@ function ChatBot(props) {
             onClick:function(ev) { ev.stopPropagation(); CB_setRenameValue(conv.title || ''); CB_setRenamingId(conv.id); CB_setConvMenuId(null); },
             style:{ display:'block', width:'100%', padding:'9px 12px', background:'none', border:'none', color:C.tx, fontSize:13, cursor:'pointer', textAlign:'left', borderRadius:6, fontFamily:'inherit' }
           }, '✎ Renombrar'),
+          // Mover a proyecto
+          CB_projects.length > 0 && e('div', { style:{ borderTop:'1px solid rgba(255,255,255,0.04)', margin:'4px 0', paddingTop:4 } },
+            e('div', { style:{ padding:'4px 12px', fontSize:10, color:'#64748b', letterSpacing:'0.10em', textTransform:'uppercase' } }, 'Mover a proyecto'),
+            CB_projects.map(function(p) {
+              var isHere = conv.project_id === p.id;
+              return e('button', { key: p.id,
+                onClick:function(ev) { ev.stopPropagation(); CB_assignConvToProject(conv.id, p.id); CB_setConvMenuId(null); },
+                style:{ display:'flex', alignItems:'center', gap:8, width:'100%', padding:'7px 12px', background: isHere?'rgba(167,139,250,0.10)':'none', border:'none', color:isHere?p.color:C.tx, fontSize:12, cursor:'pointer', textAlign:'left', borderRadius:6, fontFamily:'inherit' }
+              },
+                e('span', null, p.icon || '📁'),
+                e('span', { style:{ flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' } }, p.name),
+                isHere && e('span', { style:{ fontSize:11 } }, '✓')
+              );
+            }),
+            conv.project_id && e('button', {
+              onClick:function(ev) { ev.stopPropagation(); CB_assignConvToProject(conv.id, null); CB_setConvMenuId(null); },
+              style:{ display:'block', width:'100%', padding:'7px 12px', background:'none', border:'none', color:C.mt, fontSize:11, cursor:'pointer', textAlign:'left', borderRadius:6, fontFamily:'inherit', fontStyle:'italic' }
+            }, '↩ Quitar de proyecto')
+          ),
           e('button', {
             onClick:function(ev) { ev.stopPropagation(); CB_archiveConv(conv.id); CB_setConvMenuId(null); },
             style:{ display:'block', width:'100%', padding:'9px 12px', background:'none', border:'none', color:'#ef4444', fontSize:13, cursor:'pointer', textAlign:'left', borderRadius:6, fontFamily:'inherit' }
@@ -17921,7 +18000,31 @@ function ChatBot(props) {
                 e('span', { style:{ whiteSpace:'nowrap' } }, '🪙'+CB_credits),
                 CB_userNotes && CB_userNotes.trim() && e('span', { title:'Memoria activa', style:{ fontSize:11, color:'#a78bfa' } }, '🧠'),
                 e('span', { style:{ fontSize:9, opacity:0.6, marginLeft:1 } }, '▼')
-              )
+              ),
+              // C4: pill indicador de proyecto (si la conv pertenece a uno)
+              (function(){
+                if (!CB_activeConvId) return null;
+                var activeConv = CB_conversations.find ? CB_conversations.find(function(c){ return c.id === CB_activeConvId; }) : null;
+                if (!activeConv) {
+                  for (var ci=0; ci<CB_conversations.length; ci++) { if (CB_conversations[ci].id === CB_activeConvId) { activeConv = CB_conversations[ci]; break; } }
+                }
+                if (!activeConv) return null;
+                var proj = null;
+                if (activeConv.project_id) {
+                  for (var pi=0; pi<CB_projects.length; pi++) { if (CB_projects[pi].id === activeConv.project_id) { proj = CB_projects[pi]; break; } }
+                }
+                if (proj) {
+                  return e('button', {
+                    onClick: function(ev) { ev.stopPropagation(); CB_setPmOpen(true); },
+                    title: 'Proyecto: ' + proj.name,
+                    style:{ alignSelf:'flex-start', marginTop:4, background: proj.color + '20', border:'1px solid ' + proj.color + '40', borderRadius:999, padding:'3px 10px', color: proj.color, fontSize:10, fontWeight:600, cursor:'pointer', fontFamily:'inherit', display:'inline-flex', alignItems:'center', gap:4, maxWidth:'100%' }
+                  },
+                    e('span', null, proj.icon || '📁'),
+                    e('span', { style:{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' } }, proj.name)
+                  );
+                }
+                return null;
+              })()
             )
           ),
           e('div', { style:{ display:'flex', alignItems:'center', gap:2, flexShrink:0 } },
@@ -18042,11 +18145,52 @@ function ChatBot(props) {
                         )
                       : (function(){
                           var exportMeta = !m.error ? CB_extractExportMeta(m.text) : null;
-                          var displayText = exportMeta ? CB_stripExportMeta(m.text) : m.text;
+                          var flashcardsBlock = !m.error ? CB_extractFlashcardsBlock(m.text) : null;
+                          var displayText = m.text;
+                          if (exportMeta) displayText = CB_stripExportMeta(displayText);
+                          if (flashcardsBlock) displayText = CB_stripFlashcardsBlock(displayText);
                           return e('div', { style:{ display:'flex', alignItems:'flex-start', gap:10, maxWidth:'92%' } },
                             CB_elionAvatar(30),
                             e('div', { style:{ padding:'14px 18px', borderRadius:'20px 20px 20px 6px', background:m.error?'rgba(239,68,68,.08)':'linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)', border:'1px solid '+(m.error?'rgba(239,68,68,.25)':'#1a2040'), boxShadow:m.error?'none':'0 2px 8px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.15)', color:m.error?'#ef4444':C.tx, fontSize:14, lineHeight:1.55, wordBreak:'break-word' } },
                             m.error ? e('span', null, m.text) : CB_renderMarkdown(displayText),
+                            // Flashcards generadas: panel con preview + botón guardar
+                            flashcardsBlock && e('div', { style:{
+                              marginTop:'14px',
+                              padding:'14px 16px',
+                              background:'linear-gradient(135deg, rgba(167,139,250,0.14), rgba(96,165,250,0.08))',
+                              border:'1px solid rgba(167,139,250,0.32)',
+                              borderRadius:14,
+                              display:'flex',
+                              flexDirection:'column',
+                              gap:10
+                            } },
+                              e('div', null,
+                                e('div', { style:{ fontSize:13, fontWeight:700, color:'#a78bfa', letterSpacing:'-0.01em', display:'flex', alignItems:'center', gap:6 } },
+                                  e('span', null, '🎴'),
+                                  e('span', null, 'Generé ' + flashcardsBlock.cards.length + ' flashcards'),
+                                  flashcardsBlock.deckName && e('span', { style:{ color:C.mt, fontWeight:500 } }, '— ' + flashcardsBlock.deckName)
+                                ),
+                                // Preview de las primeras 3 preguntas
+                                e('div', { style:{ marginTop:8, fontSize:11, color:C.mt, lineHeight:1.5 } },
+                                  flashcardsBlock.cards.slice(0,3).map(function(c, ci) {
+                                    return e('div', { key:ci, style:{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' } }, '• ' + (c.q || ''));
+                                  }),
+                                  flashcardsBlock.cards.length > 3 && e('div', { style:{ color:C.dm, fontStyle:'italic' } }, '... +' + (flashcardsBlock.cards.length - 3) + ' más')
+                                )
+                              ),
+                              e('button', {
+                                onClick: function() { CB_saveGeneratedFlashcards(flashcardsBlock.deckName, flashcardsBlock.cards); },
+                                style:{
+                                  alignSelf:'flex-start',
+                                  background:'linear-gradient(135deg,#60a5fa,#a78bfa)',
+                                  color:'#fff', border:'none',
+                                  padding:'9px 16px', borderRadius:10,
+                                  fontSize:12, fontWeight:700,
+                                  cursor:'pointer', fontFamily:'inherit',
+                                  boxShadow:'0 4px 12px rgba(167,139,250,0.30)'
+                                }
+                              }, '🎴 Guardar en baraja nueva')
+                            ),
                             // Pro 2.5: botón download premium si hay export meta
                             exportMeta && e('div', { style:{
                               marginTop:'14px',
