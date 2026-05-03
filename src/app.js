@@ -549,7 +549,26 @@ function App(){
       var sec=REUMA_SECS.find(function(s2){return s2.id===cs})||{};
       return e(ModuleShell,{title:sec.n||"Reumatología",subtitle:sd.length+" enfermedad"+(sd.length===1?"":"es"),icon:sec.i||"🦴",accent:"#60a5fa",onBack:function(){go("reuma");}},
         e("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(320px,1fr))",gap:"12px"}},sd.map(function(d,di){
-          return e("div",{key:d.id,onClick:function(){go("reuma_dis",d.s,d.id)},style:{background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",border:"1px solid "+C.bd,borderRadius:"14px",padding:"16px 20px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"12px",minHeight:"68px",transition:"transform 220ms cubic-bezier(0.32,0.72,0,1),border-color 220ms cubic-bezier(0.32,0.72,0,1),box-shadow 220ms ease-out",animation:"ecept_fadeSlideUp 380ms cubic-bezier(0.16,1,0.3,1) "+(di*30+40)+"ms both",boxSizing:"border-box"},onMouseEnter:function(ev){ev.currentTarget.style.borderColor="rgba(96,165,250,0.40)";ev.currentTarget.style.transform="translateY(-1px)";ev.currentTarget.style.boxShadow="0 6px 18px rgba(0,0,0,0.25)";},onMouseLeave:function(ev){ev.currentTarget.style.borderColor=C.bd;ev.currentTarget.style.transform="translateY(0)";ev.currentTarget.style.boxShadow="none";}},
+          // Long-press timer ref para favoritear (mantenido en closure por item)
+          var lpTimer = { id:null, fired:false };
+          return e("div",{
+            key:d.id,
+            onClick:function(){ if(!lpTimer.fired) go("reuma_dis",d.s,d.id); lpTimer.fired=false; },
+            onPointerDown: ecuUser ? function(){
+              lpTimer.fired = false;
+              lpTimer.id = setTimeout(function(){
+                lpTimer.fired = true;
+                if (window.ECEPT_FAVORITES) window.ECEPT_FAVORITES.toggle(ecuUser.id, 'enfermedad', d.id);
+              }, 500);
+            } : null,
+            onPointerUp: ecuUser ? function(){ if(lpTimer.id) { clearTimeout(lpTimer.id); lpTimer.id=null; } } : null,
+            onPointerLeave: ecuUser ? function(){ if(lpTimer.id) { clearTimeout(lpTimer.id); lpTimer.id=null; } lpTimer.fired=false; } : null,
+            onPointerCancel: ecuUser ? function(){ if(lpTimer.id) { clearTimeout(lpTimer.id); lpTimer.id=null; } lpTimer.fired=false; } : null,
+            onContextMenu: function(ev){ ev.preventDefault(); },
+            style:{background:"linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)",border:"1px solid "+C.bd,borderRadius:"14px",padding:"16px 20px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"12px",minHeight:"68px",transition:"transform 220ms cubic-bezier(0.32,0.72,0,1),border-color 220ms cubic-bezier(0.32,0.72,0,1),box-shadow 220ms ease-out",animation:"ecept_fadeSlideUp 380ms cubic-bezier(0.16,1,0.3,1) "+(di*30+40)+"ms both",boxSizing:"border-box",userSelect:"none",WebkitUserSelect:"none"},
+            onMouseEnter:function(ev){ev.currentTarget.style.borderColor="rgba(96,165,250,0.40)";ev.currentTarget.style.transform="translateY(-1px)";ev.currentTarget.style.boxShadow="0 6px 18px rgba(0,0,0,0.25)";},
+            onMouseLeave:function(ev){ev.currentTarget.style.borderColor=C.bd;ev.currentTarget.style.transform="translateY(0)";ev.currentTarget.style.boxShadow="none";}
+          },
             e("div",{style:{display:"flex",alignItems:"center",gap:"12px",flex:1,minWidth:0}},
               isFav(d.id)&&e("span",{style:{fontSize:"15px"}},"⭐"),
               vi.indexOf(d.id)>-1&&e("span",{style:{color:"#34d399",fontSize:"13px"}},"✓"),
@@ -563,7 +582,18 @@ function App(){
 
     // ════════════ REUMATOLOGÍA ENFERMEDAD ════════════
     vista==="reuma_dis"&&dis&&e(F,null,
-      e("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"18px",flexWrap:"wrap",gap:"8px"}},e("div",{style:{display:"flex",alignItems:"center",gap:"10px"}},e("h2",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"20px",fontWeight:700,margin:0}},dis.n),e("button",{onClick:function(){toggleFav(dis.id)},style:{background:"none",border:"none",fontSize:"20px",cursor:"pointer",padding:"4px"}},isFav(dis.id)?"⭐":"☆")),dis.qz&&dis.qz.length>0&&e("button",{onClick:function(){setQm(!qm);setQa({})},style:{padding:"6px 14px",borderRadius:"20px",cursor:"pointer",fontSize:"13px",background:qm?C.ac:"rgba(255,255,255,.05)",color:qm?"#fff":C.mt,border:"none"}},qm?"✕ Cerrar":"🧠 Quiz")),
+      // Track visit + sync favorites con Supabase
+      window.VisitTracker && e(window.VisitTracker, { itemType:"enfermedad", itemId:dis.id, user:ecuUser }),
+      e("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"18px",flexWrap:"wrap",gap:"8px"}},
+        e("div",{style:{display:"flex",alignItems:"center",gap:"10px"}},
+          e("h2",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"20px",fontWeight:700,margin:0}},dis.n),
+          // Favorito persistente (Supabase) si hay usuario; fallback a local-only si no
+          ecuUser && window.FavoriteButton
+            ? e(window.FavoriteButton, { itemType:"enfermedad", itemId:dis.id, user:ecuUser, size:22 })
+            : e("button",{onClick:function(){toggleFav(dis.id)},style:{background:"none",border:"none",fontSize:"20px",cursor:"pointer",padding:"4px"}},isFav(dis.id)?"⭐":"☆")
+        ),
+        dis.qz&&dis.qz.length>0&&e("button",{onClick:function(){setQm(!qm);setQa({})},style:{padding:"6px 14px",borderRadius:"20px",cursor:"pointer",fontSize:"13px",background:qm?C.ac:"rgba(255,255,255,.05)",color:qm?"#fff":C.mt,border:"none"}},qm?"✕ Cerrar":"🧠 Quiz")
+      ),
       qm?e("div",{style:cb},e("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"16px"}},e("h3",{style:{color:C.ac,fontSize:"16px",fontWeight:700,margin:0}},"🧠 Quiz"),streak>0&&e("div",{style:{display:"flex",alignItems:"center",gap:"6px",padding:"4px 12px",background:"rgba(52,211,153,.12)",borderRadius:"20px",border:"1px solid rgba(52,211,153,.25)"}},e("span",{style:{fontSize:"14px"}},"🔥"),e("span",{style:{fontSize:"12px",fontWeight:700,color:"#34d399"}},streak+" racha"))),dis.qz.map(function(q,qi){return e("div",{key:qi,style:{marginBottom:"18px",padding:"14px",background:"rgba(255,255,255,.02)",borderRadius:"12px"}},e("p",{style:{color:C.tx,fontWeight:600,marginBottom:"10px",fontSize:"14px"}},(qi+1)+". "+q.p),e("div",{style:{display:"flex",flexDirection:"column",gap:"6px"}},q.o.map(function(o,oi){var an2=qa[qi]!==undefined,sl=qa[qi]===oi,cr=oi===q.r;var bg2="rgba(255,255,255,.04)",bd2=C.bd;if(an2&&cr){bg2="rgba(52,211,153,.15)";bd2="#34d399"}if(an2&&sl&&!cr){bg2="rgba(239,68,68,.15)";bd2="#ef4444"}return e("button",{key:oi,onClick:function(){if(!an2){setQa(function(p2){var n2={};for(var k in p2)n2[k]=p2[k];n2[qi]=oi;return n2});if(oi===q.r){setStreak(function(s2){var ns=s2+1;if(ns>bestStreak)setBestStreak(ns);return ns})}else{setStreak(0)}}},style:{padding:"10px 14px",borderRadius:"8px",border:"1px solid "+bd2,background:bg2,color:C.tx,textAlign:"left",cursor:an2?"default":"pointer",fontSize:"13px"}},String.fromCharCode(65+oi)+") "+o+(an2&&cr?" ✓":"")+(an2&&sl&&!cr?" ✗":""))})),qa[qi]!==undefined&&e("p",{style:{marginTop:"8px",padding:"10px",background:qa[qi]===q.r?"rgba(52,211,153,.1)":"rgba(239,68,68,.1)",borderRadius:"8px",fontSize:"13px",color:qa[qi]===q.r?"#34d399":"#fca5a5",lineHeight:1.5}},q.x))}))
       :e(F,null,
         e("div",{style:{display:"flex",gap:"4px",overflowX:"auto",padding:"4px",background:"rgba(255,255,255,.03)",borderRadius:"14px",marginBottom:"18px",flexWrap:"wrap"}},SUB.map(function(s2,i){return e("div",{key:i,onClick:function(){setTab(i)},style:{padding:"7px 12px",borderRadius:"10px",cursor:"pointer",fontSize:"12px",fontWeight:600,background:tab===i?s2.c+"22":"transparent",color:tab===i?s2.c:C.mt,border:tab===i?"1px solid "+s2.c+"44":"1px solid transparent",whiteSpace:"nowrap"}},s2.i+" "+s2.l)})),
@@ -573,6 +603,8 @@ function App(){
 
     // ════════════ TRÍADAS ════════════
     vista==="triadas"&&e(F,null,
+      // Track visita a tríada activa cuando hay una expandida
+      et!==null && TR[et] && window.VisitTracker && e(window.VisitTracker, { itemType:"triada", itemId: String(et), user:ecuUser }),
       e("div",{style:{textAlign:"center",marginBottom:"24px"}},e("div",{style:{fontSize:"40px",marginBottom:"10px"}},"🔺"),e("h2",{style:{fontFamily:"'Inter','DM Sans',sans-serif",fontSize:"22px",fontWeight:800,background:"linear-gradient(135deg,#e879f9,#f472b6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}},"Tríadas y Síndromes"),e("p",{style:{color:C.dm,fontSize:"13px"}},TR.length+" asociaciones clásicas")),
       e("div",{style:{display:"flex",flexDirection:"column",gap:"10px"}},TR.map(function(t,i){
         var op=et===i;var ci=TC.find(function(c2){return c2.id===t.ct});
