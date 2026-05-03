@@ -13631,11 +13631,51 @@ function HomeView(props) {
   var isTablet = w >= p.bp.tablet;
 
   var go = props.go;
+  var user = props.user;
   var vi = props.vi || [];
   var favs = props.favs || [];
   var bestStreak = props.bestStreak || 0;
   var totalReuma = (typeof RD !== 'undefined' && RD.length) || 0;
   var pct = totalReuma > 0 ? Math.round(vi.length / totalReuma * 100) : 0;
+
+  // ─── Progreso global (visitas + cards estudiadas) ─────────
+  var sgp = useState(null);
+  var globalProgress = sgp[0];
+  var setGlobalProgress = sgp[1];
+  useEffect(function() {
+    if (!user || !window.ECEPT_SUPABASE) { setGlobalProgress(null); return; }
+    var visitsP = window.ECEPT_SUPABASE
+      .from('user_visits').select('item_type').eq('user_id', user.id);
+    var progP = window.ECEPT_SUPABASE
+      .from('flashcard_progress').select('flashcard_id', { count:'exact', head:true }).eq('user_id', user.id);
+    var cardsTotalP = window.ECEPT_SUPABASE
+      .from('flashcards').select('id', { count:'exact', head:true }).eq('is_official', true);
+    Promise.all([visitsP, progP, cardsTotalP]).then(function(rs) {
+      var visits = (rs[0] && rs[0].data) || [];
+      var visitedByType = {};
+      visits.forEach(function(v) {
+        if (!visitedByType[v.item_type]) visitedByType[v.item_type] = 0;
+        visitedByType[v.item_type]++;
+      });
+      var enfVisited = visitedByType.enfermedad || 0;
+      var triVisited = visitedByType.triada || 0;
+      var cardsStudied = (rs[1] && typeof rs[1].count === 'number') ? rs[1].count : 0;
+      var cardsTotal = (rs[2] && typeof rs[2].count === 'number') ? rs[2].count : 0;
+      var totalEnf = totalReuma;
+      var totalTri = (typeof TR !== 'undefined' && TR.length) || 0;
+      var enfPct = totalEnf > 0 ? Math.min(1, enfVisited / totalEnf) : 0;
+      var triPct = totalTri > 0 ? Math.min(1, triVisited / totalTri) : 0;
+      var cardsPct = cardsTotal > 0 ? Math.min(1, cardsStudied / cardsTotal) : 0;
+      var globalPct = (enfPct * 0.4) + (triPct * 0.2) + (cardsPct * 0.4);
+      setGlobalProgress({
+        pct: Math.round(globalPct * 100),
+        enf: { v: enfVisited, t: totalEnf },
+        tri: { v: triVisited, t: totalTri },
+        cards: { s: cardsStudied, t: cardsTotal }
+      });
+    }, function() { setGlobalProgress(null); });
+  }, [user]);
+  // Re-cargar cuando cambian visitas (señal soft) — opcional, observa visit cache.
 
   var specialIds = ['triadas','labs','imagenes','general','flashcards'];
   var specials = (typeof MODS !== 'undefined' ? MODS : []).filter(function(m){ return specialIds.indexOf(m.id) > -1; });
@@ -13699,8 +13739,56 @@ function HomeView(props) {
         );
       })
     ),
-    // Progress reuma
-    totalReuma > 0 && e('div', { style: { maxWidth: 360, margin: p.space.lg + ' auto 0' } },
+    // Progress global (solo si hay user logueado)
+    user && globalProgress && e('div', {
+      style: {
+        maxWidth: 720,
+        margin: p.space.xl + ' auto 0',
+        padding: '20px 24px',
+        background: 'linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)',
+        border: '1px solid ' + p.color.bg4,
+        borderRadius: p.radius.xl,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.20)'
+      }
+    },
+      e('div', { style: { display:'flex', justifyContent:'space-between', alignItems:'flex-end', marginBottom: 10 } },
+        e('div', null,
+          e('div', { style: { fontSize: p.font.caption.size, fontWeight: 700, color: p.color.textMuted, letterSpacing:'0.10em', textTransform:'uppercase' } }, 'Tu progreso'),
+          e('div', { style: { fontSize: 11, color: p.color.textDim, marginTop: 2 } }, 'Visitas + cards estudiadas')
+        ),
+        e('div', { style: { fontSize: 28, fontWeight: 800, letterSpacing:'-0.02em', background: p.color.gradMixed, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', lineHeight:1 } }, globalProgress.pct + '%')
+      ),
+      e('div', { style: { height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: p.radius.pill, overflow: 'hidden', marginBottom: 14 } },
+        e('div', {
+          style: {
+            width: globalProgress.pct + '%',
+            height: '100%',
+            background: p.color.gradMixed,
+            borderRadius: p.radius.pill,
+            transition: 'width 800ms ' + p.ease.out,
+            boxShadow: '0 0 12px rgba(96,165,250,0.50)'
+          }
+        })
+      ),
+      e('div', { style: { display:'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: p.space.md } },
+        [
+          { v: globalProgress.enf.v, t: globalProgress.enf.t, l: 'enfermedades', c: '#60a5fa' },
+          { v: globalProgress.tri.v, t: globalProgress.tri.t, l: 'tríadas', c: '#a78bfa' },
+          { v: globalProgress.cards.s, t: globalProgress.cards.t, l: 'cards', c: '#34d399' }
+        ].map(function(stat, i){
+          return e('div', { key:i, style:{ textAlign:'center', padding:'10px 8px', background:'rgba(255,255,255,0.02)', borderRadius: p.radius.md, border:'1px solid '+p.color.bg4 } },
+            e('div', { style: { fontSize: 20, fontWeight: 800, color: stat.c, fontFamily:'Inter, monospace', letterSpacing:'-0.02em', lineHeight:1.1 } }, stat.v + (stat.t > 0 ? ('/' + stat.t) : '')),
+            e('div', { style: { fontSize: 10, color: p.color.textDim, marginTop: 4, letterSpacing:'0.04em', textTransform:'uppercase' } }, stat.l)
+          );
+        })
+      )
+    ),
+    // Fallback: si user pero todavía calculando, skeleton mini.
+    user && !globalProgress && e('div', { style: { maxWidth: 360, margin: p.space.xl + ' auto 0' } },
+      window.SkeletonBase && e(window.SkeletonBase, { height: 6, width:'100%', radius:'999px' })
+    ),
+    // Sin user: progreso simple Reuma (legacy)
+    !user && totalReuma > 0 && e('div', { style: { maxWidth: 360, margin: p.space.lg + ' auto 0' } },
       e('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: 6 } },
         e('span', { style: { fontSize: p.font.micro.size, color: p.color.textDim, letterSpacing: '0.04em', textTransform: 'uppercase' } }, 'Progreso Reumatología'),
         e('span', { style: { fontSize: p.font.micro.size, color: p.color.primaryHi, fontWeight: 700 } }, pct + '%')
