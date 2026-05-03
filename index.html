@@ -165,6 +165,14 @@ button { cursor: pointer; color: inherit; background: none; }
   0%, 100% { opacity: 1; transform: scale(1); }
   50%      { opacity: 0.55; transform: scale(0.88); }
 }
+@keyframes ecept_sidebarIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes ecept_chatPanelIn {
+  from { opacity: 0; transform: translateX(-20px) scale(0.98); filter: blur(8px); }
+  to   { opacity: 1; transform: translateX(0)     scale(1);    filter: blur(0); }
+}
 .ecept-strand-flow         { animation: ecept_strandFlow         2.5s linear infinite; }
 .ecept-strand-flow-reverse { animation: ecept_strandFlowReverse  2.5s linear infinite; }
 .ecept-logo-flow           { animation: ecept_logoBreathe        3s   ease-in-out infinite; }
@@ -15067,6 +15075,7 @@ function ChatBot(props) {
   s=useState(null);                      var CB_activeConvId=s[0],    CB_setActiveConvId=s[1];
   s=useState(false);                     var CB_loadingConvs=s[0],    CB_setLoadingConvs=s[1];
   s=useState(false);                     var CB_sidebarOpen=s[0],     CB_setSidebarOpen=s[1];
+  s=useState('');                        var CB_sidebarQ=s[0],        CB_setSidebarQ=s[1];
   s=useState(null);                      var CB_convMenuId=s[0],      CB_setConvMenuId=s[1];
   s=useState(null);                      var CB_renamingId=s[0],      CB_setRenamingId=s[1];
   s=useState('');                        var CB_renameValue=s[0],     CB_setRenameValue=s[1];
@@ -15497,133 +15506,268 @@ function ChatBot(props) {
   };
 
   // ── Sidebar renderer ──
+  // Helper: timestamp relativo en español
+  function CB_relTime(ts) {
+    if (!ts) return '';
+    var d = new Date(ts);
+    var now = new Date();
+    var diffMin = Math.floor((now - d) / 60000);
+    if (diffMin < 1) return 'Ahora';
+    if (diffMin < 60) return 'Hace ' + diffMin + 'm';
+    var diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return 'Hace ' + diffHr + 'h';
+    var diffDay = Math.floor(diffHr / 24);
+    if (diffDay === 1) return 'Ayer';
+    if (diffDay < 7) return 'Hace ' + diffDay + 'd';
+    var months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    return d.getDate() + ' ' + months[d.getMonth()];
+  }
+
+  // Helper: clasificar conversación por antigüedad (HOY / ESTA SEMANA / ANTES)
+  function CB_convBucket(ts) {
+    if (!ts) return 'antes';
+    var d = new Date(ts);
+    var now = new Date();
+    var sameDay = d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth() && d.getDate()===now.getDate();
+    if (sameDay) return 'hoy';
+    var diffDay = Math.floor((now - d) / 86400000);
+    if (diffDay < 7) return 'semana';
+    return 'antes';
+  }
+
   function CB_renderSidebar(permanent) {
     var sidebarStyle = permanent
-      ? { width:280, flexShrink:0, borderRight:'1px solid '+C.bd, display:'flex', flexDirection:'column', overflow:'hidden' }
-      : { position:'absolute', top:0, left:0, bottom:0, width:280, zIndex:20,
+      ? { width:300, flexShrink:0, borderRight:'1px solid rgba(96,165,250,0.10)', display:'flex', flexDirection:'column', overflow:'hidden', background:'linear-gradient(180deg,rgba(13,18,36,0.40) 0%,rgba(10,14,31,0.30) 100%)' }
+      : { position:'absolute', top:0, left:0, bottom:0, width:300, zIndex:20,
           background:'linear-gradient(180deg,#0d1224 0%,#060a14 100%)',
-          borderRight:'1px solid rgba(59,130,246,.2)',
+          borderRight:'1px solid rgba(96,165,250,0.20)',
           display:'flex', flexDirection:'column', overflow:'hidden',
-          animation:'CB_sidebarIn 200ms ease', boxShadow:'4px 0 20px rgba(0,0,0,.4)' };
+          animation:'ecept_sidebarIn 240ms cubic-bezier(0.16,1,0.3,1)',
+          boxShadow:'4px 0 24px rgba(0,0,0,0.4)' };
+
+    var q = (CB_sidebarQ || '').trim().toLowerCase();
+    var convs = CB_conversations.filter(function(c) {
+      if (!q) return true;
+      var t = (c.title || 'Nueva conversación').toLowerCase();
+      return t.indexOf(q) >= 0;
+    });
+
+    // Particionar en buckets: actual / hoy / semana / antes
+    var bActual = [], bHoy = [], bSemana = [], bAntes = [];
+    convs.forEach(function(c) {
+      if (c.id === CB_activeConvId) { bActual.push(c); return; }
+      var b = CB_convBucket(c.updated_at || c.created_at);
+      if (b === 'hoy') bHoy.push(c);
+      else if (b === 'semana') bSemana.push(c);
+      else bAntes.push(c);
+    });
+
+    function sectionLabel(text) {
+      return e('div', { style:{
+        fontSize:10, fontWeight:700, color:'#475569',
+        letterSpacing:'0.10em', textTransform:'uppercase',
+        padding:'14px 12px 6px'
+      }}, text);
+    }
+
+    function convItem(conv, idx) {
+      var isActive = conv.id === CB_activeConvId;
+      var isRenaming = CB_renamingId === conv.id;
+      var isMenuOpen = CB_convMenuId === conv.id;
+      var msgCount = conv.message_count || conv.msg_count || null;
+      var subtitle = (msgCount ? (msgCount + ' mensaje' + (msgCount===1?'':'s') + ' · ') : '') + CB_relTime(conv.updated_at || conv.created_at);
+
+      var itemStyle = isActive
+        ? {
+            padding:'10px 36px 10px 14px', borderRadius:12, cursor:'pointer',
+            background:'linear-gradient(135deg, rgba(96,165,250,0.14), rgba(167,139,250,0.10))',
+            border:'1px solid rgba(96,165,250,0.30)',
+            boxShadow:'0 0 0 1px rgba(255,255,255,0.04) inset, 0 2px 8px rgba(96,165,250,0.10)',
+            position:'relative',
+            transition:'all 220ms cubic-bezier(0.16,1,0.3,1)',
+            animation:'ecept_fadeSlideUp 280ms cubic-bezier(0.16,1,0.3,1) ' + (idx*30) + 'ms both'
+          }
+        : {
+            padding:'10px 36px 10px 14px', borderRadius:12, cursor:'pointer',
+            background:'transparent',
+            border:'1px solid transparent',
+            position:'relative',
+            transition:'all 220ms cubic-bezier(0.16,1,0.3,1)',
+            animation:'ecept_fadeSlideUp 280ms cubic-bezier(0.16,1,0.3,1) ' + (idx*30) + 'ms both'
+          };
+
+      return e('div', { key:conv.id, style:{ marginBottom:4, position:'relative' } },
+        e('div', {
+          className:'CB_convItem',
+          style:itemStyle,
+          onClick: function() {
+            if (CB_renamingId === conv.id) return;
+            CB_setActiveConvId(conv.id);
+            CB_setConvMenuId(null);
+            if (!permanent) CB_setSidebarOpen(false);
+          },
+          onMouseEnter: function(ev) {
+            if (isActive) return;
+            ev.currentTarget.style.background = 'rgba(96,165,250,0.06)';
+            ev.currentTarget.style.borderColor = 'rgba(96,165,250,0.12)';
+            ev.currentTarget.style.transform = 'translateX(2px)';
+          },
+          onMouseLeave: function(ev) {
+            if (isActive) return;
+            ev.currentTarget.style.background = 'transparent';
+            ev.currentTarget.style.borderColor = 'transparent';
+            ev.currentTarget.style.transform = 'translateX(0)';
+          }
+        },
+          isRenaming
+            ? e('input', {
+                autoFocus:true,
+                value:CB_renameValue,
+                onChange:function(ev) { CB_setRenameValue(ev.target.value); },
+                onKeyDown:function(ev) {
+                  if (ev.key==='Enter') {
+                    var t = CB_renameValue.trim();
+                    if (t) CB_renameConv(conv.id, t);
+                    CB_setRenamingId(null);
+                  } else if (ev.key==='Escape') {
+                    CB_setRenamingId(null);
+                  }
+                },
+                onBlur:function() { CB_setRenamingId(null); },
+                onClick:function(ev) { ev.stopPropagation(); },
+                style:{ width:'100%', background:'rgba(96,165,250,0.10)', border:'1px solid rgba(96,165,250,0.40)', borderRadius:8, color:C.tx, fontSize:13, outline:'none', padding:'6px 10px' }
+              })
+            : e('div', null,
+                e('div', { style:{ fontSize:13, color: isActive ? C.tx : '#cbd5e1', fontWeight: isActive ? 600 : 500, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', lineHeight:1.3, letterSpacing:'-0.01em' } }, conv.title || 'Nueva conversación'),
+                e('div', { style:{ fontSize:11, color:'#64748b', marginTop:3, lineHeight:1.3 } }, subtitle)
+              )
+        ),
+        !isRenaming && e('button', {
+          onClick:function(ev) { ev.stopPropagation(); CB_setConvMenuId(isMenuOpen ? null : conv.id); },
+          'aria-label':'Opciones',
+          style:{
+            position:'absolute', right:6, top:'50%', transform:'translateY(-50%)',
+            width:26, height:26, borderRadius:6, border:'none',
+            background: isMenuOpen ? 'rgba(96,165,250,0.18)' : 'transparent',
+            color: isMenuOpen ? C.ac : '#64748b',
+            cursor:'pointer', fontSize:16, lineHeight:1, padding:0,
+            display:'flex', alignItems:'center', justifyContent:'center',
+            transition:'background 180ms ease-out'
+          }
+        }, '⋮'),
+        isMenuOpen && e('div', {
+          onClick:function(ev) { ev.stopPropagation(); },
+          style:{
+            position:'absolute', top:'100%', right:4, zIndex:30,
+            background:'rgba(17,23,58,0.95)',
+            backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)',
+            border:'1px solid rgba(96,165,250,0.20)',
+            borderRadius:10, padding:4, minWidth:150,
+            boxShadow:'0 8px 24px rgba(0,0,0,0.40)',
+            animation:'ecept_modalIn 180ms cubic-bezier(0.16,1,0.3,1)'
+          }
+        },
+          e('button', {
+            onClick:function(ev) { ev.stopPropagation(); CB_setRenameValue(conv.title || ''); CB_setRenamingId(conv.id); CB_setConvMenuId(null); },
+            style:{ display:'block', width:'100%', padding:'9px 12px', background:'none', border:'none', color:C.tx, fontSize:13, cursor:'pointer', textAlign:'left', borderRadius:6, fontFamily:'inherit' }
+          }, '✎ Renombrar'),
+          e('button', {
+            onClick:function(ev) { ev.stopPropagation(); CB_archiveConv(conv.id); CB_setConvMenuId(null); },
+            style:{ display:'block', width:'100%', padding:'9px 12px', background:'none', border:'none', color:'#ef4444', fontSize:13, cursor:'pointer', textAlign:'left', borderRadius:6, fontFamily:'inherit' }
+          }, '🗑 Archivar')
+        )
+      );
+    }
+
+    var bucketIdx = 0;
+    function bucketSection(label, list) {
+      if (list.length === 0) return null;
+      var items = list.map(function(c) { var n = bucketIdx++; return convItem(c, n); });
+      return e('div', null, sectionLabel(label), items);
+    }
+
+    var totalConvs = CB_conversations.length;
+    var countLabel = totalConvs === 0 ? 'Sin conversaciones aún' : (totalConvs + ' chat' + (totalConvs===1?'':'s'));
 
     return e('div', { style:sidebarStyle },
-      // Sidebar header
-      e('div', { style:{ padding:'16px 14px 12px', borderBottom:'1px solid '+C.bd, display:'flex', alignItems:'center', justifyContent:'space-between', flexShrink:0 } },
-        e('span', { style:{ fontSize:13, fontWeight:700, color:C.tx } }, 'Conversaciones'),
-        e('button', {
-          onClick: CB_newConv,
-          title:'Nueva conversación',
-          style:{ background:'linear-gradient(135deg,#a78bfa,#60a5fa)', border:'none', borderRadius:8, color:'#fff', width:28, height:28, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', fontSize:16, flexShrink:0 }
-        }, '+')
+      // ── Sidebar header ──
+      e('div', { style:{ padding:'16px 18px 12px', borderBottom:'1px solid rgba(96,165,250,0.10)', flexShrink:0 } },
+        e('div', { style:{ display:'flex', alignItems:'center', gap:10, marginBottom:4 } },
+          e('div', { style:{ flex:1, fontSize:16, fontWeight:700, color:C.tx, letterSpacing:'-0.015em' } }, 'Conversaciones'),
+          e('button', {
+            onClick: CB_newConv,
+            'aria-label':'Nueva conversación',
+            title:'Nueva conversación',
+            style:{ background:'linear-gradient(135deg,#60a5fa,#a78bfa)', border:'none', borderRadius:10, color:'#fff', width:32, height:32, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', fontSize:18, fontWeight:600, flexShrink:0, boxShadow:'0 2px 8px rgba(167,139,250,0.30)', transition:'transform 200ms cubic-bezier(0.34,1.56,0.64,1)' },
+            onMouseEnter: function(ev) { ev.currentTarget.style.transform='scale(1.08)'; },
+            onMouseLeave: function(ev) { ev.currentTarget.style.transform='scale(1)'; }
+          }, '+'),
+          e('button', {
+            onClick: function() { CB_setSidebarOpen(false); },
+            'aria-label':'Cerrar sidebar',
+            title:'Cerrar',
+            style:{ background:'transparent', border:'1px solid '+C.bd, borderRadius:10, color:C.mt, width:32, height:32, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', fontSize:14, flexShrink:0, transition:'all 200ms ease-out' },
+            onMouseEnter: function(ev) { ev.currentTarget.style.background='rgba(255,255,255,0.04)'; ev.currentTarget.style.borderColor='rgba(96,165,250,0.30)'; },
+            onMouseLeave: function(ev) { ev.currentTarget.style.background='transparent'; ev.currentTarget.style.borderColor=C.bd; }
+          }, '✕')
+        ),
+        e('div', { style:{ fontSize:11, color:'#64748b', letterSpacing:'0.04em' } }, countLabel)
       ),
 
-      // Conversation list
-      e('div', { style:{ flex:1, overflowY:'auto', padding:'6px 8px' } },
-        CB_loadingConvs && (window.SkeletonRow ? e('div', { style:{ display:'flex', flexDirection:'column', gap:4, padding:'4px 0' } }, e(window.SkeletonRow), e(window.SkeletonRow), e(window.SkeletonRow), e(window.SkeletonRow)) : e('div', { style:{ color:C.dm, fontSize:12, padding:'12px 8px', textAlign:'center' } }, 'Cargando…')),
+      // ── Search bar ──
+      totalConvs > 0 && e('div', { style:{ padding:'10px 14px 8px', flexShrink:0 } },
+        e('div', { style:{ position:'relative' } },
+          e('span', { 'aria-hidden':'true', style:{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', fontSize:13, color:'#64748b', pointerEvents:'none' } }, '🔍'),
+          e('input', {
+            type:'text',
+            placeholder:'Buscar conversación...',
+            value:CB_sidebarQ,
+            onChange:function(ev) { CB_setSidebarQ(ev.target.value); },
+            style:{
+              width:'100%',
+              padding:'8px 12px 8px 34px',
+              background:'rgba(13,18,36,0.6)',
+              border:'1px solid '+C.bd,
+              borderRadius:10,
+              color:C.tx,
+              fontSize:12,
+              fontFamily:'inherit',
+              outline:'none',
+              transition:'border-color 200ms ease-out, box-shadow 200ms ease-out',
+              boxSizing:'border-box'
+            },
+            onFocus:function(ev) { ev.currentTarget.style.borderColor='rgba(96,165,250,0.40)'; ev.currentTarget.style.boxShadow='0 0 0 3px rgba(96,165,250,0.08)'; },
+            onBlur:function(ev) { ev.currentTarget.style.borderColor=C.bd; ev.currentTarget.style.boxShadow='none'; }
+          })
+        )
+      ),
 
-        !CB_loadingConvs && CB_conversations.length === 0 && e('div', { style:{ padding:'24px 12px', textAlign:'center' } },
-          e('div', { style:{
-            width:64, height:64, margin:'0 auto 12px',
-            borderRadius:'50%',
-            background:'linear-gradient(135deg, rgba(96,165,250,0.12), rgba(167,139,250,0.08))',
-            border:'1px solid rgba(96,165,250,0.20)',
-            display:'flex', alignItems:'center', justifyContent:'center',
-            fontSize:28,
-            boxShadow:'0 0 24px rgba(96,165,250,0.12)'
-          } }, '💬'),
-          e('div', { style:{ fontSize:14, fontWeight:600, color:C.tx, marginBottom:4, letterSpacing:'-0.01em' } }, 'Sin conversaciones'),
-          e('div', { style:{ color:C.dm, fontSize:12, lineHeight:1.5, maxWidth:200, margin:'0 auto' } }, 'Mandá tu primer mensaje para empezar a chatear con Elion.')
+      // ── Conversation list ──
+      e('div', { style:{ flex:1, overflowY:'auto', padding:'0 10px 12px' } },
+        CB_loadingConvs && (window.SkeletonRow ? e('div', { style:{ display:'flex', flexDirection:'column', gap:4, padding:'8px 0' } }, e(window.SkeletonRow), e(window.SkeletonRow), e(window.SkeletonRow), e(window.SkeletonRow)) : e('div', { style:{ color:C.dm, fontSize:12, padding:'12px 8px', textAlign:'center' } }, 'Cargando…')),
+
+        // Empty state — sin conversaciones
+        !CB_loadingConvs && totalConvs === 0 && e('div', { style:{ padding:'40px 16px', textAlign:'center' } },
+          e('div', { style:{ marginBottom:14, display:'flex', justifyContent:'center' } },
+            e(window.Logo || 'div', { size:48, glow:true, idSuffix:'sbempty' })
+          ),
+          e('div', { style:{ fontSize:14, fontWeight:600, color:C.tx, marginBottom:6, letterSpacing:'-0.01em' } }, 'Empezá tu primera conversación'),
+          e('div', { style:{ color:'#64748b', fontSize:11, lineHeight:1.5 } }, 'Las conversaciones se guardan automáticamente.')
         ),
 
-        CB_conversations.map(function(conv) {
-          var isActive = conv.id === CB_activeConvId;
-          var isRenaming = CB_renamingId === conv.id;
-          var isMenuOpen = CB_convMenuId === conv.id;
+        // Empty state — search sin resultados
+        !CB_loadingConvs && totalConvs > 0 && convs.length === 0 && q && e('div', { style:{ padding:'24px 12px', textAlign:'center' } },
+          e('div', { style:{ fontSize:24, marginBottom:8, opacity:0.5 } }, '🔍'),
+          e('div', { style:{ fontSize:12, color:C.mt } }, 'Sin resultados para "' + CB_sidebarQ + '"')
+        ),
 
-          return e('div', { key:conv.id, style:{ marginBottom:2, position:'relative' } },
-            // Row
-            e('div', {
-              className:'CB_convItem',
-              style:{
-                padding:'9px 32px 9px 10px', borderRadius:10, cursor:'pointer',
-                background: isActive ? 'rgba(96,165,250,0.18)' : 'transparent',
-                borderLeft: isActive ? '3px solid '+C.ac : '3px solid transparent',
-                transition:'background .15s', position:'relative'
-              },
-              onClick: function() {
-                if (CB_renamingId === conv.id) return;
-                CB_setActiveConvId(conv.id);
-                CB_setConvMenuId(null);
-                if (!permanent) CB_setSidebarOpen(false);
-              }
-            },
-              isRenaming
-                ? e('input', {
-                    autoFocus:true,
-                    value:CB_renameValue,
-                    onChange:function(ev) { CB_setRenameValue(ev.target.value); },
-                    onKeyDown:function(ev) {
-                      if (ev.key==='Enter') {
-                        var t = CB_renameValue.trim();
-                        if (t) CB_renameConv(conv.id, t);
-                        CB_setRenamingId(null);
-                      } else if (ev.key==='Escape') {
-                        CB_setRenamingId(null);
-                      }
-                    },
-                    onBlur:function() { CB_setRenamingId(null); },
-                    onClick:function(ev) { ev.stopPropagation(); },
-                    style:{ width:'100%', background:'transparent', border:'none', borderBottom:'1px solid '+C.ac, color:C.tx, fontSize:12, outline:'none', padding:'2px 0' }
-                  })
-                : e('div', { style:{ fontSize:12, color: isActive ? C.tx : C.mt, fontWeight: isActive ? 600 : 400, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', lineHeight:1.4 } }, conv.title || 'Nueva conversación')
-            ),
-
-            // ⋮ button (always visible)
-            !isRenaming && e('button', {
-              onClick:function(ev) {
-                ev.stopPropagation();
-                CB_setConvMenuId(isMenuOpen ? null : conv.id);
-              },
-              style:{
-                position:'absolute', right:4, top:'50%', transform:'translateY(-50%)',
-                width:24, height:24, borderRadius:6, border:'none',
-                background: isMenuOpen ? 'rgba(96,165,250,0.15)' : 'transparent',
-                color: isMenuOpen ? C.ac : '#64748b',
-                cursor:'pointer', fontSize:16, lineHeight:1, padding:0,
-                display:'flex', alignItems:'center', justifyContent:'center'
-              }
-            }, '⋮'),
-
-            // Dropdown menu
-            isMenuOpen && e('div', {
-              onClick:function(ev) { ev.stopPropagation(); },
-              style:{
-                position:'absolute', top:'100%', right:4, zIndex:30,
-                background:'#0d1224', border:'1px solid #1a2040',
-                borderRadius:8, padding:4, minWidth:140,
-                boxShadow:'0 4px 16px rgba(0,0,0,.5)'
-              }
-            },
-              e('button', {
-                onClick:function(ev) {
-                  ev.stopPropagation();
-                  CB_setRenameValue(conv.title || '');
-                  CB_setRenamingId(conv.id);
-                  CB_setConvMenuId(null);
-                },
-                style:{ display:'block', width:'100%', padding:'8px 10px', background:'none', border:'none', color:C.mt, fontSize:12, cursor:'pointer', textAlign:'left', borderRadius:6, fontFamily:'inherit' }
-              }, '✎ Renombrar'),
-              e('button', {
-                onClick:function(ev) {
-                  ev.stopPropagation();
-                  CB_archiveConv(conv.id);
-                  CB_setConvMenuId(null);
-                },
-                style:{ display:'block', width:'100%', padding:'8px 10px', background:'none', border:'none', color:'#ef4444', fontSize:12, cursor:'pointer', textAlign:'left', borderRadius:6, fontFamily:'inherit' }
-              }, '🗑 Archivar')
-            )
-          );
-        })
+        // Sections
+        convs.length > 0 && e('div', null,
+          bucketSection('✦ Actual', bActual),
+          bucketSection('Hoy', bHoy),
+          bucketSection('Esta semana', bSemana),
+          bucketSection('Antes', bAntes)
+        )
       )
     );
   }
