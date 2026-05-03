@@ -14829,6 +14829,178 @@ function EmptyState(props) {
 window.EmptyState = EmptyState;
 
 // ══════════════════════════════════════════════════════════════
+// ElionIntro — presentación oficial cuando el user abre el chat
+// por primera vez (sin conversaciones previas, sin mensajes).
+// ══════════════════════════════════════════════════════════════
+// Props:
+//   onPromptSelect(text) — callback que recibe el prompt clickeado.
+//                          El parent inserta el texto en el textarea
+//                          y opcionalmente focus.
+// ══════════════════════════════════════════════════════════════
+
+function ElionIntro(props) {
+  var p = T;
+
+  var capabilities = [
+    { ic: '🩺', t: 'Casos clínicos y diagnóstico' },
+    { ic: '💊', t: 'Mecanismos de fármacos' },
+    { ic: '📚', t: 'Resúmenes y esquemas' },
+    { ic: '🔬', t: 'Fisiopatología paso a paso' },
+    { ic: '🎴', t: 'Generar flashcards de tus PDFs' }
+  ];
+
+  var prompts = [
+    '💊 Explicame los betabloqueantes',
+    '🩺 DDx de dolor torácico',
+    '✨ Dame ideas de cómo estudiar mejor'
+  ];
+
+  return e('div', {
+    style: {
+      flex: 1,
+      overflowY: 'auto',
+      padding: '32px 20px 24px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'flex-start',
+      gap: 0,
+      animation: 'ecept_fadeIn 320ms cubic-bezier(0.16,1,0.3,1)'
+    }
+  },
+    // Logo grande con flow + glow
+    e('div', { style: { marginBottom: 18, animation: 'ecept_fadeSlideUp 480ms cubic-bezier(0.16,1,0.3,1) 80ms both' } },
+      e(window.Logo || 'div', { size: 80, animated: true, glow: true, idSuffix: 'elionintro' })
+    ),
+    // Título principal
+    e('div', {
+      style: {
+        fontSize: '28px',
+        fontWeight: 800,
+        letterSpacing: '-0.025em',
+        background: 'linear-gradient(135deg, #60a5fa, #a78bfa)',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        backgroundClip: 'text',
+        marginBottom: 6,
+        textAlign: 'center',
+        lineHeight: 1.15,
+        animation: 'ecept_fadeSlideUp 480ms cubic-bezier(0.16,1,0.3,1) 160ms both'
+      }
+    }, 'Hola, soy Elion ✨'),
+    // Subtitle
+    e('div', {
+      style: {
+        fontSize: 15,
+        color: '#94a3b8',
+        marginBottom: 22,
+        textAlign: 'center',
+        letterSpacing: '-0.005em',
+        animation: 'ecept_fadeSlideUp 480ms cubic-bezier(0.16,1,0.3,1) 220ms both'
+      }
+    }, 'Tu segundo cerebro médico'),
+    // Description
+    e('div', {
+      style: {
+        fontSize: 14,
+        color: '#cbd5e1',
+        marginBottom: 22,
+        maxWidth: 360,
+        textAlign: 'center',
+        lineHeight: 1.6,
+        animation: 'ecept_fadeSlideUp 480ms cubic-bezier(0.16,1,0.3,1) 280ms both'
+      }
+    }, 'Estoy entrenado en medicina y diseñado para ayudarte a estudiar más inteligente.'),
+    // Capabilities label
+    e('div', {
+      style: {
+        fontSize: 11,
+        fontWeight: 700,
+        color: '#475569',
+        letterSpacing: '0.10em',
+        textTransform: 'uppercase',
+        marginBottom: 10,
+        alignSelf: 'flex-start',
+        width: '100%',
+        maxWidth: 360,
+        animation: 'ecept_fadeSlideUp 480ms cubic-bezier(0.16,1,0.3,1) 320ms both'
+      }
+    }, 'Puedo ayudarte con'),
+    // Capabilities list
+    e('div', { style: { width: '100%', maxWidth: 360, marginBottom: 24, display: 'flex', flexDirection: 'column', gap: 6 } },
+      capabilities.map(function(cap, i) {
+        return e('div', {
+          key: i,
+          style: {
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            padding: '12px 16px',
+            background: 'linear-gradient(180deg, rgba(13,18,36,0.60), rgba(10,14,31,0.40))',
+            border: '1px solid rgba(26,32,64,0.60)',
+            borderRadius: 12,
+            fontSize: 13,
+            color: '#cbd5e1',
+            lineHeight: 1.4,
+            animation: 'ecept_fadeSlideUp 320ms cubic-bezier(0.16,1,0.3,1) ' + (380 + i * 70) + 'ms both'
+          }
+        },
+          e('span', { style: { fontSize: 18, flexShrink: 0 } }, cap.ic),
+          e('span', { style: { letterSpacing: '-0.005em' } }, cap.t)
+        );
+      })
+    ),
+    // CTA label
+    e('div', {
+      style: {
+        fontSize: 13,
+        color: '#94a3b8',
+        marginBottom: 10,
+        animation: 'ecept_fadeSlideUp 480ms cubic-bezier(0.16,1,0.3,1) 760ms both'
+      }
+    }, '¿Por dónde empezamos?'),
+    // Quick prompts
+    e('div', { style: { display: 'flex', flexDirection: 'column', gap: 8, width: '100%', maxWidth: 360 } },
+      prompts.map(function(qp, i) {
+        return e('button', {
+          key: i,
+          onClick: function() {
+            if (typeof props.onPromptSelect === 'function') props.onPromptSelect(qp);
+          },
+          style: {
+            padding: '14px 18px',
+            background: 'linear-gradient(135deg, rgba(96,165,250,0.10), rgba(167,139,250,0.06))',
+            border: '1px solid rgba(96,165,250,0.22)',
+            borderRadius: 14,
+            color: '#e2e8f0',
+            fontSize: 13,
+            textAlign: 'left',
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+            letterSpacing: '-0.005em',
+            transition: 'transform 200ms cubic-bezier(0.16,1,0.3,1), border-color 200ms ease-out, box-shadow 200ms ease-out',
+            animation: 'ecept_fadeSlideUp 320ms cubic-bezier(0.16,1,0.3,1) ' + (820 + i * 80) + 'ms both',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.20)'
+          },
+          onMouseOver: function(ev) {
+            ev.currentTarget.style.transform = 'translateY(-1px)';
+            ev.currentTarget.style.borderColor = 'rgba(96,165,250,0.42)';
+            ev.currentTarget.style.boxShadow = '0 4px 14px rgba(96,165,250,0.15)';
+          },
+          onMouseOut: function(ev) {
+            ev.currentTarget.style.transform = 'translateY(0)';
+            ev.currentTarget.style.borderColor = 'rgba(96,165,250,0.22)';
+            ev.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.20)';
+          }
+        }, qp);
+      })
+    )
+  );
+}
+
+window.ElionIntro = ElionIntro;
+
+// ══════════════════════════════════════════════════════════════
 // CHATBOT — Elion AI assistant for ECEPT
 // ES5 estricto: solo declaraciones var y function. Nada de ES6+.
 // React.createElement vía alias global `e`. Sin JSX.
@@ -16147,36 +16319,43 @@ function ChatBot(props) {
           : e(F, null,
               e('div', { ref:CB_scrollRef, style:{ flex:1, overflowY:'auto', padding:16, display:'flex', flexDirection:'column', gap:14 } },
 
-                CB_msgs.length === 0 && !CB_loading && e('div', {
-                  style:{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flex:1, gap:14, minHeight:200, paddingTop:20 }
+                // Empty state — primera vez (sin conversaciones previas) → presentación de Elion
+                CB_msgs.length === 0 && !CB_loading && CB_conversations.length === 0 && window.ElionIntro
+                  && e(window.ElionIntro, {
+                    onPromptSelect: function(p) {
+                      CB_setInput(p);
+                      if (CB_inputRef.current) CB_inputRef.current.focus();
+                    }
+                  }),
+
+                // Empty state — conversación nueva (ya tiene historial previo) → versión simple
+                CB_msgs.length === 0 && !CB_loading && CB_conversations.length > 0 && e('div', {
+                  style:{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flex:1, gap:14, minHeight:200, paddingTop:32 }
                 },
-                  e('div', { style:{ width:64, height:64, borderRadius:'50%', background:'rgba(59,130,246,.12)', border:'1px solid rgba(59,130,246,.25)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:30, boxShadow:'0 0 40px rgba(59,130,246,.3)' } }, '🧬'),
-                  e('div', { style:{ marginBottom: 4 } }, e(window.Logo || 'span', { size: 72, glow: true, float: true, idSuffix:'empty' })),
-                  e('div', { style:{ fontWeight:800, fontSize:26, letterSpacing:'-0.02em', background:'linear-gradient(135deg,#60a5fa,#a78bfa)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text', lineHeight:1.1 } }, '¿Cómo te ayudo hoy?'),
-                  e('div', { style:{ color:C.mt, fontSize:13, marginTop:-4 } }, 'Soy Elion · tu asistente médico'),
-                  e('div', { style:{ display:'flex', flexDirection:'column', gap:10, width:'100%', maxWidth:340, marginTop:12 } },
+                  e('div', { style:{ marginBottom: 4 } }, e(window.Logo || 'span', { size: 64, animated: true, glow: true, idSuffix:'empty' })),
+                  e('div', { style:{ fontWeight:800, fontSize:24, letterSpacing:'-0.02em', background:'linear-gradient(135deg,#60a5fa,#a78bfa)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text', lineHeight:1.1 } }, '¿Cómo te ayudo?'),
+                  e('div', { style:{ color:C.mt, fontSize:13, marginTop:-2, marginBottom:8 } }, 'Nueva conversación'),
+                  e('div', { style:{ display:'flex', flexDirection:'column', gap:8, width:'100%', maxWidth:340 } },
                     quickPrompts.map(function(qp, qi) {
                       return e('button', {
                         key:qi,
                         onClick: function() { CB_setInput(qp); if (CB_inputRef.current) CB_inputRef.current.focus(); },
                         style:{
-                          minHeight:48, padding:'14px 18px', borderRadius:14,
-                          background:'linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)',
-                          border:'1px solid '+C.bd, color:C.tx, fontSize:13, cursor:'pointer',
-                          textAlign:'left', lineHeight:1.45,
+                          minHeight:44, padding:'12px 16px', borderRadius:12,
+                          background:'linear-gradient(135deg, rgba(96,165,250,0.08), rgba(167,139,250,0.05))',
+                          border:'1px solid rgba(96,165,250,0.20)',
+                          color:'#e2e8f0', fontSize:13, cursor:'pointer',
+                          textAlign:'left', lineHeight:1.45, fontFamily:'inherit',
                           transition:'all 220ms cubic-bezier(0.16,1,0.3,1)',
-                          animation:'ecept_fadeSlideUp 480ms cubic-bezier(0.16,1,0.3,1) '+(200+qi*80)+'ms both',
-                          boxShadow:'0 1px 2px rgba(0,0,0,0.2)'
+                          animation:'ecept_fadeSlideUp 320ms cubic-bezier(0.16,1,0.3,1) '+(120+qi*70)+'ms both'
                         },
                         onMouseEnter: function(ev) {
-                          ev.currentTarget.style.borderColor = 'rgba(96,165,250,0.4)';
+                          ev.currentTarget.style.borderColor = 'rgba(96,165,250,0.42)';
                           ev.currentTarget.style.transform = 'translateY(-1px)';
-                          ev.currentTarget.style.boxShadow = '0 4px 14px rgba(96,165,250,0.15)';
                         },
                         onMouseLeave: function(ev) {
-                          ev.currentTarget.style.borderColor = C.bd;
+                          ev.currentTarget.style.borderColor = 'rgba(96,165,250,0.20)';
                           ev.currentTarget.style.transform = 'translateY(0)';
-                          ev.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.2)';
                         }
                       }, qp);
                     })

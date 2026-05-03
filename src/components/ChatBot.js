@@ -1317,36 +1317,43 @@ function ChatBot(props) {
           : e(F, null,
               e('div', { ref:CB_scrollRef, style:{ flex:1, overflowY:'auto', padding:16, display:'flex', flexDirection:'column', gap:14 } },
 
-                CB_msgs.length === 0 && !CB_loading && e('div', {
-                  style:{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flex:1, gap:14, minHeight:200, paddingTop:20 }
+                // Empty state — primera vez (sin conversaciones previas) → presentación de Elion
+                CB_msgs.length === 0 && !CB_loading && CB_conversations.length === 0 && window.ElionIntro
+                  && e(window.ElionIntro, {
+                    onPromptSelect: function(p) {
+                      CB_setInput(p);
+                      if (CB_inputRef.current) CB_inputRef.current.focus();
+                    }
+                  }),
+
+                // Empty state — conversación nueva (ya tiene historial previo) → versión simple
+                CB_msgs.length === 0 && !CB_loading && CB_conversations.length > 0 && e('div', {
+                  style:{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flex:1, gap:14, minHeight:200, paddingTop:32 }
                 },
-                  e('div', { style:{ width:64, height:64, borderRadius:'50%', background:'rgba(59,130,246,.12)', border:'1px solid rgba(59,130,246,.25)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:30, boxShadow:'0 0 40px rgba(59,130,246,.3)' } }, '🧬'),
-                  e('div', { style:{ marginBottom: 4 } }, e(window.Logo || 'span', { size: 72, glow: true, float: true, idSuffix:'empty' })),
-                  e('div', { style:{ fontWeight:800, fontSize:26, letterSpacing:'-0.02em', background:'linear-gradient(135deg,#60a5fa,#a78bfa)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text', lineHeight:1.1 } }, '¿Cómo te ayudo hoy?'),
-                  e('div', { style:{ color:C.mt, fontSize:13, marginTop:-4 } }, 'Soy Elion · tu asistente médico'),
-                  e('div', { style:{ display:'flex', flexDirection:'column', gap:10, width:'100%', maxWidth:340, marginTop:12 } },
+                  e('div', { style:{ marginBottom: 4 } }, e(window.Logo || 'span', { size: 64, animated: true, glow: true, idSuffix:'empty' })),
+                  e('div', { style:{ fontWeight:800, fontSize:24, letterSpacing:'-0.02em', background:'linear-gradient(135deg,#60a5fa,#a78bfa)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text', lineHeight:1.1 } }, '¿Cómo te ayudo?'),
+                  e('div', { style:{ color:C.mt, fontSize:13, marginTop:-2, marginBottom:8 } }, 'Nueva conversación'),
+                  e('div', { style:{ display:'flex', flexDirection:'column', gap:8, width:'100%', maxWidth:340 } },
                     quickPrompts.map(function(qp, qi) {
                       return e('button', {
                         key:qi,
                         onClick: function() { CB_setInput(qp); if (CB_inputRef.current) CB_inputRef.current.focus(); },
                         style:{
-                          minHeight:48, padding:'14px 18px', borderRadius:14,
-                          background:'linear-gradient(180deg,#0d1224 0%,#0a0e1f 100%)',
-                          border:'1px solid '+C.bd, color:C.tx, fontSize:13, cursor:'pointer',
-                          textAlign:'left', lineHeight:1.45,
+                          minHeight:44, padding:'12px 16px', borderRadius:12,
+                          background:'linear-gradient(135deg, rgba(96,165,250,0.08), rgba(167,139,250,0.05))',
+                          border:'1px solid rgba(96,165,250,0.20)',
+                          color:'#e2e8f0', fontSize:13, cursor:'pointer',
+                          textAlign:'left', lineHeight:1.45, fontFamily:'inherit',
                           transition:'all 220ms cubic-bezier(0.16,1,0.3,1)',
-                          animation:'ecept_fadeSlideUp 480ms cubic-bezier(0.16,1,0.3,1) '+(200+qi*80)+'ms both',
-                          boxShadow:'0 1px 2px rgba(0,0,0,0.2)'
+                          animation:'ecept_fadeSlideUp 320ms cubic-bezier(0.16,1,0.3,1) '+(120+qi*70)+'ms both'
                         },
                         onMouseEnter: function(ev) {
-                          ev.currentTarget.style.borderColor = 'rgba(96,165,250,0.4)';
+                          ev.currentTarget.style.borderColor = 'rgba(96,165,250,0.42)';
                           ev.currentTarget.style.transform = 'translateY(-1px)';
-                          ev.currentTarget.style.boxShadow = '0 4px 14px rgba(96,165,250,0.15)';
                         },
                         onMouseLeave: function(ev) {
-                          ev.currentTarget.style.borderColor = C.bd;
+                          ev.currentTarget.style.borderColor = 'rgba(96,165,250,0.20)';
                           ev.currentTarget.style.transform = 'translateY(0)';
-                          ev.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.2)';
                         }
                       }, qp);
                     })

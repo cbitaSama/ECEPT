@@ -108,6 +108,7 @@ var parts = [
   'src/components/Button.js',
   'src/components/Skeleton.js',
   'src/components/EmptyState.js',
+  'src/components/ElionIntro.js',
   // chatbot (must come after App? no — function hoisted; keep with components)
   'src/components/ChatBot.js',
   // supabase client (reads window.__ECEPT_ENV; exposes window.ECEPT_SUPABASE)
@@ -195,6 +196,7 @@ var expectedGlobals = [
   'function Button', 'window.Button',
   'function SkeletonCard', 'function SkeletonList', 'window.SkeletonCard', 'window.SkeletonList',
   'function EmptyState', 'window.EmptyState',
+  'function ElionIntro', 'window.ElionIntro',
   'function LayeredCard', 'window.LayeredCard',
   'function InfoLayer', 'window.InfoLayer',
   'function Detail', 'window.Detail',
