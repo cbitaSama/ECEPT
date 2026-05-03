@@ -971,6 +971,8 @@ function App(){
                 border:"1px solid "+(aExp?sec.accent+"30":"rgba(96,165,250,0.10)"),
                 borderRadius:"14px",
                 overflow:"hidden",
+                gridColumn:aExp?"1 / -1":"auto",
+                alignSelf:"start",
                 transition:"border-color 200ms ease-out"
               }},
                 e("button",{
