@@ -6874,7 +6874,10 @@ var useState=React.useState,useEffect=React.useEffect;
 
 
 var C={
-  bg:"#060a14",cd:"#0d1224",cd2:"#141a33",bd:"#1a2040",bd2:"#2a3358",
+  bg:"#060a14",cd:"#0d1224",cd2:"#141a33",
+  // Bordes premium: sutiles, accent azul tenue. Antes eran "#1a2040"/"#2a3358"
+  // que generaban marcos muy duros. Ahora aire visual.
+  bd:"rgba(96,165,250,0.10)",bd2:"rgba(96,165,250,0.20)",
   tx:"#e2e8f0",mt:"#94a3b8",dm:"#64748b",
   anx:"#60a5fa",toc:"#a78bfa",trm:"#fb923c",som:"#34d399",dis:"#f472b6",
   psi:"#ef4444",bip:"#fbbf24",esq:"#a855f7",del:"#f87171",dep:"#38bdf8",
