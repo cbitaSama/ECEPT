@@ -95,8 +95,27 @@ function App(){
       if(dc&&vi.indexOf(dc)===-1)setVi(function(p){return p.concat([dc])});
       window.scrollTo(0,0);
       window._currentVista=x;
+      // Persistir vista top-level (sin params) en localStorage para sobrevivir reloads.
+      try {
+        var SAFE_VISTAS = {home:1,reuma:1,cir_menu:1,anat_menu:1,emergen_menu:1,fisio:1,general:1,vocabulario:1,"trauma-u1":1,salud_mental:1,favoritos:1,profile:1,flashcards:1,triadas:1,labs:1,receptores:1,mediadores:1};
+        if (SAFE_VISTAS[x] && !sc && !dc) localStorage.setItem('ECEPT_LAST_VISTA', x);
+        else if (x === 'home') localStorage.removeItem('ECEPT_LAST_VISTA');
+      } catch(e2) {}
     },120);
   },[vista,cs,cd,vi]);
+
+  // ─── RESTAURAR vista al mount inicial ───
+  useEffect(function(){
+    try {
+      var lastVista = localStorage.getItem('ECEPT_LAST_VISTA');
+      if (!lastVista) return;
+      var SAFE_VISTAS = {home:1,reuma:1,cir_menu:1,anat_menu:1,emergen_menu:1,fisio:1,general:1,vocabulario:1,"trauma-u1":1,salud_mental:1,favoritos:1,profile:1,flashcards:1,triadas:1,labs:1,receptores:1,mediadores:1};
+      if (SAFE_VISTAS[lastVista] && lastVista !== 'home') {
+        setVista(lastVista);
+        window._currentVista = lastVista;
+      }
+    } catch(e2) {}
+  },[]);
   // Expose go() to ChatBot. Supports "modId/subId" deeplinks + anti-double-click debounce.
   useEffect(function(){
     window.CB_go=function(target){
