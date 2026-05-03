@@ -171,15 +171,17 @@ function CB_exportToPDF(content, meta) {
 }
 
 function CB_exportToDOCX(content, meta) {
-  if (!window.docx) {
-    if (window.ECEPT_toast) window.ECEPT_toast('Librería DOCX no disponible. Recargá la página.', 'error');
+  // Detectar el namespace global. UMD bundle expone docxLib.
+  var docxLib = window.docx || window.Docx || (window.DocX ? window.DocX : null);
+  if (!docxLib || !docxLib.Document || !docxLib.Packer) {
+    if (window.ECEPT_toast) window.ECEPT_toast('La generación de DOCX no está disponible. Probá descargar como PDF.', 'warning');
     return;
   }
-  var Document = window.docx.Document;
-  var Packer = window.docx.Packer;
-  var Paragraph = window.docx.Paragraph;
-  var TextRun = window.docx.TextRun;
-  var HeadingLevel = window.docx.HeadingLevel;
+  var Document = docxLib.Document;
+  var Packer = docxLib.Packer;
+  var Paragraph = docxLib.Paragraph;
+  var TextRun = docxLib.TextRun;
+  var HeadingLevel = docxLib.HeadingLevel;
   var paragraphs = [];
   paragraphs.push(new Paragraph({ text: meta.title || 'Documento ECEPT', heading: HeadingLevel.TITLE }));
   paragraphs.push(new Paragraph({ text: '' }));
@@ -356,6 +358,57 @@ function ChatBot(props) {
 
   var CB_scrollRef = useRef(null);
   var CB_inputRef  = useRef(null);
+  var CB_fileInputRef = useRef(null);
+
+  function CB_handleFileSelect(ev) {
+    var files = ev.target.files;
+    if (!files || files.length === 0) return;
+    var allowed = ['application/pdf','image/jpeg','image/jpg','image/png','image/webp'];
+    var maxSize = 10 * 1024 * 1024; // 10MB
+    var arr = [];
+    for (var i = 0; i < files.length && arr.length + CB_pendingFiles.length < 3; i++) {
+      var f = files[i];
+      if (allowed.indexOf(f.type) === -1) {
+        if (window.ECEPT_toast) window.ECEPT_toast(f.name + ': formato no soportado (PDF/JPG/PNG/WEBP)', 'warning');
+        continue;
+      }
+      if (f.size > maxSize) {
+        if (window.ECEPT_toast) window.ECEPT_toast(f.name + ': supera 10MB', 'warning');
+        continue;
+      }
+      arr.push(f);
+    }
+    if (arr.length === 0) { ev.target.value = ''; return; }
+    // Leer cada uno como base64
+    var promises = arr.map(function(f) {
+      return new Promise(function(resolve) {
+        var reader = new FileReader();
+        reader.onload = function() {
+          var result = reader.result || '';
+          var commaIdx = String(result).indexOf(',');
+          var data = commaIdx >= 0 ? String(result).slice(commaIdx + 1) : '';
+          resolve({ name: f.name, mimeType: f.type, size: f.size, data: data });
+        };
+        reader.onerror = function() { resolve(null); };
+        reader.readAsDataURL(f);
+      });
+    });
+    Promise.all(promises).then(function(results) {
+      var ok = results.filter(function(x){ return !!x; });
+      if (ok.length === 0) return;
+      CB_setPendingFiles(function(prev){ return prev.concat(ok); });
+      if (window.ECEPT_toast) window.ECEPT_toast(ok.length + (ok.length===1?' archivo agregado':' archivos agregados'), 'success');
+    });
+    ev.target.value = ''; // reset para permitir re-seleccionar mismo archivo
+  }
+
+  function CB_removeFile(idx) {
+    CB_setPendingFiles(function(prev) {
+      var next = prev.slice();
+      next.splice(idx, 1);
+      return next;
+    });
+  }
   var CB_longPressRef = useRef(null);
   var CB_convLoadedRef = useRef(false);
   var CB_skipNextConvLoad = useRef(false);
@@ -691,6 +744,11 @@ function ChatBot(props) {
     var history = CB_msgs.slice(-9).map(function(m) { return { role:m.role, content:m.text }; });
     history.push({ role:'user', content:txt });
 
+    // Snapshot de attachments antes de limpiarlos
+    var pendingAttachments = CB_pendingFiles.map(function(f) {
+      return { mimeType: f.mimeType, data: f.data };
+    });
+
     CB_setInput('');
     CB_setPendingFiles([]);
     CB_setLoading(true);
@@ -713,7 +771,7 @@ function ChatBot(props) {
       var res = await fetch('/api/chat', {
         method:'POST',
         headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
-        body:JSON.stringify({ messages:history, model:CB_selectedModel, conversationId:CB_activeConvId })
+        body:JSON.stringify({ messages:history, model:CB_selectedModel, conversationId:CB_activeConvId, attachments: pendingAttachments })
       });
       var data = null;
       try { data = await res.json(); } catch(je) { data = null; }
@@ -1290,7 +1348,7 @@ function ChatBot(props) {
               value:CB_userNotes,
               onChange:function(ev) { CB_setUserNotes(ev.target.value.slice(0,1500)); },
               rows:5,
-              placeholder:'Soy estudiante de 4to año de medicina. Estoy preparando el examen de\ncardiología. Prefiero respuestas con casos clínicos cuando sea posible.',
+              placeholder:'Ej: estudio cardio para examen, prefiero casos clínicos breves...',
               style:{ width:'100%', padding:'10px 12px', borderRadius:10, border:'1px solid '+C.bd, background:C.bg, color:C.tx, fontSize:13, outline:'none', boxSizing:'border-box', fontFamily:'inherit', resize:'vertical', lineHeight:1.6 }
             }),
             e('div', { style:{ display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:6 } },
@@ -1664,10 +1722,51 @@ function ChatBot(props) {
               ),
 
               e('div', { style:{ padding:'12px 14px', borderTop:'1px solid rgba(59,130,246,.1)', background:C.bg, flexShrink:0 } },
+                // Hidden file input (clickeado por el botón 📎)
+                e('input', {
+                  ref: CB_fileInputRef,
+                  type: 'file',
+                  accept: '.pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp',
+                  multiple: true,
+                  style: { display: 'none' },
+                  onChange: CB_handleFileSelect
+                }),
+                // Chips de archivos pendientes (encima del textarea)
+                CB_pendingFiles.length > 0 && e('div', {
+                  style:{ display:'flex', flexWrap:'wrap', gap:6, marginBottom:8 }
+                },
+                  CB_pendingFiles.map(function(f, fi) {
+                    var sizeKb = Math.round(f.size / 1024);
+                    return e('div', { key: fi, style:{
+                      display:'inline-flex', alignItems:'center', gap:6,
+                      padding:'5px 4px 5px 10px',
+                      background:'rgba(96,165,250,0.10)',
+                      border:'1px solid rgba(96,165,250,0.25)',
+                      borderRadius: 999,
+                      fontSize: 11,
+                      color: C.tx,
+                      maxWidth: 240
+                    }},
+                      e('span', { 'aria-hidden':'true', style:{ fontSize:12 } }, f.mimeType.indexOf('pdf')>=0 ? '📄' : '🖼️'),
+                      e('span', { style:{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:140 } }, f.name),
+                      e('span', { style:{ color:'#64748b', fontSize:10 } }, sizeKb < 1024 ? (sizeKb+'KB') : ((sizeKb/1024).toFixed(1)+'MB')),
+                      e('button', {
+                        onClick: function() { CB_removeFile(fi); },
+                        'aria-label': 'Quitar archivo',
+                        style:{ background:'transparent', border:'none', color:C.mt, cursor:'pointer', width:20, height:20, borderRadius:'50%', display:'inline-flex', alignItems:'center', justifyContent:'center', fontSize:12, padding:0, fontFamily:'inherit' }
+                      }, '×')
+                    );
+                  })
+                ),
                 e('div', { style:inputContainerStyle },
                   e('button', {
-                    disabled:true, title:'Próximamente',
-                    style:{ width:32, height:32, flexShrink:0, background:'none', border:'none', color:C.mt, fontSize:16, cursor:'not-allowed', display:'flex', alignItems:'center', justifyContent:'center', opacity:0.4, padding:0 }
+                    onClick: function() { if (CB_fileInputRef.current) CB_fileInputRef.current.click(); },
+                    disabled: CB_pendingFiles.length >= 3,
+                    title: CB_pendingFiles.length >= 3 ? 'Máximo 3 archivos' : 'Adjuntar archivo (PDF, JPG, PNG, WEBP)',
+                    'aria-label': 'Adjuntar archivo',
+                    style:{ width:32, height:32, flexShrink:0, background:'none', border:'none', color: CB_pendingFiles.length >= 3 ? '#475569' : C.mt, fontSize:18, cursor: CB_pendingFiles.length >= 3 ? 'not-allowed' : 'pointer', display:'flex', alignItems:'center', justifyContent:'center', opacity: CB_pendingFiles.length >= 3 ? 0.4 : 0.85, padding:0, transition:'opacity 200ms ease-out, color 200ms ease-out' },
+                    onMouseEnter: function(ev) { if (CB_pendingFiles.length < 3) { ev.currentTarget.style.opacity = '1'; ev.currentTarget.style.color = '#60a5fa'; } },
+                    onMouseLeave: function(ev) { ev.currentTarget.style.opacity = '0.85'; ev.currentTarget.style.color = C.mt; }
                   }, '📎'),
                   e('textarea', {
                     ref:CB_inputRef,
@@ -1680,7 +1779,7 @@ function ChatBot(props) {
                       ev.target.style.height=Math.min(ev.target.scrollHeight,96)+'px';
                     },
                     onKeyDown:function(ev) { if (ev.key==='Enter'&&!ev.shiftKey) { ev.preventDefault(); CB_send(); } },
-                    placeholder:'Escribe tu mensaje...',
+                    placeholder:'Preguntale lo que sea a Elion...',
                     disabled:CB_loading,
                     enterKeyHint:'send',
                     'aria-label':'Mensaje',
