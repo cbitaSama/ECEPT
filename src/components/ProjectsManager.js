@@ -46,6 +46,21 @@ function ProjectsManager(props) {
     if (props.open && user) PM_loadProjects();
   }, [props.open, user]);
 
+  // Si props.editingProject viene con datos, abrir form directamente.
+  useEffect(function() {
+    if (props.open && props.editingProject) {
+      PM_setForm({
+        name: props.editingProject.name || '',
+        description: props.editingProject.description || '',
+        context: props.editingProject.context || '',
+        color: props.editingProject.color || '#a78bfa',
+        icon: props.editingProject.icon || '📁'
+      });
+      PM_setErr('');
+      PM_setEditing(props.editingProject.id);
+    }
+  }, [props.open, props.editingProject]);
+
   function PM_openCreate() {
     PM_setForm({ name:'', description:'', context:'', color:'#a78bfa', icon:'📁' });
     PM_setErr('');
