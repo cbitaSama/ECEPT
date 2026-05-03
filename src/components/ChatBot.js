@@ -293,6 +293,7 @@ function CB_doExportToPDF(content, meta) {
   var lines = String(content || '').split('\n');
   var i = 0;
   while (i < lines.length) {
+    var iStart = i;
     var line = lines[i];
     var trimmed = line.trim();
 
@@ -356,7 +357,7 @@ function CB_doExportToPDF(content, meta) {
         color: hLevel <= 2 ? [40, 80, 180] : [30, 30, 80],
         spacingAfter: 4
       });
-      continue;
+      i++; continue;
     }
 
     // Bullets
@@ -376,6 +377,10 @@ function CB_doExportToPDF(content, meta) {
     // Párrafo regular
     addText(CB_stripMdPlain(CB_stripEmojisForPDF(trimmed)), { spacingAfter: 4 });
     i++;
+    // Guard anti loop-infinito: si algún branch arriba olvidó incrementar i,
+    // forzamos avance para no colgar la pestaña (en iPad iOS llega a matar
+    // la app por timeout).
+    if (i === iStart) i++;
   }
 
   // Footer en cada página
