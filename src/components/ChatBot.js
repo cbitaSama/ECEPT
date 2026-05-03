@@ -956,16 +956,32 @@ function ChatBot(props) {
   function CB_renderModelPicker() {
     return ReactDOM.createPortal(
       e('div', {
-        style:{ position:'fixed', inset:0, zIndex:10000, background:'rgba(6,10,20,0.85)', backdropFilter:'blur(8px)', WebkitBackdropFilter:'blur(8px)', display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' },
+        style:{ position:'fixed', inset:0, zIndex:10000, background:'rgba(6,10,20,0.85)', backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)', display:'flex', alignItems:'center', justifyContent:'center', padding:'20px', animation:'ecept_fadeIn 240ms cubic-bezier(0.16,1,0.3,1)' },
         onClick:function(ev) { if(ev.target===ev.currentTarget) CB_setModelPickerOpen(false); }
       },
-        e('div', { style:{ width:'100%', maxWidth:480, background:'linear-gradient(180deg,#0d1224 0%,#060a14 100%)', border:'1px solid rgba(167,139,250,.25)', borderRadius:20, boxShadow:'0 20px 60px rgba(0,0,0,.6)', overflow:'hidden' } },
-          e('div', { style:{ padding:'20px 20px 16px', borderBottom:'1px solid rgba(167,139,250,.15)' } },
-            e('h2', { style:{ margin:'0 0 4px', fontSize:17, fontWeight:800, background:'linear-gradient(135deg,#60a5fa,#a78bfa)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' } }, 'Elegí tu modelo de IA'),
-            e('p', { style:{ margin:0, fontSize:12, color:C.mt } }, 'Cada modelo se especializa en algo distinto. Empezá con Flash Lite para lo cotidiano.')
+        e('div', {
+          style:{
+            width:'100%', maxWidth:540,
+            background:'linear-gradient(180deg,rgba(13,18,36,0.96) 0%,rgba(10,14,31,0.96) 100%)',
+            backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)',
+            border:'1px solid rgba(167,139,250,0.22)',
+            borderRadius:24,
+            boxShadow:'0 24px 60px rgba(0,0,0,0.50), 0 0 40px rgba(167,139,250,0.08), inset 0 1px 0 rgba(255,255,255,0.05)',
+            overflow:'hidden',
+            animation:'ecept_modalIn 320ms cubic-bezier(0.16,1,0.3,1)',
+            maxHeight:'90vh',
+            display:'flex',
+            flexDirection:'column'
+          }
+        },
+          // Header del modal
+          e('div', { style:{ padding:'28px 28px 20px', textAlign:'center', flexShrink:0 } },
+            e('h2', { style:{ margin:'0 0 6px', fontSize:24, fontWeight:800, letterSpacing:'-0.02em', background:'linear-gradient(135deg,#60a5fa,#a78bfa)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text', lineHeight:1.15 } }, 'Elegí el modelo de IA'),
+            e('p', { style:{ margin:0, fontSize:13, color:C.mt, lineHeight:1.5 } }, 'Cada uno se especializa en algo distinto')
           ),
-          e('div', { style:{ padding:'16px', display:'flex', flexDirection:'column', gap:10 } },
-            CB_MODEL_INFO.map(function(info) {
+          // Cards
+          e('div', { style:{ padding:'0 24px 16px', display:'flex', flexDirection:'column', gap:12, overflowY:'auto', flex:1 } },
+            CB_MODEL_INFO.map(function(info, idx) {
               var isSelected = CB_selectedModel === info.id;
               var tierModels = CB_TIER_MODELS[CB_role] || CB_TIER_MODELS.student;
               var inTier = false;
@@ -978,48 +994,125 @@ function ChatBot(props) {
               }
               var canAfford = CB_credits >= cost;
               var available = inTier || canAfford || CB_role === 'admin';
+              var isPremiumModel = info.id === 'gemini-2.5-pro';
+              var locked = !available;
+
+              // Glow del color accent del modelo
+              var cardBg = isSelected
+                ? info.gradient
+                : 'linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))';
+              var cardBorder = isSelected
+                ? info.accent
+                : info.accent + '22';
+              var cardShadow = isSelected
+                ? '0 0 32px ' + info.accent + '33, 0 4px 12px rgba(0,0,0,0.20)'
+                : 'none';
 
               return e('div', {
                 key:info.id,
                 onClick:function() {
-                  if (!available) return;
+                  if (locked) {
+                    if (window.ECEPT_toast) window.ECEPT_toast('Necesitás ' + (cost - CB_credits) + ' créditos más para ' + info.name, 'warning');
+                    return;
+                  }
                   CB_setSelectedModel(info.id);
                   try { localStorage.setItem('ECEPT_CHAT_MODEL', info.id); } catch(e) {}
                   CB_setModelPickerOpen(false);
                 },
                 style:{
-                  padding:'16px', borderRadius:14, cursor: available ? 'pointer' : 'default',
-                  background: isSelected ? info.gradient : 'rgba(255,255,255,.03)',
-                  border:'1px solid '+(isSelected ? info.accent : C.bd),
-                  opacity: available ? 1 : 0.5,
-                  transition:'all .15s', position:'relative'
+                  padding:'20px 22px',
+                  borderRadius:18,
+                  cursor: locked ? 'not-allowed' : 'pointer',
+                  background:cardBg,
+                  border:'1px solid ' + (isSelected ? cardBorder : (locked ? C.bd : info.accent + '33')),
+                  opacity: locked ? 0.55 : 1,
+                  transition:'transform 220ms cubic-bezier(0.16,1,0.3,1), border-color 220ms ease-out, box-shadow 220ms ease-out',
+                  position:'relative',
+                  boxShadow:cardShadow,
+                  animation:'ecept_fadeSlideUp 320ms cubic-bezier(0.16,1,0.3,1) ' + (idx * 80) + 'ms both'
+                },
+                onMouseEnter: function(ev) {
+                  if (locked || isSelected) return;
+                  ev.currentTarget.style.transform = 'translateY(-2px)';
+                  ev.currentTarget.style.borderColor = info.accent + '66';
+                  ev.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.30), 0 0 24px ' + info.accent + '20';
+                },
+                onMouseLeave: function(ev) {
+                  if (locked || isSelected) return;
+                  ev.currentTarget.style.transform = 'translateY(0)';
+                  ev.currentTarget.style.borderColor = info.accent + '33';
+                  ev.currentTarget.style.boxShadow = 'none';
                 }
               },
-                info.badge && e('div', { style:{ position:'absolute', top:10, right:10, fontSize:9, fontWeight:800, letterSpacing:1.5, padding:'2px 7px', borderRadius:4, background:info.accent+'22', border:'1px solid '+info.accent+'55', color:info.accent } }, info.badge),
-                e('div', { style:{ display:'flex', alignItems:'center', gap:10, marginBottom:6 } },
-                  e('span', { style:{ fontSize:22 } }, info.icon),
-                  e('div', null,
-                    e('div', { style:{ fontSize:14, fontWeight:700, color: isSelected ? info.accent : C.tx } }, info.name),
-                    e('div', { style:{ fontSize:11, color:C.mt } }, info.tagline)
-                  )
+                // Top row: icon + nombre + tagline + badge/check
+                e('div', { style:{ display:'flex', alignItems:'flex-start', gap:14, marginBottom:10 } },
+                  e('div', { style:{
+                    fontSize:26,
+                    width:48, height:48,
+                    display:'flex', alignItems:'center', justifyContent:'center',
+                    borderRadius:14,
+                    background:isPremiumModel ? 'linear-gradient(135deg, rgba(251,191,36,0.18), rgba(245,158,11,0.10))' : info.accent + '14',
+                    border:'1px solid ' + (isPremiumModel ? 'rgba(251,191,36,0.30)' : info.accent + '24'),
+                    flexShrink:0
+                  }}, info.icon),
+                  e('div', { style:{ flex:1, minWidth:0 } },
+                    e('div', { style:{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap', marginBottom:2 } },
+                      e('span', { style:{ fontSize:16, fontWeight:700, color:isSelected?info.accent:C.tx, letterSpacing:'-0.015em', textTransform:'uppercase' } }, info.name),
+                      info.badge && e('span', { style:{ fontSize:9, fontWeight:800, letterSpacing:'0.10em', padding:'3px 8px', borderRadius:6, background:isPremiumModel?'linear-gradient(135deg,#fbbf24,#f59e0b)':info.accent+'24', color:isPremiumModel?'#0a0e1f':info.accent, border:isPremiumModel?'none':'1px solid '+info.accent+'55' } }, info.badge)
+                    ),
+                    e('div', { style:{ fontSize:13, color:C.mt, lineHeight:1.4 } }, info.tagline)
+                  ),
+                  // Estado: ✓ activo / 🔒 locked
+                  isSelected && e('span', { 'aria-hidden':'true', style:{ fontSize:18, color:info.accent, fontWeight:700, marginLeft:'auto' } }, '✓'),
+                  locked && !isSelected && e('span', { 'aria-hidden':'true', style:{ fontSize:14, color:C.dm, marginLeft:'auto' } }, '🔒')
                 ),
-                e('div', { style:{ fontSize:12, color:C.dm, marginBottom:10, lineHeight:1.5 } }, info.description),
-                e('div', { style:{ display:'flex', flexDirection:'column', gap:2 } },
+                // Description
+                e('div', { style:{ fontSize:13, color:'#cbd5e1', lineHeight:1.55, marginBottom:14 } }, info.description),
+                // Divider
+                e('div', { style:{ height:1, background:isSelected?info.accent+'30':'rgba(255,255,255,0.06)', margin:'0 0 12px' } }),
+                // Bullets
+                e('div', { style:{ display:'flex', flexDirection:'column', gap:6 } },
                   info.bullets.map(function(b, bi) {
-                    return e('div', { key:bi, style:{ fontSize:11, color:C.mt, display:'flex', gap:6 } },
-                      e('span', { style:{ color:info.accent } }, '✓'),
+                    return e('div', { key:bi, style:{ fontSize:12, color:C.mt, display:'flex', gap:8, lineHeight:1.5 } },
+                      e('span', { style:{ color:info.accent, fontSize:11, marginTop:1, flexShrink:0 } }, '•'),
                       e('span', null, b)
                     );
                   })
                 ),
-                !available && e('div', { style:{ marginTop:8, fontSize:11, color:'#ef4444' } }, 'Necesitás '+(cost - CB_credits)+' 🪙 más')
+                // Locked footer
+                locked && e('div', { style:{ marginTop:12, fontSize:12, color:'#fbbf24', display:'flex', alignItems:'center', gap:6 } },
+                  e('span', null, '🪙'),
+                  e('span', null, 'Necesitás ' + (cost - CB_credits) + ' créditos más')
+                )
               );
             })
           ),
-          e('div', { style:{ padding:'12px 16px 16px', display:'flex', justifyContent:'flex-end' } },
+          // Footer tip
+          e('div', { style:{ padding:'14px 24px 22px', borderTop:'1px solid rgba(255,255,255,0.04)', textAlign:'center', flexShrink:0 } },
+            e('div', { style:{ fontSize:12, color:C.mt, lineHeight:1.5 } },
+              e('span', null, '💡 '),
+              e('span', null, 'Empezá con Flash Lite para lo cotidiano')
+            ),
+            CB_role === 'student' && e('button', {
+              onClick: function() {
+                if (window.ECEPT_toast) window.ECEPT_toast('Sistema Premium próximamente', 'info');
+              },
+              style:{
+                marginTop:10,
+                background:'none',
+                border:'none',
+                color:'#a78bfa',
+                fontSize:12,
+                fontWeight:600,
+                cursor:'pointer',
+                fontFamily:'inherit',
+                padding:'4px 8px',
+                letterSpacing:'-0.01em'
+              }
+            }, 'Mejorá a Premium para acceso completo →'),
             e('button', {
               onClick:function() { CB_setModelPickerOpen(false); },
-              style:{ padding:'9px 20px', borderRadius:10, border:'1px solid '+C.bd, background:'none', color:C.mt, fontSize:13, cursor:'pointer', fontWeight:600 }
+              style:{ display:'block', margin:'12px auto 0', padding:'9px 22px', borderRadius:10, border:'1px solid '+C.bd, background:'none', color:C.mt, fontSize:13, cursor:'pointer', fontWeight:600, fontFamily:'inherit' }
             }, 'Cerrar')
           )
         )
