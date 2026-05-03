@@ -375,6 +375,10 @@ function ChatBot(props) {
   s=useState(null);                      var CB_activeConvId=s[0],    CB_setActiveConvId=s[1];
   s=useState(false);                     var CB_loadingConvs=s[0],    CB_setLoadingConvs=s[1];
   s=useState(false);                     var CB_convsLoaded=s[0],     CB_setConvsLoaded=s[1];
+  s=useState([]);                        var CB_projects=s[0],        CB_setProjects=s[1];
+  s=useState({});                        var CB_expandedProjects=s[0],CB_setExpandedProjects=s[1];
+  s=useState(false);                     var CB_pmOpen=s[0],          CB_setPmOpen=s[1];
+  s=useState(null);                      var CB_assignToProj=s[0],    CB_setAssignToProj=s[1]; // conversationId siendo asignada
   s=useState(false);                     var CB_sidebarOpen=s[0],     CB_setSidebarOpen=s[1];
   s=useState('');                        var CB_sidebarQ=s[0],        CB_setSidebarQ=s[1];
   s=useState(null);                      var CB_convMenuId=s[0],      CB_setConvMenuId=s[1];
@@ -582,6 +586,7 @@ function ChatBot(props) {
     if (CB_open && CB_session === true && !CB_convLoadedRef.current) {
       CB_convLoadedRef.current = true;
       CB_loadConversations();
+      CB_loadProjects();
     }
     if (!CB_open) { CB_convLoadedRef.current = false; }
   }, [CB_open, CB_session]);
@@ -601,6 +606,40 @@ function ChatBot(props) {
   }, [CB_msgs, CB_loading]);
 
   // ── Conversation loaders ──
+  async function CB_loadProjects() {
+    if (!window.ECEPT_SUPABASE) return;
+    try {
+      var sess = await window.ECEPT_SUPABASE.auth.getSession();
+      var token = sess && sess.data && sess.data.session && sess.data.session.access_token;
+      if (!token) return;
+      var r = await fetch('/api/projects', { headers: { Authorization: 'Bearer ' + token } });
+      if (!r.ok) return;
+      var data = await r.json();
+      CB_setProjects((data && data.projects) || []);
+    } catch(e) { /* silent */ }
+  }
+
+  async function CB_assignConvToProject(convId, projectId) {
+    try {
+      var sess = await window.ECEPT_SUPABASE.auth.getSession();
+      var token = sess && sess.data && sess.data.session && sess.data.session.access_token;
+      if (!token) return;
+      await fetch('/api/conversations', {
+        method: 'PATCH',
+        headers: { 'Content-Type':'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify({ id: convId, project_id: projectId })
+      });
+      // Optimistic update local
+      CB_setConversations(function(prev) {
+        return prev.map(function(c) { return c.id === convId ? Object.assign({}, c, { project_id: projectId }) : c; });
+      });
+      CB_loadProjects();
+      if (window.ECEPT_toast) window.ECEPT_toast(projectId ? 'Movida al proyecto' : 'Sin proyecto', 'success');
+    } catch(e) {
+      if (window.ECEPT_toast) window.ECEPT_toast('Error moviendo conversación', 'error');
+    }
+  }
+
   async function CB_loadConversations() {
     CB_setLoadingConvs(true);
     var CB_loadStart = Date.now();
@@ -967,6 +1006,118 @@ function ChatBot(props) {
     return 'antes';
   }
 
+  // Render con secciones de Proyectos + buckets de tiempo (chats sin proyecto)
+  // Recibe convItem y sectionLabel/bucketSection como parámetros (closures de CB_renderSidebar).
+  function CB_renderProjectsAndBuckets(convs, bActual, bHoy, bSemana, bAntes, convItem, sectionLabelFn, bucketSectionFn) {
+    // Items por proyecto
+    var byProject = {};
+    convs.forEach(function(c) {
+      if (c.project_id) {
+        if (!byProject[c.project_id]) byProject[c.project_id] = [];
+        byProject[c.project_id].push(c);
+      }
+    });
+
+    // Filtrar buckets para incluir solo chats SIN project_id
+    function withoutProject(arr) { return arr.filter(function(c){ return !c.project_id; }); }
+    var bA = withoutProject(bActual);
+    var bH = withoutProject(bHoy);
+    var bS = withoutProject(bSemana);
+    var bAnt = withoutProject(bAntes);
+
+    var projectItemIdx = 0;
+
+    function projItem(conv, projColor) {
+      var isActive = conv.id === CB_activeConvId;
+      var msgCount = conv.message_count || null;
+      var subtitle = (msgCount ? (msgCount + ' msg · ') : '') + CB_relTime(conv.updated_at || conv.created_at);
+      var idx = projectItemIdx++;
+      return e('div', { key:conv.id, style:{ marginBottom:3, marginLeft:14 } },
+        e('div', {
+          onClick: function(ev) {
+            ev.stopPropagation();
+            CB_setActiveConvId(conv.id);
+            CB_setConvMenuId(null);
+          },
+          style:{
+            padding:'8px 32px 8px 12px', borderRadius:10, cursor:'pointer',
+            background: isActive ? 'linear-gradient(135deg, ' + projColor + '20, ' + projColor + '10)' : 'transparent',
+            border: '1px solid ' + (isActive ? projColor + '40' : 'transparent'),
+            transition:'all 200ms cubic-bezier(0.16,1,0.3,1)',
+            animation:'ecept_fadeSlideUp 240ms cubic-bezier(0.16,1,0.3,1) ' + (idx*20) + 'ms both',
+            position:'relative'
+          },
+          onMouseEnter:function(ev){ if(isActive) return; ev.currentTarget.style.background='rgba(96,165,250,0.06)'; ev.currentTarget.style.borderColor='rgba(96,165,250,0.12)'; },
+          onMouseLeave:function(ev){ if(isActive) return; ev.currentTarget.style.background='transparent'; ev.currentTarget.style.borderColor='transparent'; }
+        },
+          e('div', { style:{ fontSize:12, color:isActive?C.tx:'#cbd5e1', fontWeight:isActive?600:500, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', letterSpacing:'-0.01em' } }, conv.title || 'Nueva conversación'),
+          e('div', { style:{ fontSize:10, color:'#64748b', marginTop:2 } }, subtitle)
+        )
+      );
+    }
+
+    // Header de proyecto
+    function projectSection(proj) {
+      var convsHere = byProject[proj.id] || [];
+      var expanded = !!CB_expandedProjects[proj.id];
+      return e('div', { key: proj.id, style:{ marginBottom:6 } },
+        e('div', {
+          onClick: function() {
+            CB_setExpandedProjects(function(prev) {
+              var next = Object.assign({}, prev);
+              next[proj.id] = !prev[proj.id];
+              return next;
+            });
+          },
+          style:{
+            padding:'9px 12px', borderRadius:10, cursor:'pointer',
+            background: 'linear-gradient(135deg, ' + proj.color + '14, rgba(255,255,255,0.02))',
+            border: '1px solid ' + proj.color + '28',
+            display:'flex', alignItems:'center', gap:8,
+            transition:'border-color 180ms ease-out'
+          },
+          onMouseEnter:function(ev){ ev.currentTarget.style.borderColor=proj.color+'50'; },
+          onMouseLeave:function(ev){ ev.currentTarget.style.borderColor=proj.color+'28'; }
+        },
+          e('span', { style:{ fontSize:14, flexShrink:0 } }, proj.icon || '📁'),
+          e('div', { style:{ flex:1, minWidth:0 } },
+            e('div', { style:{ fontSize:12, fontWeight:600, color:C.tx, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', letterSpacing:'-0.005em' } }, proj.name),
+            e('div', { style:{ fontSize:10, color:'#64748b', marginTop:1 } }, convsHere.length + ' chat' + (convsHere.length===1?'':'s'))
+          ),
+          e('span', { style:{ fontSize:10, color:'#64748b', transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)', transition:'transform 200ms', flexShrink:0 } }, '▶')
+        ),
+        expanded && e('div', { style:{ marginTop:4 } },
+          convsHere.length === 0
+            ? e('div', { style:{ padding:'8px 12px 8px 26px', fontSize:11, color:'#64748b', fontStyle:'italic' } }, 'Sin conversaciones')
+            : convsHere.map(function(c){ return projItem(c, proj.color); })
+        )
+      );
+    }
+
+    return e('div', null,
+      // Sección Proyectos
+      CB_projects.length > 0 && e('div', null,
+        sectionLabelFn('📁 Proyectos'),
+        CB_projects.map(function(p){ return projectSection(p); })
+      ),
+      // Botón nuevo proyecto + gestionar
+      e('div', { style:{ display:'flex', gap:6, padding:'4px 12px 8px' } },
+        e('button', {
+          onClick: function() { CB_setPmOpen(true); },
+          style:{ flex:1, padding:'7px 10px', background:'rgba(167,139,250,0.10)', border:'1px dashed rgba(167,139,250,0.35)', color:'#a78bfa', fontSize:11, fontWeight:600, cursor:'pointer', borderRadius:8, fontFamily:'inherit' }
+        }, CB_projects.length === 0 ? '+ Crear proyecto' : 'Gestionar proyectos')
+      ),
+      // Buckets de tiempo (chats sin project_id)
+      (bA.length + bH.length + bS.length + bAnt.length > 0) && e('div', null,
+        CB_projects.length > 0 ? sectionLabelFn('💬 Sueltas') : null,
+        bucketSectionFn('✦ Actual', bA),
+        bucketSectionFn('Hoy', bH),
+        bucketSectionFn('Esta semana', bS),
+        bucketSectionFn('Antes', bAnt)
+      )
+    );
+  }
+
   function CB_renderSidebar(permanent) {
     var sidebarStyle = permanent
       ? { width:300, flexShrink:0, borderRight:'1px solid rgba(96,165,250,0.10)', display:'flex', flexDirection:'column', overflow:'hidden', background:'linear-gradient(180deg,rgba(13,18,36,0.40) 0%,rgba(10,14,31,0.30) 100%)' }
@@ -1197,13 +1348,8 @@ function ChatBot(props) {
           e('div', { style:{ fontSize:12, color:C.mt } }, 'Sin resultados para "' + CB_sidebarQ + '"')
         ),
 
-        // Sections
-        convs.length > 0 && e('div', null,
-          bucketSection('✦ Actual', bActual),
-          bucketSection('Hoy', bHoy),
-          bucketSection('Esta semana', bSemana),
-          bucketSection('Antes', bAntes)
-        )
+        // Sections — Proyectos primero (si hay), después buckets de tiempo de "sueltas"
+        convs.length > 0 && CB_renderProjectsAndBuckets(convs, bActual, bHoy, bSemana, bAntes, convItem, sectionLabel, bucketSection)
       )
     );
   }
@@ -1428,6 +1574,14 @@ function ChatBot(props) {
 
     // Model picker portal
     CB_modelPickerOpen && CB_renderModelPicker(),
+
+    // Projects manager portal
+    window.ProjectsManager && e(window.ProjectsManager, {
+      open: CB_pmOpen,
+      onClose: function() { CB_setPmOpen(false); },
+      user: props.user,
+      onChange: function(list) { CB_setProjects(list); }
+    }),
 
     // Settings portal
     CB_settingsOpen && CB_renderSettings(),

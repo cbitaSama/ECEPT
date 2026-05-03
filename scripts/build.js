@@ -114,6 +114,7 @@ var parts = [
   'src/components/FavoritesView.js',
   'src/components/AnatomiaView.js',
   'src/components/ElionIntro.js',
+  'src/components/ProjectsManager.js',
   // chatbot (must come after App? no — function hoisted; keep with components)
   'src/components/ChatBot.js',
   // supabase client (reads window.__ECEPT_ENV; exposes window.ECEPT_SUPABASE)
@@ -202,6 +203,7 @@ var expectedGlobals = [
   'function SkeletonCard', 'function SkeletonList', 'window.SkeletonCard', 'window.SkeletonList',
   'function EmptyState', 'window.EmptyState',
   'function ElionIntro', 'window.ElionIntro',
+  'function ProjectsManager', 'window.ProjectsManager',
   'function VisitTracker', 'window.VisitTracker', 'window.ECEPT_FAVORITES',
   'function FavoriteButton', 'window.FavoriteButton', 'function useLongPress', 'window.useLongPress',
   'function FavoritesView', 'window.FavoritesView',
