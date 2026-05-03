@@ -1013,7 +1013,11 @@ function ChatBot(props) {
     var totalConvs = CB_conversations.length;
     var countLabel = totalConvs === 0 ? 'Sin conversaciones aún' : (totalConvs + ' chat' + (totalConvs===1?'':'s'));
 
-    return e('div', { style:sidebarStyle },
+    return e('div', {
+      id: permanent ? null : 'CB_floatingSidebar',
+      style: sidebarStyle,
+      onClick: function(ev) { ev.stopPropagation(); }
+    },
       // ── Sidebar header ──
       e('div', { style:{ padding:'16px 18px 12px', borderBottom:'1px solid rgba(96,165,250,0.10)', flexShrink:0 } },
         e('div', { style:{ display:'flex', alignItems:'center', gap:10, marginBottom:4 } },
@@ -1361,11 +1365,10 @@ function ChatBot(props) {
       style:{ position:'fixed', inset:0, background:'rgba(0,0,0,.6)', zIndex:9998 }
     }),
 
-    // Sidebar overlay backdrop (floating desktop mode)
-    CB_open && !CB_fullscreen && CB_isDesktop && CB_sidebarOpen && e('div', {
-      onClick:function() { CB_setSidebarOpen(false); },
-      style:{ position:'fixed', inset:0, zIndex:9999 }
-    }),
+    // Sidebar overlay backdrop (floating desktop mode) — click fuera del sidebar lo cierra.
+    // Filtro e.target===currentTarget para que clicks DENTRO del sidebar (que se renderiza ENCIMA via zIndex 20 dentro del panel) no cierren la sidebar.
+    // pointerEvents 'none' en el backdrop fuera del panel evita interferir con el click outside flow del panel principal.
+    // Ahora: backdrop con zIndex MENOR al panel (4990) — sólo aparece para visualizar overlay, no captura clicks. El cierre lo gestiona onClick del panel.
 
     // ── Ambient glow detrás del panel floating (desktop) ──
     CB_open && CB_isDesktop && !CB_fullscreen && e('div', { 'aria-hidden':'true', style:{
@@ -1376,7 +1379,27 @@ function ChatBot(props) {
     }}),
 
     // ── Panel ──
-    CB_open && e('div', { id:'CB_panel', style:Object.assign({},panelStyle,{position:'fixed'}), onClick:function() { CB_setConvMenuId(null); } },
+    // onClick: cierra menús abiertos. Si el sidebar floating está abierto y click NO ocurrió dentro del sidebar (ni en su descendant), cierra el sidebar.
+    CB_open && e('div', {
+      id:'CB_panel',
+      style:Object.assign({},panelStyle,{position:'fixed'}),
+      onClick:function(ev) {
+        CB_setConvMenuId(null);
+        // Click outside del sidebar floating en desktop: cerrar.
+        if (CB_isDesktop && !CB_fullscreen && CB_sidebarOpen) {
+          // Buscar si el click ocurrió dentro de un elemento con id 'CB_floatingSidebar' o el toggle
+          var el = ev.target;
+          var inSidebar = false;
+          while (el && el !== ev.currentTarget) {
+            if (el.id === 'CB_floatingSidebar' || (el.getAttribute && el.getAttribute('data-sidebar-toggle') === '1')) {
+              inSidebar = true; break;
+            }
+            el = el.parentNode;
+          }
+          if (!inSidebar) CB_setSidebarOpen(false);
+        }
+      }
+    },
 
       // Permanent sidebar (fullscreen desktop)
       CB_isDesktop && CB_fullscreen && CB_renderSidebar(true),
@@ -1406,6 +1429,7 @@ function ChatBot(props) {
             e('button', {
               onClick:function(ev) { ev.stopPropagation(); CB_setSidebarOpen(function(o) { return !o; }); },
               title:'Conversaciones',
+              'data-sidebar-toggle':'1',
               style:{ background:'none', border:'none', color: CB_sidebarOpen ? C.ac : C.mt, fontSize:15, cursor:'pointer', minWidth:32, minHeight:32, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:8, flexShrink:0 }
             }, '📋'),
             e('div', { style:{ width:36, height:36, borderRadius:'50%', background:'linear-gradient(135deg,rgba(96,165,250,0.18),rgba(167,139,250,0.10))', border:'1px solid rgba(167,139,250,0.30)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, boxShadow:'0 0 12px rgba(167,139,250,0.20)' } }, e(window.Logo || 'span', { size: 26, idSuffix:'cbhdr' })),
@@ -1468,8 +1492,18 @@ function ChatBot(props) {
               style:{ background:'none', border:'none', color:C.mt, fontSize:15, cursor:'pointer', minWidth:32, minHeight:32, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:8 }
             }, CB_fullscreen ? '↙' : '⛶'),
             e('button', {
-              onClick: function() { CB_setOpen(false); CB_setFullscreen(false); CB_setSidebarOpen(false); },
-              'aria-label':'Cerrar',
+              onClick: function() {
+                if (CB_fullscreen) {
+                  // En fullscreen: salir a floating (no perder el chat)
+                  CB_setFullscreen(false);
+                } else {
+                  // En floating o mobile: cerrar todo
+                  CB_setOpen(false);
+                  CB_setSidebarOpen(false);
+                }
+              },
+              'aria-label': CB_fullscreen ? 'Salir de pantalla completa' : 'Cerrar chat',
+              title: CB_fullscreen ? 'Salir de pantalla completa' : 'Cerrar chat',
               style:{ background:'none', border:'none', color:C.mt, fontSize:20, cursor:'pointer', minWidth:32, minHeight:32, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:8 }
             }, '×')
           )
