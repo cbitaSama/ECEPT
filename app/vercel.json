@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "pnpm install --frozen-lockfile=false && pnpm build",
+  "outputDirectory": "dist",
+  "framework": null,
+  "rewrites": [
+    { "source": "/legacy/:path*", "destination": "/legacy/:path*" },
+    { "source": "/((?!api/|legacy/|assets/|favicon|.*\\.).*)", "destination": "/index.html" }
+  ]
+}

@@ -4,7 +4,18 @@ node_modules/
 *.swo
 *~
 .env
+.env.local
 .vscode/
 .idea/
 *.log
-.env.local
+
+# Folders del usuario
+Clasude design/
+
+# App nueva (Vite + React + TS) — build artifacts y dependencias
+app/node_modules/
+app/dist/
+app/.vite/
+
+# Sed backups que la sandbox no nos deja borrar
+app/src/data/*.bak

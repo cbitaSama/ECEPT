@@ -1,0 +1,110 @@
+import { useMemo } from "react";
+import { Link } from "react-router-dom";
+import PageWrap from "@/components/ui/PageWrap";
+import PageHeader from "@/components/ui/PageHeader";
+import Callout from "@/components/ui/Callout";
+import { useFavorites } from "@/lib/useFavorites";
+// @ts-ignore
+import { RD } from "@/data/reuma";
+
+interface FavRecord {
+  modulo: string;
+  id: string;
+  name: string;
+  hint?: string;
+  href: string;
+  accent: string;
+}
+
+// Indexa los favoritos para mostrarlos con nombre humano + link directo.
+// Para v1 cubrimos reuma; agregar más módulos = solo extender el switch.
+function resolveFav(key: string): FavRecord | null {
+  const [modulo, id] = key.split(":");
+  if (!modulo || !id) return null;
+
+  switch (modulo) {
+    case "reuma": {
+      const d = (RD as any[]).find((x) => x.id === id);
+      if (!d) return null;
+      return {
+        modulo: "Reuma",
+        id,
+        name: d.n,
+        hint: d.cc?.t,
+        href: "/modulo/reuma",
+        accent: "#f472b6",
+      };
+    }
+    default:
+      return { modulo, id, name: id, href: "/", accent: "#94a3b8" };
+  }
+}
+
+export default function FavoritesView() {
+  const { favs, clear, toggle } = useFavorites();
+  const resolved = useMemo(() => favs.map(resolveFav).filter(Boolean) as FavRecord[], [favs]);
+
+  return (
+    <PageWrap>
+      <PageHeader
+        kicker="Tu lista"
+        title="Favoritos"
+        tagline="Las enfermedades que marcaste con la estrella. Guardadas en este dispositivo."
+        icon="⭐"
+        accent="#fbbf24"
+      />
+
+      {resolved.length === 0 ? (
+        <Callout tone="yellow" title="Lista vacía">
+          Todavía no marcaste nada. Tocá la estrella en cualquier card de enfermedad para que aparezca acá.
+        </Callout>
+      ) : (
+        <>
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-[13px] text-ink-muted">{resolved.length} guardados</span>
+            <button
+              onClick={() => {
+                if (confirm("¿Borrar todos los favoritos?")) clear();
+              }}
+              className="text-[12px] text-ink-dim hover:text-danger transition px-2 h-9 rounded-lg hover:bg-danger/8"
+            >
+              Vaciar todo
+            </button>
+          </div>
+
+          <div className="space-y-2">
+            {resolved.map((r) => (
+              <article
+                key={`${r.modulo}:${r.id}`}
+                className="p-4 rounded-2xl bg-grad-surface border border-white/[0.06] flex items-center gap-3"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="text-[11px] uppercase tracking-wider font-medium mb-0.5" style={{ color: r.accent }}>
+                    {r.modulo}
+                  </div>
+                  <h3 className="font-display font-semibold text-[15px] tracking-tight">{r.name}</h3>
+                  {r.hint && <p className="text-[12.5px] text-ink-muted line-clamp-1 mt-0.5">{r.hint}</p>}
+                </div>
+                <Link
+                  to={r.href}
+                  className="shrink-0 inline-flex items-center justify-center px-3 h-10 rounded-full bg-white/[0.05] hover:bg-white/[0.08] text-[12px] text-ink-muted hover:text-ink transition min-h-10"
+                >
+                  Abrir →
+                </Link>
+                <button
+                  onClick={() => toggle(`${r.modulo.toLowerCase()}:${r.id}`)}
+                  aria-label="Quitar de favoritos"
+                  className="shrink-0 w-10 h-10 inline-flex items-center justify-center rounded-full text-gold hover:bg-gold/15 transition"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2.5l2.927 6.054 6.573.954-4.75 4.736 1.122 6.756L12 17.778l-5.872 3.222L7.25 14.244 2.5 9.508l6.573-.954L12 2.5z" />
+                  </svg>
+                </button>
+              </article>
+            ))}
+          </div>
+        </>
+      )}
+    </PageWrap>
+  );
+}

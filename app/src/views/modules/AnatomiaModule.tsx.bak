@@ -1,0 +1,202 @@
+import { useState } from "react";
+import PageWrap from "@/components/ui/PageWrap";
+import PageHeader from "@/components/ui/PageHeader";
+import Tabs from "@/components/ui/Tabs";
+import Callout from "@/components/ui/Callout";
+import Bullet from "@/components/ui/Bullet";
+// @ts-expect-error data
+import { NERVES, ING_PAREDES, ING_SUPERFICIAL, ING_PROFUNDO, ING_CORDON, ANAT_SECCIONES, ANAT_SISTEMAS } from "@/data/anatomia";
+
+export default function AnatomiaModule() {
+  return (
+    <PageWrap>
+      <PageHeader
+        kicker="Módulo básico"
+        title="Anatomía"
+        tagline="12 pares craneales detallados, conducto inguinal pieza por pieza, y mapa de secciones/sistemas para navegar."
+        icon="🧠"
+        accent="#34d399"
+      />
+
+      <Tabs
+        tabs={[
+          { id: "nerves", label: "Pares craneales", icon: "🧠", accent: "#a78bfa", content: <Nervios /> },
+          { id: "inguinal", label: "Conducto inguinal", icon: "🩻", accent: "#f59e0b", content: <Inguinal /> },
+          { id: "mapa", label: "Mapa anatómico", icon: "🗺️", accent: "#06b6d4", content: <Mapa /> },
+        ]}
+      />
+    </PageWrap>
+  );
+}
+
+function Nervios() {
+  const [open, setOpen] = useState<string | null>(null);
+  return (
+    <div className="space-y-2.5">
+      {(NERVES as any[]).map((n) => {
+        const isOpen = open === n.id;
+        return (
+          <article
+            key={n.id}
+            className="rounded-2xl bg-grad-surface border border-white/[0.06] overflow-hidden"
+            style={{ borderColor: `${n.color}33` }}
+          >
+            <button
+              onClick={() => setOpen(isOpen ? null : n.id)}
+              className="w-full text-left p-4 flex items-center gap-3 min-h-14"
+            >
+              <span
+                className="w-11 h-11 rounded-xl flex items-center justify-center font-display font-bold text-[14px] shrink-0"
+                style={{ background: `${n.color}22`, color: n.color, border: `1px solid ${n.color}55` }}
+              >
+                {n.id}
+              </span>
+              <div className="min-w-0 flex-1">
+                <h3 className="font-display font-semibold text-[15.5px] tracking-tight">{n.name}</h3>
+                <p className="text-[12px] text-ink-muted">
+                  {n.latin}{n.tipos?.length ? ` · ${n.tipos.join(" / ")}` : ""}
+                </p>
+              </div>
+              <span aria-hidden className={`text-ink-muted transition-transform ${isOpen ? "rotate-180" : ""}`}>▾</span>
+            </button>
+            {isOpen && (
+              <div className="border-t border-white/[0.06] p-4 space-y-2 text-[13.5px]">
+                {n.real && <KV k="Origen real" v={n.real} />}
+                {n.origen_aparente && <KV k="Origen aparente" v={n.origen_aparente} />}
+                {n.nivel && <KV k="Nivel" v={n.nivel} />}
+                {n.funcion && (
+                  <div className="mt-2">
+                    <div className="text-[11px] uppercase tracking-wider text-ink-dim font-medium mb-1">Función</div>
+                    <p className="text-[13.5px] text-ink leading-relaxed">{n.funcion}</p>
+                  </div>
+                )}
+                {n.lesion && (
+                  <div className="mt-2">
+                    <Callout tone="red" title="Lesión">{n.lesion}</Callout>
+                  </div>
+                )}
+              </div>
+            )}
+          </article>
+        );
+      })}
+    </div>
+  );
+}
+
+function Inguinal() {
+  return (
+    <div className="space-y-6">
+      <section>
+        <h3 className="font-display font-semibold text-[17px] tracking-tight mb-3">Paredes</h3>
+        <div className="grid sm:grid-cols-2 gap-2.5">
+          {(ING_PAREDES as any[]).map((p, i) => (
+            <article key={i} className="p-4 rounded-2xl bg-grad-surface border border-white/[0.06]" style={{ borderColor: `${p.color}40` }}>
+              <h4 className="font-display font-semibold text-[14px] mb-1" style={{ color: p.color }}>{p.nombre}</h4>
+              <p className="text-[13px] text-ink mb-1.5">{p.estructura}</p>
+              {p.detalle && <p className="text-[12.5px] text-ink-muted leading-relaxed">{p.detalle}</p>}
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <AnilloCard title="Anillo Superficial" data={ING_SUPERFICIAL as any} accent="#3b82f6" />
+      <AnilloCard title="Anillo Profundo" data={ING_PROFUNDO as any} accent="#ef4444" />
+
+      <section>
+        <h3 className="font-display font-semibold text-[17px] tracking-tight mb-3">Cordón Espermático</h3>
+        <div className="p-4 rounded-2xl bg-grad-surface border border-white/[0.06]">
+          <div className="grid sm:grid-cols-2 gap-2.5">
+            {((ING_CORDON as any)?.elementos || []).map((el: any, i: number) => (
+              <div key={i} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-mono font-bold text-[14px]" style={{ color: el.c }}>{el.ic}</span>
+                  <h4 className="font-semibold text-[14px]" style={{ color: el.c }}>{el.n}</h4>
+                </div>
+                <p className="text-[12.5px] text-ink-muted leading-relaxed">{el.d}</p>
+              </div>
+            ))}
+          </div>
+          {(ING_CORDON as any)?.nota_mujer && (
+            <div className="mt-3">
+              <Callout tone="pink" title="En la mujer">{(ING_CORDON as any).nota_mujer}</Callout>
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function AnilloCard({ title, data, accent }: { title: string; data: any; accent: string }) {
+  if (!data) return null;
+  return (
+    <section>
+      <h3 className="font-display font-semibold text-[17px] tracking-tight mb-3">{title}</h3>
+      <article className="p-4 rounded-2xl bg-grad-surface border border-white/[0.06]" style={{ borderColor: `${accent}33` }}>
+        {data.formacion && <p className="text-[13.5px] text-ink leading-relaxed mb-3">{data.formacion}</p>}
+        {data.ubicacion && <KV k="Ubicación" v={data.ubicacion} />}
+        {Array.isArray(data.pilares || data.componentes) && (
+          <div className="grid sm:grid-cols-3 gap-2 mt-3">
+            {(data.pilares || data.componentes).map((p: any, i: number) => (
+              <div key={i} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+                <h4 className="font-semibold text-[13px] mb-1" style={{ color: p.c }}>{p.n}</h4>
+                <p className="text-[12px] text-ink-muted leading-relaxed">{p.d}</p>
+              </div>
+            ))}
+          </div>
+        )}
+        {data.clinica && (
+          <div className="mt-3">
+            <Callout tone="blue" title="Clínica">{data.clinica}</Callout>
+          </div>
+        )}
+      </article>
+    </section>
+  );
+}
+
+function Mapa() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="font-display font-semibold text-[17px] tracking-tight mb-3">Secciones anatómicas</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+          {(ANAT_SECCIONES as any[]).map((s) => (
+            <div key={s.id} className="p-4 rounded-2xl bg-grad-surface border border-white/[0.06]" style={{ borderColor: `${s.c}33` }}>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[20px]">{s.i}</span>
+                <h4 className="font-display font-semibold text-[14px]" style={{ color: s.c }}>{s.n}</h4>
+              </div>
+              <p className="text-[12px] text-ink-muted">{s.d}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div>
+        <h3 className="font-display font-semibold text-[17px] tracking-tight mb-3">Sistemas</h3>
+        <div className="flex flex-wrap gap-2">
+          {(ANAT_SISTEMAS as any[]).map((s) => (
+            <span key={s.id} className="inline-flex items-center gap-1.5 px-3 h-9 rounded-full text-[13px] font-medium" style={{ background: `${s.c}15`, color: s.c, border: `1px solid ${s.c}33` }}>
+              <span>{s.i}</span>{s.n}
+            </span>
+          ))}
+        </div>
+      </div>
+      <Callout tone="blue" title="Nota">
+        Las secciones y sistemas son la base de navegación para la unidad de Anatomía. Los pares
+        craneales y el conducto inguinal son el contenido detallado disponible hoy; el resto de los
+        sistemas se irá rellenando en próximas iteraciones.
+      </Callout>
+    </div>
+  );
+}
+
+function KV({ k, v }: { k: string; v: string }) {
+  return (
+    <div className="flex flex-col sm:flex-row sm:gap-2">
+      <dt className="text-ink-dim font-medium text-[11px] uppercase tracking-wider sm:w-32 shrink-0 sm:mt-0.5">{k}</dt>
+      <dd className="text-[13px] text-ink leading-relaxed">{v}</dd>
+    </div>
+  );
+}

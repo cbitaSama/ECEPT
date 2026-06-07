@@ -1,0 +1,301 @@
+import { useMemo, useState } from "react";
+import PageWrap from "@/components/ui/PageWrap";
+import PageHeader from "@/components/ui/PageHeader";
+import Bullet from "@/components/ui/Bullet";
+import Callout from "@/components/ui/Callout";
+// @ts-expect-error data
+import { RECEPTOR_FAMILIES, RECEPTOR_QUIZZES, RECEPTOR_PEARLS } from "@/data/receptores";
+
+// Receptor schema real (verified contra data):
+// { id, symbol, letter, name, color, colorBg,
+//   protein, messenger[], net,
+//   pathway[],                                  ← cascada paso a paso
+//   effects[{t,d,x}],                           ← target / direction / explicación
+//   clinical (string),                          ← uso clínico
+//   drugs[{n,r,u,c}],                           ← drogas (nombre/rol/uso/color)
+//   notes?, pearl? }
+
+export default function ReceptoresModule() {
+  const families = RECEPTOR_FAMILIES as any[];
+  const [fam, setFam] = useState<string>(families?.[0]?.id || "adr");
+
+  const family = useMemo(() => families.find((x) => x.id === fam), [fam, families]);
+  const subtypes: any[] = family?.receptors || [];
+  const pearlsForFam = RECEPTOR_PEARLS?.[fam];
+  const quizForFam = RECEPTOR_QUIZZES?.[fam];
+
+  return (
+    <PageWrap>
+      <PageHeader
+        kicker="Módulo básico"
+        title="Receptores"
+        tagline="10 familias x 34 subtipos. Cascada, efectos por tejido, uso clínico y drogas asociadas."
+        icon="🔑"
+        accent="#a78bfa"
+      />
+
+      <div className="sticky top-16 z-10 py-2 bg-bg/85 backdrop-blur-xl -mx-4 px-4 sm:mx-0 sm:px-0 mb-6">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {families.map((f) => {
+            const col = f.col || f.color || "#a78bfa";
+            const active = fam === f.id;
+            return (
+              <button
+                key={f.id}
+                onClick={() => setFam(f.id)}
+                className="shrink-0 inline-flex items-center gap-1.5 px-3 h-10 rounded-full text-[13px] font-medium transition border min-h-10"
+                style={{
+                  background: active ? `${col}1c` : "rgba(255,255,255,0.03)",
+                  borderColor: active ? `${col}55` : "rgba(255,255,255,0.06)",
+                  color: active ? col : "#94a3b8",
+                }}
+              >
+                <span aria-hidden>{f.icon || f.i || "🔑"}</span>
+                <span className="whitespace-nowrap">{f.name || f.n}</span>
+                <span className="opacity-60 text-[10px]">{f.receptors?.length || 0}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {family && (
+        <div className="mb-6 p-4 rounded-2xl bg-grad-surface border border-white/[0.06]" style={{ borderColor: `${family.col || "#a78bfa"}33` }}>
+          <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider font-semibold" style={{ color: family.col || "#a78bfa" }}>
+            <span>{family.icon || family.i}</span>
+            <span>{family.name || family.n}</span>
+          </div>
+          {family.desc && <p className="text-[13.5px] text-ink mt-1">{family.desc}</p>}
+          {family.nt && <p className="text-[12.5px] text-ink-muted mt-0.5">Neurotransmisor: <strong>{family.nt}</strong></p>}
+        </div>
+      )}
+
+      <div className="space-y-3">
+        {subtypes.map((s: any, i: number) => (
+          <ReceptorCard key={s.id || i} sub={s} />
+        ))}
+      </div>
+
+      {pearlsForFam && Array.isArray(pearlsForFam) && pearlsForFam.length > 0 && (
+        <section className="mt-10">
+          <h2 className="font-display font-bold text-[18px] tracking-tight mb-3">Perlas</h2>
+          <div className="space-y-2">
+            {pearlsForFam.map((p: any, i: number) => (
+              <Callout key={i} tone="orange" icon="📌">
+                {typeof p === "string" ? p : p.text || p.t || JSON.stringify(p)}
+              </Callout>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {Array.isArray(quizForFam) && quizForFam.length > 0 && (
+        <section className="mt-10">
+          <h2 className="font-display font-bold text-[18px] tracking-tight mb-3">Quiz · {quizForFam.length}</h2>
+          <div className="space-y-3">
+            {quizForFam.map((q: any, i: number) => (
+              <ReceptorQuiz key={i} question={q} index={i} />
+            ))}
+          </div>
+        </section>
+      )}
+    </PageWrap>
+  );
+}
+
+function ReceptorCard({ sub }: { sub: any }) {
+  const [open, setOpen] = useState(false);
+  const color = sub.color || "#60a5fa";
+
+  return (
+    <article
+      className="rounded-2xl bg-grad-surface border border-white/[0.06] overflow-hidden"
+      style={{ boxShadow: `inset 0 0 0 1px ${color}33` }}
+    >
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full text-left p-4 sm:p-5 flex items-center gap-3 min-h-14"
+        aria-expanded={open}
+      >
+        <span
+          className="w-12 h-12 rounded-xl flex items-center justify-center font-display font-bold text-[18px] shrink-0"
+          style={{ background: sub.colorBg || `${color}1f`, color, border: `1px solid ${color}55` }}
+        >
+          {sub.symbol || sub.s || "•"}
+        </span>
+        <div className="min-w-0 flex-1">
+          <h3 className="font-display font-semibold text-[16px] tracking-tight" style={{ color }}>
+            {sub.name || sub.n || sub.id}
+          </h3>
+          {sub.net && <p className="text-[12.5px] text-ink-muted">{sub.net}</p>}
+        </div>
+        {sub.protein && (
+          <span
+            className="shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold mr-2"
+            style={{ background: `${color}15`, color, border: `1px solid ${color}33` }}
+          >
+            {sub.protein}
+          </span>
+        )}
+        <span aria-hidden className={`text-ink-muted transition-transform ${open ? "rotate-180" : ""}`}>▾</span>
+      </button>
+
+      {open && (
+        <div className="border-t border-white/[0.06] p-4 sm:p-5 space-y-4">
+          {/* Mensajero */}
+          {Array.isArray(sub.messenger) && sub.messenger.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {sub.messenger.map((m: string, i: number) => (
+                <span key={i} className="inline-flex px-2.5 py-1 rounded-full text-[11.5px] font-medium" style={{ background: `${color}14`, color, border: `1px solid ${color}33` }}>
+                  {m}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Cascada */}
+          {Array.isArray(sub.pathway) && sub.pathway.length > 0 && (
+            <div>
+              <FieldLabel color={color}>Cascada</FieldLabel>
+              <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                {sub.pathway.map((step: string, i: number) => (
+                  <span key={i} className="inline-flex items-center gap-1">
+                    <span className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.06] text-[12px] text-ink">
+                      {step}
+                    </span>
+                    {i < sub.pathway.length - 1 && (
+                      <span aria-hidden className="text-ink-dim text-[12px]">→</span>
+                    )}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Efectos por tejido */}
+          {Array.isArray(sub.effects) && sub.effects.length > 0 && (
+            <div>
+              <FieldLabel color={color}>Efectos por tejido</FieldLabel>
+              <div className="grid sm:grid-cols-2 gap-2 mt-2">
+                {sub.effects.map((ef: any, i: number) => (
+                  <div key={i} className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.05]">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="text-[13px] font-semibold text-ink">{ef.t}</span>
+                      <DirectionPill dir={ef.d} color={color} />
+                    </div>
+                    {ef.x && <p className="text-[12.5px] text-ink-muted leading-relaxed">{ef.x}</p>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Clínica */}
+          {sub.clinical && (
+            <Callout tone="blue" title="Uso clínico">
+              {sub.clinical}
+            </Callout>
+          )}
+
+          {/* Drogas */}
+          {Array.isArray(sub.drugs) && sub.drugs.length > 0 && (
+            <div>
+              <FieldLabel color={color}>Drogas</FieldLabel>
+              <div className="grid sm:grid-cols-2 gap-2 mt-2">
+                {sub.drugs.map((d: any, i: number) => {
+                  const dc = d.c || color;
+                  return (
+                    <div key={i} className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.05]" style={{ borderLeft: `3px solid ${dc}` }}>
+                      <div className="text-[13px] font-semibold" style={{ color: dc }}>{d.n}</div>
+                      {d.r && <div className="text-[11.5px] text-ink-muted">{d.r}</div>}
+                      {d.u && <div className="text-[12px] text-ink mt-0.5">{d.u}</div>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Notas + perla */}
+          {sub.notes && (
+            <Callout tone="purple" title="Notas">
+              {Array.isArray(sub.notes) ? sub.notes.join(" · ") : sub.notes}
+            </Callout>
+          )}
+          {sub.pearl && <Callout tone="orange" title="Perla">{sub.pearl}</Callout>}
+
+          {/* Localizaciones (algunos subtipos) */}
+          {(sub.location || sub.locations) && (
+            <Callout tone="green" title="Localización">
+              {Array.isArray(sub.locations) ? sub.locations.join(" · ") : sub.locations || sub.location}
+            </Callout>
+          )}
+        </div>
+      )}
+    </article>
+  );
+}
+
+function FieldLabel({ children, color }: { children: string; color: string }) {
+  return (
+    <div className="text-[10px] uppercase tracking-[0.18em] font-semibold" style={{ color }}>
+      {children}
+    </div>
+  );
+}
+
+function DirectionPill({ dir, color }: { dir: string; color: string }) {
+  const isUp = dir === "↑" || dir === "+" || dir === "↑↑";
+  const isDown = dir === "↓" || dir === "-" || dir === "↓↓";
+  const c = isUp ? "#34d399" : isDown ? "#f87171" : color;
+  return (
+    <span
+      className="inline-flex items-center justify-center w-7 h-6 rounded-md font-bold text-[12px]"
+      style={{ background: `${c}1f`, color: c, border: `1px solid ${c}55` }}
+    >
+      {dir || "·"}
+    </span>
+  );
+}
+
+function ReceptorQuiz({ question: q }: { question: any; index: number }) {
+  const [picked, setPicked] = useState<number | null>(null);
+  const revealed = picked !== null;
+  const correctIdx = q.r ?? q.respuesta;
+  const opts = q.o || q.opciones || [];
+  return (
+    <article className="p-4 rounded-2xl bg-grad-surface border border-white/[0.06]">
+      <p className="font-medium text-[14px] mb-2.5">{q.p || q.pregunta}</p>
+      <div className="space-y-1.5">
+        {opts.map((o: string, i: number) => {
+          const isCorrect = i === correctIdx;
+          const isPicked = picked === i;
+          let cls = "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05]";
+          if (revealed) {
+            if (isCorrect) cls = "border-success/40 bg-success/10";
+            else if (isPicked) cls = "border-danger/40 bg-danger/10";
+            else cls = "border-white/[0.05] bg-white/[0.02] opacity-60";
+          }
+          return (
+            <button
+              key={i}
+              onClick={() => !revealed && setPicked(i)}
+              disabled={revealed}
+              className={`w-full text-left text-[13px] text-ink px-3 py-2.5 rounded-lg border transition min-h-11 ${cls}`}
+            >
+              <span className="font-semibold opacity-60 mr-2">{String.fromCharCode(65 + i)}.</span>
+              {o}
+              {revealed && isCorrect && <span className="ml-2 text-success">✓</span>}
+              {revealed && isPicked && !isCorrect && <span className="ml-2 text-danger">✗</span>}
+            </button>
+          );
+        })}
+      </div>
+      {revealed && (q.x || q.explicacion) && (
+        <div className="mt-3">
+          <Callout tone="blue" title="Explicación">{q.x || q.explicacion}</Callout>
+        </div>
+      )}
+    </article>
+  );
+}

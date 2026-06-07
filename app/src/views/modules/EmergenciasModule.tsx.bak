@@ -1,0 +1,52 @@
+import PageWrap from "@/components/ui/PageWrap";
+import PageHeader from "@/components/ui/PageHeader";
+import Callout from "@/components/ui/Callout";
+import Bullet from "@/components/ui/Bullet";
+import { ParklandCalculator } from "@/components/medical/Calculators";
+// @ts-expect-error data file
+import { QUEM_PASOS } from "@/data/emergencias";
+
+// QUEM_PASOS: [{n, t, col, items[], alerta}]
+
+export default function EmergenciasModule() {
+  return (
+    <PageWrap>
+      <PageHeader
+        kicker="Módulo clínico"
+        title="Emergencias — Quemados"
+        tagline="Algoritmo paso a paso. Parkland, ABCDE, manejo de la herida y criterios de derivación."
+        icon="🚨"
+        accent="#ef4444"
+      />
+
+      <section className="mb-8">
+        <h2 className="font-display font-bold text-[18px] tracking-tight mb-3">Calculadora — Parkland</h2>
+        <ParklandCalculator />
+      </section>
+
+      <ol className="space-y-4 relative before:absolute before:top-6 before:bottom-6 before:left-[19px] before:w-px before:bg-white/[0.08]">
+        {(QUEM_PASOS as any[]).map((p, i) => (
+          <li key={i} className="relative pl-12">
+            <span
+              className="absolute left-0 top-0 w-10 h-10 rounded-full flex items-center justify-center font-display font-bold text-[14px]"
+              style={{ background: `${p.col}22`, border: `1.5px solid ${p.col}66`, color: p.col }}
+            >
+              {p.n}
+            </span>
+            <div className="rounded-2xl bg-grad-surface border border-white/[0.06] p-5">
+              <h3 className="font-display font-semibold text-[17px] tracking-tight mb-3" style={{ color: p.col }}>
+                {p.t}
+              </h3>
+              {p.items?.length > 0 && <Bullet items={p.items} accent={p.col} />}
+              {p.alerta && (
+                <div className="mt-3">
+                  <Callout tone={p.alerta.startsWith("⚠") ? "yellow" : "blue"}>{p.alerta}</Callout>
+                </div>
+              )}
+            </div>
+          </li>
+        ))}
+      </ol>
+    </PageWrap>
+  );
+}
